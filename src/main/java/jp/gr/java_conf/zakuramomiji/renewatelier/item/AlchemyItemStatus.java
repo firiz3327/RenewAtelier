@@ -1,0 +1,386 @@
+/*
+ * AlchemyItemStatus.java
+ * 
+ * Copyright (c) 2018 firiz.
+ * 
+ * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
+ * 
+ * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
+ */
+package jp.gr.java_conf.zakuramomiji.renewatelier.item;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
+import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
+import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.CharacteristicTemplate;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Randomizer;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Strings;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+/**
+ *
+ * @author firiz
+ */
+public enum AlchemyItemStatus {
+    ID("§l§d"),
+    CATALYST_CATEGORY("§c§a§f§c§a§f§e§d§o§r§d"), // 触媒・カテゴリ
+    CATALYST_SIZE("§c§a§f§2§1§d§e"), // 触媒・サイズ
+    CATEGORY("§c§a§f§e§d§o§r§d"), // 錬金アイテム・カテゴリ
+    SIZE("§2§1§d§e"), // 錬金アイテム・サイズ
+    QUALITY("§c§d§a§1§1§f§f"), // 品質
+    ALCHEMY_INGREDIENTS("§a§1§c§1§n§4§r§e§d§1§e§n§f§b"), // 錬金成分
+    CHARACTERISTIC("§c§f§a§r§a§c§f§e§r§1§b§f§1§c"), // 特性
+    MATERIAL("§l§a§f§e§r§l§a§l"), // マテリアル-レシピ用
+    BAG("§b§a§e"), // バッグ用
+    BAG_ITEMS("§b§a§e§l§f§e§m§r"), // バッグ-アイテム用
+    ;
+
+    private final String check;
+
+    private AlchemyItemStatus(final String check) {
+        this.check = check;
+    }
+
+    public String getCheck() {
+        return check;
+    }
+
+    public final static List<String> getLores(final AlchemyItemStatus type, final ItemStack item) {
+        return getLores(type.check, item);
+    }
+
+    public final static List<String> getLores(final String check, final ItemStack item) {
+        final List<String> list = new ArrayList<>();
+        if (check != null && item != null && item.hasItemMeta()) {
+            final ItemMeta meta = item.getItemMeta();
+            if (meta != null && meta.hasLore()) {
+                meta.getLore().stream()
+                        .filter((lore) -> (lore.startsWith(check)))
+                        .forEachOrdered((lore) -> {
+                            list.add(lore);
+                        });
+            }
+        }
+        return list;
+    }
+
+    public final static int getQuality(final ItemStack item) {
+        final List<String> lores = getLores(AlchemyItemStatus.QUALITY, item);
+        if (!lores.isEmpty()) {
+            return Integer.parseInt(lores.get(0).substring(QUALITY.check.length() + 8));  // (QUALITY.check + "§7品質: §r").length
+        }
+        return -1;
+    }
+
+    public final static ItemStack getItem(final String id) {
+        return getItem(id, null, null, -1, null, null);
+    }
+
+    public final static ItemStack getItem(final String id, final List<Ingredients> ings) {
+        return getItem(id, ings, null, -1, null, null);
+    }
+
+    public final static ItemStack getItem(final String id, final ItemStack item) {
+        return getItem(id, null, item, -1, null, null);
+    }
+
+    public final static ItemStack getItem(final AlchemyMaterial am) {
+        return getItem(am, null, null, -1, null, null, null);
+    }
+
+    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> ings) {
+        return getItem(am, ings, null, -1, null, null, null);
+    }
+
+    public final static ItemStack getItem(final AlchemyMaterial am, final ItemStack item) {
+        return getItem(am, null, item, -1, null, null, null);
+    }
+
+    public final static ItemStack getItem(final String id, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics) {
+        return getItem(AlchemyMaterialManager.getInstance().getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
+    }
+
+    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category) {
+        return getItem(am, over_ings, item, over_quality, over_size, over_characteristics, over_category, false);
+    }
+
+    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
+        if (am == null || (am.getIngredients().isEmpty() && (over_ings == null || over_ings.isEmpty()))) {
+            return null;
+        }
+        if (item == null) {
+            final DoubleData<Material, Short> matdata = am.getMaterial();
+            item = new ItemStack(matdata.getLeft(), 1, matdata.getRight());
+        }
+        final ItemMeta meta = item.getItemMeta();
+        if (!am.isDefaultName()) {
+            meta.setDisplayName(am.getName());
+        }
+
+        final List<String> lore = new ArrayList<>();
+        lore.add(ID.check + Chore.createStridColor(am.getId()));
+        lore.add(QUALITY.check + "§7品質: §r" + (over_quality != -1 ? over_quality : Randomizer.nextInt(am.getQuality_max() - am.getQuality_min()) + am.getQuality_min()));
+
+        // 錬金成分
+        int all_level = 0;
+        final Map<AlchemyAttribute, Integer> levels = new HashMap<>();
+        final List<Ingredients> acls = new ArrayList<>();
+        // 錬金成分・確定取得
+        if (over_ings != null) {
+            for (final Ingredients ingredients : over_ings) {
+                acls.add(ingredients);
+                final int level = ingredients.getLevel();
+                final AlchemyAttribute type = ingredients.getType();
+                if (levels.containsKey(type)) {
+                    levels.put(type, levels.get(type) + level);
+                } else {
+                    levels.put(type, level);
+                }
+                all_level += level;
+            }
+        } else {
+            for (final DoubleData<Ingredients, Integer> dd : am.getIngredients()) {
+                if (dd.getRight() == 100) {
+                    final Ingredients ingredients = dd.getLeft();
+                    acls.add(ingredients);
+                    final int level = ingredients.getLevel();
+                    final AlchemyAttribute type = ingredients.getType();
+                    if (levels.containsKey(type)) {
+                        levels.put(type, levels.get(type) + level);
+                    } else {
+                        levels.put(type, level);
+                    }
+                    all_level += level;
+                }
+            }
+        }
+        // 錬金成分・ランダム取得
+        for (int i = 0; i < Math.min(6, Randomizer.nextInt(am.getIngredients().size()) + 1); i++) {
+            final DoubleData<Ingredients, Integer> dd = am.getIngredients().get(Randomizer.nextInt(am.getIngredients().size()));
+            if (Randomizer.nextInt(100) <= dd.getRight()) {
+                final Ingredients ingredients = dd.getLeft();
+                if (!acls.contains(ingredients)) {
+                    acls.add(ingredients);
+                    int level = ingredients.getLevel();
+                    final AlchemyAttribute type = ingredients.getType();
+                    if (levels.containsKey(type)) {
+                        levels.put(type, levels.get(type) + level);
+                    } else {
+                        levels.put(type, level);
+                    }
+                    all_level += level;
+                }
+            }
+        }
+        // 錬金成分・非マイナス化
+        final List<Ingredients> ingacls = new ArrayList<>();
+        am.getIngredients().forEach((dd) -> {
+            ingacls.add(dd.getLeft());
+        });
+        while (all_level <= 0) {
+            final List<Ingredients> list = new ArrayList<>(ingacls);
+            Collections.shuffle(list);
+            for (final Ingredients i : list) {
+                if (i.getLevel() > 0) {
+                    acls.add(i);
+                    final int level = i.getLevel();
+                    final AlchemyAttribute type = i.getType();
+                    if (levels.containsKey(type)) {
+                        levels.put(type, levels.get(type) + level);
+                    } else {
+                        levels.put(type, level);
+                    }
+                    all_level += level;
+                    break;
+                }
+            }
+        }
+        // 錬金成分・属性最大取得
+        int max_level = 0;
+        final List<AlchemyAttribute> maxtype = new ArrayList<>();
+        for (final AlchemyAttribute type : levels.keySet()) {
+            int level = levels.get(type);
+            if (level > max_level) {
+                max_level = level;
+                maxtype.clear();
+                maxtype.add(type);
+            } else if (level == max_level) {
+                maxtype.add(type);
+            }
+        }
+        // 錬金成分・設定
+        final StringBuilder ingsb = new StringBuilder();
+        ingsb.append(ALCHEMY_INGREDIENTS.check).append("§7錬金成分: §r").append(all_level).append(" ");
+        maxtype.forEach((type) -> {
+            ingsb.append(type.getColor()).append("●");
+        });
+        lore.add(ingsb.toString());
+        acls.forEach((i) -> {
+            lore.add(ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel());
+        });
+        // サイズ
+        lore.add(SIZE.check + "§7サイズ:");
+        String str = "";
+        int c_size = 0;
+        final int[] ss = over_size == null ? am.getSizes().get(Randomizer.nextInt(am.getSizes().size())).getSize() : over_size;
+        for (final int i : ss) {
+            switch (i) {
+                case 0:
+                    str += Chore.intCcolor(i) + Strings.W_W;
+                    break;
+                default:
+                    str += Chore.intCcolor(i) + Strings.W_B;
+                    break;
+            }
+            if (c_size >= 2) {
+                lore.add(str);
+                c_size = 0;
+                str = "";
+            } else {
+                c_size++;
+            }
+        }
+        // 触媒
+        if (!not_visible_catalyst) {
+            final Catalyst catalyst = am.getCatalyst();
+            if (catalyst != null) {
+                lore.add(CATALYST_CATEGORY.check + "§7触媒: §r" + catalyst.getCategory().getName());
+                final List<Integer> allcs = new ArrayList<>();
+                for (final CatalystBonus bonus : catalyst.getBonus()) {
+                    if (allcs.isEmpty()) {
+                        for (final int i : bonus.getCS()) {
+                            allcs.add(i);
+                        }
+                    } else {
+                        int c = 0;
+                        for (final int i : bonus.getCS()) {
+                            if (i != 0) {
+                                allcs.set(c, i);
+                            }
+                            c++;
+                        }
+                    }
+                }
+                final int size = allcs.size();
+                final int rotate_value = size == 36 ? 4 : (size == 25 ? 5 : 6);
+                final StringBuilder sb = new StringBuilder();
+                int count = 0;
+                for (int i = 0; i < rotate_value; i++) {
+                    for (int j = 1; j <= rotate_value; j++) {
+                        final int value = allcs.get(count);
+                        switch (value) {
+                            case 0:
+                                sb.append(Chore.intCcolor(value)).append(Strings.W_W);
+                                break;
+                            default:
+                                sb.append(Chore.intCcolor(value)).append(Strings.W_B);
+                                break;
+                        }
+                        count++;
+                    }
+                    lore.add(CATALYST_SIZE.check + sb.toString());
+                    sb.delete(0, sb.length());
+                }
+            }
+        }
+        // 特性
+        final List<Characteristic> characteristics = new ArrayList<>();
+        if (over_characteristics == null) {
+            if (am.getCharas() != null) {
+                final List<DoubleData<Characteristic, Integer>> cs = new ArrayList<>();
+                am.getCharas().forEach((obj) -> {
+                    if (obj instanceof CharacteristicTemplate) {
+                        for (final DoubleData<Characteristic, Integer> dd : ((CharacteristicTemplate) obj).getCs()) {
+                            cs.add(dd);
+                        }
+//                        cs.addAll(Arrays.asList());
+                    } else {
+                        cs.add((DoubleData<Characteristic, Integer>) obj);
+                    }
+                });
+                Collections.shuffle(cs);
+                for (DoubleData<Characteristic, Integer> dd : cs) {
+                    if (characteristics.size() < 3) {
+                        if (Randomizer.nextInt(1000 /* - Math.max(500, (錬金レベル * 10)) */) <= dd.getRight()) {
+                            characteristics.add(dd.getLeft());
+                        }
+                        continue;
+                    }
+                    break;
+                }
+            }
+        } else {
+            characteristics.addAll(over_characteristics);
+        }
+        if (!characteristics.isEmpty()) {
+            lore.add(CHARACTERISTIC.check + "§7特性:");
+            characteristics.forEach((c) -> {
+                lore.add(CHARACTERISTIC.check + "§r- " + c.getName());
+            });
+        }
+        // カテゴリ
+        final List<Category> categorys = over_category == null ? am.getCategorys() : over_category;
+        if (!categorys.isEmpty()) {
+            lore.add(CATEGORY.check + "§7カテゴリ:");
+            categorys.forEach((category) -> {
+                lore.add(CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString()));
+            });
+        }
+        
+        // Lore終了
+        lore.add("");
+        meta.setLore(lore);
+        
+        // unbreaking & flag系
+        meta.setUnbreakable(am.isUnbreaking());
+        if (am.isHideAttribute()) {
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        }
+        if (am.isHideDestroy()) {
+            meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
+        }
+        if (am.isHideEnchant()) {
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        if (am.isHidePlacedOn()) {
+            meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
+        }
+        if (am.isHidePotionEffect()) {
+            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+        }
+        if (am.isHideUnbreaking()) {
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        }
+        
+        // meta設定
+        item.setItemMeta(meta);
+        return item;
+    }
+
+}
