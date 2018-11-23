@@ -115,7 +115,7 @@ public final class ItemSelect {
 
         if (material != null) {
             final int req_amount = Integer.parseInt(data[1]);
-            final ItemStack item = new ItemStack(material.getLeft(), 1, material.getRight());
+            final ItemStack item = new ItemStack(material.getLeft(), 1);
             final ItemMeta meta = item.getItemMeta();
             if (name != null) {
                 meta.setDisplayName(name);

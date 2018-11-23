@@ -20,7 +20,9 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 
-import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
@@ -29,7 +31,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.ItemSel
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,6 +41,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -49,20 +51,26 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InventoryListener implements Listener {
 
+    private final Map<UUID, ItemStack> click_temp = new HashMap<>();
+
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invClick(final InventoryClickEvent e) {
+        final UUID uuid = e.getWhoClicked().getUniqueId();
         final Inventory inv = e.getInventory();
 
-        if (e.getCurrentItem().getType() == Material.GRASS_BLOCK) {
-            System.out.println("aaa");
-            e.setCancelled(true);
-//            Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-            ((Player) e.getWhoClicked()).updateInventory();
-//            });
-            return;
+        if (click_temp.containsKey(uuid)) {
+            final ItemStack rcursor = click_temp.remove(uuid);
+            if (rcursor.isSimilar(e.getCursor())) {
+                e.setCancelled(true);
+                return;
+            }
         }
 
         if (ConfirmInventory.isConfirmInventory(inv)) {
+            if (e.getSlotType() == SlotType.CONTAINER) {
+                e.setCancelled(true);
+                click_temp.put(uuid, e.getCursor());
+            }
             ConfirmInventory.click(e);
         } else if (RecipeSelect.isKettleRecipe(inv)) {
             RecipeSelect.click(e);
@@ -76,6 +84,7 @@ public class InventoryListener implements Listener {
             final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
             if (bag != null) {
                 e.setCancelled(true);
+                click_temp.put(uuid, e.getCursor());
                 if (e.getCursor() == null || e.getCursor().getType() == Material.AIR) {
                     AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem());
                 } else if (AlchemyMaterialManager.getInstance().getMaterial(e.getCursor()) != null) {

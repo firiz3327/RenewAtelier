@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSizeData;
 
 /**
  *
@@ -41,6 +42,7 @@ public class AlchemyRecipe {
     private final List<RecipeEffect> effects;
     private final Map<Integer, List<RecipeLevelEffect>> levels;
     private final List<String> catalyst_categorys;
+    private final List<MaterialSizeData> sizes;
 
     public AlchemyRecipe(
             final String id,
@@ -51,7 +53,8 @@ public class AlchemyRecipe {
             final int req_bar,
             final List<RecipeEffect> effects,
             final Map<Integer, List<RecipeLevelEffect>> levels,
-            final List<String> catalyst_categorys
+            final List<String> catalyst_categorys,
+            final List<MaterialSizeData> sizes
     ) {
         this.id = id;
         this.result = result;
@@ -62,6 +65,7 @@ public class AlchemyRecipe {
         this.effects = effects;
         this.levels = levels;
         this.catalyst_categorys = catalyst_categorys;
+        this.sizes = sizes;
     }
 
     public String getId() {
@@ -98,6 +102,10 @@ public class AlchemyRecipe {
 
     public List<String> getCatalyst_categorys() {
         return new ArrayList<>(catalyst_categorys);
+    }
+
+    public List<MaterialSizeData> getSizes() {
+        return sizes;
     }
 
 }

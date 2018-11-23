@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.box.KettleBox;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
@@ -42,10 +42,11 @@ public final class KettleItemManager {
     private final Map<UUID, Map<Integer, List<ItemStack>>> use_items = new HashMap<>();
     private final Map<UUID, ItemStack> use_catalyst = new HashMap<>();
     private final Map<UUID, ItemStack[]> default_contents = new HashMap<>();
-    private final Map<UUID, List<CatalystBonusData>> catalyst_bonus = new HashMap<>();
+    private final Map<UUID, List<CatalystBonus>> catalyst_bonus = new HashMap<>();
     private final Map<UUID, KettleBox> kettleData = new HashMap<>();
     private final Map<UUID, List<Characteristic>> characteristics = new HashMap<>();
     private final Map<UUID, List<Characteristic>> select_characteristics = new HashMap<>();
+    private final Map<UUID, List<Characteristic>> catalyst_characteristics = new HashMap<>();
 
     private KettleItemManager() {
     }
@@ -53,7 +54,7 @@ public final class KettleItemManager {
     public static KettleItemManager getInstance() {
         return INSTANCE;
     }
-    
+
     public void reset(final Player player) {
         final UUID uuid = player.getUniqueId();
         KettleBonusManager.getInstance().removeData(uuid);
@@ -78,6 +79,9 @@ public final class KettleItemManager {
         }
         if (select_characteristics.containsKey(uuid)) {
             select_characteristics.remove(uuid);
+        }
+        if (catalyst_characteristics.containsKey(uuid)) {
+            catalyst_characteristics.remove(uuid);
         }
     }
 
@@ -175,25 +179,33 @@ public final class KettleItemManager {
         default_contents.put(uuid, contents);
     }
 
-    public List<CatalystBonusData> getCatalystBonusList(final UUID uuid) {
+    public List<CatalystBonus> getCatalystBonusList(final UUID uuid) {
         return catalyst_bonus.get(uuid);
     }
 
-    public boolean hasCatalystBonus(final UUID uuid, final CatalystBonusData data) {
-        return catalyst_bonus.containsKey(uuid) ? catalyst_bonus.get(uuid).contains(data) : false;
+    public boolean hasCatalystBonus(final UUID uuid, final CatalystBonus bonus) {
+        return catalyst_bonus.containsKey(uuid) ? catalyst_bonus.get(uuid).contains(bonus) : false;
     }
 
-    public void addCatalystBonus(final UUID uuid, final CatalystBonusData data) {
+    public void addCatalystBonus(final UUID uuid, final CatalystBonus data) {
         if (catalyst_bonus.containsKey(uuid)) {
             catalyst_bonus.get(uuid).add(data);
             return;
         }
-        final List<CatalystBonusData> list = new ArrayList<>();
+        final List<CatalystBonus> list = new ArrayList<>() {
+            @Override
+            public boolean contains(Object obj) {
+                if (!(obj instanceof CatalystBonus)) {
+                    System.out.println("not contains : " + obj);
+                }
+                return super.contains(obj);
+            }
+        };
         list.add(data);
         catalyst_bonus.put(uuid, list);
     }
 
-    public boolean removeCatalystBonus(final UUID uuid, final CatalystBonusData data) {
+    public boolean removeCatalystBonus(final UUID uuid, final CatalystBonus data) {
         if (catalyst_bonus.containsKey(uuid)) {
             return catalyst_bonus.get(uuid).remove(data);
         }
@@ -220,19 +232,35 @@ public final class KettleItemManager {
         cs.stream().filter((c) -> (!result.contains(c))).forEachOrdered((c) -> {
             result.add(c);
         });
+        final List<Characteristic> ccs = catalyst_characteristics.get(uuid);
+        if (ccs != null) {
+            ccs.stream().filter((c) -> (!result.contains(c))).forEachOrdered((c) -> {
+                result.add(c);
+            });
+        }
         return result;
     }
 
-    public void addCharacteristic(final UUID uuid, final Characteristic characteristic) {
-        if (!characteristics.containsKey(uuid)) {
-            characteristics.put(uuid, new ArrayList<>());
+    public void addCharacteristic(final UUID uuid, final Characteristic characteristic, final boolean catalyst) {
+        if (!catalyst) {
+            if (!characteristics.containsKey(uuid)) {
+                characteristics.put(uuid, new ArrayList<>());
+            }
+            characteristics.get(uuid).add(characteristic);
+        } else {
+            if (!catalyst_characteristics.containsKey(uuid)) {
+                catalyst_characteristics.put(uuid, new ArrayList<>());
+            }
+            final List<Characteristic> cs = catalyst_characteristics.get(uuid);
+            if(!cs.contains(characteristic)) {
+                cs.add(characteristic);
+            }
         }
-        characteristics.get(uuid).add(characteristic);
     }
 
-    public void removeCharacteristic(final UUID uuid, final Characteristic characteristic) {
-        if (characteristics.containsKey(uuid)) {
-            characteristics.get(uuid).remove(characteristic);
+    public void removeCatalystCharacteristic(final UUID uuid, final Characteristic characteristic) {
+        if (catalyst_characteristics.containsKey(uuid)) {
+            catalyst_characteristics.get(uuid).remove(characteristic);
         }
     }
 
@@ -262,7 +290,7 @@ public final class KettleItemManager {
         }
         return false;
     }
-    
+
     public void resetSelectCharacteristic(final UUID uuid) {
         select_characteristics.remove(uuid);
     }

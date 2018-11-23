@@ -47,13 +47,13 @@ public class AlchemyBagItem {
 
     public AlchemyBagItem(final AlchemyMaterial type) {
         this.type = type;
-        this.item = new ItemStack(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
+        this.item = Chore.createDamageableItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
         init(null);
     }
 
     public AlchemyBagItem(final AlchemyMaterial type, final List<String> lore) {
         this.type = type;
-        this.item = new ItemStack(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
+        this.item = Chore.createDamageableItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
         init(lore);
     }
 
@@ -105,19 +105,14 @@ public class AlchemyBagItem {
             final NBTItem nbti = new NBTItem(item);
             final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
 
-            int amount = _item.getAmount();
-            System.out.println(items);
-            for (int i = 0; i < items.size(); i++) {
+            System.out.println("additem");
+            int amount = _item.getAmount(); // 64
+            for (int i = 0; i < items.size(); i++) { // 0:16
                 final String[] data = items.get(i).split(","); // amount, damage, lore
                 if (amount > 0) {
-//                    System.out.println("damage: " + (Integer.parseInt(data[1]) == (int) itemData[1]));
-//                    System.out.println("lore: " + (data[2].equals(itemData[2])));
-                    if (Integer.parseInt(data[1]) == (int) itemData[1]
-                            && data[2].equals(itemData[2])) { // damageとloreが一致した時
-                        int da = Integer.parseInt(data[0]) + amount;
-                        if (da > 64) {
-                            amount -= da - 64;
-                        }
+                    if (Integer.parseInt(data[1]) == (int) itemData[1] && data[2].equals(itemData[2])) { // damageとloreが一致した時
+                        int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
+                        amount = da - 64;
                         data[0] = String.valueOf(Math.min(64, da));
                     }
                 }
@@ -135,7 +130,6 @@ public class AlchemyBagItem {
                 }
                 sb.append(str);
             });
-            System.out.println(sb.toString());
             nbti.setString("items", sb.toString());
             return nbti.getItem();
         }

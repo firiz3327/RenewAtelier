@@ -21,6 +21,7 @@
 
 package jp.gr.java_conf.zakuramomiji.renewatelier.script;
 
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.PlayerRunnable;
 
 /**

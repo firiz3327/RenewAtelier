@@ -51,6 +51,22 @@ import org.bukkit.inventory.meta.ItemMeta;
  * @author firiz
  */
 public final class Chore {
+    
+    public static ItemStack createDamageableItem(final Material material, int amount, int damage) {
+        final ItemStack item = new ItemStack(material, amount);
+        setDamage(item, damage);
+        return item;
+    }
+    
+    private static void setDamage(final ItemStack item, final int damage) {
+        final ItemMeta meta = item.getItemMeta();
+        setDamage(meta, damage);
+        item.setItemMeta(meta);
+    }
+
+    public static void setDamage(final ItemMeta meta, final int damage) {
+        ((Damageable) meta).setDamage(damage);
+    }
 
     public static int getDamage(final ItemStack item) {
         return getDamage(item.getItemMeta());

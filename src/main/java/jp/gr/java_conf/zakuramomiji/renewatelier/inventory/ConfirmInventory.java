@@ -22,9 +22,10 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.inventory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.PlayerRunnable;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,7 +42,7 @@ import org.bukkit.event.inventory.InventoryType.SlotType;
  */
 public final class ConfirmInventory {
 
-    private static final Map<String, PlayerRunnable> RUNS = new HashMap<>();
+    private static final Map<UUID, DoubleData<String, ClickRunnable>> RUNS = new HashMap<>();
     private static final String CONFSTR = "-Confirm";
 
     private ConfirmInventory() {
@@ -51,43 +52,30 @@ public final class ConfirmInventory {
         return inv.getTitle().endsWith(CONFSTR);
     }
 
-    public static void openInventory(final Player player, final String id, final String title, final String yes, final String no, final PlayerRunnable run) {
-        final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, id.concat(CONFSTR));
-        inv.setItem(1, Chore.ci(Material.LIME_WOOL, 0/*5*/, yes, null));
-        inv.setItem(3, Chore.ci(Material.RED_WOOL, 0/*14*/, no, null));
-        RUNS.put(id, run);
-        player.openInventory(inv);
-        InventoryPacket.update(player, title, InventoryPacketType.HOPPER);
-    }
-
-    public static void openInventory(final Player player, final String title, final String yes, final String no, final PlayerRunnable run) {
-        final String uuid = player.getUniqueId().toString();
-        final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, uuid.concat(CONFSTR));
-        inv.setItem(1, Chore.ci(Material.LIME_WOOL, 0/*5*/, yes, null));
-        inv.setItem(3, Chore.ci(Material.RED_WOOL, 0/*14*/, no, null));
-        RUNS.put(uuid, run);
+    public static void openInventory(final Player player, final String title, final String yes, final String no, final ClickRunnable run) {
+        final UUID uuid = player.getUniqueId();
+        final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, uuid.toString().concat(CONFSTR));
+        inv.setItem(1, Chore.ci(Material.LIME_WOOL, 0, yes, null));
+        inv.setItem(3, Chore.ci(Material.RED_WOOL, 0, no, null));
+        if (!RUNS.containsKey(uuid) || !RUNS.get(uuid).getLeft().equals(title)) {
+            RUNS.put(uuid, new DoubleData<>(title, run));
+        }
         player.openInventory(inv);
         InventoryPacket.update(player, title, InventoryPacketType.HOPPER);
     }
 
     public static void click(final InventoryClickEvent e) {
-        final Inventory inv = e.getInventory();
         final Player player = (Player) e.getWhoClicked();
-        final String invname = inv.getTitle().replaceAll(CONFSTR, "");
-        if (e.getSlotType() == SlotType.CONTAINER) {
-            e.setCancelled(true);
-        }
+        final UUID uuid = player.getUniqueId();
+        final ClickRunnable cr = RUNS.get(uuid).getRight();
         switch (e.getRawSlot()) {
             case 1:
-                RUNS.get(invname).run(player);
                 player.closeInventory();
+                cr.run(player, true);
                 break;
             case 3:
-                player.closeInventory();
+                RUNS.get(uuid).getRight().run(player, false);
                 break;
-        }
-        if (invname.equals(player.getUniqueId().toString())) {
-            RUNS.remove(invname);
         }
     }
 
@@ -101,11 +89,16 @@ public final class ConfirmInventory {
     }
 
     public static void close(final InventoryCloseEvent e) {
-        final String invname = e.getInventory().getTitle().replaceAll(CONFSTR, "");
         final Player player = (Player) e.getPlayer();
-        if (invname.equals(player.getUniqueId().toString())) {
-            RUNS.remove(invname);
+        final UUID uuid = player.getUniqueId();
+        if (RUNS.containsKey(uuid)) {
+            RUNS.remove(uuid);
         }
+    }
+
+    public interface ClickRunnable {
+
+        public void run(Player player, boolean confirm);
     }
 
 }

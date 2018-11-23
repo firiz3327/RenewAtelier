@@ -76,7 +76,7 @@ public enum AlchemyCircle {
         this.data = data;
         this.value = value;
     }
-    
+
     private AlchemyCircle(final int type, final int type2, final int data, final int value) {
         this.type = type;
         this.type2 = type2;
@@ -87,7 +87,7 @@ public enum AlchemyCircle {
     public int getType() {
         return type;
     }
-    
+
     public int getCircleType() {
         return type2;
     }
@@ -128,14 +128,14 @@ public enum AlchemyCircle {
     }
 
     private static ItemStack i(final int v1, final int v2, final ItemStack sitem) {
-        final ItemStack item = new ItemStack(
-                Material.DIAMOND_HOE,
-                1,
-                (short) AlchemyCircle.sertchValue(Integer.parseInt(v2 + "" + v1)).data
-        );
+        final ItemStack item = new ItemStack(Material.DIAMOND_HOE, 1);
+        final int damage = AlchemyCircle.sertchValue(Integer.parseInt(v2 + "" + v1)).data;
         final ItemMeta meta = item.getItemMeta();
+        Chore.setDamage(meta, damage);
         if (sitem != null) {
-            meta.setDisplayName(sitem.getItemMeta().getDisplayName());
+            final ItemMeta smeta = sitem.getItemMeta();
+            meta.setDisplayName(smeta.getDisplayName());
+            meta.setLore(smeta.getLore());
         } else {
             meta.setDisplayName("-");
         }

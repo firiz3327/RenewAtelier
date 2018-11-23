@@ -144,6 +144,14 @@ public class AlchemyMaterial {
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {
         final List<String> catalyst_categorys = recipe.getCatalyst_categorys();
+        if (catalyst_categorys != null && catalyst != null) {
+            for (final String str : catalyst_categorys) {
+                if (str.equals("material:".concat(id))
+                        || str.equals("category:".concat(catalyst.getCategory().name()))) {
+                    return true;
+                }
+            }
+        }
         return catalyst_categorys != null && catalyst != null && catalyst_categorys.stream().anyMatch(
                 (str) -> (str.equals("material:".concat(id)) || str.equals("category:".concat(catalyst.getCategory().getName())))
         );

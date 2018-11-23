@@ -110,7 +110,7 @@ public class AlchemyKettle {
                             final String clore = clores.get(j).substring(AlchemyItemStatus.CHARACTERISTIC.getCheck().length() + 4);
                             final Characteristic c = Characteristic.search(clore);
                             if (c != null) {
-                                KETTLE.addCharacteristic(uuid, c);
+                                KETTLE.addCharacteristic(uuid, c, false);
                             }
                         }
                     }
@@ -207,7 +207,7 @@ public class AlchemyKettle {
         // 触媒追加効果 評価
         // 確認・設定
         final ItemStack catalyst_item = KETTLE.getCatalyst(uuid);
-        final List<CatalystBonusData> old_CatalystBonusList = KETTLE.getCatalystBonusList(uuid);
+        final List<CatalystBonus> old_CatalystBonusList = KETTLE.getCatalystBonusList(uuid);
         final Catalyst catalyst = catalyst_item != null ? AlchemyMaterialManager.getInstance().getMaterial(catalyst_item).getCatalyst() : Catalyst.DEFAULT;
         final List<CatalystBonus> bonusList = catalyst.getBonus();
         final int size = bonusList.get(0).getCS().length;
@@ -220,70 +220,73 @@ public class AlchemyKettle {
             for (final int c : cs) {
                 if (c != 0) {
                     final ItemStack item = inv.getItem(slot);
-                    final int durability = Chore.getDamage(item);
-                    final int defdamage = Catalyst.getDamage(c);
-                    boolean stop = false;
-                    if (durability == defdamage) {
-                        stop = true;
-                    } else {
-                        final AlchemyCircle circle = AlchemyCircle.sertchData(defdamage);
-                        if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.sertchData(durability).getCircleType()) {
+                    if (item != null) {
+                        final int durability = Chore.getDamage(item);
+                        final int defdamage = Catalyst.getDamage(c);
+                        boolean stop = false;
+                        if (durability == defdamage) {
                             stop = true;
-                        }
-                    }
-                    if (stop) {
-                        final boolean remove = KETTLE.removeCatalystBonus(uuid, data);
-                        if (remove) {
-                            switch (data.getType()) {
-                                case CHARACTERISTIC: {
-                                    final Characteristic cdata = (Characteristic) data.getY();
-                                    KETTLE.removeCharacteristic(uuid, cdata);
-                                    KETTLE.removeSelectCharacteristic(uuid, cdata);
-                                    break;
-                                }
-                                case INHERITING: {
-                                    KETTLE.resetSelectCharacteristic(uuid);
-                                    break;
-                                }
+                        } else {
+                            final AlchemyCircle circle = AlchemyCircle.sertchData(defdamage);
+                            if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.sertchData(durability).getCircleType()) {
+                                stop = true;
                             }
                         }
-                        continue resultBonus;
+                        if (stop) {
+                            final boolean remove = KETTLE.removeCatalystBonus(uuid, bonus);
+                            if (remove) {
+                                switch (data.getType()) {
+                                    case CHARACTERISTIC: {
+                                        final Characteristic cdata = (Characteristic) data.getY();
+                                        KETTLE.removeCatalystCharacteristic(uuid, cdata);
+                                        KETTLE.removeSelectCharacteristic(uuid, cdata);
+                                        break;
+                                    }
+                                    case INHERITING: {
+                                        KETTLE.resetSelectCharacteristic(uuid);
+                                        break;
+                                    }
+                                }
+                            }
+                            continue resultBonus;
+                        }
                     }
                 }
                 slot = Catalyst.nextSlot(slot, size);
             }
-            if (!KETTLE.hasCatalystBonus(uuid, data)) {
-                KETTLE.addCatalystBonus(uuid, data);
+            if (!KETTLE.hasCatalystBonus(uuid, bonus)) {
+                KETTLE.addCatalystBonus(uuid, bonus);
             }
         }
-        final List<CatalystBonusData> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+        final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
         int bonus_quality = 0;
         int bonus_quality_percent = 0;
         int bonus_amount = 0;
         int bonus_inheriting = 0;
+        int bonus_size = 0;
         if (bonusDatas != null) {
-            for (final CatalystBonusData bonus : bonusDatas) {
+            for (final CatalystBonus bonus : bonusDatas) {
 //            BonusType.
-                switch (bonus.getType()) {
+                final CatalystBonusData bonusData = bonus.getData();
+                switch (bonusData.getType()) {
                     case QUALITY:
-                        bonus_quality += bonus.getX();
+                        bonus_quality += bonusData.getX();
                         break;
                     case QUALITY_PERCENT:
-                        bonus_quality_percent += bonus.getX();
+                        bonus_quality_percent += bonusData.getX();
                         break;
                     case AMOUNT:
-                        bonus_amount += bonus.getX();
+                        bonus_amount += bonusData.getX();
                         break;
                     case CHARACTERISTIC:
-                        KETTLE.addCharacteristic(uuid, (Characteristic) bonus.getY());
+                        KETTLE.addCharacteristic(uuid, (Characteristic) bonusData.getY(), true);
                         break;
                     case INHERITING:
-                        bonus_inheriting += bonus.getX();
+                        bonus_inheriting += bonusData.getX();
                         break;
-//                    case STARLEVEL:
-//                        final int value = bonus.getX();
-//                        final AlchemyAttribute attribute = (AlchemyAttribute) bonus.getY();
-//                        break;
+                    case SIZE:
+                        bonus_size += bonusData.getX();
+                        break;
                 }
             }
         }
@@ -293,17 +296,24 @@ public class AlchemyKettle {
         int all_quality = 0;
         if (kettleBox != null) {
             final List<ItemStack> kettleItems = kettleBox.getItemStacks();
-            int item_size = 0;
             if (kettleItems != null && !kettleItems.isEmpty()) {
-                for (final ItemStack item : kettleItems) {
-                    all_quality += AlchemyItemStatus.getQuality(item);
-//                item_size += AlchemyItemStatus.getLores(AlchemyItemStatus.SIZE, item).get(0).substring(0);
-                }
+                all_quality = kettleItems.stream().map((item) -> AlchemyItemStatus.getQuality(item)).reduce(all_quality, Integer::sum);
                 if (all_quality != 0) {
                     all_quality /= kettleItems.size();
                 }
             }
         }
+        int item_count = 0;
+        int item_size = 0;
+        for (int i = 0; i < recipe.getReqMaterial().size(); i++) {
+            for (final ItemStack item : KETTLE.getPageItems(uuid, i)) {
+                item_size += MaterialSize.getSizeCount(item);
+                item_count++;
+            }
+        }
+        item_size = Math.round((float) item_size / item_count);
+        item_size += bonus_size;
+
         final Integer add_quality = recipe_effects.get(RecipeLEType.ADD_QUALITY);
         all_quality += (add_quality != null ? add_quality : 0) + bonus_quality; // +品質固定値
         all_quality += Math.round(all_quality * (bonus_quality_percent * 0.01)); // +品質％値
@@ -348,13 +358,15 @@ public class AlchemyKettle {
             resultItem = AlchemyItemStatus.getItem(
                     result,
                     ings, // 錬金属性 書き換え
-                    new ItemStack(
+                    Chore.createDamageableItem(
                             result.getMaterial().getLeft(),
                             recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonus_amount,
                             result.getMaterial().getRight()
                     ),
                     all_quality, // 品質 書き換え
-                    null, // サイズ 書き換え
+                    item_size <= 1
+                            ? MaterialSize.S1_1.getSize(0)
+                            : (item_size >= 9 ? MaterialSize.S9_1.getSize(0) : recipe.getSizes().get(item_size - 2).getSize()), // サイズ 書き換え
                     characteristics, // 特性 書き換え
                     result.getCategorys().equals(categorys) ? new ArrayList<>() : categorys, // カテゴリ 書き換え
                     true
@@ -400,9 +412,9 @@ public class AlchemyKettle {
             // 触媒効果項目
             lore.add(loreslot, ChatColor.GRAY + "触媒効果:");
             if (bonusDatas != null && !bonusDatas.isEmpty()) {
-                for (final CatalystBonusData bonus : bonusDatas) {
+                for (final CatalystBonus bonus : bonusDatas) {
                     loreslot++;
-                    lore.add(loreslot, ChatColor.GREEN + "- ".concat(bonus.getName()));
+                    lore.add(loreslot, ChatColor.GREEN + "- ".concat(bonus.getData().getName()));
                 }
             } else {
                 loreslot++;
@@ -411,23 +423,23 @@ public class AlchemyKettle {
 
             // 特性項目
             final Integer inheriting = recipe_effects.get(RecipeLEType.ADD_INHERITING);
-            lore.add(loreslot + 1, ChatColor.GRAY + "特性:");
+            lore.add(lore.size() - 1, ChatColor.GRAY + "特性:");
             final int cslot = Math.min(3, (inheriting == null ? 0 : inheriting) + bonus_inheriting);
             if (cslot == 0) {
-                lore.add(loreslot + 2, ChatColor.RESET + "特性引継ぎスロットなし");
+                lore.add(lore.size() - 1, ChatColor.RESET + "特性引継ぎスロットなし");
             } else {
                 final List<Characteristic> cs = KETTLE.getCharacteristics(uuid);
                 int count = 0;
                 if (cs != null) {
                     for (final Characteristic c : cs) {
                         if (KETTLE.isSelectCharacteristic(uuid, c)) {
-                            lore.add(loreslot + 2 + count, ChatColor.RESET + "- " + c.getName());
+                            lore.add(lore.size() - 1, ChatColor.RESET + "- " + c.getName());
                             count++;
                         }
                     }
                 }
                 for (int i = count; i < cslot; i++) {
-                    lore.add(loreslot + 2 + i, ChatColor.RESET + "- なし");
+                    lore.add(lore.size() - 1, ChatColor.RESET + "- なし");
                 }
             }
 
@@ -454,10 +466,41 @@ public class AlchemyKettle {
         final KettleBox box = KETTLE.getKettleData(uuid);
         if (box != null) {
             int j = (box.getCSize() == 36 || box.getCSize() == 25 ? 3 : 13);
-            for (final int c : catalyst.getMainCS()) {
-                inv.setItem(j, catalyst.getSlotItem(j));
+
+            final List<CatalystBonus> bonusList = catalyst.getBonus();
+            final List<CatalystBonus> ignores = new ArrayList<>();
+            for (final CatalystBonus cbonus : bonusList) {
+                if (cbonus.getData().getType().isOnce() && box.usedBonus(cbonus)) {
+                    ignores.add(cbonus);
+                }
+            }
+            for (int i = 0; i < bonusList.get(0).getCS().length; i++) {
+                ItemStack slotItem = null;
+                final int size = bonusList.get(0).getCS().length;
+                final int defslot = (size == 36 || size == 25 ? 3 : 13);
+                getSlotItem:
+                for (final CatalystBonus b : bonusList) {
+                    int slot = defslot;
+                    for (int c2 : b.getCS()) {
+                        if (j == slot) {
+                            short itemDamage = Catalyst.getDamage(c2);
+                            if (itemDamage != -1) {
+                                slotItem = ignores.contains(b) ? null : Chore.ci(
+                                        Material.DIAMOND_HOE,
+                                        itemDamage,
+                                        ChatColor.RESET + b.getData().getName(),
+                                        b.getData().getDesc()
+                                );
+                                break getSlotItem;
+                            }
+                        }
+                        slot = Catalyst.nextSlot(slot, size);
+                    }
+                }
+                inv.setItem(j, slotItem);
                 j = Catalyst.nextSlot(j, box.getCSize());
             }
+
             final Map<DoubleData<Integer, BonusItem>, Integer> resultCS = box.getResultCS();
             resultCS.keySet().forEach((slotData) -> {
                 final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
@@ -546,7 +589,7 @@ public class AlchemyKettle {
                     e.setCancelled(true);
                     final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
                     final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
-                    player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                    player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                     final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                     if (kettleBox != null) {
                         final ItemMeta setting = inv.getItem(1).getItemMeta();
@@ -594,7 +637,7 @@ public class AlchemyKettle {
                                 resultItem = AlchemyItemStatus.getItem(
                                         result,
                                         ings, // 錬金属性 書き換え
-                                        new ItemStack(
+                                        Chore.createDamageableItem(
                                                 result.getMaterial().getLeft(),
                                                 result_slot_item.getAmount(),
                                                 result.getMaterial().getRight()
@@ -639,7 +682,7 @@ public class AlchemyKettle {
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
                         final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
-                        player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                        player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
 
                         final ItemStack settingItem = inv.getItem(1);
                         final ItemStack button = inv.getItem(47);
@@ -726,36 +769,38 @@ public class AlchemyKettle {
 
                         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                         if (kettleBox != null) {
-                            player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
                             final DoubleData<BonusItem, Map<Integer, Integer>> backData = kettleBox.backData();
-                            final PlayerInventory pinv = player.getInventory();
-                            boolean check = false;
-                            int slot = 12;
-                            setitemloop:
-                            for (int i = 0; i < 3; i++) {
-                                for (int j = 0; j < 6; j++) {
-                                    if (pinv.getItem(slot) == null) {
-                                        pinv.setItem(slot, backData.getLeft().getItem());
-                                        check = true;
-                                        break setitemloop;
+                            if (backData != null) {
+                                final PlayerInventory pinv = player.getInventory();
+                                boolean check = false;
+                                int slot = 12;
+                                setitemloop:
+                                for (int i = 0; i < 3; i++) {
+                                    for (int j = 0; j < 6; j++) {
+                                        if (pinv.getItem(slot) == null) {
+                                            pinv.setItem(slot, backData.getLeft().getItem());
+                                            check = true;
+                                            break setitemloop;
+                                        }
+                                        slot++;
                                     }
-                                    slot++;
+                                    slot += 4;
                                 }
-                                slot += 4;
-                            }
-                            if (!check) {
-                                for (int i = 3; i < 9; i++) { // 3~8 slots
-                                    if (pinv.getItem(i) == null) {
-                                        pinv.setItem(i, backData.getLeft().getItem());
-                                        break;
+                                if (!check) {
+                                    for (int i = 3; i < 9; i++) { // 3~8 slots
+                                        if (pinv.getItem(i) == null) {
+                                            pinv.setItem(i, backData.getLeft().getItem());
+                                            break;
+                                        }
                                     }
                                 }
+                                BONUSMANAGER.back(uuid);
+                                setResultSlot(inv, player);
+                                player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                                break;
                             }
-                            BONUSMANAGER.back(uuid);
-                            setResultSlot(inv, player);
-                        } else {
-                            player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                         }
+                        player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                         break;
                         //</editor-fold>
                     }
@@ -764,7 +809,7 @@ public class AlchemyKettle {
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
                         final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
-                        player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                        player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         setCharacteristicPage(inv, player, -1);
                         System.out.println("特性一覧 ページ移動-上");
                         break;
@@ -775,7 +820,7 @@ public class AlchemyKettle {
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
                         final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
-                        player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                        player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         setCharacteristicPage(inv, player, 1);
                         System.out.println("特性一覧 ページ移動-下");
                         break;
@@ -805,18 +850,19 @@ public class AlchemyKettle {
                                         if (change_on) {
                                             int inheriting = 0;
                                             inheriting = effects.stream().filter((effect) -> (effect.getType() == RecipeLEType.ADD_INHERITING)).map((effect) -> effect.getCount()).reduce(inheriting, Integer::sum);
-                                            final List<CatalystBonusData> catalystBonusList = KETTLE.getCatalystBonusList(uuid);
+                                            final List<CatalystBonus> catalystBonusList = KETTLE.getCatalystBonusList(uuid);
                                             if (catalystBonusList != null) {
-                                                inheriting = catalystBonusList.stream().filter((cbd) -> (cbd.getType() == BonusType.INHERITING)).map((cbd) -> cbd.getX()).reduce(inheriting, Integer::sum);
+                                                inheriting = catalystBonusList.stream().filter((cbd) -> (cbd.getData().getType() == BonusType.INHERITING)).map((cbd) -> cbd.getData().getX()).reduce(inheriting, Integer::sum);
                                             }
                                             final List<Characteristic> scs = KETTLE.getSelectCharacteristics(uuid);
                                             final int count = scs != null ? scs.size() : 0;
                                             if (count < Math.min(3, inheriting)) {
                                                 System.out.println("特性 追加");
-                                                player.playSound(loc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.1f, change_on ? 0.5f : 1);
+                                                player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.1f, change_on ? 0.5f : 1);
                                                 KETTLE.addSelectCharacteristic(uuid, c);
+                                                System.out.println(KETTLE.getCharacteristics(uuid));
                                             } else {
-                                                player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
+                                                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                                                 return;
                                             }
                                         } else {
@@ -827,7 +873,7 @@ public class AlchemyKettle {
                                         return;
                                     }
                                 }
-                                player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
+                                player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                                 //</editor-fold>
                             } else {
                                 //<editor-fold defaultstate="collapsed" desc="アイテムを錬金釜に投入">
@@ -922,7 +968,7 @@ public class AlchemyKettle {
                                         final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
                                         if (rslots == null) {
                                             System.out.println("アイテムを錬金釜に投入できない");
-                                            player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
+                                            player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                                         } else {
                                             System.out.println("アイテムを錬金釜に投入できる");
                                             final ItemMeta setting = inv.getItem(1).getItemMeta();

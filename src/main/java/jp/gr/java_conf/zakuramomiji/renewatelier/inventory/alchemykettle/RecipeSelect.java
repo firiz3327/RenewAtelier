@@ -193,7 +193,7 @@ public final class RecipeSelect {
                 final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
                 final ItemMeta imeta;
 
-                item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : new ItemStack(material.getLeft(), 1, material.getRight());
+                item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createDamageableItem(material.getLeft(), 1, material.getRight());
                 imeta = item.getItemMeta();
                 final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 if (am != null) {

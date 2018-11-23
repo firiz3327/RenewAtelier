@@ -1,5 +1,5 @@
 /*
- * ScriptItem.java
+ * ScriptManager.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -18,34 +18,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.script;
+package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptGraalJS;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptNashorn;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptObject;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author firiz
  */
-public class ScriptItem {
+public final class ScriptManager {
 
-    public static boolean start(final PlayerInteractEvent e) {
-        final Player player = e.getPlayer();
-        final ItemStack item = e.getItem();
-
-        if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final AlchemyMaterial material = AlchemyMaterialManager.getInstance().getMaterial(item);
-            if (material != null && material.getScript() != null) {
-                ScriptManager.getInstance().start(material.getScript(), player);
-                e.setCancelled(true);
-                return true;
-            }
-        }
-        return false;
+    private static final ScriptManager INSTANCE = new ScriptManager();
+    private final ScriptObject script;
+    
+    private ScriptManager() {
+        script = ServerConstants.NASHORN ? new ScriptNashorn() : new ScriptGraalJS();
     }
 
+    public static ScriptManager getInstance() {
+        return INSTANCE;
+    }
+
+    public void start(final String name, final Player player) {
+        script.start(name, player);
+    }
+
+    public void start(final String name, final Player player, final String functionName, final Object... args) {
+        script.start(name, player, functionName, args);
+    }
 }

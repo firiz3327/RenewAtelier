@@ -30,6 +30,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribu
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSize;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSizeData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect.RecipeLEType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.CustomConfig;
 import org.bukkit.configuration.ConfigurationSection;
@@ -126,8 +128,20 @@ public final class AlchemyRecipeManager {
                     // 使用可能触媒
                     final List<String> catalyst_categorys = item.getStringList("usable_catalysts_categorys");
                     System.out.println(result + " " + req_materials + " " + effects + " " + levels);
+                    // 調合品サイズ
+                    final List<MaterialSizeData> sizes = new ArrayList<>();
+                    final ConfigurationSection sizesec = item.getConfigurationSection("sizes");
+                    for (int i = 2; i <= 8; i++) {
+                        final String s_str = sizesec.getString("s" + i);
+                        System.out.println(s_str);
+                        final String strs[] = s_str.split(",");
+                        sizes.add(new MaterialSizeData(
+                                MaterialSize.valueOf(strs[0].trim().toUpperCase()),
+                                Integer.parseInt(strs[1].trim()))
+                        );
+                    }
                     // リストに追加
-                    recipes.add(new AlchemyRecipe(key, result, amount, req_materials, default_ingredients, req_bar, effects, levels, catalyst_categorys));
+                    recipes.add(new AlchemyRecipe(key, result, amount, req_materials, default_ingredients, req_bar, effects, levels, catalyst_categorys, sizes));
                 });
             }
         }

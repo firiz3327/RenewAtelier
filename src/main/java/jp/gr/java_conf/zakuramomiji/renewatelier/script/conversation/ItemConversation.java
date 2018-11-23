@@ -18,17 +18,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.script;
+package jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation;
 
+import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.script.Invocable;
+import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.PlayerRunnable;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,10 +44,12 @@ public final class ItemConversation {
 
     private final String scriptName;
     private final Player player;
+    private final Object iv;
 
-    public ItemConversation(String scriptName, Player player) {
+    public ItemConversation(String scriptName, Player player, Object iv) {
         this.scriptName = scriptName;
         this.player = player;
+        this.iv = iv;
     }
 
     public Player getPlayer() {
@@ -78,39 +83,53 @@ public final class ItemConversation {
     public List<String> getLores(final String check, final ItemStack item) {
         return AlchemyItemStatus.getLores(check, item);
     }
-    
+
     public void warpRoom(final Player player) {
         MyRoomManager.getInstance().warpRoom(player);
     }
-    
+
     public void warpRoom(final Player player, final UUID uuid) {
         MyRoomManager.getInstance().warpRoom(player, uuid);
     }
-    
+
     public boolean hasRoom(final Player player) {
         return MyRoomManager.getInstance().hasRoom(player.getUniqueId());
     }
-    
+
     public void createRoom(final Player player) {
         MyRoomManager.getInstance().createRoom(player.getUniqueId());
     }
 
-    public void openConfirmInventory(final String title, final String yes, final String no, final String functionName, final Object args) {
-        openConfirmInventory(title, yes, no, scriptName, functionName, args);
+    public void openConfirmInventory(final String title, final String yes, final String no, final String confirmFunctionName, final String cancelFunctionName) {
+        openConfirmInventory(title, yes, no, scriptName, confirmFunctionName, cancelFunctionName);
     }
 
-    public void openConfirmInventory(final String title, final String yes, final String no, final String script, final String functionName, final Object... args) {
+    public void openConfirmInventory(final String title, final String yes, final String no, final String script, final String confirmFunctionName, final String cancelFunctionName) {
         ConfirmInventory.openInventory(
                 player,
                 ChatColor.translateAlternateColorCodes('&', title),
                 yes,
                 no,
-                new PlayerRunnable() {
-            @Override
-            public void run(final Player player) {
-                ScriptManager.getInstance().start(script, player, functionName, args);
-            }
-        });
+                (final Player player1, final boolean confirm) -> {
+                    if (confirm && confirmFunctionName != null) {
+                        if (iv instanceof Invocable) {
+                            try {
+                                ((Invocable) iv).invokeFunction(confirmFunctionName);
+                            } catch (ScriptException ex) {
+                                Logger.getLogger(ItemConversation.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (NoSuchMethodException ex) {
+                            }
+                        } else if(iv instanceof GraalJSScriptEngine) {
+                            try {
+                                ((GraalJSScriptEngine) iv).invokeFunction(confirmFunctionName);
+                            } catch (ScriptException ex) {
+                                Logger.getLogger(ItemConversation.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (NoSuchMethodException ex) {
+                            }
+                        }
+                    }
+                }
+        );
     }
 
 }

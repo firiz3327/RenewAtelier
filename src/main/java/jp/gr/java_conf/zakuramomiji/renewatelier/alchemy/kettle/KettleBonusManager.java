@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData.BonusType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.box.KettleBox;
@@ -62,22 +63,13 @@ public class KettleBonusManager {
         int sizes = 0;
         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
         if (kettleBox != null) {
-            final List<BonusItem> kettleSelects = kettleBox.getItems();
+            final List<BonusItem> kettleSelects = kettleBox.getResultItems();
             for (final BonusItem itemData : kettleSelects) {
                 final ItemStack item = itemData.getItem();
                 if (item != null) {
                     for (final AlchemyAttribute aa : AlchemyIngredients.getAllLevel(item).getRight()) {
-                        if (aa == type) {
-                            if (AlchemyIngredients.getLevel(item, type) != 0) {
-                                final int[] size = MaterialSize.getSize(item);
-                                int i = 0;
-                                for (int j : size) {
-                                    if (j != 0) {
-                                        i++;
-                                    }
-                                }
-                                sizes += i;
-                            }
+                        if (aa == type && AlchemyIngredients.getLevel(item, type) != 0) {
+                            sizes += MaterialSize.getSizeCount(item);
                         }
                     }
                 }
@@ -120,18 +112,20 @@ public class KettleBonusManager {
         }
 
         int bonus = 0;
-        for (AlchemyAttribute aa : aas) {
+        for (final AlchemyAttribute aa : aas) {
             bonus += getBonus(uuid, aa);
         }
         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
         final List<BonusItem> kettleSelects = kettleBox == null ? null : kettleBox.getItems();
         plus += plus * (((double) bonus * 0.01) + ((kettleSelects == null || kettleSelects.isEmpty()) ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));
 
-        final List<CatalystBonusData> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+        final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
         if (bonusDatas != null) {
-            for (final CatalystBonusData cbd : bonusDatas) {
-                if (cbd.getType() == BonusType.INGREDIENT_AMOUNT_PERCENT) {
-                    plus += Math.round(plus * (cbd.getX() * 0.01));
+            for (final CatalystBonus cb : bonusDatas) {
+                final List<CatalystBonus> usedBonus = kettleBox.getBonus();
+                if (cb.getData().getType().isOnce() && (usedBonus == null || !usedBonus.contains(cb))) {
+                    plus += Math.round(plus * (cb.getData().getX() * 0.01));
+                    kettleBox.addBonus(cb);
                 }
             }
         }

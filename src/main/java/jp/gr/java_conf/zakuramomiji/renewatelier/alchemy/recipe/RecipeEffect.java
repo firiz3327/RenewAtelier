@@ -22,6 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe;
 
 import java.util.List;
 import java.util.UUID;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData.BonusType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.KettleBonusManager;
@@ -71,11 +72,11 @@ public class RecipeEffect {
                 }
             }
         }
-        final List<CatalystBonusData> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+        final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
         if (bonusDatas != null) {
-            for (final CatalystBonusData cbd : bonusDatas) {
-                if (cbd.getType() == BonusType.STARLEVEL && attribute == cbd.getY()) {
-                    upcount += cbd.getX();
+            for (final CatalystBonus cb : bonusDatas) {
+                if (cb.getData().getType() == BonusType.STARLEVEL && attribute == cb.getData().getY()) {
+                    upcount += cb.getData().getX();
                 }
             }
         }

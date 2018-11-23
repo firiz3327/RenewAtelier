@@ -20,6 +20,7 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst;
 
+import java.util.Arrays;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -73,18 +74,6 @@ public class Catalyst {
         }
         inv.setItem(45, Chore.ci(Material.DIAMOND_HOE, kettle ? 1511 : 1561, "", null));
 
-//        ItemStack ditem = new ItemStack(Material.BARRIER, 1);
-//        ItemMeta meta = ditem.getItemMeta();
-//        meta.setDisplayName(ChatColor.RESET.toString());
-//        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-
-        // Catalyst ID
-//        meta.addEnchant(Enchantment.LUCK, id, true);
-        // AlchemyRecipe ID
-//        meta.addEnchant(Enchantment.ARROW_DAMAGE, recipe.getId(), true);
-//        ditem.setItemMeta(meta);
-//        inv.setItem(1, ditem);
-
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach((b) -> {
             int slot = defslot;
@@ -95,7 +84,7 @@ public class Catalyst {
                             Material.DIAMOND_HOE,
                             itemDamage,
                             ChatColor.RESET + b.getData().getName(),
-                            null
+                            b.getData().getDesc()
                     ));
                 }
                 slot = nextSlot(slot, size);

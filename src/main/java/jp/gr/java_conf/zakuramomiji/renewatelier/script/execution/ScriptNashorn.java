@@ -1,5 +1,5 @@
 /*
- * ScriptManager.java
+ * ScriptNashorn.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -18,8 +18,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.script;
+package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,16 +41,11 @@ import org.bukkit.entity.Player;
  *
  * @author firiz
  */
-public final class ScriptManager {
+public final class ScriptNashorn extends ScriptObject {
 
     private static final ScriptEngineManager SEM = new ScriptEngineManager();
-    private static final ScriptManager INSTANCE = new ScriptManager();
 
-    private ScriptManager() {
-    }
-
-    public static ScriptManager getInstance() {
-        return INSTANCE;
+    protected ScriptNashorn() {
     }
 
     public void start(final String name, final Player player) {
@@ -60,7 +57,7 @@ public final class ScriptManager {
             final Invocable iv = getInvocable(name);
             if(iv != null) {
                 final ScriptEngine scriptengine = (ScriptEngine) iv;
-                scriptengine.put("ic", new ItemConversation(name, player));
+                scriptengine.put("ic", new ItemConversation(name, player, iv));
                 try {
                     iv.invokeFunction("init");
                 } catch (NoSuchMethodException ex) {
@@ -68,13 +65,13 @@ public final class ScriptManager {
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 System.out.println(name.concat(" is not found for script."));
             }
         } catch (ScriptException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -89,9 +86,9 @@ public final class ScriptManager {
             engine.eval(reader);
             return (Invocable) engine;
         } catch (FileNotFoundException | ScriptException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
