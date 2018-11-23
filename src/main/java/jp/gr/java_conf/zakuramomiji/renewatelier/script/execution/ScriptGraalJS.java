@@ -37,19 +37,13 @@ import org.bukkit.entity.Player;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
-public class ScriptGraalJS extends ScriptObject {
+final class ScriptGraalJS extends ScriptObject {
 
     private static final GraalJSEngineFactory GJEF = new GraalJSEngineFactory();
 
-    protected ScriptGraalJS() {
-    }
-
-    public void start(final String name, final Player player) {
-        start(name, player, null);
-    }
-
+    @Override
     public void start(final String name, final Player player, final String functionName, final Object... args) {
         try {
             final GraalJSScriptEngine scriptengine = getScriptEngine(name);

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.GameContents;
+import jp.gr.java_conf.zakuramomiji.renewatelier.constants.GameConstants;
 
 /**
  *
@@ -93,7 +93,7 @@ public final class PlayerStatus {
         status.setExp(status.getExp() + exp);
         while (true) {
             final int level = status.getLevel();
-            final int req_exp = GameContents.RECIPE_REQLEVELS[level];
+            final int req_exp = GameConstants.RECIPE_REQLEVELS[level];
             if (status.getExp() >= req_exp) {
                 status.setLevel(level + 1);
                 status.setExp(status.getExp() - req_exp);

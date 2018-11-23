@@ -1,5 +1,5 @@
 /*
- * AbstractBox.java
+ * KettleBox.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -33,7 +33,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public class KettleBox {
 

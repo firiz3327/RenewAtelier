@@ -22,7 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public interface ReturnObjectRunnable {
     

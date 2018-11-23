@@ -50,6 +50,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffec
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.StarEffect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
+import jp.gr.java_conf.zakuramomiji.renewatelier.constants.GameConstants;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.drop.AlchemyResultDrop;
@@ -662,7 +663,7 @@ public class AlchemyKettle {
                                 KETTLE.reset(player);
                                 player.closeInventory();
                                 final PlayerStatus status = PlayerSaveManager.getInstance().getStatus(uuid);
-                                status.addRecipeExp(recipe.getId(), status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? 25 : 0);
+                                status.addRecipeExp(recipe.getId(), status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
                                 new AlchemyResultDrop(loc, resultItem).start();
                             }
                         }

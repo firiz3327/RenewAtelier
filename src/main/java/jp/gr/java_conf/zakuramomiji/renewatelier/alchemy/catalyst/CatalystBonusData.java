@@ -29,7 +29,7 @@ import net.md_5.bungee.api.ChatColor;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public class CatalystBonusData {
 

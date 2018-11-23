@@ -21,7 +21,6 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,17 +40,11 @@ import org.bukkit.entity.Player;
  *
  * @author firiz
  */
-public final class ScriptNashorn extends ScriptObject {
+final class ScriptNashorn extends ScriptObject {
 
     private static final ScriptEngineManager SEM = new ScriptEngineManager();
 
-    protected ScriptNashorn() {
-    }
-
-    public void start(final String name, final Player player) {
-        start(name, player, null);
-    }
-
+    @Override
     public void start(final String name, final Player player, final String functionName, final Object... args) {
         try {
             final Invocable iv = getInvocable(name);

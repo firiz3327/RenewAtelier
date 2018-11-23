@@ -21,9 +21,6 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptGraalJS;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptNashorn;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptObject;
 import org.bukkit.entity.Player;
 
 /**

@@ -20,7 +20,6 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier;
 
-import java.util.function.Consumer;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.BlockListener;

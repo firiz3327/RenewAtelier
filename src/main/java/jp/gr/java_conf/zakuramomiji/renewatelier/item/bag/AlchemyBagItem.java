@@ -1,5 +1,5 @@
 /*
- * AlchemyBag.java
+ * AlchemyBagItem.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -38,7 +38,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public class AlchemyBagItem {
 

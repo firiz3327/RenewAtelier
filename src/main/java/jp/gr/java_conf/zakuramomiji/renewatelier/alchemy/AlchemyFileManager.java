@@ -1,5 +1,5 @@
 /*
- * AlchemyManager.java
+ * AlchemyFileManager.java
  * 
  * Copyright (c) 2018 firiz.
  * 

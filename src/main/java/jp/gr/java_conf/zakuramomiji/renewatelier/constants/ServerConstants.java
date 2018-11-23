@@ -22,7 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public class ServerConstants {
     

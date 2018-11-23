@@ -1,5 +1,5 @@
 /*
- * GameContents.java
+ * GameConstants.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -18,14 +18,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
+package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
-public interface GameContents {
+public interface GameConstants {
 
-    public static int[] RECIPE_REQLEVELS = new int[]{0, 80, 140, 220}; // ブロンズ・シルバー・ゴールド・プラチナ
+    public static int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300}; // ブロンズ・シルバー・ゴールド・プラチナ
+    public static int RECIPE_EXP = 25;
 
 }

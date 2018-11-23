@@ -1,5 +1,5 @@
 /*
- * StartEffect.java
+ * StarEffect.java
  * 
  * Copyright (c) 2018 firiz.
  * 

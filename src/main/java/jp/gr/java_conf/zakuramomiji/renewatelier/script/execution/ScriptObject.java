@@ -24,9 +24,9 @@ import org.bukkit.entity.Player;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
-public abstract class ScriptObject {
+abstract class ScriptObject {
 
     public void start(final String name, final Player player) {
         start(name, player, null);

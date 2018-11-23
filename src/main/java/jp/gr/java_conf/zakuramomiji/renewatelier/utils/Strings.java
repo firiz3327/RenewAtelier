@@ -1,7 +1,7 @@
 /*
  * Strings.java
  * 
- * Copyright (c) 2018 kanzakiayaka.
+ * Copyright (c) 2018 firiz.
  * 
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
  * 
@@ -22,7 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
 /**
  *
- * @author kanzakiayaka
+ * @author firiz
  */
 public interface Strings {
     
