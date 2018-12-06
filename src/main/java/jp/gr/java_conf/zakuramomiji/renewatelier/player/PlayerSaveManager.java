@@ -26,26 +26,17 @@ import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 
 /**
  *
  * @author firiz
  */
-public final class PlayerSaveManager {
-
-    private final static PlayerSaveManager INSTANCE = new PlayerSaveManager();
-    private final SQLManager sql = SQLManager.getInstance();
+public enum PlayerSaveManager {
+    INSTANCE;
+    
+    private final SQLManager sql = SQLManager.INSTANCE;
     private final Map<UUID, PlayerStatus> statusList = new HashMap<>();
-    private final Map<Player, Inventory> openingInventory = new HashMap<>();
-
-    private PlayerSaveManager() {
-    }
-
-    public static PlayerSaveManager getInstance() {
-        return INSTANCE;
-    }
 
     public PlayerStatus getStatus(final UUID uuid) {
         PlayerStatus status;
@@ -55,7 +46,7 @@ public final class PlayerSaveManager {
                     new String[]{"uuid", "id"},
                     new Object[]{uuid.toString()}
             );
-            System.out.println(select);
+            Chore.log(select);
             final int id = (int) select.get(0).get(1);
             status = new PlayerStatus(id);
             final List<List<Object>> recipe_statuses_obj = sql.select(
@@ -79,18 +70,6 @@ public final class PlayerSaveManager {
 
     public void unloadStatus(final UUID uuid) {
         statusList.remove(uuid);
-    }
-
-    public Inventory getOpenInventory(final Player player) {
-        return openingInventory.get(player);
-    }
-
-    public void setOpenInventory(final Player player, final Inventory inv) {
-        openingInventory.put(player, inv);
-    }
-
-    public void removeOpenInventory(final Player player) {
-        openingInventory.remove(player);
     }
 
 }

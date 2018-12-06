@@ -36,9 +36,9 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author firiz
  */
-public final class KettleItemManager {
-
-    private final static KettleItemManager INSTANCE = new KettleItemManager();
+public enum KettleItemManager {
+    INSTANCE;
+    
     private final Map<UUID, Map<Integer, List<ItemStack>>> use_items = new HashMap<>();
     private final Map<UUID, ItemStack> use_catalyst = new HashMap<>();
     private final Map<UUID, ItemStack[]> default_contents = new HashMap<>();
@@ -48,16 +48,9 @@ public final class KettleItemManager {
     private final Map<UUID, List<Characteristic>> select_characteristics = new HashMap<>();
     private final Map<UUID, List<Characteristic>> catalyst_characteristics = new HashMap<>();
 
-    private KettleItemManager() {
-    }
-
-    public static KettleItemManager getInstance() {
-        return INSTANCE;
-    }
-
     public void reset(final Player player) {
         final UUID uuid = player.getUniqueId();
-        KettleBonusManager.getInstance().removeData(uuid);
+        KettleBonusManager.INSTANCE.removeData(uuid);
         if (catalyst_bonus.containsKey(uuid)) {
             catalyst_bonus.remove(uuid);
         }
@@ -87,7 +80,7 @@ public final class KettleItemManager {
 
     public void allBack(final Player player) {
         final UUID uuid = player.getUniqueId();
-        KettleBonusManager.getInstance().removeData(uuid);
+        KettleBonusManager.INSTANCE.removeData(uuid);
         if (catalyst_bonus.containsKey(uuid)) {
             catalyst_bonus.remove(uuid);
         }
@@ -175,6 +168,10 @@ public final class KettleItemManager {
     }
 
     /* 錬金画面 Start */
+    public boolean isOpenKettle(final UUID uuid) {
+        return default_contents.containsKey(uuid);
+    }
+    
     public void setDefaultContents(final UUID uuid, final ItemStack[] contents) {
         default_contents.put(uuid, contents);
     }
@@ -196,7 +193,7 @@ public final class KettleItemManager {
             @Override
             public boolean contains(Object obj) {
                 if (!(obj instanceof CatalystBonus)) {
-                    System.out.println("not contains : " + obj);
+                    Chore.log("not contains : " + obj);
                 }
                 return super.contains(obj);
             }

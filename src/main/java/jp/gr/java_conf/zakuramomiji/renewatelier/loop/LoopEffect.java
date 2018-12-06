@@ -30,13 +30,13 @@ public abstract class LoopEffect implements Runnable {
     private int sec = 0;
     
     public LoopEffect() {
-        manager = LoopManager.getInstance();
+        manager = LoopManager.INSTANCE;
         miri = false;
         addLoopEffectManager();
     }
     
     public LoopEffect(final boolean miri) {
-        manager = LoopManager.getInstance();
+        manager = LoopManager.INSTANCE;
         this.miri = miri;
         addLoopEffectManager();
     }

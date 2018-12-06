@@ -52,7 +52,7 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class CatalystSelect {
 
-    private final static KettleItemManager KETTLE = KettleItemManager.getInstance();
+    private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static List<UUID> OPEN_USERS = new ArrayList<>();
 
     public static boolean isCatalystSelect(Inventory inv) {
@@ -77,7 +77,7 @@ public class CatalystSelect {
         if (citem == null) {
             catalyst = Catalyst.DEFAULT;
         } else {
-            catalyst = AlchemyMaterialManager.getInstance().getMaterial(citem).getCatalyst();
+            catalyst = AlchemyMaterialManager.INSTANCE.getMaterial(citem).getCatalyst();
         }
         catalyst.setInv(inv, recipe, false);
         final List<String> lore = new ArrayList<>();
@@ -87,7 +87,7 @@ public class CatalystSelect {
             if (ct.startsWith("material:")) {
                 lore.add(
                         ChatColor.RESET + "- "
-                        + AlchemyMaterialManager.getInstance()
+                        + AlchemyMaterialManager.INSTANCE
                                 .getMaterial(ct.substring(9)).getName()
                 );
             } else if (ct.startsWith("category:")) {
@@ -115,14 +115,14 @@ public class CatalystSelect {
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final int raw = e.getRawSlot();
-        final AlchemyRecipe recipe = AlchemyRecipeManager.getInstance().search(Chore.getStridColor(setting.getLore().get(0)));
+        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
         if (!(raw < inv.getSize()) && e.isShiftClick()) {
             e.setCancelled(true);
             if (inv.getItem(37).getType() != Material.BARRIER) {
                 Chore.addItem(player, KETTLE.getCatalyst(uuid));
             }
             final ItemStack current = e.getCurrentItem();
-            final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial(current);
+            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(current);
             if (am != null && am.hasUsefulCatalyst(recipe)) {
                 final ItemStack cloneItem = current.clone();
                 cloneItem.setAmount(1);
@@ -139,7 +139,7 @@ public class CatalystSelect {
                     case 37: {
                         if (e.getCurrentItem().getType() == Material.BARRIER) {
                             final ItemStack cursor = e.getCursor();
-                            final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial(cursor);
+                            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(cursor);
                             if (am != null && am.hasUsefulCatalyst(recipe)) {
                                 final ItemStack cloneItem = cursor.clone();
                                 cloneItem.setAmount(1);

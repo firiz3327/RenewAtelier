@@ -23,6 +23,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
@@ -30,12 +31,14 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.Catalys
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.ItemSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
-import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -67,10 +70,7 @@ public class InventoryListener implements Listener {
         }
 
         if (ConfirmInventory.isConfirmInventory(inv)) {
-            if (e.getSlotType() == SlotType.CONTAINER) {
-                e.setCancelled(true);
-                click_temp.put(uuid, e.getCursor());
-            }
+            e.setCancelled(e.getSlotType() == SlotType.CONTAINER);
             ConfirmInventory.click(e);
         } else if (RecipeSelect.isKettleRecipe(inv)) {
             RecipeSelect.click(e);
@@ -80,17 +80,25 @@ public class InventoryListener implements Listener {
             CatalystSelect.click(e);
         } else if (AlchemyKettle.isAlchemyKettle(inv)) {
             AlchemyKettle.click(e);
-        } else if (inv.getType() == InventoryType.CRAFTING && !e.isCancelled()) { // player inv
+        } else if (AlchemyBagItem.isBagInventory(inv)) {
+            AlchemyBagItem.click(e);
+        } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
             final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
             if (bag != null) {
-                e.setCancelled(true);
-                click_temp.put(uuid, e.getCursor());
                 if (e.getCursor() == null || e.getCursor().getType() == Material.AIR) {
-                    AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem());
-                } else if (AlchemyMaterialManager.getInstance().getMaterial(e.getCursor()) != null) {
-                    final ItemStack bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
-                    e.setCurrentItem(bagItem);
+                    e.setCancelled(true);
+                    AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem(), e.getSlot());
+                }/* else { // アイテム追加
+                    final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(e.getCursor());
+                    if (material != null && bag.getType() == material) {
+                        e.setCancelled(true);
+                        click_temp.put(uuid, e.getCursor());
+                        
+                        final DoubleData<ItemStack, ItemStack> bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
+                        e.setCurrentItem(bagItem.getLeft());
+                    }
                 }
+                 */
             }
         }
     }
@@ -108,14 +116,15 @@ public class InventoryListener implements Listener {
             CatalystSelect.drag(e);
         } else if (AlchemyKettle.isAlchemyKettle(inv)) {
             AlchemyKettle.drag(e);
+        } else if (AlchemyBagItem.isBagInventory(inv)) {
+            AlchemyBagItem.drag(e);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invClose(final InventoryCloseEvent e) {
         final Player player = (Player) e.getPlayer();
-        PlayerSaveManager.getInstance().removeOpenInventory(player);
-        System.out.println("closeinv");
+        Chore.log("closeinv");
 
         final Inventory inv = e.getInventory();
         if (ConfirmInventory.isConfirmInventory(inv)) {
@@ -126,12 +135,13 @@ public class InventoryListener implements Listener {
             CatalystSelect.close(e);
         } else if (AlchemyKettle.isAlchemyKettle(inv)) {
             AlchemyKettle.close(e);
+        } else if (AlchemyBagItem.isBagInventory(inv)) {
+            AlchemyBagItem.close(e);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invOpen(final InventoryOpenEvent e) {
         final Player player = (Player) e.getPlayer();
-        PlayerSaveManager.getInstance().setOpenInventory(player, e.getInventory());
     }
 }

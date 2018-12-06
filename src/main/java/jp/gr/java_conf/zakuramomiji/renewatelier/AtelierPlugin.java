@@ -53,17 +53,17 @@ public final class AtelierPlugin extends JavaPlugin {
             world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
             world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         });
-        MyRoomManager.getInstance();
-        AlchemyMaterialManager.getInstance().loadConfig();
-        AlchemyRecipeManager.getInstance().loadConfig();
-        SQLManager.getInstance().setup();
-        LoopManager.getInstance().start();
+        MyRoomManager.INSTANCE.setup();
+        AlchemyMaterialManager.INSTANCE.loadConfig();
+        AlchemyRecipeManager.INSTANCE.loadConfig();
+        SQLManager.INSTANCE.setup();
+        LoopManager.INSTANCE.start();
     }
 
     @Override
     public void onDisable() {
-        LoopManager.getInstance().stopLoop();
-        SQLManager.getInstance().close();
+        LoopManager.INSTANCE.stopLoop();
+        SQLManager.INSTANCE.close();
     }
 
     public static AtelierPlugin getPlugin() {

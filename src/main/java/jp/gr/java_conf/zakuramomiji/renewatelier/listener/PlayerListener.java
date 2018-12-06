@@ -21,8 +21,9 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
+import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
-import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.block.Block;
@@ -32,7 +33,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -72,11 +72,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
-            final Player player = (Player) e.getEntity();
-            final Inventory inv = PlayerSaveManager.getInstance().getOpenInventory(player);
-            if (inv != null) {
-
-            }
+            AlchemyKettle.pickup(e);
+            AlchemyBagItem.pickup(e);
         }
     }
+
 }

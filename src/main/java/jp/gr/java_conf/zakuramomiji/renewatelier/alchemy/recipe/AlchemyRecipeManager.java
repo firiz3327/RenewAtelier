@@ -33,6 +33,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSize;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSizeData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect.RecipeLEType;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.CustomConfig;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,17 +42,10 @@ import org.bukkit.configuration.file.FileConfiguration;
  *
  * @author firiz
  */
-public final class AlchemyRecipeManager {
-
-    private final static AlchemyRecipeManager INSTANCE = new AlchemyRecipeManager();
+public enum AlchemyRecipeManager {
+    INSTANCE;
+    
     private final List<AlchemyRecipe> recipes = new ArrayList<>();
-
-    private AlchemyRecipeManager() {
-    }
-
-    public static AlchemyRecipeManager getInstance() {
-        return INSTANCE;
-    }
 
     public AlchemyRecipe search(final String id) {
         for (final AlchemyRecipe recipe : recipes) {
@@ -68,6 +62,9 @@ public final class AlchemyRecipeManager {
         if (files != null) {
             recipes.clear();
             for (final File f : files) {
+                if(!(f.getName().endsWith(".yml") || f.getName().endsWith(".yaml") || f.getName().endsWith(".YML") || f.getName().endsWith(".YAML"))) {
+                    continue;
+                }
                 final FileConfiguration config = new CustomConfig(plugin, "recipes", f.getName()).getConfig();
                 config.getKeys(false).forEach((key) -> {
                     final ConfigurationSection item = config.getConfigurationSection(key);
@@ -127,13 +124,12 @@ public final class AlchemyRecipeManager {
                     }
                     // 使用可能触媒
                     final List<String> catalyst_categorys = item.getStringList("usable_catalysts_categorys");
-                    System.out.println(result + " " + req_materials + " " + effects + " " + levels);
+                    Chore.log(result + " " + req_materials + " " + effects + " " + levels);
                     // 調合品サイズ
                     final List<MaterialSizeData> sizes = new ArrayList<>();
                     final ConfigurationSection sizesec = item.getConfigurationSection("sizes");
                     for (int i = 2; i <= 8; i++) {
                         final String s_str = sizesec.getString("s" + i);
-                        System.out.println(s_str);
                         final String strs[] = s_str.split(",");
                         sizes.add(new MaterialSizeData(
                                 MaterialSize.valueOf(strs[0].trim().toUpperCase()),

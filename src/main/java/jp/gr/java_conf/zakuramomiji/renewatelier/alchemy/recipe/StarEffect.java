@@ -29,33 +29,39 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
  */
 public class StarEffect {
     
-    private final int type;
+    public enum StarEffectType {
+        NAME,
+        INGREDIENT,
+        CATEGORY
+    }
+    
+    private final StarEffectType type;
     private final String name;
     private final AlchemyIngredients ingredient;
     private final Category category;
     
     public StarEffect(final String name) {
-        this.type = 0;
+        this.type = StarEffectType.NAME;
         this.name = name;
         this.ingredient = null;
         this.category = null;
     }
     
     public StarEffect(final AlchemyIngredients ingredient) {
-        this.type = 1;
+        this.type = StarEffectType.INGREDIENT;
         this.name = ingredient.getName();
         this.ingredient = ingredient;
         this.category = null;
     }
 
     public StarEffect(final Category category) {
-        this.type = 2;
+        this.type = StarEffectType.CATEGORY;
         this.name = category.getName();
         this.ingredient = null;
         this.category = category;
     }
     
-    public int getType() {
+    public StarEffectType getType() {
         return type;
     }
 

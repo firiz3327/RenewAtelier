@@ -57,8 +57,10 @@ public enum AlchemyItemStatus {
     ALCHEMY_INGREDIENTS("§a§1§c§1§n§4§r§e§d§1§e§n§f§b"), // 錬金成分
     CHARACTERISTIC("§c§f§a§r§a§c§f§e§r§1§b§f§1§c"), // 特性
     MATERIAL("§l§a§f§e§r§l§a§l"), // マテリアル-レシピ用
+    EFFECT("§e§t§t§e§c§t"),
     BAG("§b§a§e"), // バッグ用
     BAG_ITEMS("§b§a§e§l§f§e§m§r"), // バッグ-アイテム用
+    LORE_END("§e§e§b§e§e§b")
     ;
 
     private final String check;
@@ -123,7 +125,7 @@ public enum AlchemyItemStatus {
     }
 
     public final static ItemStack getItem(final String id, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics) {
-        return getItem(AlchemyMaterialManager.getInstance().getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
+        return getItem(AlchemyMaterialManager.INSTANCE.getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
     }
 
     public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category) {
@@ -131,12 +133,16 @@ public enum AlchemyItemStatus {
     }
 
     public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
+        return getItem(am, over_ings, item, over_quality, over_size, null, over_characteristics, over_category, not_visible_catalyst);
+    }
+    
+    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<String> active_effects, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
         if (am == null || (am.getIngredients().isEmpty() && (over_ings == null || over_ings.isEmpty()))) {
             return null;
         }
         if (item == null) {
             final DoubleData<Material, Short> matdata = am.getMaterial();
-            item = new ItemStack(matdata.getLeft(), 1, matdata.getRight());
+            item = Chore.createDamageableItem(matdata.getLeft(), 1, matdata.getRight());
         }
         final ItemMeta meta = item.getItemMeta();
         if (!am.isDefaultName()) {
@@ -309,6 +315,13 @@ public enum AlchemyItemStatus {
                 }
             }
         }
+        // 効果
+        if(active_effects != null && !active_effects.isEmpty()) {
+            lore.add(EFFECT.check + "§7効果: ");
+            active_effects.forEach((effect) -> {
+                lore.add(EFFECT.check + "§r- " + effect);
+            });
+        }
         // 特性
         final List<Characteristic> characteristics = new ArrayList<>();
         if (over_characteristics == null) {
@@ -354,7 +367,7 @@ public enum AlchemyItemStatus {
         }
         
         // Lore終了
-        lore.add("");
+        lore.add(LORE_END.check);
         meta.setLore(lore);
         
         // unbreaking & flag系

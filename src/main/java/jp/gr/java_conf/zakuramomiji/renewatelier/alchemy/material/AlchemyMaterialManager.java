@@ -44,17 +44,13 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author firiz
  */
-public final class AlchemyMaterialManager {
-
-    private final static AlchemyMaterialManager INSTANCE = new AlchemyMaterialManager();
+public enum AlchemyMaterialManager {
+    INSTANCE;
+    
     private final List<AlchemyMaterial> materials;
 
     private AlchemyMaterialManager() {
         materials = new ArrayList<>();
-    }
-
-    public static AlchemyMaterialManager getInstance() {
-        return INSTANCE;
     }
 
     public void loadConfig() {
@@ -63,6 +59,9 @@ public final class AlchemyMaterialManager {
         if (files != null) {
             materials.clear();
             for (final File f : files) {
+                if(!(f.getName().endsWith(".yml") || f.getName().endsWith(".yaml") || f.getName().endsWith(".YML") || f.getName().endsWith(".YAML"))) {
+                    continue;
+                }
                 final FileConfiguration config = new CustomConfig(plugin, "materials", f.getName()).getConfig();
                 config.getKeys(false).forEach((key) -> {
                     final ConfigurationSection item = config.getConfigurationSection(key);

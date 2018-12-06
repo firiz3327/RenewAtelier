@@ -70,11 +70,10 @@ public final class ConfirmInventory {
         final ClickRunnable cr = RUNS.get(uuid).getRight();
         switch (e.getRawSlot()) {
             case 1:
-                player.closeInventory();
                 cr.run(player, true);
                 break;
             case 3:
-                RUNS.get(uuid).getRight().run(player, false);
+                cr.run(player, false);
                 break;
         }
     }

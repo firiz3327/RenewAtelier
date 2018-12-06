@@ -23,7 +23,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 import de.tr7zw.itemnbtapi.NBTItem;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
@@ -50,10 +49,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -71,15 +70,14 @@ public class DebugListener implements Listener {
         e.setCancelled(true);
         try {
             final String strs[] = e.getMessage().split(" ");
-            switch (strs[0]) {
+            switch (strs[0].trim().toLowerCase()) {
                 case "debug": {
-                    final MaterialData data = new MaterialData(Material.DIAMOND_HOE, (byte) 1524);
-                    final ItemStack item = data.toItemStack(1);
+                    final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_HOE, 1, 1524);
                     e.getPlayer().getInventory().addItem(item);
                     break;
                 }
                 case "script": {
-                    ScriptManager.getInstance().start(strs[1], e.getPlayer());
+                    ScriptManager.INSTANCE.start(strs[1], e.getPlayer());
                     break;
                 }
                 case "item": {
@@ -101,8 +99,8 @@ public class DebugListener implements Listener {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
-                    SQLManager.getInstance().select(strs[1], split2, split3, length).forEach((a) -> {
-                        System.out.println(a.toString());
+                    SQLManager.INSTANCE.select(strs[1], split2, split3, length).forEach((a) -> {
+                        Chore.log(a.toString());
                     });
                     break;
                 }
@@ -113,7 +111,7 @@ public class DebugListener implements Listener {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
-                    SQLManager.getInstance().insert(strs[1], split(strs[2]), split3);
+                    SQLManager.INSTANCE.insert(strs[1], split(strs[2]), split3);
                     break;
                 }
                 case "delete": {
@@ -123,7 +121,7 @@ public class DebugListener implements Listener {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
-                    SQLManager.getInstance().delete(strs[1], split(strs[2]), split3);
+                    SQLManager.INSTANCE.delete(strs[1], split(strs[2]), split3);
                     break;
                 }
                 case "disable": {
@@ -151,14 +149,14 @@ public class DebugListener implements Listener {
                 case "islandcreate": {
                     Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
                         final UUID uuid = UUID.randomUUID();
-                        MyRoomManager.getInstance().createRoom(uuid);
-                        MyRoomManager.getInstance().warpRoom(e.getPlayer(), uuid);
+                        MyRoomManager.INSTANCE.createRoom(uuid);
+                        MyRoomManager.INSTANCE.warpRoom(e.getPlayer(), uuid);
                     });
                     break;
                 }
                 case "addrecipe": {
-                    final PlayerStatus status = PlayerSaveManager.getInstance().getStatus(e.getPlayer().getUniqueId());
-                    final AlchemyRecipe search = AlchemyRecipeManager.getInstance().search(strs[1]);
+                    final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
+                    final AlchemyRecipe search = AlchemyRecipeManager.INSTANCE.search(strs[1]);
                     if (search != null) {
                         final RecipeStatus rs = status.getRecipeStatus(strs[1]);
                         if (rs == null) {
@@ -170,12 +168,12 @@ public class DebugListener implements Listener {
                     break;
                 }
                 case "configreload": {
-                    AlchemyMaterialManager.getInstance().loadConfig();
-                    AlchemyRecipeManager.getInstance().loadConfig();
+                    AlchemyMaterialManager.INSTANCE.loadConfig();
+                    AlchemyRecipeManager.INSTANCE.loadConfig();
                     break;
                 }
                 case "bag": {
-                    final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial(strs[1]);
+                    final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(strs[1]);
                     if (am != null) {
                         Chore.addItem(e.getPlayer(), new AlchemyBagItem(am).getItem());
                     }
@@ -187,7 +185,7 @@ public class DebugListener implements Listener {
                         final ItemMeta meta = mainHand.getItemMeta();
                         if (meta.hasLore()) {
                             e.getPlayer().sendMessage(meta.getLore().toString());
-                            System.out.println(meta.getLore());
+                            Chore.log(meta.getLore());
                         }
                     }
                     break;
@@ -209,8 +207,18 @@ public class DebugListener implements Listener {
                     final ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
                     if (item != null) {
                         final NBTItem nbti = new NBTItem(item);
-                        System.out.println(nbti.getString(strs[1]));
+                        Chore.log(nbti.getString(strs[1]));
                     }
+                    break;
+                }
+                case "debugdrop": {
+                    final int val = Integer.parseInt(strs[1]);
+                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
+                        for (int i = 0; i < val; i++) {
+                            final ItemStack item = AlchemyItemStatus.getItem("kaen_stone", new ItemStack(Material.STONE));
+                            Chore.drop(e.getPlayer().getLocation(), item);
+                        }
+                    }, 20);
                     break;
                 }
                 default: {
@@ -220,7 +228,25 @@ public class DebugListener implements Listener {
             }
         } catch (Exception ex) {
             e.getPlayer().sendMessage(ex.getMessage());
-            Logger.getLogger(DebugListener.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @EventHandler
+    private void debugServer(final ServerCommandEvent e) {
+        final String strs[] = e.getCommand().split(" ");
+        switch (strs[0].trim().toLowerCase()) {
+            case "debugdrop": {
+                final Player player = Bukkit.getServer().getPlayer(strs[1]);
+                final int val = Integer.parseInt(strs[2]);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
+                    for (int i = 0; i < val; i++) {
+                        final ItemStack item = AlchemyItemStatus.getItem("kaen_stone", new ItemStack(Material.STONE));
+                        Chore.drop(player.getLocation(), item);
+                    }
+                }, 20);
+                break;
+            }
         }
     }
 

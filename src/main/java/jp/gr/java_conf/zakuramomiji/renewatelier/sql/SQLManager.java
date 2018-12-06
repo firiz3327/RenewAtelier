@@ -34,28 +34,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 
 /**
  *
  * @author firiz
  */
-public final class SQLManager {
-
-    private final static SQLManager INSTANCE = new SQLManager();
+public enum SQLManager {
+    INSTANCE;
+    
     private String url = "jdbc:mysql://localhost:3306/atelier";
     private String user = "root";
     private String password = "";
     private Connection conn = null;
-
-    private SQLManager() {
-    }
-
-    public static SQLManager getInstance() {
-        return INSTANCE;
-    }
-
+    
     public void setup() {
         final AtelierPlugin plugin = AtelierPlugin.getPlugin();
         try (final InputStream inputstream = new FileInputStream(new File(plugin.getDataFolder(), "db.properties"))) {
@@ -65,14 +58,14 @@ public final class SQLManager {
             user = prop.getProperty("user");
             password = prop.getProperty("password");
         } catch (FileNotFoundException ex) {
-            //Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            //Chore.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            //Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            //Chore.log(Level.SEVERE, null, ex);
         }
         try {
             conn = DriverManager.getConnection(url, user, password);
         } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
             System.exit(1);
         }
     }
@@ -81,7 +74,7 @@ public final class SQLManager {
         try {
             conn.close();
         } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -97,6 +90,14 @@ public final class SQLManager {
         return select(table, columns, columnDatas, columns.length);
     }
 
+    /**
+     * selectを行う
+     * @param table テーブル名
+     * @param columns カラム名配列
+     * @param columnDatas columnsに対しての値
+     * @param select_size columns選択範囲
+     * @return List&lt;List&lt;Object&gt;&gt; 列&lt;行&lt;値&gt;&gt;
+     */
     public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDatas, final int select_size) {
         final List<List<Object>> result = new ArrayList<>();
         try (final Statement stmt = conn.createStatement()) {
@@ -129,15 +130,57 @@ public final class SQLManager {
                 result.add(dataList);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return result;
     }
 
+    /**
+     * Execute insert ... on duplicate key update query.
+     * 
+     * <p>
+     * {@code table}の{@code columns}に対して{@code columnDatas}の値を
+     * 存在しない場合はinsertで追加し、存在する場合はdeplicate key updateで更新します。
+     * </p>
+     * 
+     * <p>example - code</p>
+     * <blockquote><pre>{@code insert("mail", "name", "John")}</pre></blockquote>
+     * 
+     * <p>example - result</p>
+     * <blockquote><table>
+     * <tr><th>name</th></tr>
+     * <tr><td>John</td></tr>
+     * </table></blockquote>
+     * 
+     * @param table 参照するテーブル名
+     * @param column {@code table}から参照するカラム名
+     * @param columnData {@code column}に対しての値
+     */
     public void insert(final String table, final String column, final Object columnData) {
         insert(table, new String[]{column}, new Object[]{columnData});
-    }
+    }   
 
+    /**
+     * Execute insert ... on duplicate key update query.
+     * 
+     * <p>
+     * {@code table}の{@code columns}に対して{@code columnDatas}の値を
+     * 存在しない場合はinsertで追加し、存在する場合はdeplicate key updateで更新します。
+     * </p>
+     * 
+     * <p>example - code</p>
+     * <blockquote><pre>{@code insert("mail", new String[]{"name", "email"}, new Object[]{"John", "john@example.com"})}</pre></blockquote>
+     * 
+     * <p>example - result</p>
+     * <blockquote><table>
+     * <tr><th>name</th><th>email</th></tr>
+     * <tr><td>John</td><td>john@example.com</td></tr>
+     * </table></blockquote>
+     * 
+     * @param table String 参照するテーブル名
+     * @param columns String[] {@code table}から参照するカラム名の配列
+     * @param columnDatas Object[] {@code columns}に対しての値の配列
+     */
     public void insert(final String table, final String[] columns, final Object[] columnDatas) {
         if (columns.length != columnDatas.length) {
             return;
@@ -169,11 +212,10 @@ public final class SQLManager {
             sb.append(";");
             stmt.executeUpdate(sb.toString());
         } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 
-    //なぜ select r.a, s.b, s.c from r,c where r.b = s.bがだめなのか
     public void delete(final String table, final String column, final Object columnData) {
         delete(table, new String[]{column}, new Object[]{columnData});
     }
@@ -195,7 +237,7 @@ public final class SQLManager {
             sb.append(";");
             stmt.executeUpdate(sb.toString());
         } catch (SQLException ex) {
-            Logger.getLogger(SQLManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 

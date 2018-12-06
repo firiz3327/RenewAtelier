@@ -34,6 +34,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
 
 /**
@@ -58,13 +59,13 @@ final class ScriptNashorn extends ScriptObject {
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
+                    Chore.log(Level.SEVERE, null, ex);
                 }
             } else {
-                System.out.println(name.concat(" is not found for script."));
+                Chore.log(name.concat(" is not found for script."));
             }
         } catch (ScriptException ex) {
-            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -79,9 +80,9 @@ final class ScriptNashorn extends ScriptObject {
             engine.eval(reader);
             return (Invocable) engine;
         } catch (FileNotFoundException | ScriptException ex) {
-            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ScriptNashorn.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return null;
     }

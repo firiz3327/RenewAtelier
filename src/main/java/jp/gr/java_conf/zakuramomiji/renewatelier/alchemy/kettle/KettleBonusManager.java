@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData.BonusType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.box.KettleBox;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
@@ -39,20 +37,16 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  *
- * @author taniyamamakito
+ * @author firiz
  */
-public class KettleBonusManager {
-
-    private static final KettleBonusManager INSTANCE = new KettleBonusManager();
+public enum KettleBonusManager {
+    INSTANCE;
+    
     private final Map<UUID, BonusPlayerData> datas;
-    private final KettleItemManager KETTLE = KettleItemManager.getInstance();
+    private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
 
     private KettleBonusManager() {
         datas = new HashMap<>();
-    }
-
-    public static KettleBonusManager getInstance() {
-        return INSTANCE;
     }
 
     public int getBonus(Player player, AlchemyAttribute type) {

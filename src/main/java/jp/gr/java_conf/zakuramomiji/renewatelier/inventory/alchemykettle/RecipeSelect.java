@@ -123,7 +123,7 @@ public final class RecipeSelect {
 
         lore.add(ChatColor.GRAY + "作成量: " + (recipe.getAmount() + add_amount));
         lore.add(ChatColor.GRAY + "必要素材:");
-        final AlchemyMaterialManager amm = AlchemyMaterialManager.getInstance();
+        final AlchemyMaterialManager amm = AlchemyMaterialManager.INSTANCE;
         for (final String req : recipe.getReqMaterial()) {
             final String data[] = req.split(",");
             if (data[0].startsWith("category:")) {
@@ -135,10 +135,10 @@ public final class RecipeSelect {
     }
 
     private static void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final AlchemyMaterialManager amm = AlchemyMaterialManager.getInstance();
-        final AlchemyRecipeManager arm = AlchemyRecipeManager.getInstance();
+        final AlchemyMaterialManager amm = AlchemyMaterialManager.INSTANCE;
+        final AlchemyRecipeManager arm = AlchemyRecipeManager.INSTANCE;
         final List<DoubleData<RecipeStatus, DoubleData<Material, Short>>> ritem = new ArrayList<>();
-        final PlayerStatus status = PlayerSaveManager.getInstance().getStatus(uuid);
+        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
         status.getRecipeStatusList().forEach((rs) -> {
             final String result_str = arm.search(rs.getId()).getResult();
             final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
@@ -195,7 +195,7 @@ public final class RecipeSelect {
 
                 item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createDamageableItem(material.getLeft(), 1, material.getRight());
                 imeta = item.getItemMeta();
-                final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
+                final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 if (am != null) {
                     if (!am.isDefaultName()) {
                         imeta.setDisplayName(am.getName());
@@ -270,7 +270,7 @@ public final class RecipeSelect {
                     break;
                 case 25:
                     if (item != null) {
-                        final AlchemyRecipe recipe = AlchemyRecipeManager.getInstance().search(Chore.getStridColor(item.getItemMeta().getLore().get(1)));
+                        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(item.getItemMeta().getLore().get(1)));
                         if (Chore.hasMaterial(player.getInventory(), recipe.getReqMaterial())) {
                             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                             ItemSelect.openItemSelect(player, recipe, inv);
@@ -286,12 +286,12 @@ public final class RecipeSelect {
                             || raw >= 36 && raw <= 41) {
                         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         if (item != null && item.getType() != Material.AIR && item.hasItemMeta()) {
-                            final AlchemyRecipe recipe = AlchemyRecipeManager.getInstance().search(Chore.getStridColor(item.getItemMeta().getLore().get(0)));
+                            final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(item.getItemMeta().getLore().get(0)));
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
                             DoubleData<Material, Short> material = null;
                             if (result[0].startsWith("material:")) {
-                                am = AlchemyMaterialManager.getInstance().getMaterial(result[0].substring(9));
+                                am = AlchemyMaterialManager.INSTANCE.getMaterial(result[0].substring(9));
                                 material = am.getMaterial();
                             } else if (result[0].startsWith("minecraft:")) {
                                 material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Short.parseShort(result[1]) : 0);
@@ -299,11 +299,11 @@ public final class RecipeSelect {
 
                             final List<String> lore = new ArrayList<>();
                             lore.add(ChatColor.WHITE + "  を作成します。");
-                            final PlayerStatus status = PlayerSaveManager.getInstance().getStatus(player.getUniqueId());
+                            final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
                             final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
                             if (recipe_status != null && material != null) {
                                 RecipeSelect.addRecipeStatus(recipe, recipe_status, lore);
-                                final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : new ItemStack(material.getLeft(), recipe.getAmount(), material.getRight());
+                                final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createDamageableItem(material.getLeft(), recipe.getAmount(), material.getRight());
                                 final ItemMeta meta = result_item.getItemMeta();
                                 if (am != null) {
                                     if (!am.isDefaultName()) {

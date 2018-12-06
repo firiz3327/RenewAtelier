@@ -42,9 +42,9 @@ import org.bukkit.potion.PotionEffectType;
  *
  * @author firiz
  */
-public final class LoopManager {
+public enum LoopManager {
+    INSTANCE;
 
-    private static final LoopManager INSTANCE = new LoopManager();
     private final AtelierPlugin plugin = AtelierPlugin.getPlugin();
     private final List<AnimatedDrop> animDrops;
     private final List<Runnable> loop_runs;
@@ -59,10 +59,6 @@ public final class LoopManager {
         animDrops = new ArrayList<>();
         loop_runs = new ArrayList<>();
         loop_miri_runs = new ArrayList<>();
-    }
-
-    public static LoopManager getInstance() {
-        return INSTANCE;
     }
 
     public void start() {
@@ -136,7 +132,7 @@ public final class LoopManager {
 
         /*
         if(sec_period % 2 == 0) {
-            AtelierGUI gui = AtelierGUI.getInstance();
+            AtelierGUI gui = AtelierGUI.INSTANCE;
             if(gui.isOfflinePlayer()) {
                 gui.setOfflinePlayerList(Bukkit.getOfflinePlayers());
             } else {

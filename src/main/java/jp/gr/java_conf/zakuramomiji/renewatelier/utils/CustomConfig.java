@@ -76,7 +76,7 @@ public class CustomConfig {
             }
             config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(CustomConfig.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 

@@ -39,7 +39,7 @@ public abstract class AnimatedDrop {
     private boolean isGet;
 
     public AnimatedDrop(Location loc, ItemStack itemstack, int tick) {
-        this.loop = LoopManager.getInstance();
+        this.loop = LoopManager.INSTANCE;
         loc.setX(loc.getX() + 0.5);
         loc.setZ(loc.getZ() + 0.5);
         this.loc = loc;

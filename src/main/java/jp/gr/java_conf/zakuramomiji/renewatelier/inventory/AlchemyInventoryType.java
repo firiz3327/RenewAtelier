@@ -55,7 +55,6 @@ public enum AlchemyInventoryType {
     }),
     KETTLE_SELECT_ITEM("KETTLE_SELECT_ITEM"/*"§l§f§e§3§c§e§l§l§e§c§f"*/),
     KETTLE_SELECT_CATALYST("KETTLE_SELECT_CATALYST"/*"§c§1§1§a§l§2§2§1"*/);
-
     private final String check;
     private final CheckRunnable cr;
 

@@ -27,17 +27,13 @@ import org.bukkit.entity.Player;
  *
  * @author firiz
  */
-public final class ScriptManager {
-
-    private static final ScriptManager INSTANCE = new ScriptManager();
+public enum ScriptManager {
+    INSTANCE;
+    
     private final ScriptObject script;
     
     private ScriptManager() {
         script = ServerConstants.NASHORN ? new ScriptNashorn() : new ScriptGraalJS();
-    }
-
-    public static ScriptManager getInstance() {
-        return INSTANCE;
     }
 
     public void start(final String name, final Player player) {

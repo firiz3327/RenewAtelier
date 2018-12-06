@@ -36,8 +36,8 @@ import net.md_5.bungee.api.ChatColor;
  */
 public class RecipeEffect {
 
-    private final KettleItemManager KETTLE = KettleItemManager.getInstance();
-    private final KettleBonusManager abm = KettleBonusManager.getInstance();
+    private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
+    private final KettleBonusManager abm = KettleBonusManager.INSTANCE;
     private final AlchemyAttribute attribute;
     private final List<Integer> star;
     private final List<StarEffect> starEffects;

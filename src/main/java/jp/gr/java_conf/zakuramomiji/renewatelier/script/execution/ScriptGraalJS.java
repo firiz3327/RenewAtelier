@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
 
 /**
@@ -56,13 +56,13 @@ final class ScriptGraalJS extends ScriptObject {
                 try {
                     scriptengine.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+                    Chore.log(Level.SEVERE, null, ex);
                 }
             } else {
-                System.out.println(name.concat(" is not found for script."));
+                Chore.log(name.concat(" is not found for script."));
             }
         } catch (ScriptException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -77,9 +77,9 @@ final class ScriptGraalJS extends ScriptObject {
             engine.eval(reader);
             return engine;
         } catch (FileNotFoundException | ScriptException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return null;
     }

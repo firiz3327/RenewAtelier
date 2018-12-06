@@ -24,16 +24,28 @@ import de.tr7zw.itemnbtapi.NBTItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
@@ -42,8 +54,9 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class AlchemyBagItem {
 
+    private final static List<UUID> OPEN_USERS = new ArrayList<>();
     private final AlchemyMaterial type;
-    private ItemStack item;
+    private final ItemStack item;
 
     public AlchemyBagItem(final AlchemyMaterial type) {
         this.type = type;
@@ -98,42 +111,93 @@ public class AlchemyBagItem {
         item.setItemMeta(meta);
     }
 
-    public static ItemStack addItem(final ItemStack item, final AlchemyBagItem bag, final ItemStack _item) {
-        final AlchemyMaterial material = AlchemyMaterialManager.getInstance().getMaterial(_item);
-        if (material != null && material == bag.type) {
-            final Object[] itemData = createItem(_item);
-            final NBTItem nbti = new NBTItem(item);
-            final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
+    public AlchemyMaterial getType() {
+        return type;
+    }
 
-            System.out.println("additem");
-            int amount = _item.getAmount(); // 64
-            for (int i = 0; i < items.size(); i++) { // 0:16
+    public static DoubleData<ItemStack, ItemStack> addItem(final ItemStack bag_item, final ItemStack _item) {
+        final Object[] itemData = createItem(_item);
+        final NBTItem nbti = new NBTItem(bag_item);
+        final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
+
+        int amount = _item.getAmount(); // 64
+        for (int i = 0; i < items.size(); i++) { // 0:16
+            final String[] data = items.get(i).split(","); // amount, damage, lore
+            if (amount > 0) {
+                if (Integer.parseInt(data[1]) == (int) itemData[1] && data[2].equals(itemData[2])) { // damageとloreが一致した時
+                    final int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
+                    amount = da - 64;
+                    data[0] = String.valueOf(Math.min(64, da));
+                }
+            }
+            items.set(i, parse(data));
+        }
+        ItemStack add = null;
+        if (amount > 0) {
+            if (items.size() < 45) {
+                itemData[0] = amount;
+                items.add(parse(itemData));
+            } else {
+                add = _item.clone();
+                add.setAmount(amount);
+            }
+        }
+        final StringBuilder sb = new StringBuilder();
+        items.forEach((str) -> {
+            if (sb.length() != 0) {
+                sb.append("\n");
+            }
+            sb.append(str);
+        });
+        nbti.setString("items", sb.toString());
+        return new DoubleData<>(nbti.getItem(), add);
+    }
+
+    public static ItemStack removeItem(final ItemStack bag_item, final ItemStack remove_item) {
+        final Object[] itemData = createItem(remove_item);
+        final NBTItem nbti = new NBTItem(bag_item);
+        final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
+
+        int amount = remove_item.getAmount();
+        if (items.size() == 1) {
+            final String[] data = items.get(0).split(","); // amount, damage, lore
+            final int da = Integer.parseInt(data[0]) - amount; // 16 - 64 = -48
+            final int setamount = Math.max(0, da);
+            if (setamount != 0) {
+                data[0] = String.valueOf(setamount);
+                items.set(0, parse(data));
+            } else {
+                return null;
+            }
+        } else {
+            for (int i = items.size() - 1; i >= 0; i--) {
                 final String[] data = items.get(i).split(","); // amount, damage, lore
                 if (amount > 0) {
                     if (Integer.parseInt(data[1]) == (int) itemData[1] && data[2].equals(itemData[2])) { // damageとloreが一致した時
-                        int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
-                        amount = da - 64;
-                        data[0] = String.valueOf(Math.min(64, da));
+                        final int da = Integer.parseInt(data[0]) - amount; // 16 - 64 = -48
+                        amount = da * -1;
+
+                        final int setamount = Math.max(0, da);
+                        if (setamount != 0) {
+                            data[0] = String.valueOf(setamount);
+                        } else {
+                            items.remove(i);
+                            continue;
+                        }
                     }
                 }
                 items.set(i, parse(data));
             }
-            if (amount > 0) {
-                itemData[0] = amount;
-                items.add(parse(itemData));
-            }
-
-            final StringBuilder sb = new StringBuilder();
-            items.forEach((str) -> {
-                if (sb.length() != 0) {
-                    sb.append("\n");
-                }
-                sb.append(str);
-            });
-            nbti.setString("items", sb.toString());
-            return nbti.getItem();
         }
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        items.forEach((str) -> {
+            if (sb.length() != 0) {
+                sb.append("\n");
+            }
+            sb.append(str);
+        });
+        nbti.setString("items", sb.toString());
+        return nbti.getItem();
     }
 
     private static String parse(final Object[] strs) {
@@ -152,18 +216,22 @@ public class AlchemyBagItem {
         return new Object[]{item.getAmount(), Chore.getDamage(meta), sb.toString()};
     }
 
-    public static void openInventory(final Player player, final ItemStack item) {
+    public static boolean isBagInventory(final Inventory inv) {
+        return inv.getTitle().startsWith("AlchemyBag,");
+    }
+
+    public static void openInventory(final Player player, final ItemStack item, final int clickslot) {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.BAG, item);
         if (!lores.isEmpty()) {
-            final Inventory inv = Bukkit.createInventory(player, 54, "バッグ");
+            final Inventory inv = Bukkit.createInventory(player, 54, "AlchemyBag," + clickslot);
             final NBTItem nbti = new NBTItem(item);
             final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
             int slot = 0;
             final String bagstr = lores.get(0).substring(AlchemyItemStatus.BAG.getCheck().length());
-            final AlchemyMaterial type = AlchemyMaterialManager.getInstance().getMaterial(Chore.getStridColor(bagstr));
+            final AlchemyMaterial type = AlchemyMaterialManager.INSTANCE.getMaterial(Chore.getStridColor(bagstr));
             for (final String datastr : items) {
                 final String[] data = datastr.split(","); // amount, damage, lore
-                final ItemStack _item = new ItemStack(
+                final ItemStack _item = Chore.createDamageableItem(
                         type.getMaterial().getLeft(),
                         Integer.parseInt(data[0]),
                         Short.parseShort(data[1])
@@ -194,7 +262,10 @@ public class AlchemyBagItem {
                 inv.setItem(slot, _item);
                 slot++;
             }
+            
             player.openInventory(inv);
+            OPEN_USERS.add(player.getUniqueId());
+            InventoryPacket.update(player, "アイテム", InventoryPacketType.CHEST);
         }
     }
 
@@ -203,11 +274,110 @@ public class AlchemyBagItem {
         if (!lores.isEmpty()) {
             final String data = lores.get(0).substring(AlchemyItemStatus.BAG.getCheck().length());
             return new AlchemyBagItem(
-                    AlchemyMaterialManager.getInstance().getMaterial(Chore.getStridColor(data)),
+                    AlchemyMaterialManager.INSTANCE.getMaterial(Chore.getStridColor(data)),
                     item.getItemMeta().getLore()
             );
         }
         return null;
+    }
+
+    public static void click(final InventoryClickEvent e) {
+        e.setCancelled(true);
+        final Player player = (Player) e.getWhoClicked();
+        final PlayerInventory pinv = player.getInventory();
+        final ItemStack currentItem = e.getCurrentItem();
+        if (currentItem != null && currentItem.getType() != Material.AIR) {
+            final int bag_slot = Integer.parseInt(e.getInventory().getTitle().split(",")[1]);
+            if (e.getSlotType() == SlotType.CONTAINER) {
+                final ItemStack removeItem = currentItem.clone();
+                if (e.getClick() == ClickType.RIGHT) {
+                    removeItem.setAmount(1);
+                }
+                final ItemStack bag_item = pinv.getItem(bag_slot);
+                final AlchemyBagItem bag = getBag(bag_item);
+                pinv.setItem(bag_slot, removeItem(bag_item, removeItem));
+
+                ItemStack next_bag_item = pinv.getItem(bag_slot);
+                if (pinv.getItem(bag_slot) != null) {
+                    final ItemStack rest = Chore.addItemNotDrop(pinv, removeItem);
+                    if (rest != null) {
+                        next_bag_item = addItem(next_bag_item, rest).getLeft();
+                        pinv.setItem(bag_slot, next_bag_item);
+                    }
+
+                    // reflesh
+                    openInventory(player, next_bag_item, bag_slot);
+                } else {
+                    Chore.addItem(player, removeItem);
+                    player.closeInventory();
+                }
+            } else if (e.getSlot() != bag_slot) {
+                final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(currentItem);
+                final ItemStack bag_item = pinv.getItem(bag_slot);
+                final AlchemyBagItem bag = getBag(bag_item);
+                if (material != null && bag.getType() == material) {
+                    final ItemStack item = currentItem.clone();
+                    if (e.getClick() == ClickType.RIGHT) {
+                        item.setAmount(1);
+                    }
+                    currentItem.setAmount(currentItem.getAmount() - item.getAmount());
+                    final DoubleData<ItemStack, ItemStack> next_bag_item = addItem(bag_item, item);
+                    pinv.setItem(bag_slot, next_bag_item.getLeft());
+                    if (next_bag_item.getRight() != null) {
+                        Chore.addItem(player, next_bag_item.getRight());
+                    }
+                    
+                    // reflesh
+                    openInventory(player, next_bag_item.getLeft(), bag_slot);
+                }
+            }
+        }
+    }
+
+    public static void drag(final InventoryDragEvent e) {
+        e.setCancelled(true);
+    }
+
+    public static void close(final InventoryCloseEvent e) {
+        OPEN_USERS.remove(e.getPlayer().getUniqueId());
+    }
+
+    public static void pickup(final EntityPickupItemEvent e) {
+        final Player player = (Player) e.getEntity();
+        if (OPEN_USERS.contains(player.getUniqueId())) {
+            e.setCancelled(true);
+        } else {
+            final AlchemyMaterialManager amm = AlchemyMaterialManager.INSTANCE;
+            final ItemStack dropitem = e.getItem().getItemStack();
+            final AlchemyMaterial material = amm.getMaterial(dropitem);
+            if (material != null) {
+                final PlayerInventory inv = player.getInventory();
+                final ItemStack[] contents = inv.getContents();
+                ItemStack check = dropitem;
+                for (int i = 0; i < contents.length; i++) {
+                    final ItemStack item = contents[i];
+                    final AlchemyBagItem bag = getBag(item);
+                    if (bag != null && bag.getType() == material) {
+                        final DoubleData<ItemStack, ItemStack> bagItem = addItem(item, check);
+                        contents[i] = bagItem.getLeft();
+                        inv.setContents(contents);
+                        check = bagItem.getRight();
+                        if (check != null) {
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                if (check != null) {
+                    final AlchemyBagItem bag = new AlchemyBagItem(material);
+                    final ItemStack item = bag.getItem();
+                    Chore.addItem(player, addItem(item, check).getLeft());
+                }
+                e.getItem().getWorld().playSound(e.getItem().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1);
+                e.setCancelled(true);
+                e.getItem().remove();
+            }
+        }
     }
 
 }

@@ -38,9 +38,9 @@ public class ScriptItem {
         final ItemStack item = e.getItem();
 
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final AlchemyMaterial material = AlchemyMaterialManager.getInstance().getMaterial(item);
+            final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(item);
             if (material != null && material.getScript() != null) {
-                ScriptManager.getInstance().start(material.getScript(), player);
+                ScriptManager.INSTANCE.start(material.getScript(), player);
                 e.setCancelled(true);
                 return true;
             }

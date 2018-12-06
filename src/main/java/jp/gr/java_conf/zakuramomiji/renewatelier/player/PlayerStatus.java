@@ -43,7 +43,7 @@ public final class PlayerStatus {
     public void addRecipes(final List<RecipeStatus> recipe_statuses) {
         this.recipe_statuses.addAll(recipe_statuses);
         recipe_statuses.forEach((rs) -> {
-            SQLManager.getInstance().insert(
+            SQLManager.INSTANCE.insert(
                     "recipe_levels",
                     new String[]{"user_id", "recipe_id", "level", "exp"},
                     new Object[]{id, rs.getId(), rs.getLevel(), rs.getExp()}
@@ -53,7 +53,7 @@ public final class PlayerStatus {
 
     public void addRecipe(final RecipeStatus recipe_status) {
         recipe_statuses.add(recipe_status);
-        SQLManager.getInstance().insert(
+        SQLManager.INSTANCE.insert(
                 "recipe_levels",
                 new String[]{"user_id", "recipe_id", "level", "exp"},
                 new Object[]{id, recipe_status.getId(), recipe_status.getLevel(), recipe_status.getExp()}
@@ -101,7 +101,7 @@ public final class PlayerStatus {
             }
             break;
         }
-        SQLManager.getInstance().insert(
+        SQLManager.INSTANCE.insert(
                 "recipe_levels",
                 new String[]{"user_id", "recipe_id", "level", "exp"},
                 new Object[]{id, status.getId(), status.getLevel(), status.getExp()}

@@ -77,7 +77,7 @@ public final class ItemConversation {
     }
 
     public void log(final String str) {
-        System.out.println(str);
+        Chore.log(str);
     }
 
     public List<String> getLores(final String check, final ItemStack item) {
@@ -85,19 +85,19 @@ public final class ItemConversation {
     }
 
     public void warpRoom(final Player player) {
-        MyRoomManager.getInstance().warpRoom(player);
+        MyRoomManager.INSTANCE.warpRoom(player);
     }
 
     public void warpRoom(final Player player, final UUID uuid) {
-        MyRoomManager.getInstance().warpRoom(player, uuid);
+        MyRoomManager.INSTANCE.warpRoom(player, uuid);
     }
 
     public boolean hasRoom(final Player player) {
-        return MyRoomManager.getInstance().hasRoom(player.getUniqueId());
+        return MyRoomManager.INSTANCE.hasRoom(player.getUniqueId());
     }
 
     public void createRoom(final Player player) {
-        MyRoomManager.getInstance().createRoom(player.getUniqueId());
+        MyRoomManager.INSTANCE.createRoom(player.getUniqueId());
     }
 
     public void openConfirmInventory(final String title, final String yes, final String no, final String confirmFunctionName, final String cancelFunctionName) {
@@ -111,19 +111,20 @@ public final class ItemConversation {
                 yes,
                 no,
                 (final Player player1, final boolean confirm) -> {
-                    if (confirm && confirmFunctionName != null) {
+                    final String functionName = confirm ? confirmFunctionName : cancelFunctionName;
+                    if (functionName != null) {
                         if (iv instanceof Invocable) {
                             try {
-                                ((Invocable) iv).invokeFunction(confirmFunctionName);
+                                ((Invocable) iv).invokeFunction(functionName);
                             } catch (ScriptException ex) {
-                                Logger.getLogger(ItemConversation.class.getName()).log(Level.SEVERE, null, ex);
+                                Chore.log(Level.SEVERE, null, ex);
                             } catch (NoSuchMethodException ex) {
                             }
-                        } else if(iv instanceof GraalJSScriptEngine) {
+                        } else if (iv instanceof GraalJSScriptEngine) {
                             try {
-                                ((GraalJSScriptEngine) iv).invokeFunction(confirmFunctionName);
+                                ((GraalJSScriptEngine) iv).invokeFunction(functionName);
                             } catch (ScriptException ex) {
-                                Logger.getLogger(ItemConversation.class.getName()).log(Level.SEVERE, null, ex);
+                                Chore.log(Level.SEVERE, null, ex);
                             } catch (NoSuchMethodException ex) {
                             }
                         }

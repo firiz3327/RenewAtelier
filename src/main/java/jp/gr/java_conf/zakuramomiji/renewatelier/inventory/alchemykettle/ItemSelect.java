@@ -57,7 +57,7 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public final class ItemSelect {
 
-    private final static KettleItemManager KETTLE = KettleItemManager.getInstance();
+    private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static List<UUID> OPEN_USERS = new ArrayList<>();
 
     public static boolean isItemSelect(Inventory inv) {
@@ -102,7 +102,7 @@ public final class ItemSelect {
         String name = null;
         DoubleData<Material, Short> material = null;
         if (data[0].startsWith("material:")) {
-            final AlchemyMaterial am = AlchemyMaterialManager.getInstance().getMaterial(data[0].substring(9));
+            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(data[0].substring(9));
             if (!am.isDefaultName()) {
                 name = am.getName();
             }
@@ -148,12 +148,12 @@ public final class ItemSelect {
         final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
         final String data[] = reqs.get(page).split(",");
         final DoubleData<Material, Short> material = data[0].startsWith("material:")
-                ? AlchemyMaterialManager.getInstance().getMaterial(data[0].substring(9)).getMaterial()
+                ? AlchemyMaterialManager.INSTANCE.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);
         if (material != null && pageItems != null) {
             final int req_amount = Integer.parseInt(data[1]);
-            System.out.println(pageItems.size() + " " + (pageItems.size() >= req_amount) + " " + Arrays.toString(data));
+            Chore.log(pageItems.size() + " " + (pageItems.size() >= req_amount) + " " + Arrays.toString(data));
             return pageItems.size() >= req_amount;
         }
         return false;
@@ -170,7 +170,7 @@ public final class ItemSelect {
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final int page = setting.getEnchantLevel(Enchantment.ARROW_DAMAGE);
         final int raw = e.getRawSlot();
-        final AlchemyRecipe recipe = AlchemyRecipeManager.getInstance().search(Chore.getStridColor(setting.getLore().get(0)));
+        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
         if ((e.getSlotType() == InventoryType.SlotType.CONTAINER || e.getSlotType() == InventoryType.SlotType.QUICKBAR) && !(raw < inv.getSize()) && e.isShiftClick()) {
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();

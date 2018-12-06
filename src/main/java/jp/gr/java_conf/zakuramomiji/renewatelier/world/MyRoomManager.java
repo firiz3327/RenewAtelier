@@ -46,21 +46,17 @@ import org.bukkit.generator.ChunkGenerator;
  *
  * @author firiz
  */
-public class MyRoomManager {
+public enum MyRoomManager {
+    INSTANCE;
 
-    private final static MyRoomManager INSTANCE = new MyRoomManager();
     private final String world_name = "atelier_world";
-    private final World world;
     private final File map_folder = new File(
             AtelierPlugin.getPlugin().getDataFolder(), "rooms"
     );
     private final int island_distance = 50;
+    private World world;
 
-    public static MyRoomManager getInstance() {
-        return INSTANCE;
-    }
-
-    private MyRoomManager() {
+    public void setup() {
         final World worldTemp = Bukkit.getWorld(world_name);
         world = worldTemp != null ? worldTemp : new WorldCreator(world_name).generator(new ChunkGenerator() {
             @Override
@@ -110,7 +106,7 @@ public class MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(MyRoomManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -124,7 +120,7 @@ public class MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(MyRoomManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return false;
     }
@@ -142,7 +138,7 @@ public class MyRoomManager {
             );
             createDefaultRoom(loc);
         } catch (IOException ex) {
-            Logger.getLogger(MyRoomManager.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -202,7 +198,7 @@ public class MyRoomManager {
                         try {
                             f2.createNewFile();
                         } catch (IOException ex) {
-                            Logger.getLogger(MyRoomManager.class.getName()).log(Level.SEVERE, null, ex);
+                            Chore.log(Level.SEVERE, null, ex);
                         }
                         return f2;
                     }
@@ -218,7 +214,7 @@ public class MyRoomManager {
                 try {
                     f.createNewFile();
                 } catch (IOException ex) {
-                    Logger.getLogger(MyRoomManager.class.getName()).log(Level.SEVERE, null, ex);
+                    Chore.log(Level.SEVERE, null, ex);
                 }
                 return f;
             }
