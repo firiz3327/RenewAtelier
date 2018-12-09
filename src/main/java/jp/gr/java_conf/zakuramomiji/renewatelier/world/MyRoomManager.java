@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.apache.commons.io.FileUtils;

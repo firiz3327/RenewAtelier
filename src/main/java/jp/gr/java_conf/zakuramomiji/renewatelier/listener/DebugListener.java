@@ -33,6 +33,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
@@ -43,7 +44,9 @@ import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -221,6 +224,19 @@ public class DebugListener implements Listener {
                     }, 20);
                     break;
                 }
+//                case "entitypacket": {
+//                    new NPCConversation(e.getPlayer(), null, e.getPlayer(), null)
+//                            .entityPacket(e.getPlayer(), EntityType.ARMOR_STAND.ordinal(), e.getPlayer().getLocation());
+//                    break;
+//                }
+//                case "ddd": {
+//                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
+//                        final Zombie z = (Zombie) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.ZOMBIE);
+//                        z.setCustomName("CustomName");
+//                        z.setCustomNameVisible(true);
+//                    }, 20);
+//                    break;
+//                }
                 default: {
                     e.setCancelled(false);
                     break;

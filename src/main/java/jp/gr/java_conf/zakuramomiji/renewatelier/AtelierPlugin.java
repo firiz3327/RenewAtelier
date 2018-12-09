@@ -20,6 +20,8 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.BlockListener;
@@ -27,6 +29,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.listener.DebugListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.InventoryListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.PlayerListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
@@ -38,7 +41,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author firiz
  */
 public final class AtelierPlugin extends JavaPlugin {
-
+    
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new DebugListener(), this);
@@ -58,6 +61,7 @@ public final class AtelierPlugin extends JavaPlugin {
         AlchemyRecipeManager.INSTANCE.loadConfig();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
+        PacketUtils.init(ProtocolLibrary.getProtocolManager());
     }
 
     @Override

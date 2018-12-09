@@ -21,67 +21,24 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation;
 
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.script.Invocable;
 import javax.script.ScriptException;
-import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
-import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author firiz
  */
-public final class ItemConversation {
-
-    private final String scriptName;
-    private final Player player;
-    private final Object iv;
+public final class ItemConversation extends ScriptConversation {
 
     public ItemConversation(String scriptName, Player player, Object iv) {
-        this.scriptName = scriptName;
-        this.player = player;
-        this.iv = iv;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public Player getPlayer(final UUID uuid) {
-        return AtelierPlugin.getPlugin().getServer().getPlayer(uuid);
-    }
-
-    public UUID getUUID(final String uuid) {
-        return UUID.fromString(uuid);
-    }
-
-    public String createStridColor(final String str) {
-        return Chore.createStridColor(str);
-    }
-
-    public String getStridColor(final String str) {
-        return Chore.getStridColor(str);
-    }
-
-    public String chatColor(final String str) {
-        return ChatColor.translateAlternateColorCodes('&', str);
-    }
-
-    public void log(final String str) {
-        Chore.log(str);
-    }
-
-    public List<String> getLores(final String check, final ItemStack item) {
-        return AlchemyItemStatus.getLores(check, item);
+        super(scriptName, player, iv);
     }
 
     public void warpRoom(final Player player) {
