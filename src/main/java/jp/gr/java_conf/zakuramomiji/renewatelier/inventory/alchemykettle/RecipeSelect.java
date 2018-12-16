@@ -77,8 +77,8 @@ public final class RecipeSelect {
 
     public static void openGUI(Player player, Location loc) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
-        inv.setItem(0, Chore.ci(Material.DIAMOND_HOE, 1521, "", null));
-        inv.setItem(45, Chore.ci(Material.DIAMOND_HOE, 1561, "", null));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1521, "", null));
+        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
         inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), null));
 
         setRecipeScroll(player.getUniqueId(), inv, 0);

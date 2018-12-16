@@ -37,8 +37,8 @@ import org.bukkit.entity.Player;
  */
 public final class ItemConversation extends ScriptConversation {
 
-    public ItemConversation(String scriptName, Player player, Object iv) {
-        super(scriptName, player, iv);
+    public ItemConversation(String scriptName, Player player) {
+        super(scriptName, player);
     }
 
     public void warpRoom(final Player player) {
@@ -70,20 +70,11 @@ public final class ItemConversation extends ScriptConversation {
                 (final Player player1, final boolean confirm) -> {
                     final String functionName = confirm ? confirmFunctionName : cancelFunctionName;
                     if (functionName != null) {
-                        if (iv instanceof Invocable) {
-                            try {
-                                ((Invocable) iv).invokeFunction(functionName);
-                            } catch (ScriptException ex) {
-                                Chore.log(Level.SEVERE, null, ex);
-                            } catch (NoSuchMethodException ex) {
-                            }
-                        } else if (iv instanceof GraalJSScriptEngine) {
-                            try {
-                                ((GraalJSScriptEngine) iv).invokeFunction(functionName);
-                            } catch (ScriptException ex) {
-                                Chore.log(Level.SEVERE, null, ex);
-                            } catch (NoSuchMethodException ex) {
-                            }
+                        try {
+                            ((Invocable) iv).invokeFunction(functionName);
+                        } catch (ScriptException ex) {
+                            Chore.log(Level.SEVERE, null, ex);
+                        } catch (NoSuchMethodException ex) {
                         }
                     }
                 }

@@ -21,7 +21,6 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
 import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
-import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,9 +28,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
+import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
 
@@ -39,22 +42,35 @@ import org.bukkit.entity.Player;
  *
  * @author firiz
  */
-final class ScriptGraalJS extends ScriptObject {
+final class ScriptRunner {
 
-    private static final GraalJSEngineFactory GJEF = new GraalJSEngineFactory();
+    private final ScriptEngineManager SEM;
+    private final GraalJSEngineFactory GJEF;
+    
+    public ScriptRunner() {
+        if(ServerConstants.NASHORN) {
+            SEM = new ScriptEngineManager();
+            GJEF = null;
+        } else {
+            SEM = null;
+            GJEF = new GraalJSEngineFactory();
+        }
+    }
 
-    @Override
-    public void start(final String name, final Player player, final String functionName, final Object... args) {
+    public void start(final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
         try {
-            final GraalJSScriptEngine scriptengine = getScriptEngine(name);
-            if(scriptengine != null) {
-                scriptengine.put("ic", new ItemConversation(name, player, scriptengine));
+            final ScriptEngine scriptengine = getScriptEngine(name);
+            if (scriptengine != null) {
+                scriptengine.put("sc", conversation);
+                
+                final Invocable iv = (Invocable) scriptengine;
+                conversation.setIv(iv);
                 try {
-                    scriptengine.invokeFunction("init");
+                    iv.invokeFunction("init");
                 } catch (NoSuchMethodException ex) {
                 }
                 try {
-                    scriptengine.invokeFunction(functionName == null ? "start" : functionName, args);
+                    iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
                     Chore.log(Level.SEVERE, null, ex);
                 }
@@ -66,12 +82,22 @@ final class ScriptGraalJS extends ScriptObject {
         }
     }
 
-    private GraalJSScriptEngine getScriptEngine(final String name) {
-        final File file = new File(
-                new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts"),
-                name.concat(".js")
-        );
-        final GraalJSScriptEngine engine = GJEF.getScriptEngine();
+    private ScriptEngine getScriptEngine(final String name) {
+        final File file;
+        if (name.contains("/")) {
+            final String[] split = name.split("/");
+            File f = new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts");
+            for (final String path : split) {
+                f = new File(f, path);
+            }
+            file = f;
+        } else {
+            file = new File(
+                    new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts"),
+                    name.concat(".js")
+            );
+        }
+        final ScriptEngine engine = SEM != null ? SEM.getEngineByName("javascript") : GJEF.getScriptEngine();
         try (final FileInputStream fis = new FileInputStream(file);
                 final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
             engine.eval(reader);

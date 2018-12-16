@@ -63,16 +63,16 @@ public class Catalyst {
         final int size = bonus.get(0).getCS().length;
         switch (size) {
             case 36: // 0 6x6
-                inv.setItem(0, Chore.ci(Material.DIAMOND_HOE, kettle ? 1510 : 1560, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1560, "", null));
                 break;
             case 25: // 1 5x5
-                inv.setItem(0, Chore.ci(Material.DIAMOND_HOE, kettle ? 1509 : 1522, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1522, "", null));
                 break;
             case 16: // 2 4x4
-                inv.setItem(0, Chore.ci(Material.DIAMOND_HOE, kettle ? 1508 : 1523, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1508 : 1523, "", null));
                 break;
         }
-        inv.setItem(45, Chore.ci(Material.DIAMOND_HOE, kettle ? 1511 : 1561, "", null));
+        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
 
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach((b) -> {
@@ -81,7 +81,7 @@ public class Catalyst {
                 short itemDamage = getDamage(c);
                 if (itemDamage != -1) {
                     inv.setItem(slot, Chore.ci(
-                            Material.DIAMOND_HOE,
+                            Material.DIAMOND_AXE,
                             itemDamage,
                             ChatColor.RESET + b.getData().getName(),
                             b.getData().getDesc()
@@ -114,7 +114,7 @@ public class Catalyst {
                 if (cslot == slot) {
                     short itemDamage = getDamage(c);
                     if (itemDamage != -1) {
-                        return Chore.ci(Material.DIAMOND_HOE, itemDamage, ChatColor.RESET + b.getData().getName(), null);
+                        return Chore.ci(Material.DIAMOND_AXE, itemDamage, ChatColor.RESET + b.getData().getName(), null);
                     }
                 }
                 slot = nextSlot(slot, size);

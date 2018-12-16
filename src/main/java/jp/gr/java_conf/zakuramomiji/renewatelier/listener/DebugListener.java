@@ -31,10 +31,11 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeMan
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCEntity;
+import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
@@ -45,8 +46,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -75,12 +76,8 @@ public class DebugListener implements Listener {
             final String strs[] = e.getMessage().split(" ");
             switch (strs[0].trim().toLowerCase()) {
                 case "debug": {
-                    final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_HOE, 1, 1524);
+                    final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524);
                     e.getPlayer().getInventory().addItem(item);
-                    break;
-                }
-                case "script": {
-                    ScriptManager.INSTANCE.start(strs[1], e.getPlayer());
                     break;
                 }
                 case "item": {
@@ -237,6 +234,42 @@ public class DebugListener implements Listener {
 //                    }, 20);
 //                    break;
 //                }
+                case "b":
+                    NPCEntity.createNPC(
+                            e.getPlayer().getWorld(),
+                            e.getPlayer().getLocation(),
+                            EntityType.SKELETON,
+                            "あほくさ",
+                            "test.js"
+                    );
+                    break;
+                case "b2":
+                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getMovePacket(
+                            NPCEntity.entity.getEntityId(),
+                            NPCEntity.entity.getLocation().getX(),
+                            NPCEntity.entity.getLocation().getY(),
+                            NPCEntity.entity.getLocation().getZ(),
+                            e.getPlayer().getLocation().getX(),
+                            e.getPlayer().getLocation().getY(),
+                            e.getPlayer().getLocation().getZ(),
+                            e.getPlayer().getLocation().getPitch(),
+                            e.getPlayer().getLocation().getYaw(),
+                            true
+                    ));
+                    break;
+                case "a":
+                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
+                        final LivingEntity entity = (LivingEntity) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.ZOMBIE);
+                        entity.setCustomName("ahohohohoh");
+                        
+                        final ItemStack item = new ItemStack(Material.STONE_BUTTON);
+                        final ItemMeta meta = item.getItemMeta();
+                        meta.setDisplayName(NPCManager.CHECK.concat("§k§k§k").concat(Chore.createStridColor("test.js")));
+                        item.setItemMeta(meta);
+                        entity.getEquipment().setBoots(item);
+                        entity.getEquipment().setBootsDropChance(0);
+                    }, 1);
+                    break;
                 default: {
                     e.setCancelled(false);
                     break;

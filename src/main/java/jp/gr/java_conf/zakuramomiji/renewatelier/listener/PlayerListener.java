@@ -24,15 +24,21 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -74,6 +80,19 @@ public class PlayerListener implements Listener {
         if (e.getEntity() instanceof Player) {
             AlchemyKettle.pickup(e);
             AlchemyBagItem.pickup(e);
+        }
+    }
+
+    @EventHandler
+    private void interactEntity(final PlayerInteractEntityEvent e) {
+        final Player player = e.getPlayer();
+        final Entity rightClicked = e.getRightClicked();
+        if (rightClicked instanceof LivingEntity && e.getHand() == EquipmentSlot.HAND) {
+            final LivingEntity entity = (LivingEntity) rightClicked;
+            NPCManager.INSTANCE.start(player, entity, player.isSneaking());
+//                ScriptManager.INSTANCE.start("npc/test.js", player, new NPCConversation(
+//                        entity, "npc/test.js", player
+//                ));
         }
     }
 

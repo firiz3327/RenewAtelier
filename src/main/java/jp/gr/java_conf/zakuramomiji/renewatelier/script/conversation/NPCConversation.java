@@ -24,8 +24,9 @@ import com.comphenix.protocol.events.PacketContainer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javax.script.Invocable;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils.FakeEntity;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
@@ -34,6 +35,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  *
@@ -42,42 +44,61 @@ import org.bukkit.entity.Player;
 public final class NPCConversation extends ScriptConversation {
 
     private final LivingEntity npc;
-    private final Map<Player, List<FakeEntity>> entitys;
-    private int index;
+    private FakeEntity fakeEntity;
+    private BukkitTask runTaskLater;
 
-    public NPCConversation(LivingEntity npc, String scriptName, Player player, Object iv) {
-        super(scriptName, player, iv);
+    public NPCConversation(LivingEntity npc, String scriptName, Player player) {
+        super(scriptName, player);
         this.npc = npc;
-        this.entitys = new HashMap<>();
-        this.index = 0;
     }
 
+    public Invocable getIv() {
+        return iv;
+    }
+
+    public LivingEntity getNPC() {
+        return npc;
+    }
+
+    public void dispose() {
+        NPCManager.INSTANCE.dispose(player.getUniqueId());
+    }
+    
     public void sendNext(final String text) {
-        messagePacket(text, 3000);
-        index++;
+        sendNext("", text);
+    }
+    
+    public void sendNext(final String prefix, final String text) {
+        sendNext(prefix, text, 3000);
+    }
+
+    public void sendNext(final String prefix, final String text, final int time) {
+        player.sendMessage(prefix + text);
+        messagePacket(chatColor(text), 20 * 3);
     }
 
     private void messagePacket(final String text, final int time) {
-        final Location balloonLoc = npc.getEyeLocation();
-        balloonLoc.setY(balloonLoc.getY() + 0.5);
-        player.sendMessage(text);
-        final DoubleData<Object, Class<?>> broadcastMessage = broadcastMessage(
+        final Location balloonLoc = npc.getLocation();
+        balloonLoc.setY(balloonLoc.getY() + 0.2);
+
+        broadcastMessage(
                 MessageType.FAKE_ENTITY,
-                player,
                 EntityType.ARMOR_STAND,
                 balloonLoc,
                 text
         );
-        Bukkit.getScheduler().runTaskLater(
+        if (runTaskLater != null) {
+            runTaskLater.cancel();
+        }
+        runTaskLater = Bukkit.getScheduler().runTaskLater(
                 AtelierPlugin.getPlugin(),
                 () -> {
-                    PacketUtils.getDespawnPacket(
-                            (FakeEntity) broadcastMessage.getLeft()
+                    broadcastMessage(
+                            MessageType.DESTROY_FAKE_ENTITY
                     );
                 },
                 time
         );
-        index++;
     }
 
     private DoubleData<Object, Class<?>> broadcastMessage(final MessageType type, final Object... datas) {
@@ -87,16 +108,9 @@ public final class NPCConversation extends ScriptConversation {
     private enum MessageType {
         FAKE_ENTITY((NPCConversation conv, Object... args) -> {
             // https://wiki.vg/Protocol#Spawn_Mob
-            final FakeEntity fakeEntity = FakeEntity.createNew((EntityType) args[0]);
-            if (conv.entitys.containsKey(conv.player)) {
-                conv.entitys.get(conv.player).add(fakeEntity);
-            } else {
-                conv.entitys.put(conv.player, new ArrayList<>() {
-                    {
-                        add(fakeEntity);
-                    }
-                });
-            };
+            final FakeEntity fakeEntity = FakeEntity.createNew(-1, (EntityType) args[0], 0);
+            conv.fakeEntity = fakeEntity;
+
             final PacketContainer packet1 = PacketUtils.getSpawnPacket(
                     fakeEntity,
                     (Location) args[1]
@@ -117,17 +131,10 @@ public final class NPCConversation extends ScriptConversation {
 
             return new DoubleData<>(fakeEntity, FakeEntity.class);
         }, EntityType.class, Location.class, String.class),
-        DESTROY_ENTITY((NPCConversation conv, Object... args) -> {
-            final Player player = (Player) args[0];
-            final FakeEntity entity = (FakeEntity) args[1];
-            if (conv.entitys.containsKey(player)) {
-                final List<FakeEntity> p_entitys = conv.entitys.get(player);
-                if (p_entitys.contains(entity)) {
-                    PacketUtils.getDespawnPacket(entity);
-                }
-            }
+        DESTROY_FAKE_ENTITY((NPCConversation conv, Object... args) -> {
+            PacketUtils.sendPacket(conv.player, PacketUtils.getDespawnPacket(conv.fakeEntity));
             return new DoubleData<>(null, ResultEmpty.class);
-        }, Player.class, FakeEntity.class);
+        });
 
         private final MessageRunnable run;
         private final Class<?>[] clasz;
@@ -139,11 +146,11 @@ public final class NPCConversation extends ScriptConversation {
 
         public DoubleData<Object, Class<?>> run(final NPCConversation conv, final Object... args) {
             if (clasz.length != args.length) {
-                return null;
+                throw new IllegalArgumentException("The value of args Length is different.");
             }
             for (int i = 0; i < clasz.length; i++) {
-                if (clasz[i] != args[i].getClass()) {
-                    return null;
+                if (!clasz[i].isInstance(args[i])) {
+                    throw new IllegalArgumentException("The argument class is different.");
                 }
             }
             return run.run(conv, args);

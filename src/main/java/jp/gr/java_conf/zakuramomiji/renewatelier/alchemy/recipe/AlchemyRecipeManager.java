@@ -43,7 +43,7 @@ import org.bukkit.configuration.file.FileConfiguration;
  * @author firiz
  */
 public enum AlchemyRecipeManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
     
     private final List<AlchemyRecipe> recipes = new ArrayList<>();
 

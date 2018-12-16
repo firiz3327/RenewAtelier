@@ -23,6 +23,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.script;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ItemConversation;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -40,7 +41,11 @@ public class ScriptItem {
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
             final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(item);
             if (material != null && material.getScript() != null) {
-                ScriptManager.INSTANCE.start(material.getScript(), player);
+                final String scriptName = "item/".concat(material.getScript());
+                ScriptManager.INSTANCE.start(scriptName, player, new ItemConversation(
+                        scriptName,
+                        player
+                ));
                 e.setCancelled(true);
                 return true;
             }

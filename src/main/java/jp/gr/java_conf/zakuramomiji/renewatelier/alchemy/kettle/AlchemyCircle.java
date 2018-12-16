@@ -130,7 +130,7 @@ public enum AlchemyCircle {
     }
 
     public static ItemStack getCircle(final int value, final ItemStack sitem) {
-        if (Chore.getType(sitem) == Material.DIAMOND_HOE) {
+        if (Chore.getType(sitem) == Material.DIAMOND_AXE) {
             final AlchemyCircle ai = sertchData(Chore.getDamage(sitem));
             if (ai != null) {
                 if (!String.valueOf(ai.value).substring(1, 2).equals("0")) {
@@ -143,7 +143,7 @@ public enum AlchemyCircle {
     }
 
     private static ItemStack i(final int v1, final int v2, final ItemStack sitem) {
-        final ItemStack item = new ItemStack(Material.DIAMOND_HOE, 1);
+        final ItemStack item = new ItemStack(Material.DIAMOND_AXE, 1);
         final int damage = AlchemyCircle.sertchValue(Integer.parseInt(v2 + "" + v1)).data;
         final ItemMeta meta = item.getItemMeta();
         Chore.setDamage(meta, damage);

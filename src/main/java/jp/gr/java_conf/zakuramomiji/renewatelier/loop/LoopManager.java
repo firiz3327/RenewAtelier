@@ -43,7 +43,7 @@ import org.bukkit.potion.PotionEffectType;
  * @author firiz
  */
 public enum LoopManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
 
     private final AtelierPlugin plugin = AtelierPlugin.getPlugin();
     private final List<AnimatedDrop> animDrops;

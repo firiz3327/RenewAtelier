@@ -22,6 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation;
 
 import java.util.List;
 import java.util.UUID;
+import javax.script.Invocable;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
@@ -37,11 +38,14 @@ public class ScriptConversation {
 
     protected final String scriptName;
     protected final Player player;
-    protected final Object iv;
+    protected Invocable iv;
 
-    public ScriptConversation(String scriptName, Player player, Object iv) {
+    public ScriptConversation(String scriptName, Player player) {
         this.scriptName = scriptName;
         this.player = player;
+    }
+    
+    public void setIv(final Invocable iv) {
         this.iv = iv;
     }
 

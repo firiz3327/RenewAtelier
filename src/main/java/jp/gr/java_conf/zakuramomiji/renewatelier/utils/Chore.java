@@ -304,7 +304,7 @@ public final class Chore {
     }
 
     public static boolean isWand(ItemStack item) {
-        return item.getType() == Material.DIAMOND_HOE && Chore.getDamage(item) == 1524;
+        return item.getType() == Material.DIAMOND_AXE && Chore.getDamage(item) == 1524;
     }
 
     public static String setLocXYZ(Location loc) {

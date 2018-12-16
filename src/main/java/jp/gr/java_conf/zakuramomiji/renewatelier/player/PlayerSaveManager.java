@@ -33,20 +33,27 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
  * @author firiz
  */
 public enum PlayerSaveManager {
-    INSTANCE;
-    
+    INSTANCE; // enum singleton style
+
     private final SQLManager sql = SQLManager.INSTANCE;
     private final Map<UUID, PlayerStatus> statusList = new HashMap<>();
 
     public PlayerStatus getStatus(final UUID uuid) {
         PlayerStatus status;
         if (!statusList.containsKey(uuid)) {
-            final List<List<Object>> select = sql.select(
+            List<List<Object>> select = sql.select(
                     "accounts",
                     new String[]{"uuid", "id"},
                     new Object[]{uuid.toString()}
             );
-            Chore.log(select);
+            if (select.isEmpty()) {
+                sql.insert("accounts", "uuid", uuid.toString());
+                select = sql.select(
+                        "accounts",
+                        new String[]{"uuid", "id"},
+                        new Object[]{uuid.toString()}
+                );
+            }
             final int id = (int) select.get(0).get(1);
             status = new PlayerStatus(id);
             final List<List<Object>> recipe_statuses_obj = sql.select(
@@ -62,6 +69,7 @@ public enum PlayerSaveManager {
                 ));
             });
             statusList.put(uuid, status);
+
         } else {
             status = statusList.get(uuid);
         }

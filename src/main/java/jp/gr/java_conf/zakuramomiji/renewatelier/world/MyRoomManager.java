@@ -46,13 +46,13 @@ import org.bukkit.generator.ChunkGenerator;
  * @author firiz
  */
 public enum MyRoomManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
 
     private final String world_name = "atelier_world";
     private final File map_folder = new File(
             AtelierPlugin.getPlugin().getDataFolder(), "rooms"
     );
-    private final int island_distance = 50;
+    private final int island_distance = 20;
     private World world;
 
     public void setup() {

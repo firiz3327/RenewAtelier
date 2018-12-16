@@ -73,8 +73,8 @@ public final class ItemSelect {
         setting.setLore(lore);
         setting.addEnchant(Enchantment.ARROW_DAMAGE, 0, true); // ページ
         setting_item.setItemMeta(setting);
-        inv.setItem(0, Chore.ci(Material.DIAMOND_HOE, 1507, "", null));
-        inv.setItem(36, Chore.ci(Material.DIAMOND_HOE, 1561, "", null));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1507, "", null));
+        inv.setItem(36, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
         inv.setItem(1, setting_item);
         inv.setItem(2, recipeInv.getItem(2).clone());
 

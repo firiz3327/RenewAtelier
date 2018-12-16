@@ -37,7 +37,7 @@ import org.bukkit.inventory.ItemStack;
  * @author firiz
  */
 public enum KettleItemManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
     
     private final Map<UUID, Map<Integer, List<ItemStack>>> use_items = new HashMap<>();
     private final Map<UUID, ItemStack> use_catalyst = new HashMap<>();

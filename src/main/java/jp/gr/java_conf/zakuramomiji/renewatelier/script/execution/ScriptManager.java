@@ -20,7 +20,7 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
-import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import org.bukkit.entity.Player;
 
 /**
@@ -28,19 +28,19 @@ import org.bukkit.entity.Player;
  * @author firiz
  */
 public enum ScriptManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
     
-    private final ScriptObject script;
+    private final ScriptRunner script;
     
     private ScriptManager() {
-        script = ServerConstants.NASHORN ? new ScriptNashorn() : new ScriptGraalJS();
+        script = new ScriptRunner();
     }
 
-    public void start(final String name, final Player player) {
-        script.start(name, player);
+    public void start(final String name, final Player player, final ScriptConversation conversation) {
+        script.start(name, player, null, conversation);
     }
 
-    public void start(final String name, final Player player, final String functionName, final Object... args) {
-        script.start(name, player, functionName, args);
+    public void start(final String name, final Player player, final ScriptConversation conversation, final String functionName, final Object... args) {
+        script.start(name, player, functionName, conversation, args);
     }
 }

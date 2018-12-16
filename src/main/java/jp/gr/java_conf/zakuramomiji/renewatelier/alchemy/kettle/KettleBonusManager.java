@@ -40,7 +40,7 @@ import org.bukkit.inventory.ItemStack;
  * @author firiz
  */
 public enum KettleBonusManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
     
     private final Map<UUID, BonusPlayerData> datas;
     private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;

@@ -45,7 +45,7 @@ import org.bukkit.inventory.ItemStack;
  * @author firiz
  */
 public enum AlchemyMaterialManager {
-    INSTANCE;
+    INSTANCE; // enum singleton style
     
     private final List<AlchemyMaterial> materials;
 

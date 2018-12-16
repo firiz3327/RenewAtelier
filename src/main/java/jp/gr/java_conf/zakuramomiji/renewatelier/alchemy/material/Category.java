@@ -42,27 +42,27 @@ public enum Category {
     STRING("糸素材", Material.STRING),
     POTION_MATERIAL("薬の材料", Material.SPIDER_EYE),
     POISON("毒の材料", Material.POISONOUS_POTATO),
-    MAGIC_ITEM("魔法の道具", new DoubleData<>(Material.DIAMOND_HOE, (short) 1524)),
-    MYSTERY("神秘の力", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // 竜核画像
-    AN_ELIXIR("エリキシル", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // 竜のウロコ画像
+    MAGIC_ITEM("魔法の道具", new DoubleData<>(Material.DIAMOND_AXE, (short) 1524)),
+    MYSTERY("神秘の力", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 竜核画像
+    AN_ELIXIR("エリキシル", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 竜のウロコ画像
     NEUTRALIZATION("中和剤", new DoubleData<>(Material.POTION, (short) 0)), // ポーション色あり
-    CLOTH("布", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // 布画像
-    TNT("爆弾", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // フラム画像
+    CLOTH("布", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 布画像
+    TNT("爆弾", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // フラム画像
     INGOT("金属", Material.IRON_INGOT),
     SWEETS("お菓子", Material.CAKE),
     FOOD("食品", Material.BREAD),
     WEAPON_MATERIAL("武器素材", Material.GOLD_INGOT),
-    ARMOR_MATERIAL("防具素材", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)),// 布画像
+    ARMOR_MATERIAL("防具素材", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)),// 布画像
     WEAPON("武器", Material.IRON_SWORD),
     ARMOR("防具", Material.IRON_CHESTPLATE),
-    DECORATION("装飾品", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // イヤリング画像
+    DECORATION("装飾品", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // イヤリング画像
     FLOWER("花", Material.DANDELION),
     SAND("砂", Material.SAND),
-    PUNIPUNI("プニプニ玉", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // ぷにぷに玉画像
+    PUNIPUNI("プニプニ玉", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // ぷにぷに玉画像
     FISH("魚介類", Material.PUFFERFISH),
     OBJECT("オブジェ", Material.CAULDRON),
     IMPORTANT("重要", Material.FILLED_MAP),
-    CATALYST("触媒", new DoubleData<>(Material.DIAMOND_HOE, (short) 0)), // 触媒画像
+    CATALYST("触媒", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 触媒画像
     COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE),;
 
     private final String name;

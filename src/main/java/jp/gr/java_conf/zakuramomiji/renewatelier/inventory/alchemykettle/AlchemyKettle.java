@@ -147,7 +147,7 @@ public class AlchemyKettle {
             }
             if (damage != 0) {
                 final ItemStack rc_setting = Chore.ci(
-                        Material.DIAMOND_HOE,
+                        Material.DIAMOND_AXE,
                         damage,
                         "",
                         null
@@ -487,7 +487,7 @@ public class AlchemyKettle {
                             short itemDamage = Catalyst.getDamage(c2);
                             if (itemDamage != -1) {
                                 slotItem = ignores.contains(b) ? null : Chore.ci(
-                                        Material.DIAMOND_HOE,
+                                        Material.DIAMOND_AXE,
                                         itemDamage,
                                         ChatColor.RESET + b.getData().getName(),
                                         b.getData().getDesc()
