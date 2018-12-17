@@ -21,9 +21,7 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation;
 
 import com.comphenix.protocol.events.PacketContainer;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import javax.script.Invocable;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
@@ -69,11 +67,14 @@ public final class NPCConversation extends ScriptConversation {
     }
     
     public void sendNext(final String prefix, final String text) {
-        sendNext(prefix, text, 3000);
+        sendNext(prefix, "", text);
+    }
+    public void sendNext(final String prefix, final String suffix, final String text) {
+        sendNext(prefix, suffix, text, 3000);
     }
 
-    public void sendNext(final String prefix, final String text, final int time) {
-        player.sendMessage(prefix + text);
+    public void sendNext(final String prefix, final String suffix, final String text, final int time) {
+        player.sendMessage(prefix + text + suffix);
         messagePacket(chatColor(text), 20 * 3);
     }
 

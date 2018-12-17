@@ -129,7 +129,6 @@ public enum LoopManager {
         new ArrayList<>(loop_runs).forEach((run) -> {
             run.run();
         });
-
         /*
         if(sec_period % 2 == 0) {
             AtelierGUI gui = AtelierGUI.INSTANCE;

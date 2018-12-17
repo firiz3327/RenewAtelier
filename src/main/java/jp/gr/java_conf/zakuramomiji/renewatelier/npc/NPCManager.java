@@ -24,13 +24,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.script.ScriptException;
+import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -42,7 +47,38 @@ public enum NPCManager {
     public static final String CHECK = "§n§b§c";
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
 
-    public void start(final Player player, final LivingEntity entity, final boolean shift) {
+    public void setup() {
+        LoopManager.INSTANCE.addLoopEffect(() -> {
+            Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
+                player.getNearbyEntities(10, 5, 10).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
+                    final String name = ((LivingEntity) entity).getEquipment().getBoots().getItemMeta().getDisplayName();
+                    if (name != null && name.contains("§k§k§k")) {
+                        final String[] datas = name.split("§k§k§k");
+                        if (datas[0].equals(NPCManager.CHECK)) {
+                            final Location origin = entity.getLocation();
+                            final Vector target = player.getLocation().toVector();
+                            origin.setDirection(target.subtract(origin.toVector()));
+                            
+                            final double yaw = origin.getYaw();
+                            final double pitch = origin.getPitch();
+                            PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
+                                    entity.getEntityId(),
+                                    pitch,
+                                    yaw,
+                                    entity.isOnGround()
+                            ));
+                            PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
+                                    entity.getEntityId(),
+                                    yaw
+                            ));
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    public boolean start(final Player player, final LivingEntity entity, final boolean shift) {
         final String name = entity.getEquipment().getBoots().getItemMeta().getDisplayName();
         if (name != null && name.contains("§k§k§k")) {
             final String[] datas = name.split("§k§k§k");
@@ -63,8 +99,10 @@ public enum NPCManager {
                     ScriptManager.INSTANCE.start(script, player, conversation, "action", shift);
                     scriptPlayers.put(uuid, conversation);
                 }
+                return true;
             }
         }
+        return false;
     }
 
     public void dispose(final UUID uuid) {

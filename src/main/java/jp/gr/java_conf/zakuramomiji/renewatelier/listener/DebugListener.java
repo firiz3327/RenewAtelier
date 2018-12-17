@@ -43,6 +43,7 @@ import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
@@ -57,6 +58,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -243,25 +245,29 @@ public class DebugListener implements Listener {
                             "test.js"
                     );
                     break;
-                case "b2":
-                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getMovePacket(
-                            NPCEntity.entity.getEntityId(),
-                            NPCEntity.entity.getLocation().getX(),
-                            NPCEntity.entity.getLocation().getY(),
-                            NPCEntity.entity.getLocation().getZ(),
-                            e.getPlayer().getLocation().getX(),
-                            e.getPlayer().getLocation().getY(),
-                            e.getPlayer().getLocation().getZ(),
-                            e.getPlayer().getLocation().getPitch(),
-                            e.getPlayer().getLocation().getYaw(),
-                            true
-                    ));
-                    break;
+//                case "b2":
+//                    final Location origin = NPCEntity.entity.getLocation();
+//                    final Vector target = e.getPlayer().getLocation().toVector();
+//                    origin.setDirection(target.subtract(origin.toVector()));
+//                    
+//                    final double yaw = origin.getYaw();
+//                    final double pitch = origin.getPitch();
+//                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getLookPacket(
+//                            NPCEntity.entity.getEntityId(),
+//                            pitch,
+//                            yaw,
+//                            true
+//                    ));
+//                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getHeadRotationPacket(
+//                            NPCEntity.entity.getEntityId(),
+//                            yaw
+//                    ));
+//                    break;
                 case "a":
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
                         final LivingEntity entity = (LivingEntity) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.ZOMBIE);
                         entity.setCustomName("ahohohohoh");
-                        
+
                         final ItemStack item = new ItemStack(Material.STONE_BUTTON);
                         final ItemMeta meta = item.getItemMeta();
                         meta.setDisplayName(NPCManager.CHECK.concat("§k§k§k").concat(Chore.createStridColor("test.js")));

@@ -89,10 +89,7 @@ public class PlayerListener implements Listener {
         final Entity rightClicked = e.getRightClicked();
         if (rightClicked instanceof LivingEntity && e.getHand() == EquipmentSlot.HAND) {
             final LivingEntity entity = (LivingEntity) rightClicked;
-            NPCManager.INSTANCE.start(player, entity, player.isSneaking());
-//                ScriptManager.INSTANCE.start("npc/test.js", player, new NPCConversation(
-//                        entity, "npc/test.js", player
-//                ));
+            e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
         }
     }
 

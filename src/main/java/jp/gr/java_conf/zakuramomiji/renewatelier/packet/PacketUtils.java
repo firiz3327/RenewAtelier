@@ -106,6 +106,30 @@ public class PacketUtils {
                 }
             }
         });
+//        manager.addPacketListener(new PacketAdapter(AtelierPlugin.getPlugin(), PacketType.Play.Server.REL_ENTITY_MOVE_LOOK) {
+//            @Override
+//            public void onPacketSending(PacketEvent arg0) {
+//                try {
+//                    System.out.println("Parameter ---");
+//                    String a[] = {"x", "y", "z", "yaw", "pitch"};
+//                    int i = 0;
+//                    for (int zzz : arg0.getPacket().getIntegers().getValues()) {
+//                        System.out.println(a[i] + ": " + zzz);
+//                        i++;
+//                    }
+//                    for (byte o : arg0.getPacket().getBytes().getValues()) {
+//                        System.out.println(a[i] + ": " + o);
+//                        i++;
+//                    }
+//                } catch (ArrayIndexOutOfBoundsException e) {
+//                }
+//                for (List<WrappedWatchableObject> get : arg0.getPacket().getWatchableCollectionModifier().getValues()) {
+//                    for (WrappedWatchableObject s : get) {
+//                        System.out.println(s.getIndex() + " " + s.getValue());
+//                    }
+//                }
+//            }
+//        });
 
         run = () -> {
             if (wwo == null) {
@@ -276,20 +300,15 @@ public class PacketUtils {
         packet.getBooleans().write(0, onGround);
         return packet;
     }
-
-    public static PacketContainer getMovePacket(int entityId, double cx, double cy, double cz, double px, double py, double pz, double pitch, double yaw, boolean onGround) {
-        final PacketContainer packet = new PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK);
+    
+    public static PacketContainer getHeadRotationPacket(int entityId, double yaw) {
+        final PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_HEAD_ROTATION);
         packet.getModifier().writeDefaults();
         packet.getModifier().write(0, entityId);
-        packet.getIntegers().write(0, (int) ((cx * 32 - px * 32) * 128));
-        packet.getIntegers().write(1, (int) ((cy * 32 - py * 32) * 128));
-        packet.getIntegers().write(2, (int) ((cz * 32 - pz * 32) * 128));
-        packet.getBytes().write(0, (byte) (yaw * 256.0F / 360.0F));
-        packet.getBytes().write(1, (byte) (pitch * 256.0F / 360.0F));
-        packet.getBooleans().write(0, onGround);
+        packet.getBytes().write(0, (byte) (yaw * 256.0F / 360.0F)); 
         return packet;
     }
-
+    
     public static class FakeEntity {
 
         private int entityId;

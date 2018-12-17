@@ -37,8 +37,6 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class NPCEntity {
 
-    public static LivingEntity entity;
-
     public static void createNPC(final World world, final Location location, final EntityType type, final String name, final String script) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
             final LivingEntity entity = (LivingEntity) world.spawnEntity(location, type);
@@ -46,8 +44,6 @@ public class NPCEntity {
             entity.setCustomNameVisible(true);
             entity.setRemoveWhenFarAway(false);
             entity.setAI(false);
-
-            NPCEntity.entity = entity;
 
             final ItemStack item = new ItemStack(Material.STONE_BUTTON);
             final ItemMeta meta = item.getItemMeta();
