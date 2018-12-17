@@ -48,6 +48,7 @@ public enum LoopManager {
     private final AtelierPlugin plugin = AtelierPlugin.getPlugin();
     private final List<AnimatedDrop> animDrops;
     private final List<Runnable> loop_runs;
+    private final List<Runnable> loop_half_sec_runs;
     private final List<Runnable> loop_miri_runs;
     private boolean start;
     private int period = 0;
@@ -58,6 +59,7 @@ public enum LoopManager {
         start = false;
         animDrops = new ArrayList<>();
         loop_runs = new ArrayList<>();
+        loop_half_sec_runs = new ArrayList<>();
         loop_miri_runs = new ArrayList<>();
     }
 
@@ -95,6 +97,14 @@ public enum LoopManager {
         loop_runs.remove(run);
     }
 
+    public void addLoopEffectHalfSec(final Runnable run) {
+        loop_half_sec_runs.add(run);
+    }
+
+    public void removeLoopEffectHalfSec(final Runnable run) {
+        loop_half_sec_runs.remove(run);
+    }
+
     public void addLoopEffectMiri(final Runnable run) {
         loop_miri_runs.add(run);
     }
@@ -114,6 +124,9 @@ public enum LoopManager {
             new ArrayList<>(loop_miri_runs).forEach((run) -> {
                 run.run();
             });
+            if(period % 10 == 0) {
+                half_sec_loop();
+            }
             if (period > 20) {
                 period = 0;
                 sec_loop();
@@ -121,6 +134,12 @@ public enum LoopManager {
             }
             period++;
         }, 0L, 1L);
+    }
+    
+    private void half_sec_loop() {
+        new ArrayList<>(loop_half_sec_runs).forEach((run) -> {
+            run.run();
+        });
     }
 
     private void sec_loop() {

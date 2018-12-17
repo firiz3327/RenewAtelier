@@ -48,28 +48,25 @@ public enum NPCManager {
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
 
     public void setup() {
-        LoopManager.INSTANCE.addLoopEffect(() -> {
+        LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
                 player.getNearbyEntities(10, 5, 10).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
                     final String name = ((LivingEntity) entity).getEquipment().getBoots().getItemMeta().getDisplayName();
                     if (name != null && name.contains("§k§k§k")) {
                         final String[] datas = name.split("§k§k§k");
                         if (datas[0].equals(NPCManager.CHECK)) {
-                            final Location origin = entity.getLocation();
+                            final Location loc = entity.getLocation();
                             final Vector target = player.getLocation().toVector();
-                            origin.setDirection(target.subtract(origin.toVector()));
-                            
-                            final double yaw = origin.getYaw();
-                            final double pitch = origin.getPitch();
+                            loc.setDirection(target.subtract(loc.toVector()));
                             PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
                                     entity.getEntityId(),
-                                    pitch,
-                                    yaw,
+                                    loc.getPitch(),
+                                    loc.getYaw(),
                                     entity.isOnGround()
                             ));
                             PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
                                     entity.getEntityId(),
-                                    yaw
+                                    loc.getYaw()
                             ));
                         }
                     }
