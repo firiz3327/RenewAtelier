@@ -114,16 +114,17 @@ public class AlchemyBagItem {
         return type;
     }
 
-    public static DoubleData<ItemStack, ItemStack> addItem(final ItemStack bag_item, final ItemStack _item) {
-        final Object[] itemData = createItem(_item);
+    public static DoubleData<ItemStack, ItemStack> addItem(final ItemStack bag_item, final ItemStack add_item) {
+        final Object[] itemData = createItem(add_item);
         final NBTItem nbti = new NBTItem(bag_item);
         final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
 
-        int amount = _item.getAmount(); // 64
+        int amount = add_item.getAmount(); // 64
         for (int i = 0; i < items.size(); i++) { // 0:16
-            final String[] data = items.get(i).split(","); // amount, damage, lore
+            final String[] data = items.get(i).split(","); // amount, damage, lore, (name) -> isDisplayName(true)
             if (amount > 0) {
-                if (Integer.parseInt(data[1]) == (int) itemData[1] && data[2].equals(itemData[2])) { // damageとloreが一致した時
+                if (data[1].equals(itemData[1]) && data[2].equals(itemData[2])
+                        && (data.length == 4 ? (itemData.length == 4 ? data[3].equals(itemData[3]) : false) : itemData.length != 4)) { // damageとloreとnameが一致した時
                     final int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
                     amount = da - 64;
                     data[0] = String.valueOf(Math.min(64, da));
@@ -133,11 +134,11 @@ public class AlchemyBagItem {
         }
         ItemStack add = null;
         if (amount > 0) {
-            if (items.size() < 45) {
+            if (items.size() < 36) {
                 itemData[0] = amount;
                 items.add(parse(itemData));
             } else {
-                add = _item.clone();
+                add = add_item.clone();
                 add.setAmount(amount);
             }
         }
@@ -172,7 +173,8 @@ public class AlchemyBagItem {
             for (int i = items.size() - 1; i >= 0; i--) {
                 final String[] data = items.get(i).split(","); // amount, damage, lore
                 if (amount > 0) {
-                    if (Integer.parseInt(data[1]) == (int) itemData[1] && data[2].equals(itemData[2])) { // damageとloreが一致した時
+                    if (data[1].equals(itemData[1]) && data[2].equals(itemData[2])
+                            && data.length == 4 ? (itemData.length == 4 ? data[3].equals(itemData[3]) : false) : itemData.length != 4) { // damageとloreとnameが一致した時
                         final int da = Integer.parseInt(data[0]) - amount; // 16 - 64 = -48
                         amount = da * -1;
 
@@ -200,7 +202,7 @@ public class AlchemyBagItem {
     }
 
     private static String parse(final Object[] strs) {
-        return strs[0] + "," + strs[1] + "," + strs[2];
+        return strs[0] + "," + strs[1] + "," + strs[2] + (strs.length == 4 ? ("," + strs[3]) : "");
     }
 
     private static Object[] createItem(final ItemStack item) {
@@ -212,7 +214,9 @@ public class AlchemyBagItem {
             }
             sb.append(str);
         });
-        return new Object[]{item.getAmount(), Chore.getDamage(meta), sb.toString()};
+        return meta.hasDisplayName()
+                ? new Object[]{item.getAmount(), item.getType().toString() + ":" + Chore.getDamage(meta), sb.toString(), meta.getDisplayName().replace(",", "¥.¥")}
+                : new Object[]{item.getAmount(), Chore.getDamage(meta), sb.toString()};
     }
 
     public static boolean isBagInventory(final Inventory inv) {
@@ -222,7 +226,7 @@ public class AlchemyBagItem {
     public static void openInventory(final Player player, final ItemStack item, final int clickslot) {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.BAG, item);
         if (!lores.isEmpty()) {
-            final Inventory inv = Bukkit.createInventory(player, 54, "AlchemyBag," + clickslot);
+            final Inventory inv = Bukkit.createInventory(player, 45, "AlchemyBag," + clickslot);
             final NBTItem nbti = new NBTItem(item);
             final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
             int slot = 0;
@@ -230,12 +234,16 @@ public class AlchemyBagItem {
             final AlchemyMaterial type = AlchemyMaterial.getMaterial(Chore.getStridColor(bagstr));
             for (final String datastr : items) {
                 final String[] data = datastr.split(","); // amount, damage, lore
+                final String[] idData = data[1].split(":");
                 final ItemStack _item = Chore.createDamageableItem(
-                        type.getMaterial().getLeft(),
+                        Material.valueOf(idData[0]),
                         Integer.parseInt(data[0]),
-                        Short.parseShort(data[1])
+                        Integer.parseInt(idData[1])
                 );
                 final ItemMeta meta = _item.getItemMeta();
+                if (data.length == 4) {
+                    meta.setDisplayName(data[3].replace("¥.¥", ","));
+                }
                 meta.setLore(Arrays.asList(data[2].split("¥0")));
 
                 meta.setUnbreakable(type.isUnbreaking());
@@ -261,7 +269,7 @@ public class AlchemyBagItem {
                 inv.setItem(slot, _item);
                 slot++;
             }
-            
+
             player.openInventory(inv);
             OPEN_USERS.add(player.getUniqueId());
             InventoryPacket.update(player, "アイテム", InventoryPacketType.CHEST);
@@ -325,7 +333,7 @@ public class AlchemyBagItem {
                     if (next_bag_item.getRight() != null) {
                         Chore.addItem(player, next_bag_item.getRight());
                     }
-                    
+
                     // reflesh
                     openInventory(player, next_bag_item.getLeft(), bag_slot);
                 }
