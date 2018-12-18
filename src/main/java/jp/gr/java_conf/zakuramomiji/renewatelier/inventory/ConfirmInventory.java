@@ -70,10 +70,10 @@ public final class ConfirmInventory {
         final ClickRunnable cr = RUNS.get(uuid).getRight();
         switch (e.getRawSlot()) {
             case 1:
-                cr.run(player, true);
+                cr.run(player, 1);
                 break;
             case 3:
-                cr.run(player, false);
+                cr.run(player, 0);
                 break;
         }
     }
@@ -91,13 +91,15 @@ public final class ConfirmInventory {
         final Player player = (Player) e.getPlayer();
         final UUID uuid = player.getUniqueId();
         if (RUNS.containsKey(uuid)) {
+            final ClickRunnable cr = RUNS.get(uuid).getRight();
+            cr.run(player, -1);
             RUNS.remove(uuid);
         }
     }
 
     public interface ClickRunnable {
 
-        public void run(Player player, boolean confirm);
+        public void run(Player player, int select);
     }
 
 }

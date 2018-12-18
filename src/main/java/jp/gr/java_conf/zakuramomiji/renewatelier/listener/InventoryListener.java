@@ -23,8 +23,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.CatalystSelect;
@@ -32,7 +30,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.ItemSel
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -89,7 +86,7 @@ public class InventoryListener implements Listener {
                     e.setCancelled(true);
                     AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem(), e.getSlot());
                 }/* else { // アイテム追加
-                    final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(e.getCursor());
+                    final AlchemyMaterial material = AlchemyMaterial.getMaterial(e.getCursor());
                     if (material != null && bag.getType() == material) {
                         e.setCancelled(true);
                         click_temp.put(uuid, e.getCursor());

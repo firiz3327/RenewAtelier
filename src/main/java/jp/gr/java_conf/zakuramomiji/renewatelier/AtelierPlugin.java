@@ -21,8 +21,7 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.BlockListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.DebugListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.InventoryListener;
@@ -57,8 +56,7 @@ public final class AtelierPlugin extends JavaPlugin {
             world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         });
         MyRoomManager.INSTANCE.setup();
-        AlchemyMaterialManager.INSTANCE.loadConfig();
-        AlchemyRecipeManager.INSTANCE.loadConfig();
+        ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
         PacketUtils.init(ProtocolLibrary.getProtocolManager());

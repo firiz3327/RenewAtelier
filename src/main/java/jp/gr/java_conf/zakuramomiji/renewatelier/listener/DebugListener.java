@@ -25,15 +25,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
-import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCEntity;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
@@ -43,7 +40,6 @@ import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
@@ -58,7 +54,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
 
 /**
  *
@@ -158,7 +153,7 @@ public class DebugListener implements Listener {
                 }
                 case "addrecipe": {
                     final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
-                    final AlchemyRecipe search = AlchemyRecipeManager.INSTANCE.search(strs[1]);
+                    final AlchemyRecipe search = AlchemyRecipe.search(strs[1]);
                     if (search != null) {
                         final RecipeStatus rs = status.getRecipeStatus(strs[1]);
                         if (rs == null) {
@@ -170,12 +165,11 @@ public class DebugListener implements Listener {
                     break;
                 }
                 case "configreload": {
-                    AlchemyMaterialManager.INSTANCE.loadConfig();
-                    AlchemyRecipeManager.INSTANCE.loadConfig();
+                    ConfigManager.INSTANCE.reloadConfigs();
                     break;
                 }
                 case "bag": {
-                    final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(strs[1]);
+                    final AlchemyMaterial am = AlchemyMaterial.getMaterial(strs[1]);
                     if (am != null) {
                         Chore.addItem(e.getPlayer(), new AlchemyBagItem(am).getItem());
                     }
@@ -223,59 +217,16 @@ public class DebugListener implements Listener {
                     }, 20);
                     break;
                 }
-//                case "entitypacket": {
-//                    new NPCConversation(e.getPlayer(), null, e.getPlayer(), null)
-//                            .entityPacket(e.getPlayer(), EntityType.ARMOR_STAND.ordinal(), e.getPlayer().getLocation());
-//                    break;
-//                }
-//                case "ddd": {
-//                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-//                        final Zombie z = (Zombie) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.ZOMBIE);
-//                        z.setCustomName("CustomName");
-//                        z.setCustomNameVisible(true);
-//                    }, 20);
-//                    break;
-//                }
-                case "b":
-                    NPCEntity.createNPC(
+                case "npc": { // npc <name> <script> <entityType>
+                    NPCManager.INSTANCE.createNPC(
                             e.getPlayer().getWorld(),
                             e.getPlayer().getLocation(),
-                            EntityType.SKELETON,
-                            "あほくさ",
-                            "test.js"
+                            EntityType.valueOf(strs[3]),
+                            strs[1],
+                            strs[2]
                     );
                     break;
-//                case "b2":
-//                    final Location origin = NPCEntity.entity.getLocation();
-//                    final Vector target = e.getPlayer().getLocation().toVector();
-//                    origin.setDirection(target.subtract(origin.toVector()));
-//                    
-//                    final double yaw = origin.getYaw();
-//                    final double pitch = origin.getPitch();
-//                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getLookPacket(
-//                            NPCEntity.entity.getEntityId(),
-//                            pitch,
-//                            yaw,
-//                            true
-//                    ));
-//                    PacketUtils.sendPacket(e.getPlayer(), PacketUtils.getHeadRotationPacket(
-//                            NPCEntity.entity.getEntityId(),
-//                            yaw
-//                    ));
-//                    break;
-                case "a":
-                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-                        final LivingEntity entity = (LivingEntity) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.ZOMBIE);
-                        entity.setCustomName("ahohohohoh");
-
-                        final ItemStack item = new ItemStack(Material.STONE_BUTTON);
-                        final ItemMeta meta = item.getItemMeta();
-                        meta.setDisplayName(NPCManager.CHECK.concat("§k§k§k").concat(Chore.createStridColor("test.js")));
-                        item.setItemMeta(meta);
-                        entity.getEquipment().setBoots(item);
-                        entity.getEquipment().setBootsDropChance(0);
-                    }, 1);
-                    break;
+                }
                 default: {
                     e.setCancelled(false);
                     break;

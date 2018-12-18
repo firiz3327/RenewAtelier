@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import net.md_5.bungee.api.ChatColor;
@@ -207,7 +206,7 @@ public final class Chore {
 
     public static int hasMaterial(final ItemStack item, final String material) {
         if (material.startsWith("material:")) {
-            return getAlchemyMaterialAmount(item, AlchemyMaterialManager.INSTANCE.getMaterial(material.substring(9)));
+            return getAlchemyMaterialAmount(item, AlchemyMaterial.getMaterial(material.substring(9)));
         } else if (material.startsWith("category:")) {
             return getCategoryMaterialAmount(item, Category.valueOf(material.substring(9)));
         }

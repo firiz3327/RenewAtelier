@@ -27,10 +27,8 @@ import java.util.Set;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import net.md_5.bungee.api.ChatColor;
@@ -77,7 +75,7 @@ public class CatalystSelect {
         if (citem == null) {
             catalyst = Catalyst.DEFAULT;
         } else {
-            catalyst = AlchemyMaterialManager.INSTANCE.getMaterial(citem).getCatalyst();
+            catalyst = AlchemyMaterial.getMaterial(citem).getCatalyst();
         }
         catalyst.setInv(inv, recipe, false);
         final List<String> lore = new ArrayList<>();
@@ -85,10 +83,8 @@ public class CatalystSelect {
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
         recipe.getCatalyst_categorys().stream().forEach((ct) -> {
             if (ct.startsWith("material:")) {
-                lore.add(
-                        ChatColor.RESET + "- "
-                        + AlchemyMaterialManager.INSTANCE
-                                .getMaterial(ct.substring(9)).getName()
+                lore.add(ChatColor.RESET + "- "
+                        + AlchemyMaterial.getMaterial(ct.substring(9)).getName()
                 );
             } else if (ct.startsWith("category:")) {
                 lore.add(
@@ -115,14 +111,14 @@ public class CatalystSelect {
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final int raw = e.getRawSlot();
-        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+        final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
         if (!(raw < inv.getSize()) && e.isShiftClick()) {
             e.setCancelled(true);
             if (inv.getItem(37).getType() != Material.BARRIER) {
                 Chore.addItem(player, KETTLE.getCatalyst(uuid));
             }
             final ItemStack current = e.getCurrentItem();
-            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(current);
+            final AlchemyMaterial am = AlchemyMaterial.getMaterial(current);
             if (am != null && am.hasUsefulCatalyst(recipe)) {
                 final ItemStack cloneItem = current.clone();
                 cloneItem.setAmount(1);
@@ -139,7 +135,7 @@ public class CatalystSelect {
                     case 37: {
                         if (e.getCurrentItem().getType() == Material.BARRIER) {
                             final ItemStack cursor = e.getCursor();
-                            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(cursor);
+                            final AlchemyMaterial am = AlchemyMaterial.getMaterial(cursor);
                             if (am != null && am.hasUsefulCatalyst(recipe)) {
                                 final ItemStack cloneItem = cursor.clone();
                                 cloneItem.setAmount(1);

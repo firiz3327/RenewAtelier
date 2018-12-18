@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
@@ -228,7 +227,7 @@ public class AlchemyBagItem {
             final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
             int slot = 0;
             final String bagstr = lores.get(0).substring(AlchemyItemStatus.BAG.getCheck().length());
-            final AlchemyMaterial type = AlchemyMaterialManager.INSTANCE.getMaterial(Chore.getStridColor(bagstr));
+            final AlchemyMaterial type = AlchemyMaterial.getMaterial(Chore.getStridColor(bagstr));
             for (final String datastr : items) {
                 final String[] data = datastr.split(","); // amount, damage, lore
                 final ItemStack _item = Chore.createDamageableItem(
@@ -274,7 +273,7 @@ public class AlchemyBagItem {
         if (!lores.isEmpty()) {
             final String data = lores.get(0).substring(AlchemyItemStatus.BAG.getCheck().length());
             return new AlchemyBagItem(
-                    AlchemyMaterialManager.INSTANCE.getMaterial(Chore.getStridColor(data)),
+                    AlchemyMaterial.getMaterial(Chore.getStridColor(data)),
                     item.getItemMeta().getLore()
             );
         }
@@ -312,7 +311,7 @@ public class AlchemyBagItem {
                     player.closeInventory();
                 }
             } else if (e.getSlot() != bag_slot) {
-                final AlchemyMaterial material = AlchemyMaterialManager.INSTANCE.getMaterial(currentItem);
+                final AlchemyMaterial material = AlchemyMaterial.getMaterial(currentItem);
                 final ItemStack bag_item = pinv.getItem(bag_slot);
                 final AlchemyBagItem bag = getBag(bag_item);
                 if (material != null && bag.getType() == material) {
@@ -347,9 +346,8 @@ public class AlchemyBagItem {
         if (OPEN_USERS.contains(player.getUniqueId())) {
             e.setCancelled(true);
         } else {
-            final AlchemyMaterialManager amm = AlchemyMaterialManager.INSTANCE;
             final ItemStack dropitem = e.getItem().getItemStack();
-            final AlchemyMaterial material = amm.getMaterial(dropitem);
+            final AlchemyMaterial material = AlchemyMaterial.getMaterial(dropitem);
             if (material != null) {
                 final PlayerInventory inv = player.getInventory();
                 final ItemStack[] contents = inv.getContents();

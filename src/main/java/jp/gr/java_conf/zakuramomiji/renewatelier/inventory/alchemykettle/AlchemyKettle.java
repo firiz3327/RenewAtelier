@@ -38,12 +38,10 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.box.KettleBox;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSize;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeEffect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect.RecipeLEType;
@@ -188,7 +186,7 @@ public class AlchemyKettle {
     private static void setResultSlot(final Inventory inv, final Player player) {
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
-        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+        final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
         final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 
@@ -210,7 +208,7 @@ public class AlchemyKettle {
         // 確認・設定
         final ItemStack catalyst_item = KETTLE.getCatalyst(uuid);
         final List<CatalystBonus> old_CatalystBonusList = KETTLE.getCatalystBonusList(uuid);
-        final Catalyst catalyst = catalyst_item != null ? AlchemyMaterialManager.INSTANCE.getMaterial(catalyst_item).getCatalyst() : Catalyst.DEFAULT;
+        final Catalyst catalyst = catalyst_item != null ? AlchemyMaterial.getMaterial(catalyst_item).getCatalyst() : Catalyst.DEFAULT;
         final List<CatalystBonus> bonusList = catalyst.getBonus();
         final int size = bonusList.get(0).getCS().length;
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
@@ -323,7 +321,7 @@ public class AlchemyKettle {
         final String result_str = recipe.getResult();
         final Integer add_amount = recipe_effects.get(RecipeLEType.ADD_AMOUNT);
         if (result_str.startsWith("material:")) {
-            final AlchemyMaterial result = AlchemyMaterialManager.INSTANCE.getMaterial(result_str.substring(9));
+            final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
             final List<Category> categorys = new ArrayList<>(result.getCategorys());
@@ -458,7 +456,7 @@ public class AlchemyKettle {
         if (citem == null) {
             catalyst = Catalyst.DEFAULT;
         } else {
-            catalyst = AlchemyMaterialManager.INSTANCE.getMaterial(citem).getCatalyst();
+            catalyst = AlchemyMaterial.getMaterial(citem).getCatalyst();
         }
         catalyst.setInv(inv, recipe, true);
 
@@ -594,7 +592,7 @@ public class AlchemyKettle {
                     final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                     if (kettleBox != null) {
                         final ItemMeta setting = inv.getItem(1).getItemMeta();
-                        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+                        final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
                         int req_count = 0;
                         for (int i = 0; i < recipe.getReqMaterial().size(); i++) {
                             req_count += KETTLE.getPageItems(uuid, i).size();
@@ -606,7 +604,7 @@ public class AlchemyKettle {
                             ItemStack resultItem = null;
                             final String result_str = recipe.getResult();
                             if (result_str.startsWith("material:")) {
-                                final AlchemyMaterial result = AlchemyMaterialManager.INSTANCE.getMaterial(result_str.substring(9));
+                                final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
                                 final List<Characteristic> characteristics = KETTLE.getSelectCharacteristics(uuid);
 
@@ -847,7 +845,7 @@ public class AlchemyKettle {
                                 if (item != null && (item.getType() == Material.BOOK || item.getType() == Material.ENCHANTED_BOOK)) {
                                     Chore.log("特性 追加・削除");
                                     final ItemMeta setting = inv.getItem(1).getItemMeta();
-                                    final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+                                    final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
                                     final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
                                     final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                                     final List<RecipeLevelEffect> effects = recipe.getLevels().get(recipeStatus.getLevel());
@@ -886,8 +884,7 @@ public class AlchemyKettle {
                                 //<editor-fold defaultstate="collapsed" desc="アイテムを錬金釜に投入">
                                 e.setCancelled(true);
                                 final ItemStack cursor = e.getCursor();
-                                final AlchemyMaterialManager amm = AlchemyMaterialManager.INSTANCE;
-                                final AlchemyMaterial material = amm.getMaterial(cursor);
+                                final AlchemyMaterial material = AlchemyMaterial.getMaterial(cursor);
                                 if (material != null) {
                                     int[] size = MaterialSize.getSize(cursor);
                                     if (size != null) {
@@ -930,7 +927,7 @@ public class AlchemyKettle {
                                         };
 
                                         final ItemStack catalyst_item = KETTLE.getCatalyst(uuid);
-                                        final Catalyst catalyst = catalyst_item != null ? amm.getMaterial(catalyst_item).getCatalyst() : Catalyst.DEFAULT;
+                                        final Catalyst catalyst = catalyst_item != null ? AlchemyMaterial.getMaterial(catalyst_item).getCatalyst() : Catalyst.DEFAULT;
                                         final int csize = catalyst.getBonus().get(0).getCS().length;
                                         Map<Integer, Integer> rslots = new HashMap<>();
                                         for (int i = 0; i < size.length; i++) {
@@ -979,7 +976,7 @@ public class AlchemyKettle {
                                         } else {
                                             Chore.log("アイテムを錬金釜に投入できる");
                                             final ItemMeta setting = inv.getItem(1).getItemMeta();
-                                            final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+                                            final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
                                             final ItemStack clone = cursor.clone();
                                             clone.setAmount(1);
                                             final DoubleData<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getAllLevel(clone);

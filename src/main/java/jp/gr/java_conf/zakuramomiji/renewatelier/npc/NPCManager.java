@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.script.ScriptException;
+import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
@@ -32,9 +33,13 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 /**
@@ -75,6 +80,23 @@ public enum NPCManager {
         });
     }
 
+    public void createNPC(final World world, final Location location, final EntityType type, final String name, final String script) {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
+            final LivingEntity entity = (LivingEntity) world.spawnEntity(location, type);
+            entity.setCustomName(name);
+            entity.setCustomNameVisible(true);
+            entity.setRemoveWhenFarAway(false);
+            entity.setAI(false);
+
+            final ItemStack item = new ItemStack(Material.STONE_BUTTON);
+            final ItemMeta meta = item.getItemMeta();
+            meta.setDisplayName(NPCManager.CHECK.concat("§k§k§k").concat(Chore.createStridColor(script)));
+            item.setItemMeta(meta);
+            entity.getEquipment().setBoots(item);
+            entity.getEquipment().setBootsDropChance(0);
+        });
+    }
+
     public boolean start(final Player player, final LivingEntity entity, final boolean shift) {
         final String name = entity.getEquipment().getBoots().getItemMeta().getDisplayName();
         if (name != null && name.contains("§k§k§k")) {
@@ -91,7 +113,6 @@ public enum NPCManager {
                     }
                 } else {
                     final String script = "npc/".concat(Chore.getStridColor(datas[1]));
-                    System.out.println("");
                     final NPCConversation conversation = new NPCConversation(entity, script, player);
                     ScriptManager.INSTANCE.start(script, player, conversation, "action", shift);
                     scriptPlayers.put(uuid, conversation);

@@ -30,6 +30,12 @@ public class RecipeStatus {
     private int level;
     private int exp;
 
+    public RecipeStatus(final String id) {
+        this.id = id;
+        this.level = 0;
+        this.exp = 0;
+    }
+    
     public RecipeStatus(final String id, final int level, final int exp) {
         this.id = id;
         this.level = level;

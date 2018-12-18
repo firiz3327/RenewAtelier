@@ -20,13 +20,14 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 
 /**
  *
@@ -55,21 +56,41 @@ public enum PlayerSaveManager {
                 );
             }
             final int id = (int) select.get(0).get(1);
-            status = new PlayerStatus(id);
+
+            //<editor-fold defaultstate="collapsed" desc="load recipe data">
             final List<List<Object>> recipe_statuses_obj = sql.select(
                     "recipe_levels",
                     new String[]{"user_id", "recipe_id", "level", "exp"},
                     new Object[]{id}
             );
+            final List<RecipeStatus> recipe_statuses = new ArrayList<>();
             recipe_statuses_obj.forEach((datas) -> {
-                status.addRecipe(new RecipeStatus(
-                        (String) datas.get(1), // id
+                recipe_statuses.add(new RecipeStatus(
+                        (String) datas.get(1), // recipe_id
                         (int) datas.get(2), // level
                         (int) datas.get(3) // exp
                 ));
             });
-            statusList.put(uuid, status);
+            //</editor-fold>
 
+            //<editor-fold defaultstate="collapsed" desc="load quest data">
+            final List<List<Object>> quest_statuses_obj = sql.select(
+                    "questDatas",
+                    new String[]{"user_id", "quest_id", "clear"},
+                    new Object[]{id}
+            );
+            final List<QuestStatus> quest_statuses = new ArrayList<>();
+            quest_statuses_obj.forEach((datas) -> {
+                quest_statuses.add(new QuestStatus(
+                        (String) datas.get(1), // quest_id
+                        (int) datas.get(2) != 0 // clear
+                ));
+            });
+            //</editor-fold>
+
+            // put data
+            status = new PlayerStatus(id, recipe_statuses, quest_statuses);
+            statusList.put(uuid, status);
         } else {
             status = statusList.get(uuid);
         }

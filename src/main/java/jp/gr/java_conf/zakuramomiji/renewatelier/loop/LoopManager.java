@@ -113,6 +113,7 @@ public enum LoopManager {
         loop_miri_runs.remove(run);
     }
 
+    // 厳密さは求めていないので大分適当。あっているかはわからない
     private void loop() {
         taskid = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             new ArrayList<>(animDrops).forEach((drop) -> {

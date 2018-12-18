@@ -23,8 +23,13 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.loader.AlchemyMaterialLoader;
+import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -32,6 +37,7 @@ import org.bukkit.Material;
  */
 public class AlchemyMaterial {
 
+    private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
     private final String name;
     private final boolean default_name;
@@ -92,6 +98,29 @@ public class AlchemyMaterial {
         this.hidePlacedOn = hidePlacedOn;
         this.hidePotionEffect = hidePotionEffect;
         this.hideUnbreaking = hideUnbreaking;
+    }
+
+    public static AlchemyMaterial getMaterial(final String id) {
+        for (final Object obj : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class)) {
+            final AlchemyMaterial am = (AlchemyMaterial) obj;
+            if (am.getId().equalsIgnoreCase(id)) {
+                return am;
+            }
+        }
+        return null;
+    }
+
+    public static AlchemyMaterial getMaterial(final ItemStack item) {
+        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
+        if (!lores.isEmpty()) {
+            return getMaterial(
+                    Chore.getStridColor(lores.get(0).replaceAll(
+                            AlchemyItemStatus.ID.getCheck(),
+                            ""
+                    ))
+            );
+        }
+        return null;
     }
 
     public String getId() {

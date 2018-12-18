@@ -28,6 +28,10 @@ import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.Quest;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
@@ -48,7 +52,7 @@ public class ScriptConversation {
         this.scriptName = scriptName;
         this.player = player;
     }
-    
+
     public void setIv(final Invocable iv) {
         this.iv = iv;
     }
@@ -59,6 +63,62 @@ public class ScriptConversation {
 
     public Player getPlayer(final UUID uuid) {
         return AtelierPlugin.getPlugin().getServer().getPlayer(uuid);
+    }
+
+    public PlayerStatus getStatus() {
+        return getStatus(player.getUniqueId());
+    }
+
+    public PlayerStatus getStatus(final UUID uuid) {
+        return PlayerSaveManager.INSTANCE.getStatus(uuid);
+    }
+
+    public QuestStatus getQuestStatus(final String questId) {
+        return getQuestStatus(player.getUniqueId(), questId);
+    }
+
+    public QuestStatus getQuestStatus(final UUID uuid, final String questId) {
+        return getStatus(uuid).getQuestStatus(questId);
+    }
+
+    public boolean hasQuest(final String questId) {
+        return hasQuest(player.getUniqueId(), questId);
+    }
+
+    public boolean hasQuest(final UUID uuid, final String questId) {
+        return getQuestStatus(uuid, questId) != null;
+    }
+
+    public boolean isQuestClear(final String questId) {
+        return isQuestClear(player.getUniqueId(), questId);
+    }
+
+    public boolean isQuestClear(final UUID uuid, final String questId) {
+        return getQuestStatus(uuid, questId).isClear();
+    }
+
+    public void questStart(final String questId) {
+        questStart(questId, true);
+    }
+
+    public void questStart(final String questId, final boolean view) {
+        if (view) {
+            getStatus().addQuest(player, questId);
+        } else {
+            getStatus().addQuest(new QuestStatus(questId));
+        }
+    }
+
+    public void questClear(final String questId) {
+        questClear(questId, true);
+    }
+
+    public void questClear(final String questId, final boolean view) {
+        getStatus().questClear(player, questId, view);
+    }
+
+    public String getQuestName(final String questId) {
+        return Quest.getQuest(questId).getName();
     }
 
     public UUID getUUID(final String uuid) {
@@ -102,17 +162,17 @@ public class ScriptConversation {
     }
 
     public void openConfirmInventory(final String title, final String yes, final String no, final String confirmFunctionName, final String cancelFunctionName) {
-        openConfirmInventory(title, yes, no, scriptName, confirmFunctionName, cancelFunctionName);
+        openConfirmInventory(title, yes, no, confirmFunctionName, cancelFunctionName, null);
     }
 
-    public void openConfirmInventory(final String title, final String yes, final String no, final String script, final String confirmFunctionName, final String cancelFunctionName) {
+    public void openConfirmInventory(final String title, final String yes, final String no, final String confirmFunctionName, final String cancelFunctionName, final String closeFunctionName) {
         ConfirmInventory.openInventory(
                 player,
                 ChatColor.translateAlternateColorCodes('&', title),
                 yes,
                 no,
-                (final Player player1, final boolean confirm) -> {
-                    final String functionName = confirm ? confirmFunctionName : cancelFunctionName;
+                (final Player player1, final int select) -> {
+                    final String functionName = select == 1 ? confirmFunctionName : select == 0 ? cancelFunctionName : closeFunctionName;
                     if (functionName != null) {
                         try {
                             ((Invocable) iv).invokeFunction(functionName);

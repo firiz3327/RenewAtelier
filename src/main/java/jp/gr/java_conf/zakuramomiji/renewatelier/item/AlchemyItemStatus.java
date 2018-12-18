@@ -29,7 +29,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribu
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
@@ -125,7 +124,7 @@ public enum AlchemyItemStatus {
     }
 
     public final static ItemStack getItem(final String id, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics) {
-        return getItem(AlchemyMaterialManager.INSTANCE.getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
+        return getItem(AlchemyMaterial.getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
     }
 
     public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category) {

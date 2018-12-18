@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSizeData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.config.loader.AlchemyRecipeLoader;
 
 /**
  *
@@ -33,6 +35,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSizeDa
  */
 public class AlchemyRecipe {
 
+    private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
     private final String result;
     private final int amount;
@@ -66,6 +69,16 @@ public class AlchemyRecipe {
         this.levels = levels;
         this.catalyst_categorys = catalyst_categorys;
         this.sizes = sizes;
+    }
+
+    public static AlchemyRecipe search(final String id) {
+        for (final Object obj : CONFIG_MANAGER.getList(AlchemyRecipeLoader.class)) {
+            final AlchemyRecipe recipe = (AlchemyRecipe) obj;
+            if (id.equals(recipe.getId())) {
+                return recipe;
+            }
+        }
+        return null;
     }
 
     public String getId() {

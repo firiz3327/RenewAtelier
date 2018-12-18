@@ -22,9 +22,22 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.constants.GameConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.Quest;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.ItemQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.MoneyQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -34,12 +47,15 @@ public final class PlayerStatus {
 
     private final int id;
     private final List<RecipeStatus> recipe_statuses;
+    private final List<QuestStatus> quest_statuses;
 
-    public PlayerStatus(final int id) {
+    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses) {
         this.id = id;
-        recipe_statuses = new ArrayList<>();
+        this.recipe_statuses = recipe_statuses;
+        this.quest_statuses = quest_statuses;
     }
 
+    //<editor-fold defaultstate="collapsed" desc="recipe">
     public void addRecipes(final List<RecipeStatus> recipe_statuses) {
         this.recipe_statuses.addAll(recipe_statuses);
         recipe_statuses.forEach((rs) -> {
@@ -86,7 +102,7 @@ public final class PlayerStatus {
             }
         }
         if (status == null) {
-            status = new RecipeStatus(recipe_id, 0, 0);
+            status = new RecipeStatus(recipe_id);
             addRecipe(status);
         }
 
@@ -107,5 +123,69 @@ public final class PlayerStatus {
                 new Object[]{id, status.getId(), status.getLevel(), status.getExp()}
         );
     }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="quest">
+    public void addQuest(final QuestStatus quest_status) {
+        quest_statuses.add(quest_status);
+        SQLManager.INSTANCE.insert(
+                "questDatas",
+                new String[]{"user_id", "quest_id", "clear"},
+                new Object[]{id, quest_status.getId(), quest_status.isClear() ? 1 : 0}
+        );
+    }
+
+    public void addQuest(final Player player, final String questId) {
+        addQuest(new QuestStatus(questId));
+        player.sendMessage("クエスト「" + ChatColor.GREEN + Quest.getQuest(questId).getName() + ChatColor.RESET + "」を受注しました。");
+    }
+
+    public List<QuestStatus> getQuestStatusList() {
+        return new ArrayList<>(quest_statuses);
+    }
+
+    public QuestStatus getQuestStatus(final String id) {
+        for (final QuestStatus rs : quest_statuses) {
+            if (rs.getId().equals(id)) {
+                return rs;
+            }
+        }
+        return null;
+    }
+
+    public void questClear(final Player player, final String id, final boolean view) {
+        questClear(player, getQuestStatus(id), view);
+    }
+
+    public void questClear(final Player player, final QuestStatus quest_status, final boolean view) {
+        SQLManager.INSTANCE.insert(
+                "questDatas",
+                new String[]{"user_id", "quest_id", "clear"},
+                new Object[]{id, quest_status.getId(), 1}
+        );
+        quest_status.clear();
+        final Quest quest = Quest.getQuest(quest_status.getId());
+        if (view) {
+            player.sendMessage("クエスト「" + ChatColor.GREEN + quest.getName() + ChatColor.RESET + "」を完了しました。");
+        }
+        if (quest.getNextQuestId() != null) {
+            addQuest(player, quest.getNextQuestId());
+        }
+        if (quest.getResults() != null) {
+            quest.getResults().forEach((result) -> {
+                if (result instanceof ItemQuestResult) {
+                    final QuestItem item = ((ItemQuestResult) result).getResult();
+                    Chore.addItem(player, item.getItem());
+                } else if (result instanceof RecipeQuestResult) {
+                    final AlchemyRecipe recipe = ((RecipeQuestResult) result).getResult();
+                    addRecipeExp(recipe.getId(), 0);
+                } else if (result instanceof MoneyQuestResult) {
+                    final int money = ((MoneyQuestResult) result).getResult();
+                    Chore.addItem(player, new ItemStack(Material.EMERALD, money));
+                }
+            });
+        }
+    }
+    //</editor-fold>
 
 }

@@ -24,15 +24,12 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.KettleItemManage
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterialManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipeManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
@@ -102,7 +99,7 @@ public final class ItemSelect {
         String name = null;
         DoubleData<Material, Short> material = null;
         if (data[0].startsWith("material:")) {
-            final AlchemyMaterial am = AlchemyMaterialManager.INSTANCE.getMaterial(data[0].substring(9));
+            final AlchemyMaterial am = AlchemyMaterial.getMaterial(data[0].substring(9));
             if (!am.isDefaultName()) {
                 name = am.getName();
             }
@@ -148,7 +145,7 @@ public final class ItemSelect {
         final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
         final String data[] = reqs.get(page).split(",");
         final DoubleData<Material, Short> material = data[0].startsWith("material:")
-                ? AlchemyMaterialManager.INSTANCE.getMaterial(data[0].substring(9)).getMaterial()
+                ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);
         if (material != null && pageItems != null) {
@@ -170,7 +167,7 @@ public final class ItemSelect {
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final int page = setting.getEnchantLevel(Enchantment.ARROW_DAMAGE);
         final int raw = e.getRawSlot();
-        final AlchemyRecipe recipe = AlchemyRecipeManager.INSTANCE.search(Chore.getStridColor(setting.getLore().get(0)));
+        final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
         if ((e.getSlotType() == InventoryType.SlotType.CONTAINER || e.getSlotType() == InventoryType.SlotType.QUICKBAR) && !(raw < inv.getSize()) && e.isShiftClick()) {
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();

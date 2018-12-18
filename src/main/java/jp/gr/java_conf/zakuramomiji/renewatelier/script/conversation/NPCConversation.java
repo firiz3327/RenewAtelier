@@ -57,6 +57,10 @@ public final class NPCConversation extends ScriptConversation {
     public LivingEntity getNPC() {
         return npc;
     }
+    
+    public String getNPCName() {
+        return npc.getCustomName();
+    }
 
     public void dispose() {
         NPCManager.INSTANCE.dispose(player.getUniqueId());
