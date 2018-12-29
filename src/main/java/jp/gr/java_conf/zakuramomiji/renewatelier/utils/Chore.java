@@ -159,10 +159,14 @@ public final class Chore {
         if (item.hasItemMeta()) {
             final ItemMeta meta = item.getItemMeta();
             if (meta.hasLore()) {
-                final List<String> idLores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
-                if (!idLores.isEmpty() && material.getId().equals(getStridColor(
-                        idLores.get(0).replaceAll(AlchemyItemStatus.ID.getCheck(), "")
-                ))) {
+//                final List<String> idLores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
+//                if (!idLores.isEmpty() && material.getId().equals(getStridColor(
+//                        idLores.get(0).replaceAll(AlchemyItemStatus.ID.getCheck(), "")
+//                ))) {
+//                    amount += item.getAmount();
+//                }
+                final String id = AlchemyItemStatus.getId(item);
+                if(id != null && material.getId().equals(id)) {
                     amount += item.getAmount();
                 }
             }

@@ -38,6 +38,7 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
@@ -56,23 +57,29 @@ public enum NPCManager {
         LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
                 player.getNearbyEntities(10, 5, 10).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
-                    final String name = ((LivingEntity) entity).getEquipment().getBoots().getItemMeta().getDisplayName();
-                    if (name != null && name.contains("§k§k§k")) {
-                        final String[] datas = name.split("§k§k§k");
-                        if (datas[0].equals(NPCManager.CHECK)) {
-                            final Location loc = entity.getLocation();
-                            final Vector target = player.getLocation().toVector();
-                            loc.setDirection(target.subtract(loc.toVector()));
-                            PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
-                                    entity.getEntityId(),
-                                    loc.getPitch(),
-                                    loc.getYaw(),
-                                    entity.isOnGround()
-                            ));
-                            PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
-                                    entity.getEntityId(),
-                                    loc.getYaw()
-                            ));
+                    if (entity instanceof LivingEntity) {
+                        final LivingEntity lentity = (LivingEntity) entity;
+                        final EntityEquipment equipment = lentity.getEquipment();
+                        if (equipment != null && equipment.getBoots() != null && equipment.getBoots().hasItemMeta()) {
+                            final String name = equipment.getBoots().getItemMeta().getDisplayName();
+                            if (name != null && name.contains("§k§k§k")) {
+                                final String[] datas = name.split("§k§k§k");
+                                if (datas[0].equals(NPCManager.CHECK)) {
+                                    final Location loc = entity.getLocation();
+                                    final Vector target = player.getLocation().toVector();
+                                    loc.setDirection(target.subtract(loc.toVector()));
+                                    PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
+                                            entity.getEntityId(),
+                                            loc.getPitch(),
+                                            loc.getYaw(),
+                                            entity.isOnGround()
+                                    ));
+                                    PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
+                                            entity.getEntityId(),
+                                            loc.getYaw()
+                                    ));
+                                }
+                            }
                         }
                     }
                 });
@@ -125,6 +132,10 @@ public enum NPCManager {
 
     public void dispose(final UUID uuid) {
         scriptPlayers.remove(uuid);
+    }
+
+    public NPCConversation getNPCConversation(final UUID uuid) {
+        return scriptPlayers.get(uuid);
     }
 
 }

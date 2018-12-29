@@ -91,7 +91,6 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             }
             // サイズ取得
             final List<String> sizes_str = (List<String>) item.getList("sizes");
-            // 特性取得
             final List<MaterialSizeData> sizes = new ArrayList<>();
             sizes_str.forEach((s_str) -> {
                 final String strs[] = s_str.split(",");

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
+import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.DeliveryInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.CatalystSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.ItemSelect;
@@ -68,6 +69,8 @@ public class InventoryListener implements Listener {
 
         if (ConfirmInventory.isConfirmInventory(inv)) {
             e.setCancelled(e.getSlotType() == SlotType.CONTAINER);
+            ConfirmInventory.click(e);
+        } else if(DeliveryInventory.isDeliveryInventory(inv)) {
             ConfirmInventory.click(e);
         } else if (RecipeSelect.isKettleRecipe(inv)) {
             RecipeSelect.click(e);

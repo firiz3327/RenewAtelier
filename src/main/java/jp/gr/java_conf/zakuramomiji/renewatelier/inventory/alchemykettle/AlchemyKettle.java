@@ -62,6 +62,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -607,30 +608,8 @@ public class AlchemyKettle {
                                 final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
                                 final List<Characteristic> characteristics = KETTLE.getSelectCharacteristics(uuid);
-
-                                final List<String> ing_lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ALCHEMY_INGREDIENTS, result_slot_item);
-                                final List<Ingredients> ings = new ArrayList<>();
-                                for (int i = 1; i < ing_lores.size(); i++) {
-                                    final String lore = ing_lores.get(i);
-                                    final String name = lore.substring(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck().length() + 4, lore.indexOf(" : "));
-                                    final AlchemyIngredients ing = AlchemyIngredients.searchName(name);
-                                    if (ing != null) {
-                                        ings.add(ing);
-                                    }
-                                }
-
-                                final List<String> category_lores = AlchemyItemStatus.getLores(AlchemyItemStatus.CATEGORY, result_slot_item);
-                                List<Category> categorys = null;
-                                if (category_lores != null && !category_lores.isEmpty()) {
-                                    categorys = new ArrayList<>();
-                                    for (int i = 1; i < category_lores.size(); i++) {
-                                        final String lore = category_lores.get(i);
-                                        final Category category = Category.valueOf(Chore.getStridColor(lore.substring(lore.indexOf("§0") + 2)));
-                                        if (category != null) {
-                                            categorys.add(category);
-                                        }
-                                    }
-                                }
+                                final List<Ingredients> ings = AlchemyItemStatus.getIngredients(result_slot_item);
+                                final List<Category> categorys = AlchemyItemStatus.getCategorys(result_slot_item);
 
                                 final List<String> activeEffects = new ArrayList<>();
                                 recipe.getEffects().stream().map((effect) -> effect.getActiveEffect(uuid)).filter((activeEffect) -> (activeEffect != null)).filter((activeEffect) -> (activeEffect.getType() == StarEffect.StarEffectType.NAME)).forEachOrdered((activeEffect) -> {
@@ -650,7 +629,7 @@ public class AlchemyKettle {
                                         MaterialSize.getSize(result_slot_item), // サイズ 書き換え
                                         activeEffects, // 発現効果
                                         characteristics == null ? new ArrayList<>() : characteristics, // 特性 書き換え
-                                        categorys, // カテゴリ 書き換え
+                                        categorys.isEmpty() ? null : categorys, // カテゴリ 書き換え
                                         false
                                 );
                             } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
