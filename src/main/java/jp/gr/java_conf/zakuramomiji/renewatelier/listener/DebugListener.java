@@ -289,10 +289,18 @@ public class DebugListener implements Listener {
                 }
                 case "npc": { // npc <name> <script> <entityType>
                     NPCManager.INSTANCE.createNPC(
-                            e.getPlayer().getWorld(),
                             e.getPlayer().getLocation(),
                             EntityType.valueOf(strs[3]),
                             strs[1],
+                            strs[2]
+                    );
+                    break;
+                }
+                case "player": {
+                    NPCManager.INSTANCE.createNPCPlayer(
+                            e.getPlayer().getLocation(),
+                            strs[1],
+                            UUID.fromString(strs[3]),
                             strs[2]
                     );
                     break;

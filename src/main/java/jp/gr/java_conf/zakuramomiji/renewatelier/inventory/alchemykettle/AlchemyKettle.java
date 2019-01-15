@@ -572,11 +572,9 @@ public class AlchemyKettle {
     }
 
     public static void click(InventoryClickEvent e) {
-        //<editor-fold defaultstate="collapsed" desc="kkkkk">
         if (e.isShiftClick()) {
             e.setCancelled(true);
         }
-        //</editor-fold>
 
         final Inventory inv = e.getInventory();
         final int raw = e.getRawSlot();

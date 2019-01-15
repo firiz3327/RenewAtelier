@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.BetweenValue;
@@ -269,14 +270,13 @@ public enum SQLManager {
             final StringBuilder sbkeys = new StringBuilder();
             final StringBuilder sbvals = new StringBuilder();
             final LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> vals = value.getVals();
-            boolean check = true;
+            int i = 0;
             for (final KeyValue key : vals.keySet()) {
                 sbkeys.append(",").append(key.getColumn());
 
                 if (key.getValue() != null) {
                     final DoubleData<ConditionType, Pipe> val = vals.get(key);
                     if (val != null) {
-                        check = false;
                         sbvals.append(key.getColumn()).append(" ");
 
                         switch (val.getLeft()) {
@@ -306,33 +306,30 @@ public enum SQLManager {
                         }
 
                         final Pipe pipe = val.getRight();
-                        if (pipe == null || pipe == Pipe.NONE) {
-                            check = true;
-                            break;
+                        if (pipe != null && pipe != Pipe.NONE) {
+                            sbvals.append(" ").append(pipe).append(" ");
                         }
-                        sbvals.append(" ").append(pipe).append(" ");
                     }
                 }
+                i++;
             }
-            if (check) {
-                sbmain.append(sbkeys.substring(1))
-                        .append(" from ")
-                        .append(value.getTable())
-                        .append(sbvals.length() == 0 ? "" : " where ".concat(sbvals.toString()))
-                        .append(";");
-                final ResultSet resultSet = stmt.executeQuery(sbmain.toString());
-                while (resultSet.next()) {
-                    final List<Object> dataList = new ArrayList<>();
-                    for (final KeyValue key : vals.keySet()) {
-                        dataList.add(resultSet.getObject(key.getColumn()));
-                    }
-                    result.add(dataList);
+            sbmain.append(sbkeys.substring(1))
+                    .append(" from ")
+                    .append(value.getTable())
+                    .append(sbvals.length() == 0 ? "" : " where ".concat(sbvals.toString()))
+                    .append(value.getOrderBys().isEmpty() ? "" : " order by ".concat(value.getOrderBys().toString()))
+                    .append(value.getOrderType() == null ? "" : " ".concat(value.getOrderType().toString()))
+                    .append(";");
+            final ResultSet resultSet = stmt.executeQuery(sbmain.toString());
+            while (resultSet.next()) {
+                final List<Object> dataList = new ArrayList<>();
+                for (final KeyValue key : vals.keySet()) {
+                    dataList.add(resultSet.getObject(key.getColumn()));
                 }
-            } else {
-                throw new IllegalArgumentException("Please let pipe end with null or Pipe.NONE.");
+                result.add(dataList);
             }
         } catch (SQLException ex) {
-            //Chore.log(Level.SEVERE, null, ex);
+            Chore.log(Level.SEVERE, null, ex);
         }
         return result;
     }

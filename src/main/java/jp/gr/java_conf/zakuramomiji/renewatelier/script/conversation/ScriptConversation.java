@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.ConfirmInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
@@ -51,6 +52,15 @@ public class ScriptConversation {
     public ScriptConversation(String scriptName, Player player) {
         this.scriptName = scriptName;
         this.player = player;
+    }
+
+    public void log(final String str) {
+        Chore.log(str);
+    }
+    
+    public void debug(final String str) {
+        Chore.log(str);
+        player.sendMessage(str);
     }
 
     public void setIv(final Invocable iv) {
@@ -137,10 +147,6 @@ public class ScriptConversation {
         return ChatColor.translateAlternateColorCodes('&', str);
     }
 
-    public void log(final String str) {
-        Chore.log(str);
-    }
-
     public List<String> getLores(final String check, final ItemStack item) {
         return AlchemyItemStatus.getLores(check, item);
     }
@@ -184,4 +190,13 @@ public class ScriptConversation {
                 }
         );
     }
+    
+    public AlchemyMaterial getMaterial(final String material_id) {
+        return AlchemyMaterial.getMaterial(material_id);
+    }
+    
+    public AlchemyMaterial getMaterial(final ItemStack item) {
+        return AlchemyMaterial.getMaterial(item);
+    }
+    
 }

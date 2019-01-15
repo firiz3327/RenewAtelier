@@ -20,7 +20,10 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.npc;
 
+import com.mojang.authlib.GameProfile;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -30,11 +33,24 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import net.minecraft.server.v1_13_R2.AxisAlignedBB;
+import net.minecraft.server.v1_13_R2.EntityPlayer;
+import net.minecraft.server.v1_13_R2.MinecraftServer;
+import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_13_R2.PlayerConnection;
+import net.minecraft.server.v1_13_R2.PlayerInteractManager;
+import net.minecraft.server.v1_13_R2.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
+import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -52,10 +68,113 @@ public enum NPCManager {
 
     public static final String CHECK = "§n§b§c";
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
+    private final Map<EntityPlayer, DoubleData<Location, List<UUID>>> npcViewPlayers = new HashMap<>();
+
+    public void logout(final Player player) {
+        final UUID uuid = player.getUniqueId();
+        for (final EntityPlayer entityPlayer : npcViewPlayers.keySet()) {
+            npcViewPlayers.get(entityPlayer).getRight().remove(uuid);
+        }
+    }
 
     public void setup() {
+
+        // load sql npcdata
+        final List<List<Object>> resultObjects = SQLManager.INSTANCE.select("npcs", new String[]{
+            "id", // 0
+            "name", // 1
+            "script", // 2
+            "entityType", // 3
+            "world", // 4
+            "x", // 5
+            "y", // 6
+            "z", // 7
+            "skin_uuid" // 8
+        }, null);
+        for (final List<Object> objs : resultObjects) {
+            final EntityType type = EntityType.valueOf((String) objs.get(3));
+            final Object skin_uuid = objs.get(8);
+            if (type == EntityType.PLAYER && skin_uuid != null) {
+                createNPCPlayer(
+                        new Location(
+                                Bukkit.getWorld((String) objs.get(4)),
+                                (double) objs.get(5),
+                                (double) objs.get(6),
+                                (double) objs.get(7)
+                        ),
+                        (String) objs.get(1), // name
+                        UUID.fromString((String) skin_uuid),
+                        (String) objs.get(2), // script
+                        false
+                );
+            } else if (type.isAlive()) {
+                final World world = Bukkit.getWorld((String) objs.get(4));
+                final Location loc = new Location(
+                        world,
+                        (double) objs.get(5),
+                        (double) objs.get(6),
+                        (double) objs.get(7)
+                );
+                world.loadChunk(world.getChunkAt(loc));
+                createNPC(
+                        loc,
+                        type,
+                        (String) objs.get(1), // name
+                        (String) objs.get(2), // script
+                        false
+                );
+            }
+        }
+
+        // addLoopEffect 0.5sec
         LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
+            final Map<EntityPlayer, List<UUID>> ignore_uuids = new HashMap<>();
+            for (final EntityPlayer entityPlayer : npcViewPlayers.keySet()) {
+                final DoubleData<Location, List<UUID>> entityData = npcViewPlayers.get(entityPlayer);
+                final List<UUID> uuids = new ArrayList<>();
+                entityData.getLeft().getWorld().getNearbyEntities(entityData.getLeft(), 30, 10, 30)
+                        .stream().filter((entity) -> (entity instanceof Player)).forEachOrdered((player) -> {
+                    final UUID uuid = player.getUniqueId();
+                    uuids.add(uuid);
+                    if (!entityData.getRight().contains(uuid)) {
+                        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+                        playerConnection.sendPacket(
+                                new PacketPlayOutPlayerInfo(
+                                        PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER,
+                                        entityPlayer
+                                )
+                        );
+                        playerConnection.sendPacket(
+                                new PacketPlayOutNamedEntitySpawn(entityPlayer)
+                        );
+                        entityData.getRight().add(uuid);
+                    }
+                });
+                ignore_uuids.put(entityPlayer, uuids);
+            }
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
+                for (final EntityPlayer entityPlayer : ignore_uuids.keySet()) {
+                    final List<UUID> uuids = ignore_uuids.get(entityPlayer);
+                    final DoubleData<Location, List<UUID>> npcData = npcViewPlayers.get(entityPlayer);
+                    final Location loc = npcData.getLeft();
+                    if (!uuids.contains(player.getUniqueId())) {
+                        npcData.getRight().remove(player.getUniqueId());
+                    } else if (Chore.distanceSq(loc, player.getLocation(), 100, 5)) {
+                        final Vector target = player.getLocation().toVector();
+                        loc.setDirection(target.subtract(loc.toVector()));
+                        PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
+                                entityPlayer.getId(),
+                                loc.getPitch(),
+                                loc.getYaw(),
+                                true
+                        ));
+                        PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
+                                entityPlayer.getId(),
+                                loc.getYaw()
+                        ));
+                    }
+                }
+
                 player.getNearbyEntities(10, 5, 10).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
                     if (entity instanceof LivingEntity) {
                         final LivingEntity lentity = (LivingEntity) entity;
@@ -87,9 +206,13 @@ public enum NPCManager {
         });
     }
 
-    public void createNPC(final World world, final Location location, final EntityType type, final String name, final String script) {
+    public void createNPC(final Location location, final EntityType type, final String name, final String script) {
+        createNPC(location, type, name, script, false);
+    }
+
+    public void createNPC(final Location location, final EntityType type, final String name, final String script, final boolean save) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-            final LivingEntity entity = (LivingEntity) world.spawnEntity(location, type);
+            final LivingEntity entity = (LivingEntity) location.getWorld().spawnEntity(location, type);
             entity.setCustomName(name);
             entity.setCustomNameVisible(true);
             entity.setRemoveWhenFarAway(false);
@@ -102,6 +225,45 @@ public enum NPCManager {
             entity.getEquipment().setBoots(item);
             entity.getEquipment().setBootsDropChance(0);
         });
+
+        if (save) {
+            SQLManager.INSTANCE.insert("npcs", new String[]{
+                "name", "script", "entityType",
+                "world",
+                "x", "y", "z"
+            }, new Object[]{
+                name, script, type.toString(),
+                location.getWorld().getName(),
+                location.getX(), location.getY(), location.getZ()
+            });
+        }
+    }
+
+    public void createNPCPlayer(final Location location, final String name, final UUID uuid, final String script) {
+        createNPCPlayer(location, name, uuid, script, false);
+    }
+
+    public void createNPCPlayer(final Location location, final String name, final UUID uuid, final String script, final boolean save) {
+        final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        final WorldServer nmsworld = ((CraftWorld) location.getWorld()).getHandle();
+        final GameProfile profile = new GameProfile(uuid, name);
+        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsworld, profile, new PlayerInteractManager(nmsworld));
+        entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        npcViewPlayers.put(entityPlayer, new DoubleData<>(location, new ArrayList<>()));
+        
+        if (save) {
+            SQLManager.INSTANCE.insert("npcs", new String[]{
+                "name", "script", "entityType",
+                "world",
+                "x", "y", "z",
+                "skin_uuid"
+            }, new Object[]{
+                name, script, EntityType.PLAYER.toString(),
+                location.getWorld().getName(),
+                location.getX(), location.getY(), location.getZ(),
+                uuid.toString()
+            });
+        }
     }
 
     public boolean start(final Player player, final LivingEntity entity, final boolean shift) {

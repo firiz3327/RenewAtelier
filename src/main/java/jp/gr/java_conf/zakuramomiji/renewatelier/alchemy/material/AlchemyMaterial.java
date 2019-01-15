@@ -113,12 +113,7 @@ public class AlchemyMaterial {
     public static AlchemyMaterial getMaterial(final ItemStack item) {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
         if (!lores.isEmpty()) {
-            return getMaterial(
-                    Chore.getStridColor(lores.get(0).replaceAll(
-                            AlchemyItemStatus.ID.getCheck(),
-                            ""
-                    ))
-            );
+            return getMaterial(AlchemyItemStatus.getId(item));
         }
         return null;
     }

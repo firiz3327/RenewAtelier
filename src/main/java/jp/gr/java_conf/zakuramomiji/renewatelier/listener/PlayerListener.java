@@ -38,6 +38,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -65,12 +66,10 @@ public class PlayerListener implements Listener {
                     }
                 }
                 // use_item -------
-                if (item != null && player.getCooldown(item.getType()) == 0) {
-                    if (ScriptItem.start(e)) {
-                        return;
-                    }
-                    //---
+                if (ScriptItem.start(e)) {
+                    return;
                 }
+                //---
             }
         }
     }
@@ -91,6 +90,11 @@ public class PlayerListener implements Listener {
             final LivingEntity entity = (LivingEntity) rightClicked;
             e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
         }
+    }
+    
+    @EventHandler
+    private void logout(final PlayerQuitEvent e) {
+        NPCManager.INSTANCE.logout(e.getPlayer());
     }
 
 }

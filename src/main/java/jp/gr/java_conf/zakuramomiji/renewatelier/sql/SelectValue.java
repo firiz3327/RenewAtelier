@@ -23,6 +23,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.sql;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 
 /**
@@ -33,10 +34,24 @@ public class SelectValue {
 
     private final String table;
     private final LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> vals;
-
+    private final OrderByType order_type;
+    private final List<String> order_bys;
+    
     public SelectValue(String table, LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> vals) {
+        this(table, vals, null);
+    }
+
+    public SelectValue(String table, LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> vals, OrderByType order_type, String... order_bys) {
         this.table = table;
         this.vals = vals;
+        this.order_type = order_type;
+        this.order_bys = new ArrayList<>(Arrays.asList(order_bys)) {
+            @Override
+            public String toString() {
+                final String s = super.toString();
+                return s.substring(1, s.length() - 1);
+            }
+        };
     }
 
     public String getTable() {
@@ -45,6 +60,19 @@ public class SelectValue {
 
     public LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> getVals() {
         return vals;
+    }
+    
+    public OrderByType getOrderType() {
+        return order_type;
+    }
+
+    public List<String> getOrderBys() {
+        return order_bys;
+    }
+    
+    public static enum OrderByType {
+        ASC,
+        DESC
     }
 
     public static enum Pipe {
@@ -94,13 +122,18 @@ public class SelectValue {
         private final String column;
         private final String value;
 
+        public KeyValue(String column) {
+            this.column = column;
+            this.value = null;
+        }
+
         public KeyValue(String column, Object value) {
             this.column = column;
             this.value = value instanceof String
                     ? "'".concat(replace((String) value)).concat("'")
                     : value == null ? null : replace(value.toString());
         }
-        
+
         private String replace(final String val) {
             return val.replace("'", "\"").replace("\\", "/");
         }
@@ -131,11 +164,11 @@ public class SelectValue {
         }
 
     }
-    
+
     public static class InValue extends KeyValue {
 
         public InValue(String column, int... val) {
-            super(column, new ArrayList<>(Arrays.asList(val)){
+            super(column, new ArrayList<>(Arrays.asList(val)) {
                 @Override
                 public String toString() {
                     final String str = super.toString();

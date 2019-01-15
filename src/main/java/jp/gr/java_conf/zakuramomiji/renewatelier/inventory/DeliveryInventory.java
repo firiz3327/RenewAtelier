@@ -64,7 +64,7 @@ public class DeliveryInventory {
     // 00 01 02 03 04 05 06 07 08
     // 09 10 11 12 13 14 15 16 17
     // 18 19 20 21 22 23 24 25 26
-    public static void openInventory(final Player player, final String title, final int line_size, final AlchemyMaterial material, final List<Characteristic> characteristics, final List<AlchemyIngredients> ingredients) {
+    public static void openInventory(final Player player, final String title, final int line_size, final int req_amount, final AlchemyMaterial material, final List<Characteristic> characteristics, final List<AlchemyIngredients> ingredients) {
         if (line_size < 2) {
             throw new IllegalArgumentException("The line_size variable must be 2 or more.");
         }

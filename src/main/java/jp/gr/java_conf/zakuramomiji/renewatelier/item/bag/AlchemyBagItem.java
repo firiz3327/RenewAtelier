@@ -353,7 +353,8 @@ public class AlchemyBagItem {
         final Player player = (Player) e.getEntity();
         if (OPEN_USERS.contains(player.getUniqueId())) {
             e.setCancelled(true);
-        } else {
+        }
+        if(!e.isCancelled()) {
             final ItemStack dropitem = e.getItem().getItemStack();
             final AlchemyMaterial material = AlchemyMaterial.getMaterial(dropitem);
             if (material != null) {

@@ -63,6 +63,14 @@ public enum PlayerSaveManager {
                     new String[]{"user_id", "recipe_id", "level", "exp"},
                     new Object[]{id}
             );
+//            final List<List<Object>> recipe_statuses_obj = sql.select(new SelectValue("recipe_levels", new LinkedHashMap<>() {
+//                {
+//                    put(new KeyValue("user_id", id), new DoubleData<>(ConditionType.EQUALS, Pipe.NONE));
+//                    put(new KeyValue("recipe_id"), null);
+//                    put(new KeyValue("level"), null);
+//                    put(new KeyValue("exp"), null);
+//                }
+//            }, OrderByType.ASC, "recipe_id"));
             final List<RecipeStatus> recipe_statuses = new ArrayList<>();
             recipe_statuses_obj.forEach((datas) -> {
                 recipe_statuses.add(new RecipeStatus(

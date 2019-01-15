@@ -21,6 +21,8 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -147,7 +149,13 @@ public final class RecipeSelect {
                 ritem.add(new DoubleData<>(rs, material));
             }
         });
-
+        Collections.sort(
+                ritem,
+                (
+                        DoubleData<RecipeStatus, DoubleData<Material, Short>> o1,
+                        DoubleData<RecipeStatus, DoubleData<Material, Short>> o2
+                ) -> o1.getLeft().getId().compareTo(o2.getLeft().getId())
+        );
         final int dscroll = scroll * 6;
         if (ritem.size() > dscroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
@@ -219,6 +227,7 @@ public final class RecipeSelect {
 
                 final List<String> lore = new ArrayList<>();
                 addRecipeStatus(recipe, rs, lore);
+                lore.add("");
                 imeta.setLore(lore);
 
                 item.setItemMeta(imeta);

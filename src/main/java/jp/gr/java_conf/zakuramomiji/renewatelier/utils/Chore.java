@@ -20,6 +20,7 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -166,7 +167,7 @@ public final class Chore {
 //                    amount += item.getAmount();
 //                }
                 final String id = AlchemyItemStatus.getId(item);
-                if(id != null && material.getId().equals(id)) {
+                if (id != null && material.getId().equals(id)) {
                     amount += item.getAmount();
                 }
             }
@@ -477,4 +478,14 @@ public final class Chore {
         item.setItemMeta(meta);
         return item;
     }
+
+    public static boolean distanceSq(final Location center_loc, final Location check_loc, int rangeSq, int rangeY) {
+        return new Point(center_loc.getBlockX(), center_loc.getBlockZ())
+                .distanceSq(new Point(
+                        check_loc.getBlockX(),
+                        check_loc.getBlockZ()
+                )) <= rangeSq
+                && Math.abs(center_loc.getY() - check_loc.getY()) <= rangeY;
+    }
+
 }
