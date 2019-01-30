@@ -21,6 +21,7 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.BlockListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.DebugListener;
@@ -34,15 +35,25 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * @author firiz
  */
 public final class AtelierPlugin extends JavaPlugin {
-    
+
     @Override
     public void onEnable() {
+        
+        for(final World world : getServer().getWorlds()) {
+            for(final ArmorStand stand : world.getEntitiesByClass(ArmorStand.class)) {
+                if(!stand.isVisible() && stand.getCustomName() != null && stand.getCustomName().startsWith("npc,")) {
+                    stand.remove();
+                }
+            }
+        }
+        
         getServer().getPluginManager().registerEvents(new DebugListener(), this);
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
@@ -59,8 +70,10 @@ public final class AtelierPlugin extends JavaPlugin {
         ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
-        PacketUtils.init(ProtocolLibrary.getProtocolManager());
-        NPCManager.INSTANCE.setup();
+        
+        final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        PacketUtils.init(protocolManager);
+        NPCManager.INSTANCE.setup(protocolManager);
     }
 
     @Override

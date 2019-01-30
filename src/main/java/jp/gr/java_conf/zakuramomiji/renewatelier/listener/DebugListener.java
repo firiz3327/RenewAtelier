@@ -21,9 +21,6 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 
 import de.tr7zw.itemnbtapi.NBTItem;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
@@ -38,25 +35,20 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Randomizer;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -64,7 +56,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.projectiles.ProjectileSource;
 
 /**
  *
@@ -302,6 +293,16 @@ public class DebugListener implements Listener {
                             strs[1],
                             UUID.fromString(strs[3]),
                             strs[2]
+                    );
+                    break;
+                }
+                case "save_player": {
+                    NPCManager.INSTANCE.createNPCPlayer(
+                            e.getPlayer().getLocation(),
+                            strs[1],
+                            UUID.fromString(strs[3]),
+                            strs[2],
+                            true
                     );
                     break;
                 }

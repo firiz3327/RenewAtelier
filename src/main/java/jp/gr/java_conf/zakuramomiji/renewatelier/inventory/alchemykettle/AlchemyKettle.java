@@ -125,6 +125,7 @@ public class AlchemyKettle {
         }
 
         // レシピレベルに基く回転ボタンの設定
+        /*
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
         final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
         final List<RecipeLevelEffect> rles = recipe.getLevels().get(recipeStatus.getLevel());
@@ -154,6 +155,16 @@ public class AlchemyKettle {
                 inv.setItem(47, rc_setting);
             }
         }
+         */
+        // 回転ボタンをレシピレベルに関係なく使用可能に変更
+        final ItemStack rc_setting = Chore.ci(
+                Material.DIAMOND_AXE,
+                1502,
+                "",
+                null
+        );
+        inv.setItem(47, rc_setting);
+
         final ItemStack settingItem = catalystInv.getItem(1);
         final ItemMeta setting = settingItem.getItemMeta();
         setting.addEnchant(Enchantment.ARROW_FIRE, 4, true); // center data

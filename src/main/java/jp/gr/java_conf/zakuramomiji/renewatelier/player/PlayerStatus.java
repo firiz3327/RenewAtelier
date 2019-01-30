@@ -31,7 +31,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.ItemQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.MoneyQuestResult;
-import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.ChatColor;

@@ -27,6 +27,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -35,8 +36,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -82,19 +83,50 @@ public class PlayerListener implements Listener {
         }
     }
 
+//    @EventHandler
+//    private void interactEntity(final PlayerInteractEntityEvent e) {
+//        final Player player = e.getPlayer();
+//        final Entity rightClicked = e.getRightClicked();
+//        if (rightClicked instanceof LivingEntity && e.getHand() == EquipmentSlot.HAND) {
+//            final LivingEntity entity = (LivingEntity) rightClicked;
+//            e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
+//        }
+//    }
     @EventHandler
-    private void interactEntity(final PlayerInteractEntityEvent e) {
+    private void interactEntity(final PlayerInteractAtEntityEvent e) {
         final Player player = e.getPlayer();
         final Entity rightClicked = e.getRightClicked();
-        if (rightClicked instanceof LivingEntity && e.getHand() == EquipmentSlot.HAND) {
+        if (e.getHand() == EquipmentSlot.HAND) {
             final LivingEntity entity = (LivingEntity) rightClicked;
-            e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
+            if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.WOODEN_AXE) {
+                entity.remove();
+            } else {
+                e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
+            }
         }
     }
-    
+
     @EventHandler
     private void logout(final PlayerQuitEvent e) {
         NPCManager.INSTANCE.logout(e.getPlayer());
+    }
+
+    @EventHandler
+    private void fishing(final PlayerFishEvent e) {
+        switch (e.getState()) {
+            case BITE:
+                break;
+            case CAUGHT_ENTITY:
+                break;
+            case CAUGHT_FISH:
+                break;
+            case FAILED_ATTEMPT:
+                break;
+            case FISHING:
+                break;
+            case IN_GROUND:
+                break;
+        }
     }
 
 }

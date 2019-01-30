@@ -35,6 +35,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils.FakeEntity;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import net.minecraft.server.v1_13_R2.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -50,12 +51,19 @@ import org.bukkit.scheduler.BukkitTask;
 public final class NPCConversation extends ScriptConversation {
 
     private final LivingEntity npc;
+    private final EntityPlayer npcPlayer;
     private FakeEntity fakeEntity;
     private BukkitTask runTaskLater;
 
     public NPCConversation(LivingEntity npc, String scriptName, Player player) {
         super(scriptName, player);
         this.npc = npc;
+        this.npcPlayer = null;
+    }
+    public NPCConversation(EntityPlayer npcPlayer, String scriptName, Player player) {
+        super(scriptName, player);
+        this.npc = null;
+        this.npcPlayer = npcPlayer;
     }
 
     public Invocable getIv() {
@@ -65,9 +73,17 @@ public final class NPCConversation extends ScriptConversation {
     public LivingEntity getNPC() {
         return npc;
     }
+    
+    public EntityPlayer getPlayerNPC() {
+        return npcPlayer;
+    }
 
     public String getNPCName() {
-        return npc.getCustomName();
+        return npc == null ? npcPlayer.getName() : npc.getCustomName();
+    }
+    
+    public Location getLocation() {
+        return npc == null ? npcPlayer.getBukkitEntity().getLocation() : npc.getLocation();
     }
 
     public void dispose() {
@@ -116,7 +132,7 @@ public final class NPCConversation extends ScriptConversation {
     }
 
     private void messagePacket(final String text, final int time) {
-        final Location balloonLoc = npc.getLocation();
+        final Location balloonLoc = getLocation();
         balloonLoc.setY(balloonLoc.getY() + 0.25);
 
         MessageType.FAKE_ENTITY.boardcast(
