@@ -36,6 +36,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -197,6 +198,14 @@ public class ScriptConversation {
     
     public AlchemyMaterial getMaterial(final ItemStack item) {
         return AlchemyMaterial.getMaterial(item);
+    }
+    
+    public ItemStack createItemStack(final Material material, int amount) {
+        return new ItemStack(material, amount);
+    }
+    
+    public Material getItemMaterial(final String material_id) {
+        return Material.valueOf(material_id.toUpperCase());
     }
     
 }

@@ -25,11 +25,14 @@ import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.drop.AnimatedDrop;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -125,7 +128,7 @@ public enum LoopManager {
             new ArrayList<>(loop_miri_runs).forEach((run) -> {
                 run.run();
             });
-            if(period % 10 == 0) {
+            if (period % 10 == 0) {
                 half_sec_loop();
             }
             if (period > 20) {
@@ -136,7 +139,7 @@ public enum LoopManager {
             period++;
         }, 0L, 1L);
     }
-    
+
     private void half_sec_loop() {
         new ArrayList<>(loop_half_sec_runs).forEach((run) -> {
             run.run();
@@ -149,6 +152,31 @@ public enum LoopManager {
         new ArrayList<>(loop_runs).forEach((run) -> {
             run.run();
         });
+
+        int max_length = 0;
+        final List<Player> players = new ArrayList<>();
+        for (final World world : Bukkit.getWorlds()) {
+            for (final Player player : world.getPlayers()) {
+                players.add(player);
+                final int length = player.getDisplayName().length();
+                if (max_length < length) {
+                    max_length = length;
+                }
+            }
+        }
+        for (final Player player : players) {
+            final StringBuilder sb = new StringBuilder();
+            final String name = player.getDisplayName();
+            sb.append(name);
+            for (int i = 0; i < max_length - name.length() + 1; i++) {
+                sb.append(" ");
+            }
+            sb.append(ChatColor.GREEN).append(
+                    ((CraftPlayer) player).getHandle().ping
+            );
+            player.setPlayerListName(sb.toString());
+        }
+
         /*
         if(sec_period % 2 == 0) {
             AtelierGUI gui = AtelierGUI.INSTANCE;

@@ -29,6 +29,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -36,10 +37,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -107,8 +109,13 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    private void logout(final PlayerQuitEvent e) {
-        NPCManager.INSTANCE.logout(e.getPlayer());
+    private void join(final PlayerJoinEvent e) {
+        NPCManager.INSTANCE.packet(e.getPlayer());
+    }
+
+    @EventHandler
+    private void changeWorld(final PlayerChangedWorldEvent e) {
+        NPCManager.INSTANCE.packet(e.getPlayer());
     }
 
     @EventHandler

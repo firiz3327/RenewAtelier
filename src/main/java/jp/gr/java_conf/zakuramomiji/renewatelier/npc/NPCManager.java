@@ -22,6 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.npc;
 
 import com.comphenix.protocol.ProtocolManager;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,15 +37,16 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversa
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.DataWatcher;
-import net.minecraft.server.v1_13_R2.DataWatcherObject;
 import net.minecraft.server.v1_13_R2.DataWatcherRegistry;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.MinecraftServer;
+import net.minecraft.server.v1_13_R2.Packet;
 import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
 import net.minecraft.server.v1_13_R2.PlayerConnection;
 import net.minecraft.server.v1_13_R2.PlayerInteractManager;
 import net.minecraft.server.v1_13_R2.WorldServer;
@@ -70,21 +72,72 @@ import org.bukkit.util.Vector;
  */
 public enum NPCManager {
     INSTANCE;
-
+    /*
+        --- sublayer all bitmask ---
+    
+        final byte[] sublayer_bitmasks = new byte[]{
+                0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x30, 0x40
+        };
+        byte all_flag = 0;
+        for (final byte bitmask : sublayer_bitmasks) {
+                all_flag |= bitmask;
+        }
+     */
     public static final String CHECK = "§n§b§c";
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
-    private final Map<EntityPlayer, DoubleData<Location, List<UUID>>> npcViewPlayers = new HashMap<>();
+    private final List<PlayerNPC> npcs = new ArrayList<>();
     private final Map<Location, String> playerNpcs = new HashMap<>();
 
-    public void logout(final Player player) {
-        final UUID uuid = player.getUniqueId();
-        for (final EntityPlayer entityPlayer : npcViewPlayers.keySet()) {
-            npcViewPlayers.get(entityPlayer).getRight().remove(uuid);
+    private void sendPackets(PlayerConnection playerConnection, Packet<?>... packets) {
+        for (final Packet<?> packet : packets) {
+            playerConnection.sendPacket(packet);
         }
     }
 
-    public void setup(final ProtocolManager protocolManager) {
+    public void packet(final Player player) {
+        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+        final List<EntityPlayer> eps = new ArrayList<>();
+        for (final PlayerNPC npc : npcs) {
+            if (player.getWorld().equals(npc.getWorld())) {
+                eps.add(npc.getEntity());
+            }
+        }
+        sendPackets(
+                playerConnection,
+                new PacketPlayOutPlayerInfo(
+                        EnumPlayerInfoAction.ADD_PLAYER,
+                        eps
+                )
+        );
+        for (final EntityPlayer eplayer : eps) {
+            final DataWatcher watcher = eplayer.getDataWatcher();
+            watcher.set(DataWatcherRegistry.a.a(13), (byte) 127); // 127 = all flag value
+            sendPackets(
+                    playerConnection,
+                    new PacketPlayOutEntityMetadata(
+                            eplayer.getId(),
+                            watcher,
+                            true
+                    ),
+                    new PacketPlayOutNamedEntitySpawn(eplayer)
+            );
+        }
+        Bukkit.getScheduler().runTaskLater(
+                AtelierPlugin.getPlugin(),
+                () -> {
+                    sendPackets(
+                            playerConnection,
+                            new PacketPlayOutPlayerInfo(
+                                    EnumPlayerInfoAction.REMOVE_PLAYER,
+                                    eps
+                            )
+                    );
+                },
+                200 // 10 sec
+        );
+    }
 
+    public void setup(final ProtocolManager protocolManager) {
         // load sql npcdata
         final List<List<Object>> resultObjects = SQLManager.INSTANCE.select("npcs", new String[]{
             "id", // 0
@@ -132,93 +185,22 @@ public enum NPCManager {
             }
         }
 
-        // playernpc interact event
-//        protocolManager.addPacketListener(new PacketAdapter(
-//                AtelierPlugin.getPlugin(),
-//                ListenerPriority.NORMAL,
-//                PacketType.Play.Client.USE_ENTITY
-//        ) {
-//            @Override
-//            public void onPacketReceiving(PacketEvent event) {
-//                if (event.getPacketType() == PacketType.Play.Client.USE_ENTITY) {
-//                    final PacketContainer packet = event.getPacket();
-//                    if (packet.getEntityUseActions().getValues().get(0) == EnumWrappers.EntityUseAction.INTERACT_AT
-//                            && packet.getHands().getValues().get(0) == EnumWrappers.Hand.MAIN_HAND) {
-//                        final Vector vec = packet.getVectors().getValues().get(0);
-//                        final Player player = event.getPlayer();
-//                        for (final EntityPlayer npc : npcViewPlayers.keySet()) {
-//                            final Location loc = npcViewPlayers.get(npc).getLeft();
-//                            final Location ploc = player.getLocation();
-//                            if (loc.getWorld() == ploc.getWorld()
-//                                    && loc.getX() == ploc.getX()
-//                                    && loc.getY() == ploc.getY()
-//                                    && loc.getZ() == ploc.getZ()) {
-//                                start(player, npc, playerNpcs.get(loc), player.isSneaking());
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        });
         // addLoopEffect 0.5sec
         LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
-            final Map<EntityPlayer, List<UUID>> ignore_uuids = new HashMap<>();
-            for (final EntityPlayer entityPlayer : npcViewPlayers.keySet()) {
-                final DoubleData<Location, List<UUID>> entityData = npcViewPlayers.get(entityPlayer);
-                final List<UUID> uuids = new ArrayList<>();
-                entityData.getLeft().getWorld().getNearbyEntities(entityData.getLeft(), 30, 10, 30)
-                        .stream().filter((entity) -> (entity instanceof Player)).forEachOrdered((player) -> {
-                    final UUID uuid = player.getUniqueId();
-                    uuids.add(uuid);
-                    if (!entityData.getRight().contains(uuid)) {
-                        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
-                        playerConnection.sendPacket(
-                                new PacketPlayOutPlayerInfo(
-                                        PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER,
-                                        entityPlayer
-                                )
-                        );
-
-                        final byte[] bitmasks = new byte[]{0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x30, 0x40};
-                        final DataWatcher watcher = entityPlayer.getDataWatcher();
-                        final DataWatcherObject<Byte> dwo = DataWatcherRegistry.a.a(13);
-                        byte all_flag = 0;
-                        for (final byte bitmask : bitmasks) {
-                            all_flag |= bitmask;
-                        }
-                        watcher.set(dwo, all_flag);
-                        playerConnection.sendPacket(new PacketPlayOutEntityMetadata(
-                                entityPlayer.getId(),
-                                watcher,
-                                true
-                        ));
-
-                        playerConnection.sendPacket(
-                                new PacketPlayOutNamedEntitySpawn(entityPlayer)
-                        );
-                        entityData.getRight().add(uuid);
-                    }
-                });
-                ignore_uuids.put(entityPlayer, uuids);
-            }
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
-                for (final EntityPlayer entityPlayer : ignore_uuids.keySet()) {
-                    final List<UUID> uuids = ignore_uuids.get(entityPlayer);
-                    final DoubleData<Location, List<UUID>> npcData = npcViewPlayers.get(entityPlayer);
-                    final Location loc = npcData.getLeft();
-                    if (!uuids.contains(player.getUniqueId())) {
-                        npcData.getRight().remove(player.getUniqueId());
-                    } else if (Chore.distanceSq(loc, player.getLocation(), 100, 5)) {
+                for (final PlayerNPC npc : npcs) {
+                    final Location loc = npc.getLocation().clone();
+                    if (Chore.distanceSq(loc, player.getLocation(), 300, 5)) {
                         final Vector target = player.getLocation().toVector();
                         loc.setDirection(target.subtract(loc.toVector()));
                         PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
-                                entityPlayer.getId(),
+                                npc.getEntity().getId(),
                                 loc.getPitch(),
                                 loc.getYaw(),
                                 true
                         ));
                         PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
-                                entityPlayer.getId(),
+                                npc.getEntity().getId(),
                                 loc.getYaw()
                         ));
                     }
@@ -296,11 +278,15 @@ public enum NPCManager {
         final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         final WorldServer nmsworld = ((CraftWorld) location.getWorld()).getHandle();
         final GameProfile profile = new GameProfile(uuid, name);
-//        setSkin(profile, uuid);
-        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsworld, profile, new PlayerInteractManager(nmsworld));
+        // テクスチャが変わらない
+//        final String value = "eyJ0aW1lc3RhbXAiOjE1NDg5MDEzMzg2NzYsInByb2ZpbGVJZCI6Ijg0MDEzYmIzYmJmMjQ2YzU5ZDFmN2ZkMWE3ZmQ0OGU5IiwicHJvZmlsZU5hbWUiOiJfX19Eb2xhIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9iMTFhMDk2NWY1N2FhNTkzODEzY2MwOWM4YjVjYzYyNjhmMThhNmIzYjcyNTg3ZTY3MjZlODIwOWM1OTk4MDE4IiwibWV0YWRhdGEiOnsibW9kZWwiOiJzbGltIn19fX0=";
+//        final String signature = "pEgASFAzeXFMzQAIoyM2/AeHaMUwCOzWKcRkx+kH8ckh5Q9QKkR7qdh/5UotPt02k6JSr6OancQhA7XjtWQWvdlyrwGVJQHYBWNEUSrQ+kx3lkRLbCcoYZkOwsVPfIocbGUZoDaKlmOtXOEpn6/to81teThJKgmlnspTePbQzWZvzSvO+60SjV5toTlUkuGX+whYMT99m9yaXh+HqnxTovdHp18VRBGCkGqetmEWxPn9WdUSGbR3VBT3Ws6YVJXv0lDo7ZoyIVFU7ejmhcjQ4SyNv8sHkPTmfY564zkxtr/Mp6yWR0PeVC2bHcFosXACIrJsIC+rGmbgEzF2bo5cFGJj77KH0t5lsK+xim+yPqVpXm1L66CZjrjnASbRBZjuqdcCoQAM6MeRT6Blz02wB2Lv87S4vIA7lmjZc8/RNdsIZUMwPU0JU89nbssq4kVo1f9KgXG7e4hpFUAgBNNCIyaXhmaDtB+w5diq0I/DGzei43WBOTJ8lmSTghDfo4zOIh/0DSJlSJ8un3EsHpRUhWiQlnbhCrPxeBLNGuOe2TnO/93i+f3kuQ6oHrvyskEuZHuw4hpdXM91PX+Hj6bESHX8vtJ0omwRZJGE2yCQDfWgMryQQ7RZGZLkXd6BBZFp+b5MzZO9mq2WzYcCEIaiPHdf5DFZHKvkuA7QyzwRga8=";
+//        profile.getProperties().put("textures", new Property(value, signature));
 
+        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsworld, profile, new PlayerInteractManager(nmsworld));
+        entityPlayer.listName = new ChatMessage("");
         entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-        npcViewPlayers.put(entityPlayer, new DoubleData<>(location, new ArrayList<>()));
+        npcs.add(new PlayerNPC(entityPlayer));
         playerNpcs.put(new Location(
                 location.getWorld(),
                 location.getX(),
@@ -308,15 +294,20 @@ public enum NPCManager {
                 location.getZ()
         ), script);
 
-        for (int i = 0; i < 4; i++) {
-            final Location cloc = location.clone();
-            cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
-            cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
-            final ArmorStand stand = (ArmorStand) location.getWorld().spawnEntity(cloc, EntityType.ARMOR_STAND);
-            stand.setVisible(false);
-            stand.setCustomName("npc," + script + "," + location.getWorld().getName() + "," + location.getX() + "," + location.getY() + "," + location.getZ());
-            stand.setCustomNameVisible(false);
-        }
+        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
+            for (int i = 0; i < 4; i++) {
+                final Location cloc = location.clone();
+                cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
+                cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
+
+                final ArmorStand stand = (ArmorStand) location.getWorld().spawnEntity(cloc, EntityType.ARMOR_STAND);
+                stand.setVisible(false);
+                stand.setGravity(false);
+                stand.setCustomName("npc," + script + "," + location.getWorld().getName() + "," + location.getX() + "," + location.getY() + "," + location.getZ());
+                stand.setCustomNameVisible(false);
+
+            }
+        });
 
         if (save) {
             SQLManager.INSTANCE.insert("npcs", new String[]{
@@ -345,17 +336,19 @@ public enum NPCManager {
                     Double.parseDouble(datas[5])
             );
             EntityPlayer entityPlayer = null;
-            for (final EntityPlayer ep : npcViewPlayers.keySet()) {
-                final Location nvpl = npcViewPlayers.get(ep).getLeft().clone();
+            for (final PlayerNPC npc : npcs) {
+                final Location nvpl = npc.getLocation().clone();
                 nvpl.setPitch(0);
                 nvpl.setYaw(0);
                 if (nvpl.equals(loc)) {
-                    entityPlayer = ep;
+                    entityPlayer = npc.getEntity();
                     break;
                 }
             }
             if (entityPlayer != null) {
-                if (scriptPlayers.containsKey(uuid) && scriptPlayers.get(uuid).getPlayerNPC().equals(entityPlayer)) {
+                if (scriptPlayers.containsKey(uuid)
+                        && scriptPlayers.get(uuid).getPlayerNPC() != null
+                        && scriptPlayers.get(uuid).getPlayerNPC().equals(entityPlayer)) {
                     final NPCConversation npcc = scriptPlayers.get(uuid);
                     try {
                         npcc.getIv().invokeFunction("action", shift);
@@ -380,7 +373,9 @@ public enum NPCManager {
                         final String[] datas = name.split("§k§k§k");
                         if (datas[0].equals(CHECK)) {
                             final UUID uuid = player.getUniqueId();
-                            if (scriptPlayers.containsKey(uuid) && scriptPlayers.get(uuid).getNPC().equals(entity)) {
+                            if (scriptPlayers.containsKey(uuid)
+                                    && scriptPlayers.get(uuid).getNPC() != null
+                                    && scriptPlayers.get(uuid).getNPC().equals(entity)) {
                                 final NPCConversation npcc = scriptPlayers.get(uuid);
                                 try {
                                     npcc.getIv().invokeFunction("action", shift);
