@@ -48,6 +48,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
 
     @Override
     protected void loadConfig(final FileConfiguration config) {
+        final List<Quest> importantQuests = new ArrayList<>();
         config.getKeys(false).forEach((key) -> {
             final ConfigurationSection item = config.getConfigurationSection(key);
             // クエスト名
@@ -56,6 +57,8 @@ public class QuestLoader extends ConfigLoader<Quest> {
             final String description = ChatColor.translateAlternateColorCodes('&', item.getString("description"));
             // 次のクエストID
             final String nextQuestId = item.contains("nextQuestId") ? item.getString("nextQuestId") : null;
+            // 重要
+            final boolean important = item.contains("important") ? item.getBoolean("important") : false;
 
             // 報酬
             final List<QuestResult> results = new ArrayList<>();
@@ -109,19 +112,25 @@ public class QuestLoader extends ConfigLoader<Quest> {
 
                 // 報酬 - お金
                 final int money = result.contains("money") ? result.getInt("money") : 0;
-                if(money > 0) {
+                if (money > 0) {
                     results.add(new MoneyQuestResult(money));
                 }
             }
 
-            add(new Quest(
+            final Quest quest = new Quest(
                     key,
                     name,
                     description.split("\n"),
                     nextQuestId,
+                    important,
                     results
-            ));
+            );
+            add(quest);
+            if (important) {
+                importantQuests.add(quest);
+            }
         });
+        Quest.setImportantQuests(importantQuests);
     }
 
 }

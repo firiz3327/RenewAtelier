@@ -20,6 +20,7 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.quest;
 
+import java.util.ArrayList;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
@@ -32,17 +33,20 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.config.loader.QuestLoader;
 public class Quest {
 
     private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
+    private static List<Quest> IMPORTANT_QUESTS;
     private final String id;
     private final String name;
     private final String[] description;
     private final String nextQuestId;
+    private final boolean important;
     private final List<QuestResult> results;
 
-    public Quest(String id, String name, String[] description, String nextQuestId, List<QuestResult> results) {
+    public Quest(String id, String name, String[] description, String nextQuestId, boolean important, List<QuestResult> results) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.nextQuestId = nextQuestId;
+        this.important = important;
         this.results = results;
     }
 
@@ -54,6 +58,14 @@ public class Quest {
             }
         }
         return null;
+    }
+    
+    public static void setImportantQuests(final List<Quest> importantQuests) {
+        IMPORTANT_QUESTS = importantQuests;
+    }
+    
+    public static List<Quest> getImportantQuests() {
+        return new ArrayList<>(IMPORTANT_QUESTS);
     }
 
     public String getId() {
@@ -74,6 +86,10 @@ public class Quest {
 
     public List<QuestResult> getResults() {
         return results;
+    }
+    
+    public boolean isImportant() {
+        return important;
     }
 
 }

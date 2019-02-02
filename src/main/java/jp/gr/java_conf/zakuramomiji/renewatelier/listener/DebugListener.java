@@ -33,6 +33,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.book.QuestBook;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
@@ -54,7 +55,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
@@ -107,7 +110,6 @@ public class DebugListener implements Listener {
 //            }
 //        }
 //    }
-
     @EventHandler
     private void debug(final AsyncPlayerChatEvent e) {
         if (!e.getPlayer().isOp()) {
@@ -304,6 +306,19 @@ public class DebugListener implements Listener {
                             strs[2],
                             true
                     );
+                    break;
+                }
+                case "quest_book": {
+                    final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+                    final ItemMeta meta = book.getItemMeta();
+                    meta.setUnbreakable(true);
+                    meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+                    final BookMeta bookmeta = (BookMeta) meta;
+                    bookmeta.setTitle("クエスト一覧");
+                    bookmeta.setAuthor(e.getPlayer().getDisplayName());
+                    bookmeta.setGeneration(BookMeta.Generation.ORIGINAL);
+                    book.setItemMeta(meta);
+                    e.getPlayer().getInventory().addItem(book);
                     break;
                 }
                 default: {

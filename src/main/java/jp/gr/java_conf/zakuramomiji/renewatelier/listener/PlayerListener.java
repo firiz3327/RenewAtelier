@@ -25,11 +25,11 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.Alchemy
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.book.QuestBook;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -42,8 +42,10 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -60,6 +62,15 @@ public class PlayerListener implements Listener {
 
         if (action != null && player != null) {
             if (Chore.isRight(action)) {
+                if (item != null && item.getType() == Material.WRITTEN_BOOK) {
+                    final ItemMeta meta = item.getItemMeta();
+                    if (meta != null && meta.isUnbreakable()) {
+                        e.setCancelled(true);
+                        QuestBook.openQuestBook(player, item, e.getHand());
+                        return;
+                    }
+                }
+
                 if (block != null) {
                     final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
                     if (type != null) {
@@ -115,6 +126,11 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void changeWorld(final PlayerChangedWorldEvent e) {
+        NPCManager.INSTANCE.packet(e.getPlayer());
+    }
+    
+    @EventHandler
+    private void respawn(final PlayerRespawnEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
     }
 
