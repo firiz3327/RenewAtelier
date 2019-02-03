@@ -7,6 +7,8 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -24,9 +26,15 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import net.minecraft.server.v1_13_R2.ChatComponentText;
 import net.minecraft.server.v1_13_R2.ChatModifier;
+import net.minecraft.server.v1_13_R2.MinecraftKey;
+import net.minecraft.server.v1_13_R2.PacketDataSerializer;
+import net.minecraft.server.v1_13_R2.PacketPlayOutCustomPayload;
+import net.minecraft.server.v1_13_R2.PlayerConnection;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 
 /**
  * Class by iso2013 © 2017.
@@ -300,15 +308,27 @@ public class PacketUtils {
         packet.getBooleans().write(0, onGround);
         return packet;
     }
-    
+
     public static PacketContainer getHeadRotationPacket(int entityId, double yaw) {
         final PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_HEAD_ROTATION);
         packet.getModifier().writeDefaults();
         packet.getModifier().write(0, entityId);
-        packet.getBytes().write(0, (byte) (yaw * 256.0F / 360.0F)); 
+        packet.getBytes().write(0, (byte) (yaw * 256.0F / 360.0F));
         return packet;
     }
-    
+
+    public static void openBook(final Player player, final EquipmentSlot hand) {
+        final ByteBuf buf = Unpooled.buffer(256);
+        buf.setByte(0, (byte) (hand == EquipmentSlot.HAND ? 0 : 1)); // hand
+        buf.writerIndex(1);
+        final PacketPlayOutCustomPayload payload = new PacketPlayOutCustomPayload(
+                new MinecraftKey("minecraft:book_open"),
+                new PacketDataSerializer(buf)
+        );
+        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+        playerConnection.sendPacket(payload);
+    }
+
     public static class FakeEntity {
 
         private int entityId;

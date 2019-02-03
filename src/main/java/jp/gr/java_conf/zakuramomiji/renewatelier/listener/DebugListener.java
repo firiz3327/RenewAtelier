@@ -30,10 +30,10 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.megaphone.Megaphone;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.quest.book.QuestBook;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
@@ -42,8 +42,6 @@ import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -53,7 +51,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -68,73 +65,17 @@ public class DebugListener implements Listener {
 
     private boolean nonbreak = true;
 
-//    @EventHandler
-//    private void projectileHit(final ProjectileHitEvent e) {
-//        final Projectile projectile = e.getEntity();
-//        final ProjectileSource shooter = projectile.getShooter();
-//        if (shooter != null && shooter instanceof Player) {
-//            if (projectile.getCustomName() != null && projectile.getCustomName().equals("arrowrain")) {
-//                projectile.remove();
-//            } else {
-//                Location location = null;
-//                if (e.getHitBlock() != null) {
-//                    location = e.getHitBlock().getLocation();
-//                } else if (e.getHitEntity() != null) {
-//                    location = e.getHitEntity().getLocation();
-//                }
-//                
-//                if (location != null) {
-//                    final List<Location> locs = new ArrayList<>();
-//                    final Location loc = location;
-//                    loc.setY(loc.getY() + 8);
-//                    loc.setZ(loc.getZ() + 2);
-//                    loc.setX(loc.getX() + 2);
-//                    for (int j = 0; j < 5; j++) {
-//                        for (int l = 0; l < 5; l++) {
-//                            loc.setX(loc.getX() - 1);
-//                            locs.add(loc.clone());
-//                        }
-//                        loc.setX(loc.getX() + 5);
-//                        loc.setZ(loc.getZ() - 1);
-//                    }
-//                    
-//                    for (int i = 0; i < 30; i++) {
-//                        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-//                            Collections.shuffle(locs);
-//                            final Arrow arrow = (Arrow) loc.getWorld().spawnEntity(locs.get(0), EntityType.ARROW);
-//                            arrow.setCustomName("arrowrain");
-//                            arrow.setShooter(shooter);
-//                        }, 2 * i);
-//                    }
-//                }
-//            }
-//        }
-//    }
     @EventHandler
     private void debug(final AsyncPlayerChatEvent e) {
         if (!e.getPlayer().isOp()) {
             return;
         }
         e.setCancelled(true);
+
+        //<editor-fold defaultstate="collapsed" desc="debug">
         try {
             final String strs[] = e.getMessage().split(" ");
             switch (strs[0].trim().toLowerCase()) {
-                case "aaa": {
-                    final ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-                    final ItemMeta meta = item.getItemMeta();
-                    meta.addAttributeModifier(
-                            Attribute.GENERIC_ATTACK_DAMAGE,
-                            new AttributeModifier(
-                                    UUID.randomUUID(),
-                                    "attackDamage",
-                                    10,
-                                    AttributeModifier.Operation.ADD_NUMBER,
-                                    EquipmentSlot.HAND
-                            )
-                    );
-                    item.setItemMeta(meta);
-                    break;
-                }
                 case "debug": {
                     final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524);
                     e.getPlayer().getInventory().addItem(item);
@@ -329,6 +270,24 @@ public class DebugListener implements Listener {
         } catch (Exception ex) {
             e.getPlayer().sendMessage(ex.getMessage());
             Chore.log(Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        if (!e.isCancelled()) {
+            e.setCancelled(true);
+            final String msg = e.getMessage();
+            if (msg.contains("%item%")) {
+                final ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
+                if (mainHand != null && mainHand.getType() != Material.AIR) {
+                    Megaphone.itemMegaPhone(
+                            e.getPlayer(),
+                            msg,
+                            mainHand
+                    );
+                    return;
+                }
+            }
+            Megaphone.megaPhone(e.getPlayer(), msg);
         }
     }
 

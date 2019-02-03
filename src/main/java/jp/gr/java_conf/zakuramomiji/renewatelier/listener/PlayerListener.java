@@ -24,6 +24,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.nodification.Nodification;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.book.QuestBook;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
@@ -122,13 +123,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void join(final PlayerJoinEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
+        Nodification.view(e.getPlayer());
     }
 
     @EventHandler
     private void changeWorld(final PlayerChangedWorldEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
     }
-    
+
     @EventHandler
     private void respawn(final PlayerRespawnEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());

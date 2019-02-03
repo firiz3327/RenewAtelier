@@ -31,7 +31,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.box.KettleBox;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.MaterialSize;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,7 +41,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public enum KettleBonusManager {
     INSTANCE; // enum singleton style
-    
+
     private final Map<UUID, BonusPlayerData> datas;
     private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
 

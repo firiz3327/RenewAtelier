@@ -20,28 +20,35 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.quest.book;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
+import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.Quest;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestItem;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.ItemQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.MoneyQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.TellrawUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.minecraft.server.v1_13_R2.MinecraftKey;
-import net.minecraft.server.v1_13_R2.PacketDataSerializer;
-import net.minecraft.server.v1_13_R2.PacketPlayOutCustomPayload;
-import net.minecraft.server.v1_13_R2.PlayerConnection;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -53,41 +60,38 @@ public class QuestBook {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
         final List<Quest> progress_quests = new ArrayList<>();
         final List<Quest> clear_quests = new ArrayList<>();
+        final List<Quest> importantQuests = Quest.getImportantQuests();
         status.getQuestStatusList().forEach((qs) -> {
             final Quest quest = Quest.getQuest(qs.getId());
+            importantQuests.remove(quest);
+
             if (qs.isClear()) {
                 clear_quests.add(quest);
             } else {
                 progress_quests.add(quest);
             }
         });
+        // 本を開くパケット
+        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
+            PacketUtils.openBook(player, hand);
+        }, 5); // 0.25 sec
 
         final List<BaseComponent[]> pages = new ArrayList<>();
-        progress_quests.forEach((quest) -> { // 進行中クエスト
+        // 進行中クエスト
+        progress_quests.forEach((quest) -> {
             addSpigotPage(pages, quest, 0);
         });
-        Quest.getImportantQuests().forEach((quest) -> { // 重要クエスト
+        // 重要クエスト
+        importantQuests.forEach((quest) -> {
             addSpigotPage(pages, quest, 2);
         });
-        clear_quests.forEach((quest) -> { // クリア済みクエスト
+        // クリア済みクエスト
+        clear_quests.forEach((quest) -> {
             addSpigotPage(pages, quest, 1);
         });
         final BookMeta meta = (BookMeta) book.getItemMeta();
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
-
-        // book open packet
-        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-            final ByteBuf buf = Unpooled.buffer(256);
-            buf.setByte(0, (byte) (hand == EquipmentSlot.HAND ? 0 : 1)); // hand
-            buf.writerIndex(1);
-            final PacketPlayOutCustomPayload payload = new PacketPlayOutCustomPayload(
-                    new MinecraftKey("minecraft:book_open"),
-                    new PacketDataSerializer(buf)
-            );
-            final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
-            playerConnection.sendPacket(payload);
-        }, 5); // 0.25 sec
     }
 
     private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type) {
@@ -107,17 +111,108 @@ public class QuestBook {
                 color = ChatColor.RED;
                 break;
         }
-        ComponentBuilder builder = new ComponentBuilder("【")
+        final ComponentBuilder builder = new ComponentBuilder("【")
                 .append(quest.getName())
                 .color(color)
-                .event(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder(flag_text).create()
-                ))
+                .event(TellrawUtils.createHoverEvent(flag_text))
                 .append("】\n\n")
                 .reset();
         for (final String line : quest.getDescription()) {
-            builder = builder.append(line + "\n");
+            builder.append(line + "\n");
+        }
+        builder.append("\n【報酬】\n");
+        for (final QuestResult qr : quest.getResults()) {
+            if (qr instanceof RecipeQuestResult) {
+                final RecipeQuestResult result = (RecipeQuestResult) qr;
+                final AlchemyRecipe recipe = result.getResult();
+                final String result_str = recipe.getResult();
+                builder.append("レシピ: ");
+
+                final List<ItemFlag> flags = new ArrayList<>();
+                final String name;
+                Material material;
+                final int damage;
+                if (result_str.startsWith("material:")) {
+                    final AlchemyMaterial am = AlchemyMaterial.getMaterial(result_str.substring(9));
+                    name = am.getName();
+                    material = am.getMaterial().getLeft();
+                    damage = am.getMaterial().getRight();
+                    if (am.isHideAttribute()) {
+                        flags.add(ItemFlag.HIDE_ATTRIBUTES);
+                    }
+                    if (am.isHideDestroy()) {
+                        flags.add(ItemFlag.HIDE_DESTROYS);
+                    }
+                    if (am.isHideEnchant()) {
+                        flags.add(ItemFlag.HIDE_ENCHANTS);
+                    }
+                    if (am.isHidePlacedOn()) {
+                        flags.add(ItemFlag.HIDE_PLACED_ON);
+                    }
+                    if (am.isHidePotionEffect()) {
+                        flags.add(ItemFlag.HIDE_POTION_EFFECTS);
+                    }
+                    if (am.isHideUnbreaking()) {
+                        flags.add(ItemFlag.HIDE_UNBREAKABLE);
+                    }
+                } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
+                    material = Material.matchMaterial(result_str);
+                    if (material == null) {
+                        material = Material.matchMaterial(result_str, true);
+                    }
+                    name = null;
+                    damage = 0;
+                } else {
+                    continue;
+                }
+                final ItemStack view_item = Chore.createDamageableItem(material, 1, damage);
+                final ItemMeta view_meta = view_item.getItemMeta();
+                if (name != null) {
+                    view_meta.setDisplayName(name);
+                }
+                if (!flags.isEmpty()) {
+                    view_meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
+                }
+                view_meta.setLore(new ArrayList<>() {
+                    {
+                        add(ChatColor.GRAY + "作成量: " + recipe.getAmount());
+                        add(ChatColor.GRAY + "必要素材:");
+                        for (final String req : recipe.getReqMaterial()) {
+                            final String data[] = req.split(",");
+                            if (data[0].startsWith("category:")) {
+                                add(AlchemyItemStatus.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
+                            } else if (data[0].startsWith("material:")) {
+                                add(AlchemyItemStatus.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+                            }
+                        }
+                    }
+                });
+                view_item.setItemMeta(view_meta);
+                builder.append(name == null ? "エラー" : name).event(
+                        TellrawUtils.createHoverEvent(view_item)
+                );
+            } else if (qr instanceof ItemQuestResult) {
+                final ItemQuestResult result = (ItemQuestResult) qr;
+                final QuestItem questItem = result.getResult();
+                final ItemStack view_item = questItem.getItem(new boolean[]{
+                    true, // id
+                    false, // quality - default min
+                    (questItem.getIngredients() == null), // ings
+                    true, // size
+                    true, // catalyst
+                    true, // category
+                    true // end
+                });
+                final String name = view_item.hasItemMeta() ? view_item.getItemMeta().getDisplayName() : null;
+                builder.append("アイテム: ").append(
+                        questItem.getName() == null ? (name == null ? "エラー" : name) : questItem.getName()
+                ).event(TellrawUtils.createHoverEvent(view_item));
+            } else if (qr instanceof MoneyQuestResult) {
+                final MoneyQuestResult result = (MoneyQuestResult) qr;
+                final int money = result.getResult();
+                builder.append("エメラルド: x" + money);
+            }
+            builder.append("\n").reset();
         }
         pages.add(builder.create());
     }

@@ -32,7 +32,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.ItemQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.MoneyQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 

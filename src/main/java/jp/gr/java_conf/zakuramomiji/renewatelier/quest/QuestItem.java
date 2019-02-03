@@ -53,7 +53,16 @@ public class QuestItem {
     }
 
     public ItemStack getItem() {
-        final ItemStack result = AlchemyItemStatus.getItem(AlchemyMaterial.getMaterial(material), ingredients, null, quality, null, characteristics, null, false);
+        final ItemStack result = AlchemyItemStatus.getItem(
+                AlchemyMaterial.getMaterial(material),
+                ingredients,
+                null,
+                quality,
+                null,
+                characteristics,
+                null,
+                false
+        );
         result.setAmount(amount);
         if (name != null) {
             final ItemMeta meta = result.getItemMeta();
@@ -61,6 +70,55 @@ public class QuestItem {
             result.setItemMeta(meta);
         }
         return result;
+    }
+
+    public ItemStack getItem(final boolean[] flags) {
+        final ItemStack result = AlchemyItemStatus.getItem(
+                AlchemyMaterial.getMaterial(material),
+                ingredients,
+                null,
+                quality,
+                null,
+                null,
+                characteristics,
+                null,
+                flags
+        );
+        result.setAmount(amount);
+        if (name != null) {
+            final ItemMeta meta = result.getItemMeta();
+            meta.setDisplayName(name);
+            result.setItemMeta(meta);
+        }
+        return result;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public int getUsecount() {
+        return usecount;
+    }
+
+    public List<Ingredients> getIngredients() {
+        return ingredients;
+    }
+
+    public List<Characteristic> getCharacteristics() {
+        return characteristics;
     }
 
 }
