@@ -284,9 +284,10 @@ public enum NPCManager {
             VEntityPlayer entityPlayer = null;
             for (final VEntityPlayer npc : npcs) {
                 final Location nvpl = npc.getLocation().clone();
-                nvpl.setPitch(0);
-                nvpl.setYaw(0);
-                if (nvpl.equals(loc)) {
+                if (nvpl.getWorld().equals(loc.getWorld())
+                        && nvpl.getX() == loc.getX()
+                        && nvpl.getY() == loc.getY()
+                        && nvpl.getZ() == loc.getZ()) {
                     entityPlayer = npc;
                     break;
                 }

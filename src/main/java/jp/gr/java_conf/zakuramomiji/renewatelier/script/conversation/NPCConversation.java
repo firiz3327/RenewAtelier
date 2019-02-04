@@ -61,6 +61,7 @@ public final class NPCConversation extends ScriptConversation {
         this.npc = npc;
         this.npcPlayer = null;
     }
+
     public NPCConversation(VEntityPlayer npcPlayer, String scriptName, Player player) {
         super(scriptName, player);
         this.npc = null;
@@ -74,17 +75,17 @@ public final class NPCConversation extends ScriptConversation {
     public LivingEntity getNPC() {
         return npc;
     }
-    
-    public Object getPlayerNPC() {
+
+    public VEntityPlayer getPlayerNPC() {
         return npcPlayer;
     }
 
     public String getNPCName() {
         return npc == null ? npcPlayer.getName() : npc.getCustomName();
     }
-    
+
     public Location getLocation() {
-        return npc == null ? npcPlayer.getLocation() : npc.getLocation();
+        return (npc == null ? npcPlayer.getLocation() : npc.getLocation()).clone();
     }
 
     public void dispose() {
