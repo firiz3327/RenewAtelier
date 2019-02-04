@@ -1,5 +1,5 @@
 /*
- * NPC.java
+ * VersionUtil.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -18,38 +18,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.npc;
+package jp.gr.java_conf.zakuramomiji.renewatelier.version;
 
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import org.bukkit.Location;
-import org.bukkit.World;
+import net.minecraft.server.v1_13_R2.ChatMessage;
+import net.minecraft.server.v1_13_R2.NBTTagCompound;
 
 /**
  *
  * @author firiz
  */
-public class PlayerNPC {
-
-    private final EntityPlayer entity;
-
-    public PlayerNPC(EntityPlayer entity) {
-        this.entity = entity;
+public class VersionUtils {
+    
+    public static Object createNBTTagCompound() {
+        return new NBTTagCompound();
     }
     
-    public EntityPlayer getEntity() {
-        return entity;
+    public static Object createChatMessage(final String msg) {
+        return new ChatMessage(msg);
     }
     
-    public String getName() {
-        return entity.getName();
-    }
-    
-    public Location getLocation() {
-        return entity.getBukkitEntity().getLocation();
-    }
-    
-    public World getWorld() {
-        return entity.getBukkitEntity().getWorld();
-    }
-
 }

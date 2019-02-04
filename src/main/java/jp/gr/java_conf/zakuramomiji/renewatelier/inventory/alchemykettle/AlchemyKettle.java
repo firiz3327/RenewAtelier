@@ -62,7 +62,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -70,6 +69,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -83,8 +83,8 @@ public class AlchemyKettle {
     private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static KettleBonusManager BONUSMANAGER = KettleBonusManager.INSTANCE;
 
-    public static boolean isAlchemyKettle(final Inventory inv) {
-        return inv.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
+    public static boolean isAlchemyKettle(final InventoryView view) {
+        return view.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
     }
 
     public static void openKettle(final Player player, final AlchemyRecipe recipe, final Inventory catalystInv) {
@@ -520,7 +520,7 @@ public class AlchemyKettle {
         }
     }
 
-    private static void setCharacteristicPage(Inventory inv, Player player, int move) {
+    private static void setCharacteristicPage(final Inventory inv, final Player player, final int move) {
         final ItemStack setting = inv.getItem(1);
         final ItemMeta meta = setting.getItemMeta();
         final int page = meta.getEnchantLevel(Enchantment.ARROW_KNOCKBACK);

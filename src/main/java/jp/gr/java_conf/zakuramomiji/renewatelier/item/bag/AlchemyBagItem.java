@@ -26,11 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -42,6 +42,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -219,8 +220,8 @@ public class AlchemyBagItem {
                 : new Object[]{item.getAmount(), Chore.getDamage(meta), sb.toString()};
     }
 
-    public static boolean isBagInventory(final Inventory inv) {
-        return inv.getTitle().startsWith("AlchemyBag,");
+    public static boolean isBagInventory(final InventoryView view) {
+        return view.getTitle().startsWith("AlchemyBag,");
     }
 
     public static void openInventory(final Player player, final ItemStack item, final int clickslot) {
@@ -294,7 +295,7 @@ public class AlchemyBagItem {
         final PlayerInventory pinv = player.getInventory();
         final ItemStack currentItem = e.getCurrentItem();
         if (currentItem != null && currentItem.getType() != Material.AIR) {
-            final int bag_slot = Integer.parseInt(e.getInventory().getTitle().split(",")[1]);
+            final int bag_slot = Integer.parseInt(e.getView().getTitle().split(",")[1]);
             if (e.getSlotType() == SlotType.CONTAINER) {
                 final ItemStack removeItem = currentItem.clone();
                 if (e.getClick() == ClickType.RIGHT) {

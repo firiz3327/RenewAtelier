@@ -32,10 +32,11 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMateria
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.DeliveryInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils.FakeEntity;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.FakeEntity;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VEntityPlayer;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.EntityPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -51,7 +52,7 @@ import org.bukkit.scheduler.BukkitTask;
 public final class NPCConversation extends ScriptConversation {
 
     private final LivingEntity npc;
-    private final EntityPlayer npcPlayer;
+    private final VEntityPlayer npcPlayer; // EntityPlayer class
     private FakeEntity fakeEntity;
     private BukkitTask runTaskLater;
 
@@ -60,7 +61,7 @@ public final class NPCConversation extends ScriptConversation {
         this.npc = npc;
         this.npcPlayer = null;
     }
-    public NPCConversation(EntityPlayer npcPlayer, String scriptName, Player player) {
+    public NPCConversation(VEntityPlayer npcPlayer, String scriptName, Player player) {
         super(scriptName, player);
         this.npc = null;
         this.npcPlayer = npcPlayer;
@@ -74,7 +75,7 @@ public final class NPCConversation extends ScriptConversation {
         return npc;
     }
     
-    public EntityPlayer getPlayerNPC() {
+    public Object getPlayerNPC() {
         return npcPlayer;
     }
 
@@ -83,7 +84,7 @@ public final class NPCConversation extends ScriptConversation {
     }
     
     public Location getLocation() {
-        return npc == null ? npcPlayer.getBukkitEntity().getLocation() : npc.getLocation();
+        return npc == null ? npcPlayer.getLocation() : npc.getLocation();
     }
 
     public void dispose() {
@@ -158,19 +159,19 @@ public final class NPCConversation extends ScriptConversation {
             @Override
             FakeEntity run(NPCConversation conv, Object... args) {
                 // https://wiki.vg/Protocol#Spawn_Mob
-                final FakeEntity fakeEntity = FakeEntity.createNew(-1, (EntityType) args[0], 0);
+                final FakeEntity fakeEntity = new FakeEntity(-1, (EntityType) args[0], 0);
                 conv.fakeEntity = fakeEntity;
 
-                final PacketContainer packet1 = PacketUtils.getSpawnPacket(
+                final PacketContainer packet1 = EntityPacket.getSpawnPacket(
                         fakeEntity,
                         (Location) args[1]
                 );
                 PacketUtils.sendPacket(conv.player, packet1);
 
                 // https://wiki.vg/Entity_metadata#Entity_Metadata_Format
-                final PacketContainer packet2 = PacketUtils.getMetadataPacket(
+                final PacketContainer packet2 = EntityPacket.getMetadataPacket(
                         fakeEntity,
-                        PacketUtils.setEntityCustomName(PacketUtils.createWatcher(new HashMap<>() {
+                        EntityPacket.setEntityCustomName(PacketUtils.createWatcher(new HashMap<>() {
                             {
                                 put(0, (byte) (0x20)); // invisible
                                 put(3, true); // customname visible
@@ -185,7 +186,7 @@ public final class NPCConversation extends ScriptConversation {
         DESTROY_FAKE_ENTITY {
             @Override
             Object run(NPCConversation conv, Object... args) {
-                PacketUtils.sendPacket(conv.player, PacketUtils.getDespawnPacket(conv.fakeEntity));
+                PacketUtils.sendPacket(conv.player, EntityPacket.getDespawnPacket(conv.fakeEntity));
                 return null;
             }
         };

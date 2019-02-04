@@ -23,9 +23,10 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.inventory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -34,6 +35,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryView;
 
 /**
  *
@@ -47,8 +49,8 @@ public final class ConfirmInventory {
     private ConfirmInventory() {
     }
 
-    public static boolean isConfirmInventory(Inventory inv) {
-        return inv.getTitle().endsWith(CONFSTR);
+    public static boolean isConfirmInventory(final InventoryView view) {
+        return view.getTitle().endsWith(CONFSTR);
     }
 
     public static void openInventory(final Player player, final String title, final String yes, final String no, final ClickRunnable run) {

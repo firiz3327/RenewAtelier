@@ -25,6 +25,7 @@ import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.drop.AnimatedDrop;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -32,7 +33,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -171,9 +171,7 @@ public enum LoopManager {
             for (int i = 0; i < max_length - name.length() + 1; i++) {
                 sb.append(" ");
             }
-            sb.append(ChatColor.GREEN).append(
-                    ((CraftPlayer) player).getHandle().ping
-            );
+            sb.append(ChatColor.GREEN).append(PacketUtils.getPing(player));
             player.setPlayerListName(sb.toString());
         }
 

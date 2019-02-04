@@ -44,6 +44,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -58,6 +59,7 @@ public class InventoryListener implements Listener {
     private void invClick(final InventoryClickEvent e) {
         final UUID uuid = e.getWhoClicked().getUniqueId();
         final Inventory inv = e.getInventory();
+        final InventoryView view = e.getView();
 
         if (click_temp.containsKey(uuid)) {
             final ItemStack rcursor = click_temp.remove(uuid);
@@ -67,20 +69,20 @@ public class InventoryListener implements Listener {
             }
         }
 
-        if (ConfirmInventory.isConfirmInventory(inv)) {
+        if (ConfirmInventory.isConfirmInventory(view)) {
             e.setCancelled(e.getSlotType() == SlotType.CONTAINER);
             ConfirmInventory.click(e);
-        } else if(DeliveryInventory.isDeliveryInventory(inv)) {
+        } else if (DeliveryInventory.isDeliveryInventory(view)) {
             ConfirmInventory.click(e);
-        } else if (RecipeSelect.isKettleRecipe(inv)) {
+        } else if (RecipeSelect.isKettleRecipe(view)) {
             RecipeSelect.click(e);
-        } else if (ItemSelect.isItemSelect(inv)) {
+        } else if (ItemSelect.isItemSelect(view)) {
             ItemSelect.click(e);
-        } else if (CatalystSelect.isCatalystSelect(inv)) {
+        } else if (CatalystSelect.isCatalystSelect(view)) {
             CatalystSelect.click(e);
-        } else if (AlchemyKettle.isAlchemyKettle(inv)) {
+        } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.click(e);
-        } else if (AlchemyBagItem.isBagInventory(inv)) {
+        } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.click(e);
         } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
             final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
@@ -105,37 +107,34 @@ public class InventoryListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invDrag(final InventoryDragEvent e) {
-        final Inventory inv = e.getInventory();
-        if (ConfirmInventory.isConfirmInventory(inv)) {
+        final InventoryView view = e.getView();
+        if (ConfirmInventory.isConfirmInventory(view)) {
             ConfirmInventory.drag(e);
-        } else if (RecipeSelect.isKettleRecipe(inv)) {
+        } else if (RecipeSelect.isKettleRecipe(view)) {
             RecipeSelect.drag(e);
-        } else if (ItemSelect.isItemSelect(inv)) {
+        } else if (ItemSelect.isItemSelect(view)) {
             ItemSelect.drag(e);
-        } else if (CatalystSelect.isCatalystSelect(inv)) {
+        } else if (CatalystSelect.isCatalystSelect(view)) {
             CatalystSelect.drag(e);
-        } else if (AlchemyKettle.isAlchemyKettle(inv)) {
+        } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.drag(e);
-        } else if (AlchemyBagItem.isBagInventory(inv)) {
+        } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.drag(e);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invClose(final InventoryCloseEvent e) {
-        final Player player = (Player) e.getPlayer();
-        Chore.log("closeinv");
-
-        final Inventory inv = e.getInventory();
-        if (ConfirmInventory.isConfirmInventory(inv)) {
+        final InventoryView view = e.getView();
+        if (ConfirmInventory.isConfirmInventory(view)) {
             ConfirmInventory.close(e);
-        } else if (ItemSelect.isItemSelect(inv)) {
+        } else if (ItemSelect.isItemSelect(view)) {
             ItemSelect.close(e);
-        } else if (CatalystSelect.isCatalystSelect(inv)) {
+        } else if (CatalystSelect.isCatalystSelect(view)) {
             CatalystSelect.close(e);
-        } else if (AlchemyKettle.isAlchemyKettle(inv)) {
+        } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.close(e);
-        } else if (AlchemyBagItem.isBagInventory(inv)) {
+        } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.close(e);
         }
     }

@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.inventory;
+package jp.gr.java_conf.zakuramomiji.renewatelier.version.packet;
 
 import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
@@ -31,12 +31,12 @@ import org.bukkit.entity.Player;
  * @author firiz
  */
 public class InventoryPacket {
-    
+
     public static void update(final Player player, final String title, final InventoryPacketType type) {
         update(player, title, type.id);
     }
-    
-    private static void update(final Player player, final String title, final String id) {
+
+    public static void update(final Player player, final String title, final String id) {
         final EntityPlayer ep = ((CraftPlayer) player).getHandle();
         final PacketPlayOutOpenWindow packet = new PacketPlayOutOpenWindow(
                 ep.activeContainer.windowId,
@@ -47,11 +47,11 @@ public class InventoryPacket {
         ep.playerConnection.sendPacket(packet);
         ep.updateInventory(ep.activeContainer);
     }
-    
+
     public enum InventoryPacketType {
         CHEST("chest"),
         HOPPER("hopper");
-        
+
         private final String id;
 
         private InventoryPacketType(String id) {
@@ -61,6 +61,6 @@ public class InventoryPacket {
         public String getId() {
             return id;
         }
-        
+
     }
 }

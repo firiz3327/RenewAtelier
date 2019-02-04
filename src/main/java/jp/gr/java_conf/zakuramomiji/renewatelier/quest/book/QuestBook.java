@@ -27,7 +27,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMateria
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.Quest;
@@ -38,6 +37,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.TellrawUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PayloadPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -73,7 +73,7 @@ public class QuestBook {
         });
         // 本を開くパケット
         Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-            PacketUtils.openBook(player, hand);
+            PayloadPacket.openBook(player, hand);
         }, 5); // 0.25 sec
 
         final List<BaseComponent[]> pages = new ArrayList<>();

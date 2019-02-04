@@ -22,7 +22,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,13 +32,13 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect.RecipeLEType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -52,6 +51,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -71,11 +71,11 @@ public final class RecipeSelect {
         ChatColor.DARK_AQUA + "ダイアモンド"
     };
 
-    public static boolean isKettleRecipe(Inventory inv) {
-        return inv.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
+    public static boolean isKettleRecipe(final InventoryView view) {
+        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
     }
 
-    public static void openGUI(Player player, Location loc) {
+    public static void openGUI(final Player player, final Location loc) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
         inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1521, "", null));
         inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));

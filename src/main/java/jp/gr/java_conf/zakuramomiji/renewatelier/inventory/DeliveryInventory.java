@@ -30,10 +30,11 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredi
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -43,6 +44,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -56,8 +58,8 @@ public class DeliveryInventory {
     private DeliveryInventory() {
     }
 
-    public static boolean isDeliveryInventory(Inventory inv) {
-        return inv.getTitle().endsWith(DELISTR);
+    public static boolean isDeliveryInventory(final InventoryView view) {
+        return view.getTitle().endsWith(DELISTR);
     }
 
     // slots
@@ -124,15 +126,15 @@ public class DeliveryInventory {
             e.setCancelled(true);
         }
 
-        updateInventory(inv, player);
+        updateInventory(inv, e.getView(), player);
     }
 
-    private static void updateInventory(final Inventory inv, final Player player) {
-        final String[] datas = inv.getTitle().split(",");
+    private static void updateInventory(final Inventory inv, final InventoryView view, final Player player) {
+        final String[] datas = view.getTitle().split(",");
         final AlchemyMaterial material = AlchemyMaterial.getMaterial(datas[0]);
         final List<Characteristic> req_characteristics = new ArrayList<>();
         final List<Ingredients> req_ingredients = new ArrayList<>();
-        
+
         if (datas.length <= 2) {
             for (int i = 1; i < datas.length; i++) {
                 final String[] strs = datas[i].substring(2, datas[i].length() - 1).split(",");

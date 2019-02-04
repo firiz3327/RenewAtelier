@@ -36,13 +36,10 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
-import net.minecraft.server.v1_13_R2.ChatMessage;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import net.minecraft.server.v1_13_R2.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -138,13 +135,13 @@ public class DebugListener implements Listener {
                             e.getPlayer(), InventoryType.ANVIL
                     );
                     e.getPlayer().openInventory(inv);
-                    update(e.getPlayer(), strs[1], inv, "minecraft:anvil");
+                    InventoryPacket.update(e.getPlayer(), strs[1], "anvil");
                     break;
                 }
                 case "inv": {
                     final Inventory inv = Bukkit.createInventory(e.getPlayer(), Integer.parseInt(strs[1]), strs[2]);
                     e.getPlayer().openInventory(inv);
-                    e.getPlayer().sendMessage(inv.getTitle());
+                    e.getPlayer().sendMessage(strs[2]);
                     break;
                 }
                 case "islandcreate": {
@@ -307,18 +304,6 @@ public class DebugListener implements Listener {
                 break;
             }
         }
-    }
-
-    private void update(final Player player, final String title, final Inventory inv, final String id) {
-        EntityPlayer ep = ((CraftPlayer) player).getHandle();
-        PacketPlayOutOpenWindow packet = new PacketPlayOutOpenWindow(
-                ep.activeContainer.windowId,
-                id,
-                new ChatMessage(title),
-                inv.getSize()
-        );
-        ep.playerConnection.sendPacket(packet);
-        ep.updateInventory(ep.activeContainer);
     }
 
     @EventHandler

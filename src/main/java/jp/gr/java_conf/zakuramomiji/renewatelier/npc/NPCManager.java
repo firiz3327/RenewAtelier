@@ -21,8 +21,6 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.npc;
 
 import com.comphenix.protocol.ProtocolManager;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,31 +30,18 @@ import java.util.logging.Level;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.NPCConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import net.minecraft.server.v1_13_R2.ChatMessage;
-import net.minecraft.server.v1_13_R2.DataWatcher;
-import net.minecraft.server.v1_13_R2.DataWatcherRegistry;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import net.minecraft.server.v1_13_R2.MinecraftServer;
-import net.minecraft.server.v1_13_R2.Packet;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
-import net.minecraft.server.v1_13_R2.PlayerConnection;
-import net.minecraft.server.v1_13_R2.PlayerInteractManager;
-import net.minecraft.server.v1_13_R2.WorldServer;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VEntityPlayer;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.EntityPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.FakePlayerPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -85,59 +70,29 @@ public enum NPCManager {
      */
     public static final String CHECK = "§n§b§c";
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
-    private final List<PlayerNPC> npcs = new ArrayList<>();
+    private final List<VEntityPlayer> npcs = new ArrayList<>();
     private final Map<Location, String> playerNpcs = new HashMap<>();
 
-    private void sendPackets(PlayerConnection playerConnection, Packet<?>... packets) {
-        for (final Packet<?> packet : packets) {
-            playerConnection.sendPacket(packet);
-        }
-    }
-
     public void packet(final Player player) {
-        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
-        final List<EntityPlayer> eps = new ArrayList<>();
-        for (final PlayerNPC npc : npcs) {
-            if (player.getWorld().equals(npc.getWorld())) {
-                eps.add(npc.getEntity());
-            }
-        }
-        sendPackets(
-                playerConnection,
-                new PacketPlayOutPlayerInfo(
-                        EnumPlayerInfoAction.ADD_PLAYER,
-                        eps
-                )
-        );
-        for (final EntityPlayer eplayer : eps) {
-            final DataWatcher watcher = eplayer.getDataWatcher();
-            watcher.set(DataWatcherRegistry.a.a(13), (byte) 127); // 127 = all flag value
-            sendPackets(
-                    playerConnection,
-                    new PacketPlayOutEntityMetadata(
-                            eplayer.getId(),
-                            watcher,
-                            true
-                    ),
-                    new PacketPlayOutNamedEntitySpawn(eplayer)
-            );
-        }
-        Bukkit.getScheduler().runTaskLater(
-                AtelierPlugin.getPlugin(),
+        final List<VEntityPlayer> eps = new ArrayList<>();
+        npcs.stream().filter(
+                (npc) -> (player.getWorld().equals(npc.getWorld()))
+        ).forEachOrdered((npc) -> {
+            eps.add(npc);
+        });
+        FakePlayerPacket.sendPlayer(player, eps, false);
+        eps.forEach((eplayer) -> {
+            FakePlayerPacket.sendSkin(player, eplayer, (byte) 127); // 127 = all flag value
+        });
+        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(),
                 () -> {
-                    sendPackets(
-                            playerConnection,
-                            new PacketPlayOutPlayerInfo(
-                                    EnumPlayerInfoAction.REMOVE_PLAYER,
-                                    eps
-                            )
-                    );
+                    FakePlayerPacket.sendPlayer(player, eps, true);
                 },
                 200 // 10 sec
         );
     }
 
-    public void setup(final ProtocolManager protocolManager) {
+    public void setup() {
         // load sql npcdata
         final List<List<Object>> resultObjects = SQLManager.INSTANCE.select("npcs", new String[]{
             "id", // 0
@@ -188,19 +143,19 @@ public enum NPCManager {
         // addLoopEffect 0.5sec
         LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
-                for (final PlayerNPC npc : npcs) {
+                for (final VEntityPlayer npc : npcs) {
                     final Location loc = npc.getLocation().clone();
                     if (Chore.distanceSq(loc, player.getLocation(), 300, 5)) {
                         final Vector target = player.getLocation().toVector();
                         loc.setDirection(target.subtract(loc.toVector()));
-                        PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
-                                npc.getEntity().getId(),
+                        PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
+                                npc.getId(),
                                 loc.getPitch(),
                                 loc.getYaw(),
                                 true
                         ));
-                        PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
-                                npc.getEntity().getId(),
+                        PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
+                                npc.getId(),
                                 loc.getYaw()
                         ));
                     }
@@ -218,13 +173,13 @@ public enum NPCManager {
                                     final Location loc = entity.getLocation();
                                     final Vector target = player.getLocation().toVector();
                                     loc.setDirection(target.subtract(loc.toVector()));
-                                    PacketUtils.sendPacket(player, PacketUtils.getLookPacket(
+                                    PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
                                             entity.getEntityId(),
                                             loc.getPitch(),
                                             loc.getYaw(),
                                             entity.isOnGround()
                                     ));
-                                    PacketUtils.sendPacket(player, PacketUtils.getHeadRotationPacket(
+                                    PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
                                             entity.getEntityId(),
                                             loc.getYaw()
                                     ));
@@ -275,18 +230,9 @@ public enum NPCManager {
     }
 
     public void createNPCPlayer(final Location location, final String name, final UUID uuid, final String script, final boolean save) {
-        final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        final WorldServer nmsworld = ((CraftWorld) location.getWorld()).getHandle();
-        final GameProfile profile = new GameProfile(uuid, name);
-        // テクスチャが変わらない
-//        final String value = "eyJ0aW1lc3RhbXAiOjE1NDg5MDEzMzg2NzYsInByb2ZpbGVJZCI6Ijg0MDEzYmIzYmJmMjQ2YzU5ZDFmN2ZkMWE3ZmQ0OGU5IiwicHJvZmlsZU5hbWUiOiJfX19Eb2xhIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9iMTFhMDk2NWY1N2FhNTkzODEzY2MwOWM4YjVjYzYyNjhmMThhNmIzYjcyNTg3ZTY3MjZlODIwOWM1OTk4MDE4IiwibWV0YWRhdGEiOnsibW9kZWwiOiJzbGltIn19fX0=";
-//        final String signature = "pEgASFAzeXFMzQAIoyM2/AeHaMUwCOzWKcRkx+kH8ckh5Q9QKkR7qdh/5UotPt02k6JSr6OancQhA7XjtWQWvdlyrwGVJQHYBWNEUSrQ+kx3lkRLbCcoYZkOwsVPfIocbGUZoDaKlmOtXOEpn6/to81teThJKgmlnspTePbQzWZvzSvO+60SjV5toTlUkuGX+whYMT99m9yaXh+HqnxTovdHp18VRBGCkGqetmEWxPn9WdUSGbR3VBT3Ws6YVJXv0lDo7ZoyIVFU7ejmhcjQ4SyNv8sHkPTmfY564zkxtr/Mp6yWR0PeVC2bHcFosXACIrJsIC+rGmbgEzF2bo5cFGJj77KH0t5lsK+xim+yPqVpXm1L66CZjrjnASbRBZjuqdcCoQAM6MeRT6Blz02wB2Lv87S4vIA7lmjZc8/RNdsIZUMwPU0JU89nbssq4kVo1f9KgXG7e4hpFUAgBNNCIyaXhmaDtB+w5diq0I/DGzei43WBOTJ8lmSTghDfo4zOIh/0DSJlSJ8un3EsHpRUhWiQlnbhCrPxeBLNGuOe2TnO/93i+f3kuQ6oHrvyskEuZHuw4hpdXM91PX+Hj6bESHX8vtJ0omwRZJGE2yCQDfWgMryQQ7RZGZLkXd6BBZFp+b5MzZO9mq2WzYcCEIaiPHdf5DFZHKvkuA7QyzwRga8=";
-//        profile.getProperties().put("textures", new Property(value, signature));
-
-        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsworld, profile, new PlayerInteractManager(nmsworld));
-        entityPlayer.listName = new ChatMessage("");
-        entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-        npcs.add(new PlayerNPC(entityPlayer));
+        final VEntityPlayer entityPlayer = FakePlayerPacket.createEntityPlayer(location.getWorld(), location, uuid, name);
+        entityPlayer.setListName("");
+        npcs.add(entityPlayer);
         playerNpcs.put(new Location(
                 location.getWorld(),
                 location.getX(),
@@ -335,13 +281,13 @@ public enum NPCManager {
                     Double.parseDouble(datas[4]),
                     Double.parseDouble(datas[5])
             );
-            EntityPlayer entityPlayer = null;
-            for (final PlayerNPC npc : npcs) {
+            VEntityPlayer entityPlayer = null;
+            for (final VEntityPlayer npc : npcs) {
                 final Location nvpl = npc.getLocation().clone();
                 nvpl.setPitch(0);
                 nvpl.setYaw(0);
                 if (nvpl.equals(loc)) {
-                    entityPlayer = npc.getEntity();
+                    entityPlayer = npc;
                     break;
                 }
             }

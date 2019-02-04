@@ -31,10 +31,10 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMateria
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket;
-import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.InventoryPacket.InventoryPacketType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -46,6 +46,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -57,8 +58,8 @@ public final class ItemSelect {
     private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static List<UUID> OPEN_USERS = new ArrayList<>();
 
-    public static boolean isItemSelect(Inventory inv) {
-        return inv.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
+    public static boolean isItemSelect(final InventoryView view) {
+        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
     }
 
     protected static void openItemSelect(Player player, AlchemyRecipe recipe, Inventory recipeInv) {

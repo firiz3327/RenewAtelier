@@ -41,6 +41,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -53,11 +54,11 @@ public class CatalystSelect {
     private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static List<UUID> OPEN_USERS = new ArrayList<>();
 
-    public static boolean isCatalystSelect(Inventory inv) {
-        return inv.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
+    public static boolean isCatalystSelect(final InventoryView view) {
+        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
     }
 
-    public static void openCatalyst(Player player, AlchemyRecipe recipe, Inventory itemInv) {
+    public static void openCatalyst(final Player player, final AlchemyRecipe recipe, final Inventory itemInv) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
         inv.setItem(1, itemInv.getItem(1).clone());
         inv.setItem(2, itemInv.getItem(2).clone());
@@ -65,7 +66,7 @@ public class CatalystSelect {
         player.openInventory(inv);
     }
 
-    private static void setCatalystSlot(Player player, Inventory inv, AlchemyRecipe recipe) {
+    private static void setCatalystSlot(final Player player, final Inventory inv, final AlchemyRecipe recipe) {
         for (int i = 3; i < inv.getSize(); i++) {
             inv.setItem(i, null);
         }
@@ -101,7 +102,7 @@ public class CatalystSelect {
         ));
     }
 
-    public static void click(InventoryClickEvent e) {
+    public static void click(final InventoryClickEvent e) {
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { // 増殖防止 - チェスト内のアイテムにフラッグを付与すれば対処可能
             e.setCancelled(true);
             return;
@@ -165,7 +166,7 @@ public class CatalystSelect {
         }
     }
 
-    public static void drag(InventoryDragEvent e) {
+    public static void drag(final InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
         raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> {
@@ -173,7 +174,7 @@ public class CatalystSelect {
         });
     }
 
-    public static void close(InventoryCloseEvent e) {
+    public static void close(final InventoryCloseEvent e) {
         if (!OPEN_USERS.contains(e.getPlayer().getUniqueId())) {
             KETTLE.allBack((Player) e.getPlayer());
         }

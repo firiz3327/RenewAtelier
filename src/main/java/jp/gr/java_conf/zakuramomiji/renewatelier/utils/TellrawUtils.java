@@ -20,13 +20,13 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VItemStack;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_13_R2.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -57,15 +57,15 @@ public class TellrawUtils {
     }
 
     public static String getLocalizeName(final ItemStack item) {
-        final net.minecraft.server.v1_13_R2.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+        final VItemStack vitem = PacketUtils.asNMSCopy(item);
         return LanguageItemUtil.getLocalizeName(
-                nmsItem.getItem().getName()
+                vitem.getItemName()
         );
     }
 
     private static BaseComponent[] parseItemComponents(final ItemStack item) {
         return new BaseComponent[]{
-            new TextComponent(CraftItemStack.asNMSCopy(item).save(new NBTTagCompound()).toString())
+            new TextComponent(PacketUtils.asNMSCopy(item).getMinecraftId())
         };
     }
 }

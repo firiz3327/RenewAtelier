@@ -21,7 +21,7 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.nodification;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PayloadPacket;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -40,21 +40,22 @@ public class Nodification {
     public static void view(final Player player) {
         final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
+        
         final ComponentBuilder builder = new ComponentBuilder("");
-
         builder.append("アップデート\n");
         builder.append("ああああ");
 
         meta.spigot().setPages(builder.create());
         book.setItemMeta(meta);
 
-        final PlayerInventory inv = player.getInventory();
-        final ItemStack offHand = inv.getItemInOffHand();
-        inv.setItemInOffHand(book);
-
         Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-            PacketUtils.openBook(player, EquipmentSlot.OFF_HAND);
-            inv.setItemInOffHand(offHand);
+            if (player.isOnline()) {
+                final PlayerInventory inv = player.getInventory();
+                final ItemStack offHand = inv.getItemInOffHand();
+                inv.setItemInOffHand(book);
+                PayloadPacket.openBook(player, EquipmentSlot.OFF_HAND);
+                inv.setItemInOffHand(offHand);
+            }
         }, 20); // 1 sec
     }
 

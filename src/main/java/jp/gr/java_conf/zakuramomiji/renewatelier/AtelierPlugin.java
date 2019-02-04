@@ -29,13 +29,14 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.listener.InventoryListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.PlayerListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.packet.PacketUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -45,19 +46,25 @@ public final class AtelierPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        
-        for(final World world : getServer().getWorlds()) {
-            for(final ArmorStand stand : world.getEntitiesByClass(ArmorStand.class)) {
-                if(!stand.isVisible() && stand.getCustomName() != null && stand.getCustomName().startsWith("npc,")) {
-                    stand.remove();
-                }
-            }
-        }
-        
-        getServer().getPluginManager().registerEvents(new DebugListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
+
+        // remove playernpc stands
+        getServer().getWorlds().forEach((world) -> {
+            world.getEntitiesByClass(ArmorStand.class).stream().filter(
+                    (stand) -> (!stand.isVisible()
+                    && stand.getCustomName() != null
+                    && stand.getCustomName().startsWith("npc,"))
+            ).forEachOrdered((stand) -> {
+                stand.remove();
+            });
+        });
+
+        // registerEvents
+        final PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new DebugListener(), this);
+        pluginManager.registerEvents(new BlockListener(), this);
+        pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new InventoryListener(), this);
+
         Bukkit.getWorlds().stream().forEachOrdered((World world) -> {
             world.setAutoSave(true);
             world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
@@ -66,14 +73,17 @@ public final class AtelierPlugin extends JavaPlugin {
             world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
             world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         });
+
+        // init PacketUtils
+        final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+        PacketUtils.init(protocolManager);
+
+        // setup managers
         MyRoomManager.INSTANCE.setup();
         ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
-        
-        final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketUtils.init(protocolManager);
-        NPCManager.INSTANCE.setup(protocolManager);
+        NPCManager.INSTANCE.setup();
     }
 
     @Override
