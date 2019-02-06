@@ -20,8 +20,9 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.VersionUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VItemStack;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -57,15 +58,15 @@ public class TellrawUtils {
     }
 
     public static String getLocalizeName(final ItemStack item) {
-        final VItemStack vitem = PacketUtils.asNMSCopy(item);
+        final VItemStack vitem = VersionUtils.asVItemCopy(item);
         return LanguageItemUtil.getLocalizeName(
-                vitem.getItemName()
+                vitem.getLocalizationId()
         );
     }
 
     private static BaseComponent[] parseItemComponents(final ItemStack item) {
         return new BaseComponent[]{
-            new TextComponent(PacketUtils.asNMSCopy(item).getMinecraftId())
+            new TextComponent(VersionUtils.asVItemCopy(item).getMinecraftJson())
         };
     }
 }

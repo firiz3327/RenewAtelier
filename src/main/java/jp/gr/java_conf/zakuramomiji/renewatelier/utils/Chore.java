@@ -348,24 +348,21 @@ public final class Chore {
     }
 
     public static void addItem(Inventory inv, ItemStack item, Location loc) {
-//        if (inv != null && item != null) {
-//            if (Arrays.asList(inv.getStorageContents()).contains(null)) {
-//                inv.addItem(item);
-//            } else if (loc != null) {
-//                Chore.drop(loc, item);
-//            }
-//        }
         if (inv != null && item != null) {
             int amount = item.getAmount();
 
             final ItemStack[] contents = inv.getStorageContents();
             for (final ItemStack v : contents) {
-                if (v != null && v.isSimilar(item) && v.getAmount() < 64) {
-                    final int da = v.getAmount() + amount;
-                    amount = da - 64;
-                    v.setAmount(Math.min(64, da));
+                if (v != null) {
+                    final int max_stack = v.getType().getMaxStackSize();
+                    if (v.isSimilar(item) && v.getAmount() < max_stack) {
+                        final int da = v.getAmount() + amount;
+                        amount = da - max_stack;
+                        v.setAmount(Math.min(max_stack, da));
+                    }
                 }
             }
+            inv.setStorageContents(contents);
             if (amount > 0) {
                 if (Arrays.asList(inv.getStorageContents()).contains(null)) {
                     item.setAmount(amount);
@@ -386,12 +383,16 @@ public final class Chore {
             final ItemStack[] contents = inv.getStorageContents();
             for (int i = 0; i < contents.length; i++) {
                 final ItemStack v = contents[i];
-                if (v != null && v.isSimilar(item) && v.getAmount() < 64) {
-                    final int da = v.getAmount() + amount;
-                    amount = da - 64;
-                    v.setAmount(Math.min(64, da));
+                if (v != null) {
+                    final int max_stack = v.getType().getMaxStackSize();
+                    if (v.isSimilar(item) && v.getAmount() < max_stack) {
+                        final int da = v.getAmount() + amount;
+                        amount = da - max_stack;
+                        v.setAmount(Math.min(max_stack, da));
+                    }
                 }
             }
+            inv.setStorageContents(contents);
             if (amount > 0) {
                 if (Arrays.asList(inv.getStorageContents()).contains(null)) {
                     item.setAmount(amount);

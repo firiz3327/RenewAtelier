@@ -26,6 +26,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeS
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.nodification.Nodification;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.book.QuestBook;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.ScriptItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
@@ -43,6 +45,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -123,7 +126,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void join(final PlayerJoinEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
-        Nodification.view(e.getPlayer());
+        Nodification.loginNodification(e.getPlayer());
     }
 
     @EventHandler
@@ -152,6 +155,12 @@ public class PlayerListener implements Listener {
             case IN_GROUND:
                 break;
         }
+    }
+
+    @EventHandler
+    private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
+        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
+        status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
     }
 
 }

@@ -27,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -72,13 +71,13 @@ final class ScriptRunner {
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Chore.log(Level.SEVERE, null, ex);
+                    Chore.log(ex);
                 }
             } else {
                 Chore.log(name.concat(" is not found for script."));
             }
         } catch (ScriptException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
     }
 
@@ -103,9 +102,9 @@ final class ScriptRunner {
             engine.eval(reader);
             return engine;
         } catch (FileNotFoundException | ScriptException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         } catch (IOException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
         return null;
     }

@@ -26,6 +26,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.constants.GameConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.nodification.Nodification;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.Quest;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
@@ -47,26 +49,17 @@ public final class PlayerStatus {
     private final int id;
     private final List<RecipeStatus> recipe_statuses;
     private final List<QuestStatus> quest_statuses;
+    private final List<MinecraftRecipeSaveType> saveTypes;
 
-    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses) {
+    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
         this.id = id;
         this.recipe_statuses = recipe_statuses;
         this.quest_statuses = quest_statuses;
+        this.saveTypes = saveTypes;
     }
 
-    //<editor-fold defaultstate="collapsed" desc="recipe">
-    public void addRecipes(final List<RecipeStatus> recipe_statuses) {
-        this.recipe_statuses.addAll(recipe_statuses);
-        recipe_statuses.forEach((rs) -> {
-            SQLManager.INSTANCE.insert(
-                    "recipe_levels",
-                    new String[]{"user_id", "recipe_id", "level", "exp"},
-                    new Object[]{id, rs.getId(), rs.getLevel(), rs.getExp()}
-            );
-        });
-    }
-
-    public void addRecipe(final RecipeStatus recipe_status) {
+    //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
+    private void addRecipe(final RecipeStatus recipe_status) {
         recipe_statuses.add(recipe_status);
         SQLManager.INSTANCE.insert(
                 "recipe_levels",
@@ -88,21 +81,31 @@ public final class PlayerStatus {
         return null;
     }
 
-    public void addRecipeExp(final String recipe_id, final int exp) {
+    public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
+        if (addRecipeExp(recipe.getId(), exp) && view) {
+            Nodification.recipeNodification(player, Material.CAULDRON);
+            player.sendMessage("レシピ【" + ChatColor.GREEN + recipe.getResult() + ChatColor.RESET + "】を開放しました。");
+        }
+    }
+
+    private boolean addRecipeExp(final String recipe_id, final int exp) {
         RecipeStatus status = null;
         for (final RecipeStatus rs : getRecipeStatusList()) {
             if (rs.getId().equals(recipe_id)) {
                 if (rs.getLevel() > 3) {
-                    return;
+                    return false;
                 } else {
                     status = rs;
                     break;
                 }
             }
         }
+
+        boolean first = false;
         if (status == null) {
             status = new RecipeStatus(recipe_id);
             addRecipe(status);
+            first = true;
         }
 
         status.setExp(status.getExp() + exp);
@@ -121,6 +124,7 @@ public final class PlayerStatus {
                 new String[]{"user_id", "recipe_id", "level", "exp"},
                 new Object[]{id, status.getId(), status.getLevel(), status.getExp()}
         );
+        return first;
     }
     //</editor-fold>
 
@@ -177,12 +181,46 @@ public final class PlayerStatus {
                     Chore.addItem(player, item.getItem());
                 } else if (result instanceof RecipeQuestResult) {
                     final AlchemyRecipe recipe = ((RecipeQuestResult) result).getResult();
-                    addRecipeExp(recipe.getId(), 0);
+                    addRecipeExp(player, true, recipe, 0);
                 } else if (result instanceof MoneyQuestResult) {
                     final int money = ((MoneyQuestResult) result).getResult();
                     Chore.addItem(player, new ItemStack(Material.EMERALD, money));
                 }
             });
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="minecraft recipe">
+    public boolean discoveredRecipe(final MinecraftRecipeSaveType type) {
+        return saveTypes.contains(type);
+    }
+    
+    public void discoverRecipe(final String item_id) {
+        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
+        if (type != null) {
+            saveTypes.add(type);
+            SQLManager.INSTANCE.insert(
+                    "discoveredRecipes",
+                    new String[]{"user_id", "item_id"},
+                    new Object[]{id, item_id}
+            );
+        }
+    }
+    
+    /**
+     * 基本レシピの喪失は起こりえないので、使用しない
+     * @param item_id 
+     */
+    public void undiscoverRecipe(final String item_id) {
+        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
+        if (type != null) {
+            saveTypes.remove(type);
+            SQLManager.INSTANCE.delete(
+                    "discoveredRecipes",
+                    new String[]{"user_id", "item_id"},
+                    new Object[]{id, item_id}
+            );
         }
     }
     //</editor-fold>

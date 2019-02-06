@@ -22,7 +22,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
@@ -184,7 +183,7 @@ public class ScriptConversation {
                         try {
                             ((Invocable) iv).invokeFunction(functionName);
                         } catch (ScriptException ex) {
-                            Chore.log(Level.SEVERE, null, ex);
+                            Chore.log(ex);
                         } catch (NoSuchMethodException ex) {
                         }
                     }

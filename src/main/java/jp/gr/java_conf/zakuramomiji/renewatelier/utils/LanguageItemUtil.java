@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
+package jp.gr.java_conf.zakuramomiji.renewatelier.version;
 
 /**
  *

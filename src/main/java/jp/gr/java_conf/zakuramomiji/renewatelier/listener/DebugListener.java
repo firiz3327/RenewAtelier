@@ -22,7 +22,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 
 import de.tr7zw.itemnbtapi.NBTItem;
 import java.util.UUID;
-import java.util.logging.Level;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -31,12 +30,14 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.megaphone.Megaphone;
+import jp.gr.java_conf.zakuramomiji.renewatelier.nodification.Nodification;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.NodificationPacket;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -158,9 +159,9 @@ public class DebugListener implements Listener {
                     if (search != null) {
                         final RecipeStatus rs = status.getRecipeStatus(strs[1]);
                         if (rs == null) {
-                            status.addRecipe(new RecipeStatus(search.getId(), 0, 0));
+                            status.addRecipeExp(e.getPlayer(), true, search, 0);
                         } else if (strs.length > 2) {
-                            status.addRecipeExp(strs[1], Integer.parseInt(strs[2]));
+                            status.addRecipeExp(e.getPlayer(), true, search, Integer.parseInt(strs[2]));
                         }
                     }
                     break;
@@ -259,6 +260,20 @@ public class DebugListener implements Listener {
                     e.getPlayer().getInventory().addItem(book);
                     break;
                 }
+                case "recipe_packet": {
+                    Nodification.recipeNodification(
+                            e.getPlayer(),
+                            Material.CAULDRON
+                    );
+                    break;
+                }
+                case "advancement_packet": {
+                    Nodification.advancementNodification(
+                            e.getPlayer(),
+                            strs[1]
+                    );
+                    break;
+                }
                 default: {
                     e.setCancelled(false);
                     break;
@@ -266,7 +281,7 @@ public class DebugListener implements Listener {
             }
         } catch (Exception ex) {
             e.getPlayer().sendMessage(ex.getMessage());
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
         //</editor-fold>
 

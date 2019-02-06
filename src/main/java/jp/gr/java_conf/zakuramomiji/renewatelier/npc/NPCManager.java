@@ -20,13 +20,11 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.npc;
 
-import com.comphenix.protocol.ProtocolManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
@@ -300,7 +298,7 @@ public enum NPCManager {
                     try {
                         npcc.getIv().invokeFunction("action", shift);
                     } catch (ScriptException ex) {
-                        Chore.log(Level.SEVERE, null, ex);
+                        Chore.log(ex);
                     } catch (NoSuchMethodException ex) {
                     }
                 } else {
@@ -327,7 +325,7 @@ public enum NPCManager {
                                 try {
                                     npcc.getIv().invokeFunction("action", shift);
                                 } catch (ScriptException ex) {
-                                    Chore.log(Level.SEVERE, null, ex);
+                                    Chore.log(ex);
                                 } catch (NoSuchMethodException ex) {
                                 }
                             } else {

@@ -18,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-
 package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
 import java.io.File;
@@ -29,7 +28,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -76,7 +74,7 @@ public class CustomConfig {
             }
             config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
         } catch (FileNotFoundException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
     }
 
@@ -94,7 +92,7 @@ public class CustomConfig {
         try {
             getConfig().save(configFile);
         } catch (IOException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, ex);
+            Chore.log(Level.SEVERE, "Could not save config to " + configFile, ex);
         }
     }
 }

@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.logging.Level;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.apache.commons.io.FileUtils;
@@ -105,7 +104,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
         return null;
     }
@@ -119,7 +118,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
         return false;
     }
@@ -137,7 +136,7 @@ public enum MyRoomManager {
             );
             createDefaultRoom(loc);
         } catch (IOException ex) {
-            Chore.log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
     }
 
@@ -197,7 +196,7 @@ public enum MyRoomManager {
                         try {
                             f2.createNewFile();
                         } catch (IOException ex) {
-                            Chore.log(Level.SEVERE, null, ex);
+                            Chore.log(ex);
                         }
                         return f2;
                     }
@@ -213,7 +212,7 @@ public enum MyRoomManager {
                 try {
                     f.createNewFile();
                 } catch (IOException ex) {
-                    Chore.log(Level.SEVERE, null, ex);
+                    Chore.log(ex);
                 }
                 return f;
             }

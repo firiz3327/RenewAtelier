@@ -37,6 +37,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.QuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.TellrawUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.VersionUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PayloadPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -129,7 +131,7 @@ public class QuestBook {
                 builder.append("レシピ: ");
 
                 final List<ItemFlag> flags = new ArrayList<>();
-                final String name;
+                String name;
                 Material material;
                 final int damage;
                 if (result_str.startsWith("material:")) {
@@ -169,26 +171,31 @@ public class QuestBook {
                 final ItemMeta view_meta = view_item.getItemMeta();
                 if (name != null) {
                     view_meta.setDisplayName(name);
+                } else {
+                    name = LanguageItemUtil.getLocalizeName(
+                            VersionUtils.asVItemCopy(view_item).getLocalizationId()
+                    );
                 }
                 if (!flags.isEmpty()) {
                     view_meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
                 }
                 view_meta.setLore(new ArrayList<>() {
                     {
-                        add(ChatColor.GRAY + "作成量: " + recipe.getAmount());
+                        add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
                         add(ChatColor.GRAY + "必要素材:");
                         for (final String req : recipe.getReqMaterial()) {
                             final String data[] = req.split(",");
                             if (data[0].startsWith("category:")) {
-                                add(AlchemyItemStatus.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
+                                add(AlchemyItemStatus.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
                             } else if (data[0].startsWith("material:")) {
-                                add(AlchemyItemStatus.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+                                add(AlchemyItemStatus.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]
+                                );
                             }
                         }
                     }
                 });
                 view_item.setItemMeta(view_meta);
-                builder.append(name == null ? "エラー" : name).event(
+                builder.append(name).event(
                         TellrawUtils.createHoverEvent(view_item)
                 );
             } else if (qr instanceof ItemQuestResult) {
@@ -203,9 +210,13 @@ public class QuestBook {
                     true, // category
                     true // end
                 });
-                final String name = view_item.hasItemMeta() ? view_item.getItemMeta().getDisplayName() : null;
+                final String name = view_item.hasItemMeta() && view_item.getItemMeta().hasDisplayName()
+                        ? view_item.getItemMeta().getDisplayName()
+                        : LanguageItemUtil.getLocalizeName(
+                                VersionUtils.asVItemCopy(view_item).getLocalizationId()
+                        );
                 builder.append("アイテム: ").append(
-                        questItem.getName() == null ? (name == null ? "エラー" : name) : questItem.getName()
+                        questItem.getName() == null ? name : questItem.getName()
                 ).event(TellrawUtils.createHoverEvent(view_item));
             } else if (qr instanceof MoneyQuestResult) {
                 final MoneyQuestResult result = (MoneyQuestResult) qr;

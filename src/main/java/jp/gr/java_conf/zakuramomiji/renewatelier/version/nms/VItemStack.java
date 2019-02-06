@@ -22,8 +22,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.version.nms;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.VersionUtils;
 
@@ -39,18 +37,35 @@ public class VItemStack {
         this.nmsItem = nmsItem;
     }
 
-    public String getItemName() {
+    /**
+     * 
+     * @return Example: "block.minecraft.stone"
+     */
+    public String getLocalizationId() {
         return (String) getMethodItem("getItem", "getName");
     }
 
-    public String getMinecraftId() {
+    /**
+     * 
+     * @return Example: "{id:"minecraft:stone",Count:1b}"
+     */
+    public String getMinecraftJson() {
+        final Object nbtTagComponent = VersionUtils.createNBTTagCompound();
         return getMethodItem(
                 new String[]{"save"},
-                new String[][]{new String[]{"NBTTagCompound"}},
-                new Object[][]{
-                    new Object[]{VersionUtils.createNBTTagCompound()}
-                }
+                new Class<?>[][]{new Class<?>[]{nbtTagComponent.getClass()}},
+                new Object[][]{new Object[]{nbtTagComponent}}
         ).toString();
+    }
+
+    /**
+     * 
+     * @return Example: "minecraft:stone"
+     */
+    public String getMinecraftId() {
+        String json = getMinecraftJson();
+        json = json.substring(json.indexOf("id:\"") + 4);
+        return json.substring(0, json.indexOf("\""));
     }
 
     public Object getMethodItem(final String... methodNames) {
@@ -62,12 +77,23 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(VItemStack.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
         return obj;
     }
 
-    public Object getMethodItem(final String[] methodNames, final Class[][] clasz, final Object[][] values) {
+    public Object getMethodItem(final String[] methodNames, final Object[][] values) {
+        final Class<?>[][] clasz = new Class<?>[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            clasz[i] = new Class<?>[values[i].length];
+            for (int j = 0; j < values[i].length; j++) {
+                clasz[i][j] = values[i][j].getClass();
+            }
+        }
+        return getMethodItem(methodNames, clasz, values);
+    }
+
+    public Object getMethodItem(final String[] methodNames, final Class<?>[][] clasz, final Object[][] values) {
         Object obj = nmsItem;
         try {
             for (int i = 0; i < methodNames.length; i++) {
@@ -76,32 +102,6 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(VItemStack.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return obj;
-    }
-
-    public Object getMethodItem(final String[] methodNames, final String[][] clasz, final Object[][] values) {
-        Object obj = nmsItem;
-        try {
-            for (int i = 0; i < methodNames.length; i++) {
-                check_methods:
-                for (final Method method : obj.getClass().getMethods()) {
-                    final Class<?>[] parameterTypes = method.getParameterTypes();
-                    if (parameterTypes.length == clasz[i].length) {
-                        for (int j = 0; j < parameterTypes.length; j++) {
-                            final Class<?> type = parameterTypes[j];
-                            if (!type.getName().equalsIgnoreCase(clasz[i][j])) {
-                                continue check_methods;
-                            }
-                        }
-                    }
-                    obj = method.invoke(obj, values[i]);
-                    break;
-                }
-            }
-            return obj;
-        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Chore.log(ex);
         }
         return obj;

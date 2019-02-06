@@ -30,11 +30,9 @@ import net.minecraft.server.v1_13_R2.DataWatcher;
 import net.minecraft.server.v1_13_R2.DataWatcherRegistry;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.MinecraftServer;
-import net.minecraft.server.v1_13_R2.Packet;
 import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_13_R2.PlayerConnection;
 import net.minecraft.server.v1_13_R2.PlayerInteractManager;
 import net.minecraft.server.v1_13_R2.WorldServer;
 import org.bukkit.Bukkit;
@@ -42,7 +40,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 /**
@@ -71,9 +68,8 @@ public class FakePlayerPacket {
         players.forEach((veps) -> {
             eps.add((EntityPlayer) veps.getEntityPlayer());
         });
-        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
-        sendPackets(
-                playerConnection,
+        PacketUtils.sendPackets(
+                player,
                 new PacketPlayOutPlayerInfo(
                         remove
                                 ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER
@@ -84,12 +80,11 @@ public class FakePlayerPacket {
     }
 
     public static void sendSkin(final Player player, final VEntityPlayer veplayer, final byte bitmask) {
-        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
         final EntityPlayer eplayer = (EntityPlayer) veplayer.getEntityPlayer();
         final DataWatcher watcher = eplayer.getDataWatcher();
         watcher.set(DataWatcherRegistry.a.a(13), bitmask);
-        sendPackets(
-                playerConnection,
+        PacketUtils.sendPackets(
+                player,
                 new PacketPlayOutEntityMetadata(
                         eplayer.getId(),
                         watcher,
@@ -97,12 +92,6 @@ public class FakePlayerPacket {
                 ),
                 new PacketPlayOutNamedEntitySpawn(eplayer)
         );
-    }
-
-    private static void sendPackets(PlayerConnection playerConnection, Packet<?>... packets) {
-        for (final Packet<?> packet : packets) {
-            playerConnection.sendPacket(packet);
-        }
     }
 
 }

@@ -30,7 +30,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.Catalys
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.ItemSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle.RecipeSelect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

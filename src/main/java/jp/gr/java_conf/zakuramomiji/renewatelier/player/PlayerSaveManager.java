@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 
@@ -57,7 +58,7 @@ public enum PlayerSaveManager {
             }
             final int id = (int) select.get(0).get(1);
 
-            //<editor-fold defaultstate="collapsed" desc="load recipe data">
+            //<editor-fold defaultstate="collapsed" desc="load alchemy recipe data">
             final List<List<Object>> recipe_statuses_obj = sql.select(
                     "recipe_levels",
                     new String[]{"user_id", "recipe_id", "level", "exp"},
@@ -96,8 +97,23 @@ public enum PlayerSaveManager {
             });
             //</editor-fold>
 
+            //<editor-fold defaultstate="collapsed" desc="load discovered recipe data">
+            final List<List<Object>> save_types_obj = sql.select(
+                    "discoveredRecipes",
+                    new String[]{"user_id", "item_id"},
+                    new Object[]{id}
+            );
+            final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
+            save_types_obj.forEach((datas) -> {
+                final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
+                if (type != null) {
+                    saveTypes.add(type);
+                }
+            });
+            //</editor-fold>
+
             // put data
-            status = new PlayerStatus(id, recipe_statuses, quest_statuses);
+            status = new PlayerStatus(id, recipe_statuses, quest_statuses, saveTypes);
             statusList.put(uuid, status);
         } else {
             status = statusList.get(uuid);

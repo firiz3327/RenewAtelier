@@ -23,8 +23,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.inventory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
@@ -184,7 +182,7 @@ public class DeliveryInventory {
         try {
             NPCManager.INSTANCE.getNPCConversation(uuid).getIv().invokeFunction(method);
         } catch (ScriptException | NoSuchMethodException ex) {
-            Logger.getLogger(DeliveryInventory.class.getName()).log(Level.SEVERE, null, ex);
+            Chore.log(ex);
         }
     }
 

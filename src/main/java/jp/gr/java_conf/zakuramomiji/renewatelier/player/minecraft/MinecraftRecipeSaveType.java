@@ -1,7 +1,7 @@
 /*
- * QuestStatus.java
+ * MinecraftRecipe.java
  * 
- * Copyright (c) 2018 firiz.
+ * Copyright (c) 2019 firiz.
  * 
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
  * 
@@ -18,37 +18,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.quest;
+package jp.gr.java_conf.zakuramomiji.renewatelier.player.minecraft;
 
 /**
  *
  * @author firiz
  */
-public class QuestStatus {
+public enum MinecraftRecipeSaveType {
+    CAULDRON("minecraft:cauldron");
 
     private final String id;
-    private boolean clear;
-    
-    public QuestStatus(String id) {
+
+    private MinecraftRecipeSaveType(String id) {
         this.id = id;
-        this.clear = false;
     }
 
-    public QuestStatus(String id, boolean clear) {
-        this.id = id;
-        this.clear = clear;
-    }
-    
     public String getId() {
         return id;
     }
 
-    public boolean isClear() {
-        return clear;
+    public static MinecraftRecipeSaveType search(final String id) {
+        for (MinecraftRecipeSaveType type : values()) {
+            if (type.id.equals(id)) {
+                return type;
+            }
+        }
+        return null;
     }
-
-    public void clear() {
-        this.clear = true;
-    }
-
 }
