@@ -22,7 +22,6 @@
                     <finalName>RenewAtelierIAP-${project.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptorRefs>
-                        <!-- 依存するリソースをすべてjarに同梱する -->
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <archive>
@@ -105,15 +104,21 @@
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
-            <version>1.0.0-rc9</version>
+            <version>1.0.0-rc12</version>
         </dependency>
         
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
-            <version>1.0.0-rc9</version>
+            <version>1.0.0-rc12</version>
         </dependency>
         
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-parent</artifactId>
@@ -121,5 +126,6 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/libs/item-nbt-api-plugin-1.8.2-SNAPSHOT.jar</systemPath>
         </dependency>
+        
     </dependencies>
 </project>

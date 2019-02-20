@@ -26,9 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs.DiscoveredRecipeLoader;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs.QuestStatusLoader;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs.RecipeStatusLoader;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs.StatusLoader;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.quest.QuestStatus;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.execution.ScriptManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
+import org.bukkit.Bukkit;
 
 /**
  *
@@ -38,87 +44,60 @@ public enum PlayerSaveManager {
     INSTANCE; // enum singleton style
 
     private final SQLManager sql = SQLManager.INSTANCE;
+    private final ScriptManager script = ScriptManager.INSTANCE;
     private final Map<UUID, PlayerStatus> statusList = new HashMap<>();
+    private final StatusLoader[] loaders = {
+        new RecipeStatusLoader(),
+        new QuestStatusLoader(),
+        new DiscoveredRecipeLoader()
+    };
+    
+    public void loadPlayers() {
+        Bukkit.getWorlds().forEach((world) -> {
+            world.getPlayers().forEach((player) -> {
+                loadStatus(player.getUniqueId());
+            });
+        });
+    }
 
     public PlayerStatus getStatus(final UUID uuid) {
-        PlayerStatus status;
         if (!statusList.containsKey(uuid)) {
-            List<List<Object>> select = sql.select(
+            throw new IllegalStateException("PlayerStatus: ".concat(uuid.toString()).concat(" is unload"));
+        } else {
+            return statusList.get(uuid);
+        }
+    }
+
+    public void loadStatus(final UUID uuid) {
+        //<editor-fold defaultstate="collapsed" desc="select id">
+        List<List<Object>> select = sql.select(
+                "accounts",
+                new String[]{"uuid", "id"},
+                new Object[]{uuid.toString()}
+        );
+        if (select.isEmpty()) {
+            sql.insert("accounts", "uuid", uuid.toString());
+            select = sql.select(
                     "accounts",
                     new String[]{"uuid", "id"},
                     new Object[]{uuid.toString()}
             );
-            if (select.isEmpty()) {
-                sql.insert("accounts", "uuid", uuid.toString());
-                select = sql.select(
-                        "accounts",
-                        new String[]{"uuid", "id"},
-                        new Object[]{uuid.toString()}
-                );
-            }
-            final int id = (int) select.get(0).get(1);
-
-            //<editor-fold defaultstate="collapsed" desc="load alchemy recipe data">
-            final List<List<Object>> recipe_statuses_obj = sql.select(
-                    "recipe_levels",
-                    new String[]{"user_id", "recipe_id", "level", "exp"},
-                    new Object[]{id}
-            );
-//            final List<List<Object>> recipe_statuses_obj = sql.select(new SelectValue("recipe_levels", new LinkedHashMap<>() {
-//                {
-//                    put(new KeyValue("user_id", id), new DoubleData<>(ConditionType.EQUALS, Pipe.NONE));
-//                    put(new KeyValue("recipe_id"), null);
-//                    put(new KeyValue("level"), null);
-//                    put(new KeyValue("exp"), null);
-//                }
-//            }, OrderByType.ASC, "recipe_id"));
-            final List<RecipeStatus> recipe_statuses = new ArrayList<>();
-            recipe_statuses_obj.forEach((datas) -> {
-                recipe_statuses.add(new RecipeStatus(
-                        (String) datas.get(1), // recipe_id
-                        (int) datas.get(2), // level
-                        (int) datas.get(3) // exp
-                ));
-            });
-            //</editor-fold>
-
-            //<editor-fold defaultstate="collapsed" desc="load quest data">
-            final List<List<Object>> quest_statuses_obj = sql.select(
-                    "questDatas",
-                    new String[]{"user_id", "quest_id", "clear"},
-                    new Object[]{id}
-            );
-            final List<QuestStatus> quest_statuses = new ArrayList<>();
-            quest_statuses_obj.forEach((datas) -> {
-                quest_statuses.add(new QuestStatus(
-                        (String) datas.get(1), // quest_id
-                        (int) datas.get(2) != 0 // clear
-                ));
-            });
-            //</editor-fold>
-
-            //<editor-fold defaultstate="collapsed" desc="load discovered recipe data">
-            final List<List<Object>> save_types_obj = sql.select(
-                    "discoveredRecipes",
-                    new String[]{"user_id", "item_id"},
-                    new Object[]{id}
-            );
-            final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
-            save_types_obj.forEach((datas) -> {
-                final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
-                if (type != null) {
-                    saveTypes.add(type);
-                }
-            });
-            //</editor-fold>
-
-            // put data
-            status = new PlayerStatus(id, recipe_statuses, quest_statuses, saveTypes);
-            statusList.put(uuid, status);
-        } else {
-            status = statusList.get(uuid);
         }
-        return status;
+        //</editor-fold>
+        final int id = (int) select.get(0).get(1);
+        final List<Object> objs = new ArrayList<>();
+        for (final StatusLoader sloader : loaders) {
+            objs.add(sloader.load(id));
+        }
+        final PlayerStatus status = new PlayerStatus(
+                id,
+                (List<RecipeStatus>) objs.get(0), // recipeStatus
+                (List<QuestStatus>) objs.get(1), // questStatus
+                (List<MinecraftRecipeSaveType>) objs.get(2), // discoveredRecipes
+                script.createJsEngine(),
+                script.createPyEngine()
+        );
+        statusList.put(uuid, status);
     }
 
     public void unloadStatus(final UUID uuid) {

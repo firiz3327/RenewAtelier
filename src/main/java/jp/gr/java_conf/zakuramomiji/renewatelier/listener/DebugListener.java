@@ -36,8 +36,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.entity.CustomZombie;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.NodificationPacket;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -272,6 +272,14 @@ public class DebugListener implements Listener {
                             e.getPlayer(),
                             strs[1]
                     );
+                    break;
+                }
+                case "czombie": {
+                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
+                        CustomZombie.spawnEntity(new CustomZombie(
+                                e.getPlayer().getWorld()
+                        ), e.getPlayer().getLocation());
+                    });
                     break;
                 }
                 default: {

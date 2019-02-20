@@ -205,48 +205,7 @@ public enum MaterialSize {
         }
         return a;
     }
-
-    /*
-    public static List<Integer> getSize(List<Integer> ss) {
-        final List<Integer> result = new ArrayList<>();
-        int down = 0;
-        int right = 0;
-
-        final int[][] line = {
-            {ss.get(0), ss.get(1), ss.get(2)},
-            {ss.get(3), ss.get(4), ss.get(5)},
-            {ss.get(6), ss.get(7), ss.get(8)},
-        };
-
-        for (final int[] s : line) {
-            int count = 0;
-            for (int j = 0; j < s.length; j++) {
-                if (j == 0 && right == 1) {
-                    result.add(0);
-                } else if (j == s.length - 1 && right == -1) {
-                    result.add(0);
-                } else {
-                    result.add(s[count]);
-                    count++;
-                }
-            }
-        }
-
-        if (down == 1) {
-            for (int i = 0; i < 3; i++) {
-                result.remove(result.size() - 1);
-                result.add(0, 0);
-            }
-        } else if (down == -1) {
-            for (int i = 0; i < 3; i++) {
-                result.remove(0);
-                result.add(0);
-            }
-        }
-
-        return result;
-    }
-     */
+    
     public static int[] plusSize(int[] size) {
         final int color = size[0];
         for (int i = 1; i < size.length; i++) {

@@ -36,6 +36,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -205,6 +206,10 @@ public class ScriptConversation {
     
     public Material getItemMaterial(final String material_id) {
         return Material.valueOf(material_id.toUpperCase());
+    }
+    
+    public EntityType getEntityType(final String entityType) {
+        return EntityType.valueOf(entityType.toUpperCase());
     }
     
 }

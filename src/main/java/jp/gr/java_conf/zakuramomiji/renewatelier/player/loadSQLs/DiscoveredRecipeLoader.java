@@ -1,7 +1,7 @@
 /*
- * ServerConstants.java
+ * DiscoveredRecipeLoader.java
  * 
- * Copyright (c) 2018 firiz.
+ * Copyright (c) 2019 firiz.
  * 
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
  * 
@@ -18,15 +18,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
+package jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs;
+
+import java.util.ArrayList;
+import java.util.List;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.minecraft.MinecraftRecipeSaveType;
+import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 
 /**
  *
  * @author firiz
  */
-public class ServerConstants {
-    
-    public static boolean NASHORN = false;
-    public static boolean PYTHON = true;
-    
+public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
+
+    @Override
+    public List<MinecraftRecipeSaveType> load(int id) {
+        final List<List<Object>> save_types_obj = SQLManager.INSTANCE.select(
+                "discoveredRecipes",
+                new String[]{"user_id", "item_id"},
+                new Object[]{id}
+        );
+        final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
+        save_types_obj.forEach((datas) -> {
+            final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
+            if (type != null) {
+                saveTypes.add(type);
+            }
+        });
+        return saveTypes;
+    }
+
 }

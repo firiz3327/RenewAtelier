@@ -41,6 +41,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -68,12 +69,13 @@ public enum NPCManager {
      */
     public static final String CHECK = "§n§b§c";
     private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
-    private final List<VEntityPlayer> npcs = new ArrayList<>();
-    private final Map<Location, String> playerNpcs = new HashMap<>();
+    private final List<LivingEntity> npcs = new ArrayList<>();
+    private final List<VEntityPlayer> playerNpcs = new ArrayList<>();
+    private final Map<Location, String> playerNpcLocs = new HashMap<>();
 
     public void packet(final Player player) {
         final List<VEntityPlayer> eps = new ArrayList<>();
-        npcs.stream().filter(
+        playerNpcs.stream().filter(
                 (npc) -> (player.getWorld().equals(npc.getWorld()))
         ).forEachOrdered((npc) -> {
             eps.add(npc);
@@ -88,6 +90,26 @@ public enum NPCManager {
                 },
                 200 // 10 sec
         );
+    }
+
+    public void stop() {
+        // despawn npcs
+        npcs.forEach((npc) -> {
+            npc.remove();
+        });
+
+        // despawn player npcs
+        Bukkit.getWorlds().forEach((world) -> {
+            world.getPlayers().forEach((player) -> {
+                final List<VEntityPlayer> eps = new ArrayList<>();
+                playerNpcs.stream().filter(
+                        (npc) -> (player.getWorld().equals(npc.getWorld()))
+                ).forEachOrdered((npc) -> {
+                    eps.add(npc);
+                });
+                FakePlayerPacket.sendLogout(player, eps);
+            });
+        });
     }
 
     public void setup() {
@@ -138,10 +160,17 @@ public enum NPCManager {
             }
         }
 
+        // send player npcs
+        Bukkit.getWorlds().forEach((world) -> {
+            world.getPlayers().forEach((player) -> {
+                packet(player);
+            });
+        });
+
         // addLoopEffect 0.5sec
         LoopManager.INSTANCE.addLoopEffectHalfSec(() -> {
             Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
-                for (final VEntityPlayer npc : npcs) {
+                for (final VEntityPlayer npc : playerNpcs) {
                     final Location loc = npc.getLocation().clone();
                     if (Chore.distanceSq(loc, player.getLocation(), 300, 5)) {
                         final Vector target = player.getLocation().toVector();
@@ -190,6 +219,31 @@ public enum NPCManager {
         });
     }
 
+    public void removeNPC(final Location location, final EntityType type, final String name, final String script) {
+        for (final LivingEntity entity : new ArrayList<>(npcs)) {
+            if (entity.getLocation().equals(location)
+                    && entity.getType() == type
+                    && entity.getName().equals(name)) {
+                if (entity.getEquipment() != null && entity.getEquipment().getBoots() != null) {
+                    final ItemStack boots = entity.getEquipment().getBoots();
+                    if (boots.hasItemMeta()) {
+                        final String item_name = boots.getItemMeta().getDisplayName();
+                        if (item_name != null) {
+                            if (item_name.contains("§k§k§k")) {
+                                final String[] datas = item_name.split("§k§k§k");
+                                if (datas[0].equals(CHECK) && datas[1].equals(script)) {
+                                    npcs.remove(entity);
+                                    entity.remove();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void createNPC(final Location location, final EntityType type, final String name, final String script) {
         createNPC(location, type, name, script, false);
     }
@@ -201,6 +255,7 @@ public enum NPCManager {
             entity.setCustomNameVisible(true);
             entity.setRemoveWhenFarAway(false);
             entity.setAI(false);
+            npcs.add(entity);
 
             final ItemStack item = new ItemStack(Material.STONE_BUTTON);
             final ItemMeta meta = item.getItemMeta();
@@ -223,6 +278,34 @@ public enum NPCManager {
         }
     }
 
+    public void removeNPCPlayer(final Location location, final String name, final UUID uuid, final String script) {
+        for (final VEntityPlayer entityPlayer : new ArrayList<>(playerNpcs)) {
+            if (entityPlayer.getName().equals(name)
+                    && entityPlayer.getLocation().equals(location)
+                    && entityPlayer.getUniqueId().equals(uuid)) {
+                playerNpcs.remove(entityPlayer);
+
+                // remove armorstand
+                for (int i = 0; i < 4; i++) {
+                    final Location cloc = location.clone();
+                    cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
+                    cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
+                    int j = 1;
+                    for (final Entity entity : cloc.getWorld().getEntities()) {
+                        if (cloc.equals(entity.getLocation())) {
+                            entity.remove();
+                            if (j >= 4) {
+                                break;
+                            }
+                            j++;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     public void createNPCPlayer(final Location location, final String name, final UUID uuid, final String script) {
         createNPCPlayer(location, name, uuid, script, false);
     }
@@ -230,8 +313,8 @@ public enum NPCManager {
     public void createNPCPlayer(final Location location, final String name, final UUID uuid, final String script, final boolean save) {
         final VEntityPlayer entityPlayer = FakePlayerPacket.createEntityPlayer(location.getWorld(), location, uuid, name);
         entityPlayer.setListName("");
-        npcs.add(entityPlayer);
-        playerNpcs.put(new Location(
+        playerNpcs.add(entityPlayer);
+        playerNpcLocs.put(new Location(
                 location.getWorld(),
                 location.getX(),
                 location.getY(),
@@ -249,7 +332,6 @@ public enum NPCManager {
                 stand.setGravity(false);
                 stand.setCustomName("npc," + script + "," + location.getWorld().getName() + "," + location.getX() + "," + location.getY() + "," + location.getZ());
                 stand.setCustomNameVisible(false);
-
             }
         });
 
@@ -280,7 +362,7 @@ public enum NPCManager {
                     Double.parseDouble(datas[5])
             );
             VEntityPlayer entityPlayer = null;
-            for (final VEntityPlayer npc : npcs) {
+            for (final VEntityPlayer npc : playerNpcs) {
                 final Location nvpl = npc.getLocation().clone();
                 if (nvpl.getWorld().equals(loc.getWorld())
                         && nvpl.getX() == loc.getX()

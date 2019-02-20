@@ -22,6 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.script.ScriptEngine;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
@@ -50,12 +51,16 @@ public final class PlayerStatus {
     private final List<RecipeStatus> recipe_statuses;
     private final List<QuestStatus> quest_statuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
+    private final ScriptEngine jsEngine;
+    private final ScriptEngine pyEngine;
 
-    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
+    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes, final ScriptEngine jsEngine, final ScriptEngine pyEngine) {
         this.id = id;
         this.recipe_statuses = recipe_statuses;
         this.quest_statuses = quest_statuses;
         this.saveTypes = saveTypes;
+        this.jsEngine = jsEngine;
+        this.pyEngine = pyEngine;
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
@@ -195,7 +200,7 @@ public final class PlayerStatus {
     public boolean discoveredRecipe(final MinecraftRecipeSaveType type) {
         return saveTypes.contains(type);
     }
-    
+
     public void discoverRecipe(final String item_id) {
         final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
         if (type != null) {
@@ -207,10 +212,11 @@ public final class PlayerStatus {
             );
         }
     }
-    
+
     /**
      * 基本レシピの喪失は起こりえないので、使用しない
-     * @param item_id 
+     *
+     * @param item_id
      */
     public void undiscoverRecipe(final String item_id) {
         final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
@@ -224,5 +230,13 @@ public final class PlayerStatus {
         }
     }
     //</editor-fold>
+
+    public ScriptEngine getJsEngine() {
+        return jsEngine;
+    }
+
+    public ScriptEngine getPyEngine() {
+        return pyEngine;
+    }
 
 }

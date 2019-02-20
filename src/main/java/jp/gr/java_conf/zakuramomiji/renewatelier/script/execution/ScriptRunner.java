@@ -20,7 +20,6 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
-import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,10 +28,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
@@ -43,26 +40,12 @@ import org.bukkit.entity.Player;
  */
 final class ScriptRunner {
 
-    private final ScriptEngineManager SEM;
-    private final GraalJSEngineFactory GJEF;
-    
-    public ScriptRunner() {
-        if(ServerConstants.NASHORN) {
-            SEM = new ScriptEngineManager();
-            GJEF = null;
-        } else {
-            SEM = null;
-            GJEF = new GraalJSEngineFactory();
-        }
-    }
-
-    public void start(final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
+    protected void start(final ScriptEngine engine, final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
         try {
-            final ScriptEngine scriptengine = getScriptEngine(name);
-            if (scriptengine != null) {
-                scriptengine.put("sc", conversation);
-                
-                final Invocable iv = (Invocable) scriptengine;
+            if (eval(engine, name)) {
+                engine.put("sc", conversation);
+
+                final Invocable iv = (Invocable) engine;
                 conversation.setIv(iv);
                 try {
                     iv.invokeFunction("init");
@@ -74,39 +57,42 @@ final class ScriptRunner {
                     Chore.log(ex);
                 }
             } else {
-                Chore.log(name.concat(" is not found for script."));
+                Chore.log(name.concat(" is not found or error for script."));
             }
         } catch (ScriptException ex) {
             Chore.log(ex);
         }
     }
 
-    private ScriptEngine getScriptEngine(final String name) {
+    private boolean eval(final ScriptEngine engine, final String name) {
+        final String script;
+        if (name.endsWith(".js") || name.endsWith(".JS") || name.endsWith(".py") || name.endsWith(".PY")) {
+            script = name;
+        } else {
+            script = name.concat(".js");
+        }
+
         final File file;
-        if (name.contains("/")) {
-            final String[] split = name.split("/");
+        if (script.contains("/")) {
+            final String[] split = script.split("/");
             File f = new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts");
             for (final String path : split) {
                 f = new File(f, path);
             }
             file = f;
         } else {
-            file = new File(
-                    new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts"),
-                    name.concat(".js")
-            );
+            file = new File(new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts"), script);
         }
-        final ScriptEngine engine = SEM != null ? SEM.getEngineByName("javascript") : GJEF.getScriptEngine();
         try (final FileInputStream fis = new FileInputStream(file);
                 final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
             engine.eval(reader);
-            return engine;
+            return true;
         } catch (FileNotFoundException | ScriptException ex) {
             Chore.log(ex);
         } catch (IOException ex) {
             Chore.log(ex);
         }
-        return null;
+        return false;
     }
-    
+
 }

@@ -30,6 +30,7 @@ import net.minecraft.server.v1_13_R2.DataWatcher;
 import net.minecraft.server.v1_13_R2.DataWatcherRegistry;
 import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.MinecraftServer;
+import net.minecraft.server.v1_13_R2.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
@@ -63,19 +64,32 @@ public class FakePlayerPacket {
         return new VEntityPlayer(entityPlayer, entityPlayer.getId(), uuid, name, location);
     }
 
-    public static void sendPlayer(final Player player, final List<VEntityPlayer> players, final boolean remove) {
+    private static PacketPlayOutPlayerInfo getInfo(final Player player, final List<VEntityPlayer> players, final boolean remove) {
         final List<EntityPlayer> eps = new ArrayList<>();
         players.forEach((veps) -> {
             eps.add((EntityPlayer) veps.getEntityPlayer());
         });
+        return new PacketPlayOutPlayerInfo(
+                remove
+                        ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER
+                        : PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER,
+                eps
+        );
+    }
+
+    public static void sendPlayer(final Player player, final List<VEntityPlayer> players, final boolean remove) {
+        PacketUtils.sendPackets(player, getInfo(player, players, remove));
+    }
+
+    public static void sendLogout(final Player player, final List<VEntityPlayer> players) {
+        final int[] ids = new int[players.size()];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = players.get(i).getId();
+        }
         PacketUtils.sendPackets(
                 player,
-                new PacketPlayOutPlayerInfo(
-                        remove
-                                ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER
-                                : PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER,
-                        eps
-                )
+                getInfo(player, players, true),
+                new PacketPlayOutEntityDestroy(ids)
         );
     }
 

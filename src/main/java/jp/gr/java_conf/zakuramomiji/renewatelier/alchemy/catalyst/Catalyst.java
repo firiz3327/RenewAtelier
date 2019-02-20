@@ -137,6 +137,8 @@ public class Catalyst {
                 return 1547;
             case 5:
                 return 1554;
+            case 6:
+                return 1513;
         }
         return -1;
     }

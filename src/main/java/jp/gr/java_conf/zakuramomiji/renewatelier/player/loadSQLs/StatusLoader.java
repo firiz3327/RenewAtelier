@@ -1,7 +1,7 @@
 /*
- * ServerConstants.java
+ * StatusLoader.java
  * 
- * Copyright (c) 2018 firiz.
+ * Copyright (c) 2019 firiz.
  * 
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
  * 
@@ -18,15 +18,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
+package jp.gr.java_conf.zakuramomiji.renewatelier.player.loadSQLs;
 
 /**
  *
  * @author firiz
  */
-public class ServerConstants {
-    
-    public static boolean NASHORN = false;
-    public static boolean PYTHON = true;
+public interface StatusLoader<T> {
+   
+    T load(int id);
     
 }

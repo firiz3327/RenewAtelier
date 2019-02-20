@@ -29,6 +29,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.listener.InventoryListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.PlayerListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.loop.LoopManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
@@ -43,10 +44,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author firiz
  */
 public final class AtelierPlugin extends JavaPlugin {
-
+    
     @Override
     public void onEnable() {
-
         // remove playernpc stands
         getServer().getWorlds().forEach((world) -> {
             world.getEntitiesByClass(ArmorStand.class).stream().filter(
@@ -65,6 +65,7 @@ public final class AtelierPlugin extends JavaPlugin {
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new InventoryListener(), this);
 
+        // setup worlds
         Bukkit.getWorlds().stream().forEachOrdered((World world) -> {
             world.setAutoSave(true);
             world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
@@ -84,12 +85,14 @@ public final class AtelierPlugin extends JavaPlugin {
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
         NPCManager.INSTANCE.setup();
+        PlayerSaveManager.INSTANCE.loadPlayers();
     }
 
     @Override
     public void onDisable() {
         LoopManager.INSTANCE.stopLoop();
         SQLManager.INSTANCE.close();
+        NPCManager.INSTANCE.stop();
     }
 
     public static AtelierPlugin getPlugin() {

@@ -63,7 +63,7 @@ public enum Category {
     OBJECT("オブジェ", Material.CAULDRON),
     IMPORTANT("重要", Material.FILLED_MAP),
     CATALYST("触媒", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 触媒画像
-    COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE),;
+    COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE);
 
     private final String name;
     private final DoubleData<Material, Short> material;

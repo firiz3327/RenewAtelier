@@ -20,8 +20,15 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.execution;
 
+import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import org.bukkit.entity.Player;
+import org.python.jsr223.PyScriptEngineFactory;
 
 /**
  *
@@ -31,16 +38,35 @@ public enum ScriptManager {
     INSTANCE; // enum singleton style
     
     private final ScriptRunner script;
+    private final ScriptEngineManager sem;
+    private final GraalJSEngineFactory gjef;
+    private final PyScriptEngineFactory psef;
     
     private ScriptManager() {
+        sem = ServerConstants.NASHORN ? new ScriptEngineManager() : null;
+        gjef = ServerConstants.NASHORN ? null : new GraalJSEngineFactory();
+        psef = ServerConstants.PYTHON ? new PyScriptEngineFactory() : null;
         script = new ScriptRunner();
     }
 
     public void start(final String name, final Player player, final ScriptConversation conversation) {
-        script.start(name, player, null, conversation);
+        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+        final ScriptEngine engine = ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY")) ? status.getPyEngine() : status.getJsEngine();
+        script.start(engine, name, player, null, conversation);
     }
 
     public void start(final String name, final Player player, final ScriptConversation conversation, final String functionName, final Object... args) {
-        script.start(name, player, functionName, conversation, args);
+        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+        final ScriptEngine engine = ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY")) ? status.getPyEngine() : status.getJsEngine();
+        script.start(engine, name, player, functionName, conversation, args);
     }
+    
+    public ScriptEngine createJsEngine() {
+        return sem == null ? gjef.getScriptEngine() : sem.getEngineByName("javascript");
+    }
+    
+    public ScriptEngine createPyEngine() {
+        return psef == null ? null : psef.getScriptEngine();
+    }
+    
 }

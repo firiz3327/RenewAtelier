@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import javax.script.Invocable;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
@@ -88,27 +89,6 @@ public final class NPCConversation extends ScriptConversation {
         return (npc == null ? npcPlayer.getLocation() : npc.getLocation()).clone();
     }
 
-    public void dispose() {
-        NPCManager.INSTANCE.dispose(player.getUniqueId());
-    }
-
-    public void sendNext(final String text) {
-        sendNext("", text);
-    }
-
-    public void sendNext(final String prefix, final String text) {
-        sendNext(prefix, "", text);
-    }
-
-    public void sendNext(final String prefix, final String suffix, final String text) {
-        sendNext(prefix, suffix, text, 60); // 3 sec
-    }
-
-    public void sendNext(final String prefix, final String suffix, final String text, final int time) {
-        player.sendMessage(prefix + text + suffix);
-        messagePacket(chatColor(text), time);
-    }
-
     public void openDeliveryInventory(final String title, final int req_amount, final AlchemyMaterial material) {
         openDeliveryInventory(title, 2, req_amount, material);
     }
@@ -131,6 +111,59 @@ public final class NPCConversation extends ScriptConversation {
                 characteristics,
                 ingredients
         );
+    }
+
+    public void removeNPC(final String name, final String script, final double x, final double y, final double z, final EntityType type) {
+        removeNPC(name, script, new Location(player.getWorld(), x, y, z), type);
+    }
+
+    public void removeNPC(final String name, final String script, final Location location, final EntityType type) {
+        NPCManager.INSTANCE.removeNPC(location, type, name, script);
+    }
+
+    public void createNPC(final String name, final String script, final double x, final double y, final double z, final EntityType type) {
+        createNPC(name, script, new Location(player.getWorld(), x, y, z), type);
+    }
+
+    public void createNPC(final String name, final String script, final Location location, final EntityType type) {
+        NPCManager.INSTANCE.createNPC(location, type, name, script);
+    }
+
+    public void removePlayerNPC(final String name, final String script, final double x, final double y, final double z, final UUID uuid) {
+        removePlayerNPC(name, script, new Location(player.getWorld(), x, y, z), uuid);
+    }
+    
+    public void removePlayerNPC(final String name, final String script, final Location location, final UUID uuid) {
+        NPCManager.INSTANCE.removeNPCPlayer(location, name, uuid, script);
+    }
+
+    public void createPlayerNPC(final String name, final String script, final double x, final double y, final double z, final UUID uuid) {
+        createPlayerNPC(name, script, new Location(player.getWorld(), x, y, z), uuid);
+    }
+
+    public void createPlayerNPC(final String name, final String script, final Location location, final UUID uuid) {
+        NPCManager.INSTANCE.createNPCPlayer(location, name, uuid, script);
+    }
+
+    public void dispose() {
+        NPCManager.INSTANCE.dispose(player.getUniqueId());
+    }
+
+    public void sendNext(final String text) {
+        sendNext("", text);
+    }
+
+    public void sendNext(final String prefix, final String text) {
+        sendNext(prefix, "", text);
+    }
+
+    public void sendNext(final String prefix, final String suffix, final String text) {
+        sendNext(prefix, suffix, text, 60); // 3 sec
+    }
+
+    public void sendNext(final String prefix, final String suffix, final String text, final int time) {
+        player.sendMessage(prefix + text + suffix);
+        messagePacket(chatColor(text), time);
     }
 
     private void messagePacket(final String text, final int time) {

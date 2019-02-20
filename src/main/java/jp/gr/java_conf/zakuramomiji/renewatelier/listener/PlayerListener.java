@@ -45,6 +45,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -125,8 +126,14 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void join(final PlayerJoinEvent e) {
+        PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer().getUniqueId());
         NPCManager.INSTANCE.packet(e.getPlayer());
         Nodification.loginNodification(e.getPlayer());
+    }
+    
+    @EventHandler
+    private void quit(final PlayerQuitEvent e) {
+        PlayerSaveManager.INSTANCE.unloadStatus(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
