@@ -28,6 +28,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Cauldron;
 
@@ -68,9 +69,9 @@ public enum AlchemyInventoryType {
         this.cr = cr;
     }
 
-    public final static AlchemyInventoryType search(final Inventory inv) {
+    public final static AlchemyInventoryType search(final InventoryView invView) {
         for (final AlchemyInventoryType type : values()) {
-            if (inv.getName().contains(type.check)) {
+            if (invView.getTitle().contains(type.check)) {
                 return type;
             }
         }

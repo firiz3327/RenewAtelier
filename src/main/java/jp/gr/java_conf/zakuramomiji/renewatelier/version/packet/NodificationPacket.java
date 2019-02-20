@@ -41,7 +41,7 @@ import org.bukkit.entity.Player;
 public class NodificationPacket {
 
     public static void sendRecipe(final Player player, final String id, final boolean remove) {
-        final ArrayList<MinecraftKey> var1 = new ArrayList<>() {
+        final ArrayList<MinecraftKey> var1 = new ArrayList<MinecraftKey>() {
             {
                 add(new MinecraftKey(id));
             }
@@ -60,14 +60,14 @@ public class NodificationPacket {
 
     @Deprecated
     public static void sendAdvancement(final Player player, final String id, final boolean remove) {
-        final HashMap<MinecraftKey, AdvancementProgress> var3 = new HashMap<>() {
+        final HashMap<MinecraftKey, AdvancementProgress> var3 = new HashMap<MinecraftKey, AdvancementProgress>() {
             {
                 final AdvancementProgress progress = new AdvancementProgress();
                 if (!remove) {
                     try {
                         final Field a = progress.getClass().getDeclaredField("a");
                         a.setAccessible(true);
-                        a.set(progress, new HashMap<>() {
+                        a.set(progress, new HashMap<String, CriterionProgress>() {
                             {
                                 final CriterionProgress cp = new CriterionProgress();
                                 final Field b2 = cp.getClass().getDeclaredField("b");

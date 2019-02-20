@@ -33,6 +33,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
+import org.graalvm.polyglot.Context;
 
 /**
  *
@@ -42,9 +43,8 @@ final class ScriptRunner {
 
     protected void start(final ScriptEngine engine, final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
         try {
+            engine.put("sc", conversation);
             if (eval(engine, name)) {
-                engine.put("sc", conversation);
-
                 final Invocable iv = (Invocable) engine;
                 conversation.setIv(iv);
                 try {
@@ -66,7 +66,12 @@ final class ScriptRunner {
 
     private boolean eval(final ScriptEngine engine, final String name) {
         final String script;
-        if (name.endsWith(".js") || name.endsWith(".JS") || name.endsWith(".py") || name.endsWith(".PY")) {
+        if (name.endsWith(".js")
+                || name.endsWith(".JS")
+                || name.endsWith(".2.py")
+                || name.endsWith(".2.PY")
+                || name.endsWith(".3.py")
+                || name.equals(".3.PY")) {
             script = name;
         } else {
             script = name.concat(".js");
@@ -83,6 +88,7 @@ final class ScriptRunner {
         } else {
             file = new File(new File(AtelierPlugin.getPlugin().getDataFolder(), "scripts"), script);
         }
+
         try (final FileInputStream fis = new FileInputStream(file);
                 final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
             engine.eval(reader);

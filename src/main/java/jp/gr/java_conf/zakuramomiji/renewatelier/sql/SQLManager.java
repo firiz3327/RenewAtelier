@@ -35,11 +35,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.BetweenValue;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.ConditionType;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.InValue;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.KeyValue;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SelectValue.Pipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 
@@ -250,79 +245,6 @@ public enum SQLManager {
                 final List<Object> dataList = new ArrayList<>();
                 for (int i = 0; i < select_size; i++) {
                     dataList.add(resultSet.getObject(columns[i]));
-                }
-                result.add(dataList);
-            }
-        } catch (SQLException ex) {
-            Chore.log(ex);
-        }
-        return result;
-    }
-
-    public List<List<Object>> select(final SelectValue value) {
-        final List<List<Object>> result = new ArrayList<>();
-        try (final Statement stmt = conn.createStatement()) {
-            final StringBuilder sbmain = new StringBuilder();
-            sbmain.append("select ");
-
-            final StringBuilder sbkeys = new StringBuilder();
-            final StringBuilder sbvals = new StringBuilder();
-            final LinkedHashMap<KeyValue, DoubleData<ConditionType, Pipe>> vals = value.getVals();
-            int i = 0;
-            for (final KeyValue key : vals.keySet()) {
-                sbkeys.append(",").append(key.getColumn());
-
-                if (key.getValue() != null) {
-                    final DoubleData<ConditionType, Pipe> val = vals.get(key);
-                    if (val != null) {
-                        sbvals.append(key.getColumn()).append(" ");
-
-                        switch (val.getLeft()) {
-                            case BETWEEN:
-                            case NOT_BETWEEN:
-                                if (key instanceof BetweenValue) {
-                                    sbvals.append(val.getLeft()).append(" ").append(key.getValue());
-                                    break;
-                                }
-                                throw new IllegalArgumentException(ConditionType.BETWEEN + " needs " + BetweenValue.class);
-                            case LIKE:
-                                String str = key.getValue();
-                                if (!(str.startsWith("'") && str.endsWith("'"))) {
-                                    str = "'" + str + "'";
-                                }
-                                sbvals.append(val.getLeft()).append(" ").append(str);
-                                break;
-                            case IN:
-                                if (key instanceof InValue) {
-                                    sbvals.append(val.getLeft()).append("(").append(key.getValue()).append(")");
-                                    break;
-                                }
-                                throw new IllegalArgumentException(ConditionType.IN + " needs " + InValue.class);
-                            default:
-                                sbvals.append(val.getLeft()).append(" ").append(key.getValue());
-                                break;
-                        }
-
-                        final Pipe pipe = val.getRight();
-                        if (pipe != null && pipe != Pipe.NONE) {
-                            sbvals.append(" ").append(pipe).append(" ");
-                        }
-                    }
-                }
-                i++;
-            }
-            sbmain.append(sbkeys.substring(1))
-                    .append(" from ")
-                    .append(value.getTable())
-                    .append(sbvals.length() == 0 ? "" : " where ".concat(sbvals.toString()))
-                    .append(value.getOrderBys().isEmpty() ? "" : " order by ".concat(value.getOrderBys().toString()))
-                    .append(value.getOrderType() == null ? "" : " ".concat(value.getOrderType().toString()))
-                    .append(";");
-            final ResultSet resultSet = stmt.executeQuery(sbmain.toString());
-            while (resultSet.next()) {
-                final List<Object> dataList = new ArrayList<>();
-                for (final KeyValue key : vals.keySet()) {
-                    dataList.add(resultSet.getObject(key.getColumn()));
                 }
                 result.add(dataList);
             }

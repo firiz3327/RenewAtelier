@@ -27,6 +27,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.engine.GraalPy3Engine;
 import org.bukkit.entity.Player;
 import org.python.jsr223.PyScriptEngineFactory;
 
@@ -45,28 +46,44 @@ public enum ScriptManager {
     private ScriptManager() {
         sem = ServerConstants.NASHORN ? new ScriptEngineManager() : null;
         gjef = ServerConstants.NASHORN ? null : new GraalJSEngineFactory();
-        psef = ServerConstants.PYTHON ? new PyScriptEngineFactory() : null;
+        psef = ServerConstants.PYTHON_2 ? new PyScriptEngineFactory() : null;
         script = new ScriptRunner();
     }
 
     public void start(final String name, final Player player, final ScriptConversation conversation) {
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
-        final ScriptEngine engine = ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY")) ? status.getPyEngine() : status.getJsEngine();
-        script.start(engine, name, player, null, conversation);
+        script.start(getEngine(name, player), name, player, null, conversation);
     }
 
     public void start(final String name, final Player player, final ScriptConversation conversation, final String functionName, final Object... args) {
+        script.start(getEngine(name, player), name, player, functionName, conversation, args);
+    }
+    
+    private ScriptEngine getEngine(final String name, final Player player) {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
-        final ScriptEngine engine = ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY")) ? status.getPyEngine() : status.getJsEngine();
-        script.start(engine, name, player, functionName, conversation, args);
+        final ScriptEngine engine;
+        if(ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY"))) {
+            if(name.endsWith(".2.py") || name.endsWith(".2.PY")) {
+                engine = status.getPy2Engine();
+            } else {
+                engine = status.getPy3Engine();
+            }
+        } else {
+            engine = status.getJsEngine();
+        }
+        return engine;
     }
     
     public ScriptEngine createJsEngine() {
         return sem == null ? gjef.getScriptEngine() : sem.getEngineByName("javascript");
     }
     
-    public ScriptEngine createPyEngine() {
+    public ScriptEngine createPy2Engine() {
         return psef == null ? null : psef.getScriptEngine();
     }
+    
+    public ScriptEngine createPy3Engine() {
+        return ServerConstants.PYTHON_3 ? new GraalPy3Engine() : null;
+    }
+    
     
 }

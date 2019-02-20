@@ -205,7 +205,7 @@ public final class NPCConversation extends ScriptConversation {
                 // https://wiki.vg/Entity_metadata#Entity_Metadata_Format
                 final PacketContainer packet2 = EntityPacket.getMetadataPacket(
                         fakeEntity,
-                        EntityPacket.setEntityCustomName(PacketUtils.createWatcher(new HashMap<>() {
+                        EntityPacket.setEntityCustomName(PacketUtils.createWatcher(new HashMap<Integer, Object>() {
                             {
                                 put(0, (byte) (0x20)); // invisible
                                 put(3, true); // customname visible

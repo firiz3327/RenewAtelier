@@ -189,7 +189,7 @@ public enum KettleItemManager {
             catalyst_bonus.get(uuid).add(data);
             return;
         }
-        final List<CatalystBonus> list = new ArrayList<>() {
+        final List<CatalystBonus> list = new ArrayList<CatalystBonus>() {
             @Override
             public boolean contains(Object obj) {
                 if (!(obj instanceof CatalystBonus)) {

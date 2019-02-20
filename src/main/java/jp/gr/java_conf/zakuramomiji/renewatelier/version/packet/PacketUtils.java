@@ -1,28 +1,15 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.version.packet;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import net.minecraft.server.v1_13_R2.AdvancementProgress;
-import net.minecraft.server.v1_13_R2.EntityHuman;
 import net.minecraft.server.v1_13_R2.Packet;
 import net.minecraft.server.v1_13_R2.PlayerConnection;
-import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -34,6 +21,7 @@ public class PacketUtils {
         PacketUtils.manager = manager;
         EntityPacket.init(manager);
 
+        /*
         manager.addPacketListener(new PacketAdapter(
                 AtelierPlugin.getPlugin(),
                 PacketType.Play.Server.ADVANCEMENTS
@@ -89,6 +77,7 @@ public class PacketUtils {
                 }
             }
         });
+        */
     }
 
     public static void sendPacket(final Player player, final PacketContainer packet) {

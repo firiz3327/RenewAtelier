@@ -122,9 +122,6 @@ public enum LoopManager {
             new ArrayList<>(animDrops).forEach((drop) -> {
                 drop.anim();
             });
-            plugin.getServer().getWorlds().stream().forEach((world) -> {
-                entityLoop(world);
-            });
             new ArrayList<>(loop_miri_runs).forEach((run) -> {
                 run.run();
             });
@@ -141,6 +138,9 @@ public enum LoopManager {
     }
 
     private void half_sec_loop() {
+        plugin.getServer().getWorlds().stream().forEach((world) -> {
+            entityLoop(world);
+        });
         new ArrayList<>(loop_half_sec_runs).forEach((run) -> {
             run.run();
         });
@@ -214,6 +214,7 @@ public enum LoopManager {
                 cauldronDamage(entity);
             }
 
+            /*
             switch (entity.getType()) {
                 case PLAYER: {
                     Player player = (Player) entity;
@@ -235,23 +236,21 @@ public enum LoopManager {
                     } else if (hasSlow) {
                         player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
                     }
-                    /*
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if(player.getGameMode() != GameMode.CREATIVE) {
-                                PlayerInventory playerInv = player.getInventory();
-                                while (true) {
-                                    if (playerInv.contains(Material.BARRIER)) {
-                                        playerInv.remove(Material.BARRIER);
-                                        continue;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }.runTaskLater(plugin, 1);
-                     */
+//                    new BukkitRunnable() {
+//                        @Override
+//                        public void run() {
+//                            if(player.getGameMode() != GameMode.CREATIVE) {
+//                                PlayerInventory playerInv = player.getInventory();
+//                                while (true) {
+//                                    if (playerInv.contains(Material.BARRIER)) {
+//                                        playerInv.remove(Material.BARRIER);
+//                                        continue;
+//                                    }
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }.runTaskLater(plugin, 1);
                     break;
                 }
                 case DROPPED_ITEM: {
@@ -265,6 +264,7 @@ public enum LoopManager {
                     break;
                 }
             }
+             */
         }
     }
 

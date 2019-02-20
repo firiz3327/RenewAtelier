@@ -95,7 +95,8 @@ public enum PlayerSaveManager {
                 (List<QuestStatus>) objs.get(1), // questStatus
                 (List<MinecraftRecipeSaveType>) objs.get(2), // discoveredRecipes
                 script.createJsEngine(),
-                script.createPyEngine()
+                script.createPy2Engine(),
+                script.createPy3Engine()
         );
         statusList.put(uuid, status);
     }

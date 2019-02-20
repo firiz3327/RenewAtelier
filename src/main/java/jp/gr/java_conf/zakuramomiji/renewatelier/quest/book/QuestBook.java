@@ -179,7 +179,7 @@ public class QuestBook {
                 if (!flags.isEmpty()) {
                     view_meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
                 }
-                view_meta.setLore(new ArrayList<>() {
+                view_meta.setLore(new ArrayList<String>() {
                     {
                         add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
                         add(ChatColor.GRAY + "必要素材:");
