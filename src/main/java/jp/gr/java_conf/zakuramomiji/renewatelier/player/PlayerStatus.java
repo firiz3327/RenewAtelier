@@ -51,18 +51,15 @@ public final class PlayerStatus {
     private final List<RecipeStatus> recipe_statuses;
     private final List<QuestStatus> quest_statuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
-    private final ScriptEngine jsEngine;
-    private final ScriptEngine py2Engine;
-    private final ScriptEngine py3Engine;
+    private ScriptEngine jsEngine;
+    private ScriptEngine py2Engine;
+    private ScriptEngine py3Engine;
 
-    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes, final ScriptEngine jsEngine, final ScriptEngine py2Engine, final ScriptEngine py3Engine) {
+    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
         this.id = id;
         this.recipe_statuses = recipe_statuses;
         this.quest_statuses = quest_statuses;
         this.saveTypes = saveTypes;
-        this.jsEngine = jsEngine;
-        this.py2Engine = py2Engine;
-        this.py3Engine = py3Engine;
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
@@ -237,12 +234,25 @@ public final class PlayerStatus {
         return jsEngine;
     }
 
+    public void setJsEngine(ScriptEngine jsEngine) {
+        this.jsEngine = jsEngine;
+    }
+
     public ScriptEngine getPy2Engine() {
         return py2Engine;
     }
-    
+
+    public void setPy2Engine(ScriptEngine py2Engine) {
+        this.py2Engine = py2Engine;
+    }
+
     public ScriptEngine getPy3Engine() {
         return py3Engine;
     }
+
+    public void setPy3Engine(ScriptEngine py3Engine) {
+        this.py3Engine = py3Engine;
+    }
+
 
 }

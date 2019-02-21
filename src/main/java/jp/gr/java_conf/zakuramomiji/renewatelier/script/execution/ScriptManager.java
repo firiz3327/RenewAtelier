@@ -27,7 +27,8 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.constants.ServerConstants;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
-import jp.gr.java_conf.zakuramomiji.renewatelier.script.engine.GraalPy3Engine;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.engine.GraalEngine;
+import jp.gr.java_conf.zakuramomiji.renewatelier.script.engine.GraalEngine.Type;
 import org.bukkit.entity.Player;
 import org.python.jsr223.PyScriptEngineFactory;
 
@@ -61,7 +62,7 @@ public enum ScriptManager {
     private ScriptEngine getEngine(final String name, final Player player) {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
         final ScriptEngine engine;
-        if(ServerConstants.PYTHON && (name.endsWith(".py") || name.endsWith(".PY"))) {
+        if(name.endsWith(".py") || name.endsWith(".PY")) {
             if(name.endsWith(".2.py") || name.endsWith(".2.PY")) {
                 engine = status.getPy2Engine();
             } else {
@@ -82,7 +83,7 @@ public enum ScriptManager {
     }
     
     public ScriptEngine createPy3Engine() {
-        return ServerConstants.PYTHON_3 ? new GraalPy3Engine() : null;
+        return ServerConstants.PYTHON_3 ? new GraalEngine(Type.PYTHON) : null;
     }
     
     

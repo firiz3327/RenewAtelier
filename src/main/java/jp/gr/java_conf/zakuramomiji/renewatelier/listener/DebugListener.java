@@ -267,13 +267,13 @@ public class DebugListener implements Listener {
                     );
                     break;
                 }
-                case "advancement_packet": {
-                    Nodification.advancementNodification(
-                            e.getPlayer(),
-                            strs[1]
-                    );
-                    break;
-                }
+//                case "advancement_packet": {
+//                    Nodification.advancementNodification(
+//                            e.getPlayer(),
+//                            strs[1]
+//                    );
+//                    break;
+//                }
                 case "czombie": {
                     Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
                         CustomZombie.spawnEntity(new CustomZombie(

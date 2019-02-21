@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.drop.AnimatedDrop;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,14 +31,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Cauldron;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 /**
  *

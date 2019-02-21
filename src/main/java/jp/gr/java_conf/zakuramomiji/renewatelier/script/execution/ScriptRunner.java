@@ -26,14 +26,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.script.conversation.ScriptConversation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import org.bukkit.entity.Player;
-import org.graalvm.polyglot.Context;
 
 /**
  *
@@ -42,8 +43,13 @@ import org.graalvm.polyglot.Context;
 final class ScriptRunner {
 
     protected void start(final ScriptEngine engine, final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
+        if (engine == null) {
+            throw new NullPointerException("This engine is unsupport language file.");
+        }
         try {
-            engine.put("sc", conversation);
+            final Bindings bindings = engine.createBindings();
+            bindings.put("sc", conversation);
+            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             if (eval(engine, name)) {
                 final Invocable iv = (Invocable) engine;
                 conversation.setIv(iv);

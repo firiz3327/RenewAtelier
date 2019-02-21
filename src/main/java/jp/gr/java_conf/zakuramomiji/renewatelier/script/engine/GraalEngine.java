@@ -1,5 +1,5 @@
 /*
- * GraalPy3Engine.java
+ * GraalEngine.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -20,8 +20,11 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.script.engine;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.script.AbstractScriptEngine;
 import javax.script.Bindings;
 import javax.script.Compilable;
@@ -30,7 +33,7 @@ import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
-import javax.script.SimpleBindings;
+import org.apache.commons.io.IOUtils;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Source;
@@ -40,26 +43,27 @@ import org.graalvm.polyglot.Value;
  *
  * @author firiz
  */
-public class GraalPy3Engine extends AbstractScriptEngine implements Compilable, Invocable, AutoCloseable {
+public final class GraalEngine extends AbstractScriptEngine implements Compilable, Invocable, AutoCloseable {
 
-    private static final String ID = "python";
+    public enum Type {
+        PYTHON("python", "import polyglot\nsc = polyglot.import_value('sc')\n");
+
+        final String language;
+        final String importText;
+
+        Type(String language, String importText) {
+            this.language = language;
+            this.importText = importText;
+        }
+    }
+
+    private final Type type;
     private final Context c;
 
-    public GraalPy3Engine() {
-        c = Context.newBuilder(ID).allowIO(true).build();
-    }
-
-    @Override
-    public Object eval(Reader reader, ScriptContext ctxt) throws ScriptException {
-        return eval(createSource(reader, ctxt), ctxt);
-    }
-
-    private Source createSource(Reader reader, ScriptContext ctxt) throws ScriptException {
-        try {
-            return Source.newBuilder(ID, reader, getScriptName(ctxt)).build();
-        } catch (IOException var3) {
-            throw new ScriptException(var3);
-        }
+    public GraalEngine(Type type) {
+        this.type = type;
+        this.c = Context.newBuilder(type.language).allowIO(true).build();
+        setBindings(createBindings(), ScriptContext.ENGINE_SCOPE);
     }
 
     @Override
@@ -67,8 +71,24 @@ public class GraalPy3Engine extends AbstractScriptEngine implements Compilable, 
         return eval(createSource(script, ctxt), ctxt);
     }
 
+    @Override
+    public Object eval(Reader reader, ScriptContext ctxt) throws ScriptException {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(type.importText); // import文を含ませるため、一度文字列に変換してSourceを作成
+        final BufferedReader br = IOUtils.toBufferedReader(reader);
+        try {
+            String str;
+            while ((str = br.readLine()) != null) {
+                sb.append(str).append("\n");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(GraalEngine.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return eval(createSource(sb.toString(), ctxt), ctxt);
+    }
+
     private Source createSource(String script, ScriptContext ctxt) {
-        return Source.newBuilder(ID, script, getScriptName(ctxt)).buildLiteral();
+        return Source.newBuilder(type.language, type.importText.concat(script), getScriptName(ctxt)).buildLiteral();
     }
 
     private Object eval(Source source, ScriptContext scriptContext) throws ScriptException {
@@ -98,7 +118,11 @@ public class GraalPy3Engine extends AbstractScriptEngine implements Compilable, 
 
     @Override
     public Bindings createBindings() {
-        return new SimpleBindings();
+        final Bindings oldb = getBindings(ScriptContext.ENGINE_SCOPE);
+        if (oldb != null && oldb instanceof GraalBindings) {
+            oldb.clear();
+        }
+        return new GraalBindings(c);
     }
 
     @Override
@@ -114,7 +138,7 @@ public class GraalPy3Engine extends AbstractScriptEngine implements Compilable, 
 
     @Override
     public Object invokeFunction(String name, Object... args) throws ScriptException, NoSuchMethodException {
-        final Value value = c.getBindings(ID).getMember(name);
+        final Value value = c.getBindings(type.language).getMember(name);
         return invoke(name, value, args);
     }
 
