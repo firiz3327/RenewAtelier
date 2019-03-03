@@ -21,12 +21,9 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.KettleItemManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
+
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
@@ -210,9 +207,7 @@ public class AlchemyKettle {
         if (levels != null && !levels.isEmpty()) {
             final List<RecipeLevelEffect> effects = levels.get(recipeStatus.getLevel());
             if (effects != null && !effects.isEmpty()) {
-                effects.forEach((e) -> {
-                    recipe_effects.put(e.getType(), e.getCount());
-                });
+                effects.forEach((e) -> recipe_effects.put(e.getType(), e.getCount()));
             }
         }
 
@@ -308,7 +303,7 @@ public class AlchemyKettle {
         if (kettleBox != null) {
             final List<ItemStack> kettleItems = kettleBox.getItemStacks();
             if (kettleItems != null && !kettleItems.isEmpty()) {
-                all_quality = kettleItems.stream().map((item) -> AlchemyItemStatus.getQuality(item)).reduce(all_quality, Integer::sum);
+                all_quality = kettleItems.stream().map(AlchemyItemStatus::getQuality).reduce(all_quality, Integer::sum);
                 if (all_quality != 0) {
                     all_quality /= kettleItems.size();
                 }
@@ -621,9 +616,7 @@ public class AlchemyKettle {
                                 final List<Category> categorys = AlchemyItemStatus.getCategorys(result_slot_item);
 
                                 final List<String> activeEffects = new ArrayList<>();
-                                recipe.getEffects().stream().map((effect) -> effect.getActiveEffect(uuid)).filter((activeEffect) -> (activeEffect != null)).filter((activeEffect) -> (activeEffect.getType() == StarEffect.StarEffectType.NAME)).forEachOrdered((activeEffect) -> {
-                                    activeEffects.add(activeEffect.getName());
-                                });
+                                recipe.getEffects().stream().map((effect) -> effect.getActiveEffect(uuid)).filter(Objects::nonNull).filter((activeEffect) -> (activeEffect.getType() == StarEffect.StarEffectType.NAME)).forEachOrdered((activeEffect) -> activeEffects.add(activeEffect.getName()));
 
                                 // アイテムの作成
                                 resultItem = AlchemyItemStatus.getItem(
@@ -674,7 +667,6 @@ public class AlchemyKettle {
                         Chore.log("左右反転・上下反転・回転");
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
 
                         final ItemStack settingItem = inv.getItem(1);
@@ -758,7 +750,6 @@ public class AlchemyKettle {
                         Chore.log("戻す");
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
 
                         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                         if (kettleBox != null) {
@@ -842,7 +833,7 @@ public class AlchemyKettle {
                                         final boolean change_on = !KETTLE.isSelectCharacteristic(uuid, c);
                                         if (change_on) {
                                             int inheriting = 0;
-                                            inheriting = effects.stream().filter((effect) -> (effect.getType() == RecipeLEType.ADD_INHERITING)).map((effect) -> effect.getCount()).reduce(inheriting, Integer::sum);
+                                            inheriting = effects.stream().filter((effect) -> (effect.getType() == RecipeLEType.ADD_INHERITING)).map(RecipeLevelEffect::getCount).reduce(inheriting, Integer::sum);
                                             final List<CatalystBonus> catalystBonusList = KETTLE.getCatalystBonusList(uuid);
                                             if (catalystBonusList != null) {
                                                 inheriting = catalystBonusList.stream().filter((cbd) -> (cbd.getData().getType() == BonusType.INHERITING)).map((cbd) -> cbd.getData().getX()).reduce(inheriting, Integer::sum);
@@ -984,6 +975,7 @@ public class AlchemyKettle {
                             }
                         } else {
                             Chore.log(raw);
+                            // always falses
                             if (/*(raw >= 54 && raw <= 56)
                                     || */(raw >= 63 && raw <= 65)
                                     /*|| (raw >= 72 && raw <= 74)*/

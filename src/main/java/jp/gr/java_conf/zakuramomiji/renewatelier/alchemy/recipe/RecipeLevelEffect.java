@@ -61,7 +61,7 @@ public class RecipeLevelEffect {
         private final String name;
         private final boolean viewnumber;
         
-        private RecipeLEType(String name, boolean viewnumber) {
+        RecipeLEType(String name, boolean viewnumber) {
             this.name = name;
             this.viewnumber = viewnumber;
         }

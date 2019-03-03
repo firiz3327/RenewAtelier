@@ -31,19 +31,19 @@ public final class Randomizer {
     private final static Random RAND = new Random();
     private final static Sfmt RAND2 = new Sfmt(new int[]{(int) System.currentTimeMillis(), (int) Runtime.getRuntime().freeMemory()});
 
-    public static final int nextInt(final int arg0) {
+    public static int nextInt(final int arg0) {
         return RAND2.NextInt(arg0);
     }
 
-    public static final boolean nextBoolean() {
+    public static boolean nextBoolean() {
         return RAND.nextBoolean();
     }
 
-    public static final double nextDouble() {
+    public static double nextDouble() {
         return RAND2.NextUnif();
     }
 
-    public static final int rand(final int lbound, final int ubound) {
+    public static int rand(final int lbound, final int ubound) {
         return nextInt(ubound - lbound + 1) + lbound;
     }
 }

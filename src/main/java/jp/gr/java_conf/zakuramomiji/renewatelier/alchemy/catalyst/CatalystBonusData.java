@@ -86,45 +86,35 @@ public class CatalystBonusData {
                 "調合終了時に引き\n継がれる特性の数が\n$xつ$zます",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "増え" : "減り";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "増え" : "減り"
         ), // ok
         QUALITY(
                 "品質$x",
                 "できあがるアイテムの\n最終的な品質が\n$z$xされます",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "+" : "-";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "+" : "-"
         ), // ok
         QUALITY_PERCENT(
                 "品質$x%",
                 "できあがるアイテムの\n最終的な品質が\n$x%$zします",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "増加" : "減少";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
         ), // ok
         AMOUNT(
                 "作成数$x",
                 "",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "増加" : "減少";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
         ), // ok
         USECOUNT(
                 "使用回数$x",
                 "できあがるアイテムが\n使用できる場合、使用\n回数が$x回$zます",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "増え" : "減り";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "増え" : "減り"
         ), // 使用回数ありのアイテムを作っていない
         STARLEVEL(
                 "効果レベル$x・$y",
@@ -136,27 +126,21 @@ public class CatalystBonusData {
                     }
                     return ((AlchemyAttribute) objs[0]).getName();
                 },
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "アップ" : "ダウン";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "アップ" : "ダウン"
         ), // ok
         SIZE(
                 "サイズ$x",
                 "できあがるアイテムの\n最終的なサイズが\n$x段階$zなります",
                 false,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "大きく" : "小さく";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "大きく" : "小さく"
         ),
         INGREDIENT_AMOUNT_PERCENT(
                 "錬金成分量$x%",
                 "次に投入する材料の\n錬金成分量が通常より\n$x%$zします",
                 true,
                 null,
-                (Object... objs) -> {
-                    return ((int) objs[0]) >= 0 ? "増加" : "減少";
-                }
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
         ), // ok
         CHARACTERISTIC("$y付与", "できあがるアイテムに\n「$y」の特性が\n追加されます", false, (Object... objs) -> { // ok type: CHARACTERISTIC, y: Characteristic_ID
             if (!(Boolean) objs[1]) {
@@ -171,7 +155,7 @@ public class CatalystBonusData {
         private final ReturnObjectRunnable y_parse;
         private final ReturnObjectRunnable descRepletion;
 
-        private BonusType(final String name, final String desc, final boolean once) {
+        BonusType(final String name, final String desc, final boolean once) {
             this.name = name;
             this.desc = desc;
             this.y_parse = null;
@@ -179,7 +163,7 @@ public class CatalystBonusData {
             this.descRepletion = null;
         }
 
-        private BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse) {
+        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse) {
             this.name = name;
             this.desc = desc;
             this.once = once;
@@ -187,7 +171,7 @@ public class CatalystBonusData {
             this.descRepletion = null;
         }
 
-        private BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse, final ReturnObjectRunnable descRepletion) {
+        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse, final ReturnObjectRunnable descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;

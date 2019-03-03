@@ -39,12 +39,10 @@ public class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
                 new Object[]{id}
         );
         final List<QuestStatus> quest_statuses = new ArrayList<>();
-        quest_statuses_obj.forEach((datas) -> {
-            quest_statuses.add(new QuestStatus(
-                    (String) datas.get(1), // quest_id
-                    (int) datas.get(2) != 0 // clear
-            ));
-        });
+        quest_statuses_obj.forEach((datas) -> quest_statuses.add(new QuestStatus(
+                (String) datas.get(1), // quest_id
+                (int) datas.get(2) != 0 // clear
+        )));
         return quest_statuses;
     }
 

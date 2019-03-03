@@ -1679,7 +1679,7 @@ public enum LanguageItemUtil {
     private final String id;
     private final String localizeName;
 
-    private LanguageItemUtil(final String id, final String localizeName) {
+    LanguageItemUtil(final String id, final String localizeName) {
         this.id = id;
         this.localizeName = localizeName;
     }

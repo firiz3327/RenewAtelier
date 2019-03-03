@@ -85,14 +85,14 @@ public enum AlchemyCircle {
     private final int data;
     private final int value;
 
-    private AlchemyCircle(final int type, final int data, final int value) {
+    AlchemyCircle(final int type, final int data, final int value) {
         this.type = type;
         this.type2 = -1;
         this.data = data;
         this.value = value;
     }
 
-    private AlchemyCircle(final int type, final int type2, final int data, final int value) {
+    AlchemyCircle(final int type, final int type2, final int data, final int value) {
         this.type = type;
         this.type2 = type2;
         this.data = data;

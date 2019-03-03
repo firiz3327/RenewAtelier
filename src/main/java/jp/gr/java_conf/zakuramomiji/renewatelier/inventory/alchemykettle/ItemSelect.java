@@ -96,7 +96,7 @@ public final class ItemSelect {
         setting.addEnchant(Enchantment.ARROW_DAMAGE, new_page, true);
         setting_item.setItemMeta(setting);
 
-        final String data[] = reqs.get(new_page).split(",");
+        final String[] data = reqs.get(new_page).split(",");
         String name = null;
         DoubleData<Material, Short> material = null;
         if (data[0].startsWith("material:")) {
@@ -144,7 +144,7 @@ public final class ItemSelect {
     private static boolean checkMaxSlot(final UUID uuid, final AlchemyRecipe recipe, final int page) {
         final List<String> reqs = recipe.getReqMaterial();
         final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
-        final String data[] = reqs.get(page).split(",");
+        final String[] data = reqs.get(page).split(",");
         final DoubleData<Material, Short> material = data[0].startsWith("material:")
                 ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
@@ -173,7 +173,7 @@ public final class ItemSelect {
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();
             if (current != null && current.getType() != Material.AIR && !checkMaxSlot(uuid, recipe, page)) {
-                final String data[] = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
+                final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
                 if (Chore.hasMaterial(current, data[0]) != -1) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
@@ -202,7 +202,7 @@ public final class ItemSelect {
                                 KETTLE.removePageItem(uuid, slot, page);
                             }
                         } else if (!checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
-                            final String data[] = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
+                            final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
                             if (Chore.hasMaterial(cursor, data[0]) != -1) {
                                 final ItemStack cloneItem = cursor.clone();
                                 cloneItem.setAmount(1);
@@ -240,9 +240,7 @@ public final class ItemSelect {
     public static void drag(InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
-        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> {
-            e.setCancelled(true);
-        });
+        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> e.setCancelled(true));
     }
 
     public static void close(InventoryCloseEvent e) {

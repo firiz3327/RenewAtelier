@@ -66,9 +66,7 @@ public class FakePlayerPacket {
 
     private static PacketPlayOutPlayerInfo getInfo(final Player player, final List<VEntityPlayer> players, final boolean remove) {
         final List<EntityPlayer> eps = new ArrayList<>();
-        players.forEach((veps) -> {
-            eps.add((EntityPlayer) veps.getEntityPlayer());
-        });
+        players.forEach((veps) -> eps.add((EntityPlayer) veps.getEntityPlayer()));
         return new PacketPlayOutPlayerInfo(
                 remove
                         ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER

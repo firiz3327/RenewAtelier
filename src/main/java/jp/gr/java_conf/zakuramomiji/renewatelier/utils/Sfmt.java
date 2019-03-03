@@ -25,7 +25,7 @@ final class Sfmt {
     /* NextNormal で残りを持っている */
     double normal_save;
     /* NextNormal の残りの値 */
-    protected int[] x = new int[1392];
+    protected final int[] x = new int[1392];
 
     /* 状態テーブル */
     protected int[] GetParity() {
@@ -196,9 +196,9 @@ final class Sfmt {
  /*synchronized*/ public int NextByte() {
         if (--byte_pos == -1) {
             byte_pos = 3;
-            return (int) (byte_save = NextMt()) & 255;
+            return (byte_save = NextMt()) & 255;
         } else {
-            return (int) (byte_save >>>= 8) & 255;
+            return (byte_save >>>= 8) & 255;
         }
     }
 
@@ -219,18 +219,18 @@ final class Sfmt {
         for (;;) {
             y_ = NextMt() >>> 1;
             if (y_ < base || base == 1 << 31) {
-                return (int) (y_ >>> shift);
+                return (y_ >>> shift);
             }
             base_ = base;
             shift_ = shift;
             y_ -= base_;
             remain_ = (1 << 31) - base_;
-            for (; remain_ >= (int) range_; remain_ -= base_) {
+            for (; remain_ >= range_; remain_ -= base_) {
                 for (; base_ > remain_; base_ >>>= 1) {
                     shift_--;
                 }
                 if (y_ < base_) {
-                    return (int) (y_ >>> shift_);
+                    return (y_ >>> shift_);
                 } else {
                     y_ -= base_;
                 }

@@ -186,9 +186,7 @@ public class KettleBox {
         }
         overlap.keySet().forEach((layer) -> {
             final Map<Integer, Integer> datas = overlap.get(layer);
-            datas.keySet().forEach((slot) -> {
-                result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot));
-            });
+            datas.keySet().forEach((slot) -> result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot)));
         });
 
         return result;
@@ -228,9 +226,7 @@ public class KettleBox {
                 overlap.put(new DoubleData<>(i, dd.getLeft()), right);
             }
         }
-        overlap.keySet().forEach((layer) -> {
-            result.add(layer.getRight());
-        });
+        overlap.keySet().forEach((layer) -> result.add(layer.getRight()));
 
         return result;
     }

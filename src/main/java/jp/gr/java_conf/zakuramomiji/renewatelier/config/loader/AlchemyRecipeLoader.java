@@ -20,10 +20,8 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.config.loader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
@@ -62,16 +60,14 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             // 初期錬金属性
             final List<String> default_ingredients_str = item.getStringList("default_ingredients");
             final List<Ingredients> default_ingredients = new ArrayList<>();
-            default_ingredients_str.forEach((str) -> {
-                default_ingredients.add(AlchemyIngredients.valueOf(str));
-            });
+            default_ingredients_str.forEach((str) -> default_ingredients.add(AlchemyIngredients.valueOf(str)));
             // 効果-必要ゲージ数
             final int req_bar = item.getInt("req_bar");
             // 効果
             final List<RecipeEffect> effects = new ArrayList<>();
             if (item.contains("effects")) {
                 final ConfigurationSection effects_item = item.getConfigurationSection("effects");
-                effects_item.getKeys(false).stream().map((ekey) -> effects_item.getConfigurationSection(ekey)).forEachOrdered((esec) -> {
+                effects_item.getKeys(false).stream().map(effects_item::getConfigurationSection).forEachOrdered((esec) -> {
                     final AlchemyAttribute attribute = AlchemyAttribute.valueOf(esec.getString("attribute"));
                     final List<Integer> star = esec.getIntegerList("star");
                     final List<StarEffect> starEffects = new ArrayList<>();
@@ -85,9 +81,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                             se = new StarEffect(star_effect.getString("name"));
                         }
                         return se;
-                    }).filter((se) -> (se != null)).forEachOrdered((se) -> {
-                        starEffects.add(se);
-                    });
+                    }).filter(Objects::nonNull).forEachOrdered(starEffects::add);
                     effects.add(new RecipeEffect(attribute, star, starEffects));
                 });
             }
@@ -99,12 +93,10 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                 final List<RecipeLevelEffect> level_effect = new ArrayList<>();
                 level_effect_str.stream()
                         .map((effect) -> effect.split(","))
-                        .forEachOrdered((effect_split) -> {
-                            level_effect.add(new RecipeLevelEffect(
-                                    RecipeLEType.valueOf(effect_split[0].trim()),
-                                    Integer.parseInt(effect_split[1].trim())
-                            ));
-                        });
+                        .forEachOrdered((effect_split) -> level_effect.add(new RecipeLevelEffect(
+                                RecipeLEType.valueOf(effect_split[0].trim()),
+                                Integer.parseInt(effect_split[1].trim())
+                        )));
                 levels.put(i, level_effect);
             }
             // 使用可能触媒
@@ -115,7 +107,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             final ConfigurationSection sizesec = item.getConfigurationSection("sizes");
             for (int i = 2; i <= 8; i++) {
                 final String s_str = sizesec.getString("s" + i);
-                final String strs[] = s_str.split(",");
+                final String[] strs = s_str.split(",");
                 sizes.add(new MaterialSizeData(
                         MaterialSize.valueOf(strs[0].trim().toUpperCase()),
                         Integer.parseInt(strs[1].trim()))

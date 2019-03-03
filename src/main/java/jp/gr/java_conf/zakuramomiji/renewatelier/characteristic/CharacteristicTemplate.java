@@ -98,7 +98,7 @@ public enum CharacteristicTemplate {
     )
     ;
         
-    private CharacteristicTemplate(DoubleData<Characteristic, Integer>... cs) {
+    CharacteristicTemplate(DoubleData<Characteristic, Integer>... cs) {
         this.cs = cs;
     }
 

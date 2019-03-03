@@ -27,7 +27,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Cauldron;
@@ -59,17 +58,17 @@ public enum AlchemyInventoryType {
     private final String check;
     private final CheckRunnable cr;
 
-    private AlchemyInventoryType(final String check) {
+    AlchemyInventoryType(final String check) {
         this.check = check;
         this.cr = null;
     }
 
-    private AlchemyInventoryType(final String check, final CheckRunnable cr) {
+    AlchemyInventoryType(final String check, final CheckRunnable cr) {
         this.check = check;
         this.cr = cr;
     }
 
-    public final static AlchemyInventoryType search(final InventoryView invView) {
+    public static AlchemyInventoryType search(final InventoryView invView) {
         for (final AlchemyInventoryType type : values()) {
             if (invView.getTitle().contains(type.check)) {
                 return type;
@@ -78,7 +77,7 @@ public enum AlchemyInventoryType {
         return null;
     }
 
-    public final static AlchemyInventoryType search(final Action action, final ItemStack item, final Block block, final Player player) {
+    public static AlchemyInventoryType search(final Action action, final ItemStack item, final Block block, final Player player) {
         for (final AlchemyInventoryType type : values()) {
             if (type.cr != null && type.cr.check(action, item, block, player)) {
                 return type;
@@ -97,9 +96,9 @@ public enum AlchemyInventoryType {
 
     public interface CheckRunnable {
 
-        public boolean check(final Action action, final ItemStack item, final Block block, final Player player);
+        boolean check(final Action action, final ItemStack item, final Block block, final Player player);
 
-        public boolean run(final Action action, final ItemStack item, final Block block, final Player player);
+        boolean run(final Action action, final ItemStack item, final Block block, final Player player);
 
     }
 

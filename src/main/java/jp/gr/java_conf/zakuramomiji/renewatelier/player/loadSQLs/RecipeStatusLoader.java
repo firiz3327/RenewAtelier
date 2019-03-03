@@ -39,13 +39,11 @@ public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
                 new Object[]{id}
         );
         final List<RecipeStatus> recipe_statuses = new ArrayList<>();
-        recipe_statuses_obj.forEach((datas) -> {
-            recipe_statuses.add(new RecipeStatus(
-                    (String) datas.get(1), // recipe_id
-                    (int) datas.get(2), // level
-                    (int) datas.get(3) // exp
-            ));
-        });
+        recipe_statuses_obj.forEach((datas) -> recipe_statuses.add(new RecipeStatus(
+                (String) datas.get(1), // recipe_id
+                (int) datas.get(2), // level
+                (int) datas.get(3) // exp
+        )));
         return recipe_statuses;
     }
 

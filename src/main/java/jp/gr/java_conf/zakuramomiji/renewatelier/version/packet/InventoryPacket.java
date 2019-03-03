@@ -54,7 +54,7 @@ public class InventoryPacket {
 
         private final String id;
 
-        private InventoryPacketType(String id) {
+        InventoryPacketType(String id) {
             this.id = id;
         }
 

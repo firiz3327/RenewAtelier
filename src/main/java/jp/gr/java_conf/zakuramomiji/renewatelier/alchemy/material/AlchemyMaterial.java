@@ -26,7 +26,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.loader.AlchemyMaterialLoader;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

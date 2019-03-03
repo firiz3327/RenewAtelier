@@ -55,7 +55,7 @@ final class ScriptRunner {
                 conversation.setIv(iv);
                 try {
                     iv.invokeFunction("init");
-                } catch (NoSuchMethodException ex) {
+                } catch (NoSuchMethodException ignored) {
                 }
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);

@@ -53,7 +53,7 @@ public enum LoopManager {
     private int sec_period = 0;
     private int taskid;
 
-    private LoopManager() {
+    LoopManager() {
         start = false;
         animDrops = new ArrayList<>();
         loop_runs = new ArrayList<>();
@@ -82,9 +82,7 @@ public enum LoopManager {
 
     public void stopLoop() {
         plugin.getServer().getScheduler().cancelTask(taskid);
-        animDrops.stream().filter((ad) -> (!ad.isGet())).forEachOrdered((ad) -> {
-            ad.getDrop().remove();
-        });
+        animDrops.stream().filter((ad) -> (!ad.isGet())).forEachOrdered((ad) -> ad.getDrop().remove());
     }
 
     public void addLoopEffect(final Runnable run) {
@@ -114,12 +112,8 @@ public enum LoopManager {
     // 厳密さは求めていないので大分適当。あっているかはわからない
     private void loop() {
         taskid = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            new ArrayList<>(animDrops).forEach((drop) -> {
-                drop.anim();
-            });
-            new ArrayList<>(loop_miri_runs).forEach((run) -> {
-                run.run();
-            });
+            new ArrayList<>(animDrops).forEach(AnimatedDrop::anim);
+            new ArrayList<>(loop_miri_runs).forEach(Runnable::run);
             if (period % 10 == 0) {
                 half_sec_loop();
             }
@@ -133,20 +127,14 @@ public enum LoopManager {
     }
 
     private void half_sec_loop() {
-        plugin.getServer().getWorlds().stream().forEach((world) -> {
-            entityLoop(world);
-        });
-        new ArrayList<>(loop_half_sec_runs).forEach((run) -> {
-            run.run();
-        });
+        plugin.getServer().getWorlds().forEach(this::entityLoop);
+        new ArrayList<>(loop_half_sec_runs).forEach(Runnable::run);
     }
 
     private void sec_loop() {
         sec_period++;
 
-        new ArrayList<>(loop_runs).forEach((run) -> {
-            run.run();
-        });
+        new ArrayList<>(loop_runs).forEach(Runnable::run);
 
         int max_length = 0;
         final List<Player> players = new ArrayList<>();

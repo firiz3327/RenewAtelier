@@ -74,23 +74,16 @@ public class QuestBook {
             }
         });
         // 本を開くパケット
-        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-            PayloadPacket.openBook(player, hand);
-        }, 5); // 0.25 sec
+        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
 
         final List<BaseComponent[]> pages = new ArrayList<>();
         // 進行中クエスト
-        progress_quests.forEach((quest) -> {
-            addSpigotPage(pages, quest, 0);
-        });
+        progress_quests.forEach((quest) -> addSpigotPage(pages, quest, 0));
         // 重要クエスト
-        importantQuests.forEach((quest) -> {
-            addSpigotPage(pages, quest, 2);
-        });
+        importantQuests.forEach((quest) -> addSpigotPage(pages, quest, 2));
         // クリア済みクエスト
-        clear_quests.forEach((quest) -> {
-            addSpigotPage(pages, quest, 1);
-        });
+        clear_quests.forEach((quest) -> addSpigotPage(pages, quest, 1));
+
         final BookMeta meta = (BookMeta) book.getItemMeta();
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
@@ -184,7 +177,7 @@ public class QuestBook {
                         add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
                         add(ChatColor.GRAY + "必要素材:");
                         for (final String req : recipe.getReqMaterial()) {
-                            final String data[] = req.split(",");
+                            final String[] data = req.split(",");
                             if (data[0].startsWith("category:")) {
                                 add(AlchemyItemStatus.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
                             } else if (data[0].startsWith("material:")) {

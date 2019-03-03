@@ -58,7 +58,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             // 名前取得
             final String name = ChatColor.translateAlternateColorCodes('&', item.getString("name"));
             // デフォルト名優先
-            final boolean default_name = item.contains("default_name") ? item.getBoolean("default_name") : false;
+            final boolean default_name = item.contains("default_name") && item.getBoolean("default_name");
             // アイテムのマテリアルを取得
             final String mat_str = item.getString("material");
             final DoubleData<Material, Short> mat;
@@ -74,15 +74,13 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             // カテゴリ取得
             final List<String> categorys_str = (List<String>) item.getList("categorys");
             final List<Category> categorys = new ArrayList<>();
-            categorys_str.forEach((c_str) -> {
-                categorys.add(Category.valueOf(c_str.toUpperCase()));
-            });
+            categorys_str.forEach((c_str) -> categorys.add(Category.valueOf(c_str.toUpperCase())));
             // 錬金成分取得
             final List<String> ings_str = (List<String>) item.getList("ingredients");
             final List<DoubleData<Ingredients, Integer>> ingredients = new ArrayList<>();
             if (ings_str != null) {
                 ings_str.forEach((ing) -> {
-                    final String ingdata[] = ing.split(",");
+                    final String[] ingdata = ing.split(",");
                     ingredients.add(new DoubleData<>(
                             AlchemyIngredients.valueOf(ingdata[0].trim().toUpperCase()),
                             Integer.parseInt(ingdata[1].trim())
@@ -93,7 +91,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             final List<String> sizes_str = (List<String>) item.getList("sizes");
             final List<MaterialSizeData> sizes = new ArrayList<>();
             sizes_str.forEach((s_str) -> {
-                final String strs[] = s_str.split(",");
+                final String[] strs = s_str.split(",");
                 sizes.add(new MaterialSizeData(
                         MaterialSize.valueOf(strs[0].trim().toUpperCase()),
                         Integer.parseInt(strs[1].trim()))
@@ -105,7 +103,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             if (charas_str != null) {
                 charas_str.forEach((c_str) -> {
                     if (c_str.contains(",")) {
-                        final String strs[] = c_str.split(",");
+                        final String[] strs = c_str.split(",");
                         charas.add(new DoubleData<>(
                                 Characteristic.valueOf(strs[0].trim().toUpperCase()),
                                 Integer.parseInt(strs[1].trim())
@@ -123,7 +121,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final List<CatalystBonus> bonus = new ArrayList<>();
                 catalystConfig.getKeys(false).stream()
                         .filter((c_key) -> (!c_key.equals("category")))
-                        .map((c_key) -> catalystConfig.getConfigurationSection(c_key))
+                        .map(catalystConfig::getConfigurationSection)
                         .forEachOrdered((sec) -> {
                             //final CatalystBonusType type = CatalystBonusType.valueOf(sec.getString("type"));
                             final List<Integer> size = sec.getIntegerList("size");
@@ -141,13 +139,13 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             // スクリプト取得
             final String script = item.getString("script");
             //unbreaking & hide系取得
-            final boolean unbreaking = item.contains("unbreaking") ? item.getBoolean("unbreaking") : false;
-            final boolean hideAttribute = item.contains("hideAttribute") ? item.getBoolean("hideAttribute") : false;
-            final boolean hideDestroy = item.contains("hideDestroy") ? item.getBoolean("hideDestroy") : false;
-            final boolean hideEnchant = item.contains("hideEnchant") ? item.getBoolean("hideEnchant") : false;
-            final boolean hidePlacedOn = item.contains("hidePlacedOn") ? item.getBoolean("hidePlacedOn") : false;
-            final boolean hidePotionEffect = item.contains("hidePotionEffect") ? item.getBoolean("hidePotionEffect") : false;
-            final boolean hideUnbreaking = item.contains("hideUnbreaking") ? item.getBoolean("hideUnbreaking") : false;
+            final boolean unbreaking = item.contains("unbreaking") && item.getBoolean("unbreaking");
+            final boolean hideAttribute = item.contains("hideAttribute") && item.getBoolean("hideAttribute");
+            final boolean hideDestroy = item.contains("hideDestroy") && item.getBoolean("hideDestroy");
+            final boolean hideEnchant = item.contains("hideEnchant") && item.getBoolean("hideEnchant");
+            final boolean hidePlacedOn = item.contains("hidePlacedOn") && item.getBoolean("hidePlacedOn");
+            final boolean hidePotionEffect = item.contains("hidePotionEffect") && item.getBoolean("hidePotionEffect");
+            final boolean hideUnbreaking = item.contains("hideUnbreaking") && item.getBoolean("hideUnbreaking");
             // リストへ追加
             add(new AlchemyMaterial(
                     key,

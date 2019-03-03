@@ -45,7 +45,7 @@ public enum KettleBonusManager {
     private final Map<UUID, BonusPlayerData> datas;
     private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
 
-    private KettleBonusManager() {
+    KettleBonusManager() {
         datas = new HashMap<>();
     }
 
@@ -143,9 +143,7 @@ public enum KettleBonusManager {
     }
 
     public void removeData(UUID uuid) {
-        if (datas.containsKey(uuid)) {
-            datas.remove(uuid);
-        }
+        datas.remove(uuid);
     }
 
     public void back(UUID uuid) {
@@ -190,9 +188,7 @@ public enum KettleBonusManager {
 
         public List<AlchemyAttribute[]> getLevelUps() {
             List<AlchemyAttribute[]> result = new ArrayList<>();
-            levelups.keySet().forEach((i) -> {
-                result.add(levelups.get(i));
-            });
+            levelups.keySet().forEach((i) -> result.add(levelups.get(i)));
             return result;
         }
 

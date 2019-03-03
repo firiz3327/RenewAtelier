@@ -125,7 +125,7 @@ public class AlchemyBagItem {
             final String[] data = items.get(i).split(","); // amount, damage, lore, (name) -> isDisplayName(true)
             if (amount > 0) {
                 if (data[1].equals(itemData[1]) && data[2].equals(itemData[2])
-                        && (data.length == 4 ? (itemData.length == 4 ? data[3].equals(itemData[3]) : false) : itemData.length != 4)) { // damageとloreとnameが一致した時
+                        && (data.length == 4 ? (itemData.length == 4 && data[3].equals(itemData[3])) : itemData.length != 4)) { // damageとloreとnameが一致した時
                     final int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
                     amount = da - 64;
                     data[0] = String.valueOf(Math.min(64, da));
@@ -175,7 +175,7 @@ public class AlchemyBagItem {
                 final String[] data = items.get(i).split(","); // amount, damage, lore
                 if (amount > 0) {
                     if (data[1].equals(itemData[1]) && data[2].equals(itemData[2])
-                            && data.length == 4 ? (itemData.length == 4 ? data[3].equals(itemData[3]) : false) : itemData.length != 4) { // damageとloreとnameが一致した時
+                            && data.length == 4 ? (itemData.length == 4 && data[3].equals(itemData[3])) : itemData.length != 4) { // damageとloreとnameが一致した時
                         final int da = Integer.parseInt(data[0]) - amount; // 16 - 64 = -48
                         amount = da * -1;
 
@@ -302,7 +302,6 @@ public class AlchemyBagItem {
                     removeItem.setAmount(1);
                 }
                 final ItemStack bag_item = pinv.getItem(bag_slot);
-                final AlchemyBagItem bag = getBag(bag_item);
                 pinv.setItem(bag_slot, removeItem(bag_item, removeItem));
 
                 ItemStack next_bag_item = pinv.getItem(bag_slot);

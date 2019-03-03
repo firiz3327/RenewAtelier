@@ -27,9 +27,9 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material;
  */
 public interface Ingredients {
 
-    public AlchemyAttribute getType();
+    AlchemyAttribute getType();
 
-    public int getLevel();
+    int getLevel();
 
-    public String getName();
+    String getName();
 }

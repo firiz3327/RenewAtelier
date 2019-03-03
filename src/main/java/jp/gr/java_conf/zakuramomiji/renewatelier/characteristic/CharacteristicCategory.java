@@ -35,7 +35,7 @@ public enum CharacteristicCategory {
 
     private final String name;
 
-    private CharacteristicCategory(String name) {
+    CharacteristicCategory(String name) {
         this.name = name;
     }
     

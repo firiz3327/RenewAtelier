@@ -20,7 +20,6 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst;
 
-import java.util.Arrays;
 import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -36,10 +35,14 @@ import org.bukkit.inventory.ItemStack;
  */
 public class Catalyst {
 
-    public final static Catalyst DEFAULT = new DefaultCatalyst();
+    public final static Catalyst DEFAULT;
     private final Category category;
     private final List<CatalystBonus> bonus;
     private final int[] maincs;
+
+    static {
+        DEFAULT = new DefaultCatalyst();
+    }
 
     public Catalyst(Category category, List<CatalystBonus> bonus) {
         this.category = category;
@@ -94,7 +97,7 @@ public class Catalyst {
 
     private int[] createAllCS() {
         final int[] result = new int[bonus.get(0).getCS().length];
-        bonus.stream().map((cb) -> cb.getCS()).forEachOrdered((cs) -> {
+        bonus.stream().map(CatalystBonus::getCS).forEachOrdered((cs) -> {
             for (int i = 0; i < cs.length; i++) {
                 int slot = cs[i];
                 if (slot != 0) {

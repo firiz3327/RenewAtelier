@@ -33,11 +33,9 @@ import org.graalvm.polyglot.Value;
  */
 public class GraalBindings extends HashMap<String, Object> implements Bindings {
 
-    private final Context c;
     private final Value bindings;
 
     public GraalBindings(Context c) {
-        this.c = c;
         this.bindings = c.getPolyglotBindings();
     }
 
@@ -49,10 +47,8 @@ public class GraalBindings extends HashMap<String, Object> implements Bindings {
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m) {
-        m.keySet().forEach((key) -> {
-            put(key, m.get(key));
-        });
+    public void putAll(Map<? extends String, ?> m) {
+        m.keySet().forEach((key) -> put(key, m.get(key)));
     }
 
     @Override
@@ -79,9 +75,7 @@ public class GraalBindings extends HashMap<String, Object> implements Bindings {
     @Override
     public void clear() {
         if (!isEmpty()) {
-            new HashSet<>(keySet()).forEach((key) -> {
-                remove(key);
-            });
+            new HashSet<>(keySet()).forEach(this::remove);
         }
     }
 

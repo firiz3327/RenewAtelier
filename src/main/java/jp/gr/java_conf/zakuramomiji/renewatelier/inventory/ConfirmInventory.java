@@ -83,9 +83,7 @@ public final class ConfirmInventory {
         final Inventory inv = e.getInventory();
         e.getRawSlots().stream()
                 .filter((raw) -> (raw >= 0 && raw < inv.getSize()))
-                .forEach((_item) -> {
-                    e.setCancelled(true);
-                });
+                .forEach((_item) -> e.setCancelled(true));
     }
 
     public static void close(final InventoryCloseEvent e) {
@@ -100,7 +98,7 @@ public final class ConfirmInventory {
 
     public interface ClickRunnable {
 
-        public void run(Player player, int select);
+        void run(Player player, int select);
     }
 
 }

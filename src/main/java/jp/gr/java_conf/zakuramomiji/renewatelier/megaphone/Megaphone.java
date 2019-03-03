@@ -78,11 +78,9 @@ public class Megaphone {
     }
 
     private static void sendPlayers(final BaseComponent[] components) {
-        Bukkit.getWorlds().forEach((world) -> {
-            world.getPlayers().forEach((p) -> {
-                p.spigot().sendMessage(components);
-            });
-        });
+        Bukkit.getWorlds().forEach((world) -> world.getPlayers().forEach((p) -> {
+            p.spigot().sendMessage(components);
+        }));
     }
 
 }

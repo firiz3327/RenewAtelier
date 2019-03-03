@@ -37,7 +37,7 @@ public enum AlchemyAttribute {
     private final String color;
     private final String name;
     
-    private AlchemyAttribute(ChatColor color, String name) {
+    AlchemyAttribute(ChatColor color, String name) {
         this.color = color.toString();
         this.name = name;
     }

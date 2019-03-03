@@ -68,12 +68,12 @@ public enum Category {
     private final String name;
     private final DoubleData<Material, Short> material;
 
-    private Category(String name, Material material) {
+    Category(String name, Material material) {
         this.name = name;
         this.material = new DoubleData<>(material, (short) 0);
     }
 
-    private Category(String name, DoubleData<Material, Short> material) {
+    Category(String name, DoubleData<Material, Short> material) {
         this.name = name;
         this.material = material;
     }

@@ -48,13 +48,7 @@ public final class AtelierPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // remove playernpc stands
-        getServer().getWorlds().stream().flatMap(
-                world -> world.getEntitiesByClass(ArmorStand.class).stream()
-        ).filter(stand -> !stand.isVisible()
-                && stand.getCustomName() != null
-                && stand.getCustomName().startsWith("npc,")
-        ).forEachOrdered(Entity::remove);
+        removePlayerNPCStands();
 
         // registerEvents
         final PluginManager pluginManager = getServer().getPluginManager();
@@ -64,14 +58,7 @@ public final class AtelierPlugin extends JavaPlugin {
         pluginManager.registerEvents(new InventoryListener(), this);
 
         // setup worlds
-        Bukkit.getWorlds().stream().forEachOrdered((World world) -> {
-            world.setAutoSave(true);
-            world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-            world.setGameRule(GameRule.DO_FIRE_TICK, false);
-            world.setGameRule(GameRule.MOB_GRIEFING, false);
-            world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
-            world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        });
+        Bukkit.getWorlds().forEach(AtelierPlugin::worldSettings);
 
         // init PacketUtils
         final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
@@ -86,11 +73,30 @@ public final class AtelierPlugin extends JavaPlugin {
         PlayerSaveManager.INSTANCE.loadPlayers();
     }
 
+    public static void worldSettings(World world) {
+        world.setAutoSave(true);
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+        world.setGameRule(GameRule.DO_FIRE_TICK, false);
+        world.setGameRule(GameRule.MOB_GRIEFING, false);
+        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+    }
+
     @Override
     public void onDisable() {
         LoopManager.INSTANCE.stopLoop();
         SQLManager.INSTANCE.close();
         NPCManager.INSTANCE.stop();
+        removePlayerNPCStands();
+    }
+
+    private void removePlayerNPCStands() {
+        getServer().getWorlds().stream().flatMap(
+                world -> world.getEntitiesByClass(ArmorStand.class).stream()
+        ).filter(stand -> !stand.isVisible()
+                && stand.getCustomName() != null
+                && stand.getCustomName().startsWith("npc,")
+        ).forEachOrdered(Entity::remove);
     }
 
     public static AtelierPlugin getPlugin() {

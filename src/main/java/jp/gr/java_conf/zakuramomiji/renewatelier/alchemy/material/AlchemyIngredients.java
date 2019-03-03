@@ -1,34 +1,34 @@
 /*
  * AlchemyIngredients.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 
 package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material;
 
-import java.util.ArrayList;
-import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author firiz
  */
 public enum AlchemyIngredients implements Ingredients {
@@ -279,7 +279,7 @@ public enum AlchemyIngredients implements Ingredients {
     private final AlchemyAttribute type;
     private final int level;
 
-    private AlchemyIngredients(String name, AlchemyAttribute type, int level) {
+    AlchemyIngredients(String name, AlchemyAttribute type, int level) {
         this.name = name;
         this.type = type;
         this.level = level;
@@ -299,10 +299,10 @@ public enum AlchemyIngredients implements Ingredients {
     public String getName() {
         return name;
     }
-    
+
     public static AlchemyIngredients searchName(final String str) {
-        for(final AlchemyIngredients ing : values()) {
-            if(ing.getName().equals(str)) {
+        for (final AlchemyIngredients ing : values()) {
+            if (ing.getName().equals(str)) {
                 return ing;
             }
         }
@@ -312,16 +312,14 @@ public enum AlchemyIngredients implements Ingredients {
     public static DoubleData<Integer, AlchemyAttribute[]> getAllLevel(final ItemStack item) {
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
             final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ALCHEMY_INGREDIENTS, item);
-            for (String lore : lores) {
-                final String values = lore.substring(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
-                final int level = Integer.parseInt(values.substring(0, values.indexOf(" ")));
-                final String[] types = values.substring(values.indexOf(" ") + 1).split("●");
-                final List<AlchemyAttribute> list = new ArrayList<>();
-                for (final String type : types) {
-                    list.add(AlchemyAttribute.searchColor(type));
-                }
-                return new DoubleData<>(level, list.toArray(new AlchemyAttribute[list.size()]));
+            final String values = lores.get(0).substring(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
+            final int level = Integer.parseInt(values.substring(0, values.indexOf(" ")));
+            final String[] types = values.substring(values.indexOf(" ") + 1).split("●");
+            final List<AlchemyAttribute> list = new ArrayList<>();
+            for (final String type : types) {
+                list.add(AlchemyAttribute.searchColor(type));
             }
+            return new DoubleData<>(level, list.toArray(new AlchemyAttribute[list.size()]));
         }
         return null;
     }

@@ -72,7 +72,7 @@ public class DebugListener implements Listener {
 
         //<editor-fold defaultstate="collapsed" desc="debug">
         try {
-            final String strs[] = e.getMessage().split(" ");
+            final String[] strs = e.getMessage().split(" ");
             switch (strs[0].trim().toLowerCase()) {
                 case "debug": {
                     final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524);
@@ -98,9 +98,7 @@ public class DebugListener implements Listener {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
-                    SQLManager.INSTANCE.select(strs[1], split2, split3, length).forEach((a) -> {
-                        Chore.log(a.toString());
-                    });
+                    SQLManager.INSTANCE.select(strs[1], split2, split3, length).forEach((a) -> Chore.log(a.toString()));
                     break;
                 }
                 case "insert": {
@@ -275,11 +273,9 @@ public class DebugListener implements Listener {
 //                    break;
 //                }
                 case "czombie": {
-                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                        CustomZombie.spawnEntity(new CustomZombie(
-                                e.getPlayer().getWorld()
-                        ), e.getPlayer().getLocation());
-                    });
+                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> CustomZombie.spawnEntity(new CustomZombie(
+                            e.getPlayer().getWorld()
+                    ), e.getPlayer().getLocation()));
                     break;
                 }
                 default: {
@@ -313,7 +309,7 @@ public class DebugListener implements Listener {
 
     @EventHandler
     private void debugServer(final ServerCommandEvent e) {
-        final String strs[] = e.getCommand().split(" ");
+        final String[] strs = e.getCommand().split(" ");
         switch (strs[0].trim().toLowerCase()) {
             case "debugdrop": {
                 final Player player = Bukkit.getServer().getPlayer(strs[1]);

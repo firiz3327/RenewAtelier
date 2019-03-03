@@ -29,7 +29,7 @@ public enum MinecraftRecipeSaveType {
 
     private final String id;
 
-    private MinecraftRecipeSaveType(String id) {
+    MinecraftRecipeSaveType(String id) {
         this.id = id;
     }
 

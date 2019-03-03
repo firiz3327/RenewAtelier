@@ -32,12 +32,12 @@ public class FakeEntity {
 
     private static int lastId = -1;
 
-    private int entityId;
-    private UUID uniqueId;
-    private EntityType type;
-    private int typeId;
-    private boolean object;
-    private int objectData;
+    private final int entityId;
+    private final UUID uniqueId;
+    private final EntityType type;
+    private final int typeId;
+    private final boolean object;
+    private final int objectData;
 
     public FakeEntity(int entityId, EntityType type, int objectData) {
         this.entityId = entityId;
@@ -124,7 +124,7 @@ public class FakeEntity {
         private final EntityType type;
         private final int value;
 
-        private ObjectChecker(EntityType type, int value) {
+        ObjectChecker(EntityType type, int value) {
             this.type = type;
             this.value = value;
         }

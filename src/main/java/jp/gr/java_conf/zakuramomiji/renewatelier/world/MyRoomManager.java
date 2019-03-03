@@ -1,24 +1,33 @@
 /*
  * MyRoomManager.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.world;
+
+import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.*;
+import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.generator.ChunkGenerator;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,54 +35,36 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.generator.ChunkGenerator;
 
 /**
- *
  * @author firiz
  */
 public enum MyRoomManager {
     INSTANCE; // enum singleton style
 
-    private final String world_name = "atelier_world";
     private final File map_folder = new File(
             AtelierPlugin.getPlugin().getDataFolder(), "rooms"
     );
-    private final int island_distance = 20;
     private World world;
 
     public void setup() {
+        final String world_name = "atelier_world";
         final World worldTemp = Bukkit.getWorld(world_name);
-        world = worldTemp != null ? worldTemp : new WorldCreator(world_name).generator(new ChunkGenerator() {
-            @Override
-            public ChunkGenerator.ChunkData generateChunkData(final World world, final Random random, final int chunkx, final int chunkz, final ChunkGenerator.BiomeGrid biome) {
-                final ChunkGenerator.ChunkData data = createChunkData(world);
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        biome.setBiome(x, z, Biome.PLAINS);
+        world = worldTemp != null ? worldTemp : new WorldCreator(world_name).generator(
+                new ChunkGenerator() {
+                    @Override
+                    public ChunkGenerator.ChunkData generateChunkData(final World world, final Random random, final int chunkx, final int chunkz, final ChunkGenerator.BiomeGrid biome) {
+                        final ChunkGenerator.ChunkData data = createChunkData(world);
+                        for (int x = 0; x < 16; x++) {
+                            for (int z = 0; z < 16; z++) {
+                                biome.setBiome(x, z, Biome.PLAINS);
+                            }
+                        }
+                        return data;
                     }
                 }
-                return data;
-            }
-        }).createWorld();
-        world.setAutoSave(true);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.DO_FIRE_TICK, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
-        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        ).createWorld();
+        AtelierPlugin.worldSettings(world);
         world.setGameRule(GameRule.KEEP_INVENTORY, true);
         world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
@@ -169,6 +160,7 @@ public enum MyRoomManager {
     }
 
     private File createFile() {
+        final int island_distance = 20;
         int distance = 2;
         int x = 0;
         int y = 0;
@@ -176,7 +168,7 @@ public enum MyRoomManager {
         while (true) {
             final File f = new File(map_folder, x + "," + y);
             if (f.exists()) {
-                for (int i = 0; i < (int) (distance / 2); i++) {
+                for (int i = 0; i < (distance / 2); i++) {
                     switch (angle) {
                         case 0: // up
                             y += island_distance;

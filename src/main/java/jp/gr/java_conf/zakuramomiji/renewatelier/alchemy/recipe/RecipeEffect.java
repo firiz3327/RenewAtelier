@@ -23,7 +23,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe;
 import java.util.List;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonusData.BonusType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.KettleBonusManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.kettle.KettleItemManager;
@@ -134,8 +133,7 @@ public class RecipeEffect {
 
     public StarEffect getActiveEffect(final UUID uuid) {
         final int bigstar = getBigStar(uuid);
-        final StarEffect effect = bigstar != 0 ? starEffects.get(bigstar - 1) : null;
-        return effect;
+        return bigstar != 0 ? starEffects.get(bigstar - 1) : null;
     }
 
 }

@@ -1,36 +1,31 @@
 /*
  * RecipeSelect.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.inventory.alchemykettle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeLevelEffect.RecipeLEType;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.AlchemyInventoryType;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
@@ -56,19 +51,20 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.*;
+
 /**
- *
  * @author firiz
  */
 public final class RecipeSelect {
 
     private static final int[] RECIPE_REQLEVELS = new int[]{80, 140, 220}; // ブロンズ・シルバー・ゴールド・プラチナ
     private static final String[] RANK_RECIPE = new String[]{
-        "熟練度なし",
-        ChatColor.GRAY + "ブロンズ",
-        ChatColor.WHITE + "シルバー",
-        ChatColor.GOLD + "ゴールド",
-        ChatColor.DARK_AQUA + "ダイアモンド"
+            "熟練度なし",
+            ChatColor.GRAY + "ブロンズ",
+            ChatColor.WHITE + "シルバー",
+            ChatColor.GOLD + "ゴールド",
+            ChatColor.DARK_AQUA + "ダイアモンド"
     };
 
     public static boolean isKettleRecipe(final InventoryView view) {
@@ -124,7 +120,7 @@ public final class RecipeSelect {
         lore.add(ChatColor.GRAY + "作成量: " + (recipe.getAmount() + add_amount));
         lore.add(ChatColor.GRAY + "必要素材:");
         for (final String req : recipe.getReqMaterial()) {
-            final String data[] = req.split(",");
+            final String[] data = req.split(",");
             if (data[0].startsWith("category:")) {
                 lore.add(AlchemyItemStatus.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
             } else if (data[0].startsWith("material:")) {
@@ -149,13 +145,7 @@ public final class RecipeSelect {
                 ritem.add(new DoubleData<>(rs, material));
             }
         });
-        Collections.sort(
-                ritem,
-                (
-                        DoubleData<RecipeStatus, DoubleData<Material, Short>> o1,
-                        DoubleData<RecipeStatus, DoubleData<Material, Short>> o2
-                ) -> o1.getLeft().getId().compareTo(o2.getLeft().getId())
-        );
+        ritem.sort(Comparator.comparing((DoubleData<RecipeStatus, DoubleData<Material, Short>> o) -> o.getLeft().getId()));
         final int dscroll = scroll * 6;
         if (ritem.size() > dscroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
@@ -348,8 +338,6 @@ public final class RecipeSelect {
     public static void drag(InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
-        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> {
-            e.setCancelled(true);
-        });
+        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> e.setCancelled(true));
     }
 }

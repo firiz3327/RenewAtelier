@@ -1195,7 +1195,7 @@ public enum Characteristic {
     }
     */
 
-    private Characteristic(String name, String msg, CharacteristicCategory[] categorys, DoubleData<Characteristic, Characteristic> req, DoubleData<CharacteristicType, Object>... datas) {
+    Characteristic(String name, String msg, CharacteristicCategory[] categorys, DoubleData<Characteristic, Characteristic> req, DoubleData<CharacteristicType, Object>... datas) {
         this.name = name;
         this.msg = msg;
         this.categorys = Arrays.asList(categorys);
@@ -1278,6 +1278,5 @@ public enum Characteristic {
         WEAK, // 弱体化
         NOHEAL, // 回復無効
         SEALED // 封印
-        ;
     }
 }

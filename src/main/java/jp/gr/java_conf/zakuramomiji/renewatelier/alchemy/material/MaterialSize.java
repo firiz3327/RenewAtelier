@@ -1,36 +1,36 @@
 /*
  * MaterialSize.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Strings;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
- *
  * @author firiz
  */
 public enum MaterialSize {
@@ -144,7 +144,7 @@ public enum MaterialSize {
     //  □□□   ■□□   ■■■   □■■
     //  □□■   ■□□   ■□□   □□■
     //  ■■■   ■■□   □□□   □□■
-    private MaterialSize(int... ss) {
+    MaterialSize(int... ss) {
         this.ss = new int[16][9];
         if (ss.length < 9) {
             for (int i = 0; i < ss.length; i++) {
@@ -156,7 +156,7 @@ public enum MaterialSize {
 
         // 通常回転・左右反転回転・上下反転回転・上下左右反転回転
         for (int i = 0; i < 4; i++) {
-            for (int j = 0 + (i == 0 ? 1 : 0); j < 4; j++) {
+            for (int j = (i == 0 ? 1 : 0); j < 4; j++) {
                 int[] ssj = Arrays.copyOf(this.ss[j - (i == 0 ? 1 : 0)], 9);
                 switch (i) {
                     case 1:
@@ -205,7 +205,7 @@ public enum MaterialSize {
         }
         return a;
     }
-    
+
     public static int[] plusSize(int[] size) {
         final int color = size[0];
         for (int i = 1; i < size.length; i++) {
@@ -275,21 +275,18 @@ public enum MaterialSize {
             }
         }
         if (start != -1) {
-            String str = "";
+            StringBuilder str = new StringBuilder();
             int c = 0;
             for (final int i : size) {
-                switch (i) {
-                    case 0:
-                        str += Chore.intCcolor(i) + Strings.W_W;
-                        break;
-                    default:
-                        str += Chore.intCcolor(i) + Strings.W_B;
-                        break;
+                if (i == 0) {
+                    str.append(Chore.intCcolor(i)).append(Strings.W_W);
+                } else {
+                    str.append(Chore.intCcolor(i)).append(Strings.W_B);
                 }
                 if (c >= 2) {
-                    lores.set(start + 1, str);
+                    lores.set(start + 1, str.toString());
                     c = 0;
-                    str = "";
+                    str = new StringBuilder();
                     start++;
                 } else {
                     c++;

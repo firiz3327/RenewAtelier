@@ -58,7 +58,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
             // 次のクエストID
             final String nextQuestId = item.contains("nextQuestId") ? item.getString("nextQuestId") : null;
             // 重要
-            final boolean important = item.contains("important") ? item.getBoolean("important") : false;
+            final boolean important = item.contains("important") && item.getBoolean("important");
 
             // 報酬
             final List<QuestResult> results = new ArrayList<>();
@@ -67,14 +67,12 @@ public class QuestLoader extends ConfigLoader<Quest> {
                 // 報酬 - レシピ
                 final List<String> recipeIds = result.contains("recipes") ? result.getStringList("recipes") : null;
                 if (recipeIds != null) {
-                    recipeIds.forEach((recipeId) -> {
-                        results.add(new RecipeQuestResult(AlchemyRecipe.search(recipeId)));
-                    });
+                    recipeIds.forEach((recipeId) -> results.add(new RecipeQuestResult(AlchemyRecipe.search(recipeId))));
                 }
                 // 報酬 - アイテム - 錬金素材以外想定しない
                 if (result.contains("items")) {
                     final ConfigurationSection items = result.getConfigurationSection("items");
-                    items.getKeys(false).stream().map((ikey) -> items.getConfigurationSection(ikey)).forEachOrdered((isec) -> {
+                    items.getKeys(false).stream().map(items::getConfigurationSection).forEachOrdered((isec) -> {
                         final String material = isec.getString("material");
                         final String item_name = isec.contains("name") ? ChatColor.translateAlternateColorCodes('&', isec.getString("name")) : null;
                         final int amount = isec.contains("amount") ? isec.getInt("amount") : 1;
@@ -94,9 +92,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
                         // 特性
                         final List<String> characteristic_strs = isec.contains("characteristics") ? isec.getStringList("characteristics") : new ArrayList<>();
                         final List<Characteristic> characteristics = new ArrayList<>();
-                        characteristic_strs.forEach((cid) -> {
-                            characteristics.add(Characteristic.valueOf(cid));
-                        });
+                        characteristic_strs.forEach((cid) -> characteristics.add(Characteristic.valueOf(cid)));
 
                         results.add(new ItemQuestResult(new QuestItem(
                                 material,

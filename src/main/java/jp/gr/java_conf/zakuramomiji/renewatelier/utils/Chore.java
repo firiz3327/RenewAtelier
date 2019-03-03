@@ -47,6 +47,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -167,7 +168,7 @@ public final class Chore {
 //                    amount += item.getAmount();
 //                }
                 final String id = AlchemyItemStatus.getId(item);
-                if (id != null && material.getId().equals(id)) {
+                if (material.getId().equals(id)) {
                     amount += item.getAmount();
                 }
             }
@@ -181,9 +182,7 @@ public final class Chore {
             final ItemMeta meta = item.getItemMeta();
             if (meta.hasLore()) {
                 AlchemyItemStatus.getLores(AlchemyItemStatus.CATEGORY, item).stream()
-                        .filter((cate_str) -> (!cate_str.contains("カテゴリ"))).forEachOrdered((cate_str) -> {
-                    result.add(Category.valueOf(Chore.getStridColor(cate_str.substring(cate_str.indexOf("§0") + 2))));
-                });
+                        .filter((cate_str) -> (!cate_str.contains("カテゴリ"))).forEachOrdered((cate_str) -> result.add(Category.valueOf(Chore.getStridColor(cate_str.substring(cate_str.indexOf("§0") + 2)))));
             }
         }
         return result;
@@ -241,15 +240,13 @@ public final class Chore {
                     });
                 }
             }
-            return check.isEmpty() ? false : check.values().stream().noneMatch((dd) -> (dd.getLeft() < dd.getRight()));
+            return !check.isEmpty() && check.values().stream().noneMatch((dd) -> (dd.getLeft() < dd.getRight()));
         }
         return false;
     }
 
     public static void warp(final Player player, final Location loc) {
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-            player.teleport(loc);
-        });
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> player.teleport(loc));
     }
 
     public static String createStridColor(final String id) {
@@ -331,11 +328,11 @@ public final class Chore {
     }
 
     public static String setIntColor(int i) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (char ic : String.valueOf(i).toCharArray()) {
-            result += "§" + ic;
+            result.append("§").append(ic);
         }
-        return result + ChatColor.RESET;
+        return result.append(ChatColor.RESET).toString();
 //        return result;
     }
 
@@ -343,11 +340,11 @@ public final class Chore {
         return Integer.parseInt(str.substring(0, str.indexOf("r")).replaceAll("§", ""));
     }
 
-    public static void addItem(Player player, ItemStack item) {
+    public static void addItem(@NotNull Player player, @NotNull ItemStack item) {
         addItem(player.getInventory(), item, player.getLocation());
     }
 
-    public static void addItem(Inventory inv, ItemStack item, Location loc) {
+    public static void addItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull Location loc) {
         if (inv != null && item != null) {
             int amount = item.getAmount();
 

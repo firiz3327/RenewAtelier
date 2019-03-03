@@ -28,6 +28,6 @@ import java.util.List;
  */
 public interface SortObject<A, B> {
     
-    public List<A> sort(B obj);
+    List<A> sort(B obj);
     
 }

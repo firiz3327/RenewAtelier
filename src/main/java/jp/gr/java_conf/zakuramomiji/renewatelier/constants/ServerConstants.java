@@ -26,8 +26,8 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
  */
 public class ServerConstants {
     
-    public static boolean NASHORN = false;
-    public static boolean PYTHON_2 = false;
-    public static boolean PYTHON_3 = true;
+    public static final boolean NASHORN = false;
+    public static final boolean PYTHON_2 = false;
+    public static final boolean PYTHON_3 = true;
     
 }

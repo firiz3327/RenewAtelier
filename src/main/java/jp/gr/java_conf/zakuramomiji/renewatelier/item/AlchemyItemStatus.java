@@ -1,41 +1,31 @@
 /*
  * AlchemyItemStatus.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.item;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyAttribute;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.Catalyst;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.catalyst.CatalystBonus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyIngredients;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Category;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.Ingredients;
+import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.*;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.CharacteristicTemplate;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import static jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore.getStridColor;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Randomizer;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Strings;
@@ -44,8 +34,11 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.*;
+
+import static jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore.getStridColor;
+
 /**
- *
  * @author firiz
  */
 public enum AlchemyItemStatus {
@@ -65,7 +58,7 @@ public enum AlchemyItemStatus {
 
     private final String check;
 
-    private AlchemyItemStatus(final String check) {
+    AlchemyItemStatus(final String check) {
         this.check = check;
     }
 
@@ -73,26 +66,24 @@ public enum AlchemyItemStatus {
         return check;
     }
 
-    public final static List<String> getLores(final AlchemyItemStatus type, final ItemStack item) {
+    public static List<String> getLores(final AlchemyItemStatus type, final ItemStack item) {
         return getLores(type.check, item);
     }
 
-    public final static List<String> getLores(final String check, final ItemStack item) {
+    public static List<String> getLores(final String check, final ItemStack item) {
         final List<String> list = new ArrayList<>();
         if (check != null && item != null && item.hasItemMeta()) {
             final ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.hasLore()) {
                 meta.getLore().stream()
                         .filter((lore) -> (lore.startsWith(check)))
-                        .forEachOrdered((lore) -> {
-                            list.add(lore);
-                        });
+                        .forEachOrdered(list::add);
             }
         }
         return list;
     }
 
-    public final static String getId(final ItemStack item) {
+    public static String getId(final ItemStack item) {
         final List<String> lores = getLores(ID, item);
         if (!lores.isEmpty()) {
             return getStridColor(lores.get(0).substring(ID.check.length()));
@@ -100,7 +91,7 @@ public enum AlchemyItemStatus {
         return null;
     }
 
-    public final static int getQuality(final ItemStack item) {
+    public static int getQuality(final ItemStack item) {
         final List<String> lores = getLores(QUALITY, item);
         if (!lores.isEmpty()) {
             return Integer.parseInt(lores.get(0).substring(QUALITY.check.length() + 8));  // (QUALITY.check + "§7品質: §r").length
@@ -108,7 +99,7 @@ public enum AlchemyItemStatus {
         return -1;
     }
 
-    public final static List<Ingredients> getIngredients(final ItemStack item) {
+    public static List<Ingredients> getIngredients(final ItemStack item) {
         final List<Ingredients> result = new ArrayList<>();
         final List<String> lores = getLores(ALCHEMY_INGREDIENTS, item);
         for (int i = 1; i < lores.size(); i++) {
@@ -122,7 +113,7 @@ public enum AlchemyItemStatus {
         return result;
     }
 
-    public final static List<Characteristic> getCharacteristics(final ItemStack item) {
+    public static List<Characteristic> getCharacteristics(final ItemStack item) {
         final List<Characteristic> result = new ArrayList<>();
         final List<String> lores = AlchemyItemStatus.getLores(CHARACTERISTIC, item);
         for (int i = 1; i < lores.size(); i++) {
@@ -135,7 +126,7 @@ public enum AlchemyItemStatus {
         return result;
     }
 
-    public final static List<Category> getCategorys(final ItemStack item) {
+    public static List<Category> getCategorys(final ItemStack item) {
         final List<Category> result = new ArrayList<>();
         final List<String> lores = getLores(CATEGORY, item);
         for (int i = 1; i < lores.size(); i++) {
@@ -148,48 +139,48 @@ public enum AlchemyItemStatus {
         return result;
     }
 
-    public final static ItemStack getItem(final String id) {
+    public static ItemStack getItem(final String id) {
         return getItem(id, null, null, -1, null, null);
     }
 
-    public final static ItemStack getItem(final String id, final List<Ingredients> ings) {
+    public static ItemStack getItem(final String id, final List<Ingredients> ings) {
         return getItem(id, ings, null, -1, null, null);
     }
 
-    public final static ItemStack getItem(final String id, final ItemStack item) {
+    public static ItemStack getItem(final String id, final ItemStack item) {
         return getItem(id, null, item, -1, null, null);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am) {
+    public static ItemStack getItem(final AlchemyMaterial am) {
         return getItem(am, null, null, -1, null, null, null);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> ings) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> ings) {
         return getItem(am, ings, null, -1, null, null, null);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am, final ItemStack item) {
+    public static ItemStack getItem(final AlchemyMaterial am, final ItemStack item) {
         return getItem(am, null, item, -1, null, null, null);
     }
 
-    public final static ItemStack getItem(final String id, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics) {
+    public static ItemStack getItem(final String id, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics) {
         return getItem(AlchemyMaterial.getMaterial(id), over_ings, item, over_quality, over_size, over_characteristics, null);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category) {
         return getItem(am, over_ings, item, over_quality, over_size, over_characteristics, over_category, false);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
         return getItem(am, over_ings, item, over_quality, over_size, null, over_characteristics, over_category, not_visible_catalyst);
     }
 
-    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<String> active_effects, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<String> active_effects, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean not_visible_catalyst) {
         return getItem(am, over_ings, item, over_quality, over_size, active_effects, over_characteristics, over_category, new boolean[]{false, false, false, false, not_visible_catalyst, false, false});
     }
 
     // not_visibles {id, quality, ings, size, catalyst, category, end}
-    public final static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<String> active_effects, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean[] not_visibles) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> over_ings, ItemStack item, final int over_quality, final int[] over_size, final List<String> active_effects, final List<Characteristic> over_characteristics, final List<Category> over_category, final boolean[] not_visibles) {
         if (am == null || (am.getIngredients().isEmpty() && (over_ings == null || over_ings.isEmpty()))) {
             return null;
         }
@@ -263,9 +254,7 @@ public enum AlchemyItemStatus {
                 }
                 // 錬金成分・非マイナス化
                 final List<Ingredients> ingacls = new ArrayList<>();
-                am.getIngredients().forEach((dd) -> {
-                    ingacls.add(dd.getLeft());
-                });
+                am.getIngredients().forEach((dd) -> ingacls.add(dd.getLeft()));
                 while (all_level <= 0) {
                     final List<Ingredients> list = new ArrayList<>(ingacls);
                     Collections.shuffle(list);
@@ -301,33 +290,26 @@ public enum AlchemyItemStatus {
             // 錬金成分・設定
             final StringBuilder ingsb = new StringBuilder();
             ingsb.append(ALCHEMY_INGREDIENTS.check).append("§7錬金成分: §r").append(all_level).append(" ");
-            maxtype.forEach((type) -> {
-                ingsb.append(type.getColor()).append("●");
-            });
+            maxtype.forEach((type) -> ingsb.append(type.getColor()).append("●"));
             lore.add(ingsb.toString());
-            acls.forEach((i) -> {
-                lore.add(ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel());
-            });
+            acls.forEach((i) -> lore.add(ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
         }
         // サイズ
         if (!not_visibles[3]) {
             lore.add(SIZE.check + "§7サイズ:");
-            String str = "";
+            StringBuilder str = new StringBuilder();
             int c_size = 0;
             final int[] ss = over_size == null ? am.getSizes().get(Randomizer.nextInt(am.getSizes().size())).getSize() : over_size;
             for (final int i : ss) {
-                switch (i) {
-                    case 0:
-                        str += Chore.intCcolor(i) + Strings.W_W;
-                        break;
-                    default:
-                        str += Chore.intCcolor(i) + Strings.W_B;
-                        break;
+                if (i == 0) {
+                    str.append(Chore.intCcolor(i)).append(Strings.W_W);
+                } else {
+                    str.append(Chore.intCcolor(i)).append(Strings.W_B);
                 }
                 if (c_size >= 2) {
-                    lore.add(str);
+                    lore.add(str.toString());
                     c_size = 0;
-                    str = "";
+                    str = new StringBuilder();
                 } else {
                     c_size++;
                 }
@@ -361,13 +343,10 @@ public enum AlchemyItemStatus {
                 for (int i = 0; i < rotate_value; i++) {
                     for (int j = 1; j <= rotate_value; j++) {
                         final int value = allcs.get(count);
-                        switch (value) {
-                            case 0:
-                                sb.append(Chore.intCcolor(value)).append(Strings.W_W);
-                                break;
-                            default:
-                                sb.append(Chore.intCcolor(value)).append(Strings.W_B);
-                                break;
+                        if (value == 0) {
+                            sb.append(Chore.intCcolor(value)).append(Strings.W_W);
+                        } else {
+                            sb.append(Chore.intCcolor(value)).append(Strings.W_B);
                         }
                         count++;
                     }
@@ -379,9 +358,7 @@ public enum AlchemyItemStatus {
         // 効果
         if (active_effects != null && !active_effects.isEmpty()) {
             lore.add(EFFECT.check + "§7効果: ");
-            active_effects.forEach((effect) -> {
-                lore.add(EFFECT.check + "§r- " + effect);
-            });
+            active_effects.forEach((effect) -> lore.add(EFFECT.check + "§r- " + effect));
         }
         // 特性
         final List<Characteristic> characteristics = new ArrayList<>();
@@ -390,9 +367,7 @@ public enum AlchemyItemStatus {
                 final List<DoubleData<Characteristic, Integer>> cs = new ArrayList<>();
                 am.getCharas().forEach((obj) -> {
                     if (obj instanceof CharacteristicTemplate) {
-                        for (final DoubleData<Characteristic, Integer> dd : ((CharacteristicTemplate) obj).getCs()) {
-                            cs.add(dd);
-                        }
+                        cs.addAll(Arrays.asList(((CharacteristicTemplate) obj).getCs()));
 //                        cs.addAll(Arrays.asList());
                     } else {
                         cs.add((DoubleData<Characteristic, Integer>) obj);
@@ -414,18 +389,14 @@ public enum AlchemyItemStatus {
         }
         if (!characteristics.isEmpty()) {
             lore.add(CHARACTERISTIC.check + "§7特性:");
-            characteristics.forEach((c) -> {
-                lore.add(CHARACTERISTIC.check + "§r- " + c.getName());
-            });
+            characteristics.forEach((c) -> lore.add(CHARACTERISTIC.check + "§r- " + c.getName()));
         }
         // カテゴリ
         if (!not_visibles[5]) {
             final List<Category> categorys = over_category == null ? am.getCategorys() : over_category;
             if (!categorys.isEmpty()) {
                 lore.add(CATEGORY.check + "§7カテゴリ:");
-                categorys.forEach((category) -> {
-                    lore.add(CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString()));
-                });
+                categorys.forEach((category) -> lore.add(CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
             }
         }
 

@@ -26,6 +26,6 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
  */
 public interface ReturnObjectRunnable {
     
-    public Object run(Object... objects);
+    Object run(Object... objects);
     
 }

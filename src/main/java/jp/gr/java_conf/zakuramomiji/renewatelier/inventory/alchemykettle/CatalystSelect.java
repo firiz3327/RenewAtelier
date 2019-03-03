@@ -82,7 +82,7 @@ public class CatalystSelect {
         final List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
-        recipe.getCatalyst_categorys().stream().forEach((ct) -> {
+        recipe.getCatalyst_categorys().forEach((ct) -> {
             if (ct.startsWith("material:")) {
                 lore.add(ChatColor.RESET + "- "
                         + AlchemyMaterial.getMaterial(ct.substring(9)).getName()
@@ -169,9 +169,7 @@ public class CatalystSelect {
     public static void drag(final InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
-        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> {
-            e.setCancelled(true);
-        });
+        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> e.setCancelled(true));
     }
 
     public static void close(final InventoryCloseEvent e) {

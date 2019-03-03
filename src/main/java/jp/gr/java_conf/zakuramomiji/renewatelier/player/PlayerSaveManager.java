@@ -53,11 +53,9 @@ public enum PlayerSaveManager {
     };
     
     public void loadPlayers() {
-        Bukkit.getWorlds().forEach((world) -> {
-            world.getPlayers().forEach((player) -> {
-                loadStatus(player.getUniqueId());
-            });
-        });
+        Bukkit.getWorlds().forEach((world) -> world.getPlayers().forEach((player) -> {
+            loadStatus(player.getUniqueId());
+        }));
     }
 
     public PlayerStatus getStatus(final UUID uuid) {

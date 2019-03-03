@@ -182,10 +182,10 @@ public class ScriptConversation {
                     final String functionName = select == 1 ? confirmFunctionName : select == 0 ? cancelFunctionName : closeFunctionName;
                     if (functionName != null) {
                         try {
-                            ((Invocable) iv).invokeFunction(functionName);
+                            iv.invokeFunction(functionName);
                         } catch (ScriptException ex) {
                             Chore.log(ex);
-                        } catch (NoSuchMethodException ex) {
+                        } catch (NoSuchMethodException ignored) {
                         }
                     }
                 }

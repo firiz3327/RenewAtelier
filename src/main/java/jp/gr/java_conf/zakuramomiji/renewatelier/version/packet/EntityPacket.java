@@ -27,6 +27,8 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
@@ -69,12 +71,13 @@ public class EntityPacket {
          */
         run = () -> {
             if (wwo == null) {
-                for (final Player player : Bukkit.getOnlinePlayers()) {
+                final Collection<? extends Player> players = Bukkit.getOnlinePlayers();
+                if(!players.isEmpty()) {
+                    final Player player = players.iterator().next();
                     player.getWorld()
                             .spawnEntity(player.getLocation(), EntityType.SNOWBALL)
                             .setCustomName("INIT");
                     LoopManager.INSTANCE.removeLoopEffect(run);
-                    break;
                 }
             }
         };
@@ -83,6 +86,10 @@ public class EntityPacket {
 
     public static PacketContainer getSpawnPacket(FakeEntity fakeEntity, Location location) {
         return getSpawnPacket(fakeEntity, location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(), new WrappedDataWatcher());
+    }
+
+    public static PacketContainer getSpawnPacket(FakeEntity fakeEntity, Location location, WrappedDataWatcher metadata) {
+        return getSpawnPacket(fakeEntity, location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw(), metadata);
     }
 
     public static PacketContainer getSpawnPacket(FakeEntity entity, double x, double y, double z, double pitch, double yaw, WrappedDataWatcher metadata) {
@@ -99,7 +106,7 @@ public class EntityPacket {
             packet.getIntegers().write(5, (int) (yaw * 256.0F / 360.0F));
             packet.getIntegers().write(7, entity.getObjectData());
         } else {
-            packet.getIntegers().write(1, (int) entity.getType().ordinal());
+            packet.getIntegers().write(1, entity.getType().ordinal());
             packet.getBytes().write(0, (byte) (yaw * 256.0F / 360.0F));
             packet.getBytes().write(1, (byte) (pitch * 256.0F / 360.0F));
             packet.getBytes().write(2, (byte) (pitch * 256.0F / 360.0F));

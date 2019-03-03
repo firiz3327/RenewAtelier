@@ -44,7 +44,7 @@ public enum ScriptManager {
     private final GraalJSEngineFactory gjef;
     private final PyScriptEngineFactory psef;
     
-    private ScriptManager() {
+    ScriptManager() {
         sem = ServerConstants.NASHORN ? new ScriptEngineManager() : null;
         gjef = ServerConstants.NASHORN ? null : new GraalJSEngineFactory();
         psef = ServerConstants.PYTHON_2 ? new PyScriptEngineFactory() : null;

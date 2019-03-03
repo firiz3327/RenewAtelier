@@ -21,10 +21,9 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.version.entity;
 
 import java.lang.reflect.Field;
-import java.util.Map;
+
 import net.minecraft.server.v1_13_R2.Entity;
 import net.minecraft.server.v1_13_R2.EntityHuman;
-import net.minecraft.server.v1_13_R2.EntityTypes;
 import net.minecraft.server.v1_13_R2.EntityVillager;
 import net.minecraft.server.v1_13_R2.EntityZombie;
 import net.minecraft.server.v1_13_R2.PathfinderGoalFloat;

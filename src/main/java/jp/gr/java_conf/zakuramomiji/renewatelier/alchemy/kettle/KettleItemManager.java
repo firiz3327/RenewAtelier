@@ -51,42 +51,24 @@ public enum KettleItemManager {
     public void reset(final Player player) {
         final UUID uuid = player.getUniqueId();
         KettleBonusManager.INSTANCE.removeData(uuid);
-        if (catalyst_bonus.containsKey(uuid)) {
-            catalyst_bonus.remove(uuid);
-        }
-        if (kettleData.containsKey(uuid)) {
-            kettleData.remove(uuid);
-        }
+        catalyst_bonus.remove(uuid);
+        kettleData.remove(uuid);
         if (default_contents.containsKey(uuid)) {
             player.getInventory().setContents(default_contents.get(uuid));
             default_contents.remove(uuid);
         }
-        if (use_items.containsKey(uuid)) {
-            use_items.remove(uuid);
-        }
-        if (use_catalyst.containsKey(uuid)) {
-            use_catalyst.remove(uuid);
-        }
-        if (characteristics.containsKey(uuid)) {
-            characteristics.remove(uuid);
-        }
-        if (select_characteristics.containsKey(uuid)) {
-            select_characteristics.remove(uuid);
-        }
-        if (catalyst_characteristics.containsKey(uuid)) {
-            catalyst_characteristics.remove(uuid);
-        }
+        use_items.remove(uuid);
+        use_catalyst.remove(uuid);
+        characteristics.remove(uuid);
+        select_characteristics.remove(uuid);
+        catalyst_characteristics.remove(uuid);
     }
 
     public void allBack(final Player player) {
         final UUID uuid = player.getUniqueId();
         KettleBonusManager.INSTANCE.removeData(uuid);
-        if (catalyst_bonus.containsKey(uuid)) {
-            catalyst_bonus.remove(uuid);
-        }
-        if (kettleData.containsKey(uuid)) {
-            kettleData.remove(uuid);
-        }
+        catalyst_bonus.remove(uuid);
+        kettleData.remove(uuid);
 
         if (default_contents.containsKey(uuid)) {
             player.getInventory().setContents(default_contents.get(uuid));
@@ -94,11 +76,9 @@ public enum KettleItemManager {
         }
         if (use_items.containsKey(uuid)) {
             final Map<Integer, List<ItemStack>> use_item = use_items.get(uuid);
-            use_item.values().forEach((items) -> {
-                items.forEach((item) -> {
-                    Chore.addItem(player, item);
-                });
-            });
+            use_item.values().forEach((items) -> items.forEach((item) -> {
+                Chore.addItem(player, item);
+            }));
             use_items.remove(uuid);
         }
         if (use_catalyst.containsKey(uuid)) {
@@ -106,12 +86,8 @@ public enum KettleItemManager {
             Chore.addItem(player, catalyst);
             use_catalyst.remove(uuid);
         }
-        if (characteristics.containsKey(uuid)) {
-            characteristics.remove(uuid);
-        }
-        if (select_characteristics.containsKey(uuid)) {
-            select_characteristics.remove(uuid);
-        }
+        characteristics.remove(uuid);
+        select_characteristics.remove(uuid);
     }
 
     /* アイテム選択画面 Start */
@@ -181,7 +157,7 @@ public enum KettleItemManager {
     }
 
     public boolean hasCatalystBonus(final UUID uuid, final CatalystBonus bonus) {
-        return catalyst_bonus.containsKey(uuid) ? catalyst_bonus.get(uuid).contains(bonus) : false;
+        return catalyst_bonus.containsKey(uuid) && catalyst_bonus.get(uuid).contains(bonus);
     }
 
     public void addCatalystBonus(final UUID uuid, final CatalystBonus data) {
@@ -226,14 +202,10 @@ public enum KettleItemManager {
             return null;
         }
         final List<Characteristic> result = new ArrayList<>();
-        cs.stream().filter((c) -> (!result.contains(c))).forEachOrdered((c) -> {
-            result.add(c);
-        });
+        cs.stream().filter((c) -> (!result.contains(c))).forEachOrdered(result::add);
         final List<Characteristic> ccs = catalyst_characteristics.get(uuid);
         if (ccs != null) {
-            ccs.stream().filter((c) -> (!result.contains(c))).forEachOrdered((c) -> {
-                result.add(c);
-            });
+            ccs.stream().filter((c) -> (!result.contains(c))).forEachOrdered(result::add);
         }
         return result;
     }
