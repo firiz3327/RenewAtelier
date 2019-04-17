@@ -26,7 +26,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.constants;
  */
 public interface GameConstants {
 
-    public static int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300}; // ブロンズ・シルバー・ゴールド・プラチナ
-    public static int RECIPE_EXP = 25;
+    int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300}; // ブロンズ・シルバー・ゴールド・プラチナ
+    int RECIPE_EXP = 25;
 
 }

@@ -55,13 +55,13 @@ public class ScriptConversation {
         this.player = player;
     }
 
-    public void log(final String str) {
+    public void log(final Object str) {
         Chore.log(str);
     }
     
-    public void debug(final String str) {
+    public void debug(final Object str) {
         Chore.log(str);
-        player.sendMessage(str);
+        player.sendMessage(str.toString());
     }
 
     public void setIv(final Invocable iv) {
@@ -184,7 +184,7 @@ public class ScriptConversation {
                         try {
                             iv.invokeFunction(functionName);
                         } catch (ScriptException ex) {
-                            Chore.log(ex);
+                            Chore.logWarning(ex);
                         } catch (NoSuchMethodException ignored) {
                         }
                     }

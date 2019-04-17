@@ -20,12 +20,12 @@ class DeliveryValuation(
         ingredientsValue = 0
     }
 
-    fun toList(): List<Int> {
-        return arrayListOf(
-                qualityValue,
-                amountValue,
-                characteristicValue,
-                ingredientsValue
-        )
+    fun getAllValue(): Int {
+        return qualityValue + amountValue + characteristicValue + ingredientsValue;
     }
+
+    fun isEmpty(): Boolean {
+        return getAllValue() == 0
+    }
+
 }

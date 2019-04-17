@@ -55,7 +55,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class Chore {
 
-    private final static Logger log = Logger.getLogger("Minecraft");
+    private final static Logger log = AtelierPlugin.getPlugin().getLogger();
 
     public static void log(final Object obj) {
         log.info(obj.toString());
@@ -77,6 +77,7 @@ public final class Chore {
         log.log(level, str, throwable);
     }
 
+    @NotNull
     public static ItemStack createDamageableItem(final Material material, int amount, int damage) {
         final ItemStack item = new ItemStack(material, amount);
         setDamage(item, damage);
@@ -461,9 +462,10 @@ public final class Chore {
         return loc.getWorld().dropItem(loc, item);
     }
 
+    @NotNull
     public static ItemStack ci(Material m, int d, String name, List<String> lore) {
-        ItemStack item = createDamageableItem(m, 1, (short) d);
-        ItemMeta meta = item.getItemMeta();
+        final ItemStack item = createDamageableItem(m, 1, (short) d);
+        final ItemMeta meta = item.getItemMeta();
         if (name != null) {
             meta.setDisplayName(name.isEmpty() ? "§r" : name);
         }

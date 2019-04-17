@@ -20,6 +20,9 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.version;
 
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 /**
  *
  * @author firiz
@@ -1682,6 +1685,14 @@ public enum LanguageItemUtil {
     LanguageItemUtil(final String id, final String localizeName) {
         this.id = id;
         this.localizeName = localizeName;
+    }
+
+    public static String getLocalizeName(final ItemStack item, final Player player) {
+        return "ja-JP".equals(player.getLocale()) ? getLocalizeName(item) : item.getItemMeta().getDisplayName();
+    }
+
+    public static String getLocalizeName(final ItemStack item) {
+        return getLocalizeName(VersionUtils.asVItemCopy(item).getLocalizationId());
     }
 
     public static String getLocalizeName(final String id) {

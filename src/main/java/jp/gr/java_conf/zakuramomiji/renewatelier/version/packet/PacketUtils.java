@@ -84,7 +84,7 @@ public class PacketUtils {
         try {
             manager.sendServerPacket(player, packet);
         } catch (InvocationTargetException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
     }
 

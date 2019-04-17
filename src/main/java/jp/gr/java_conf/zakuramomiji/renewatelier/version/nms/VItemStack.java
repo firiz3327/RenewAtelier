@@ -77,7 +77,7 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         return obj;
     }
@@ -102,7 +102,7 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         return obj;
     }

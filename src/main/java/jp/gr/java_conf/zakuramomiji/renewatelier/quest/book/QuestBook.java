@@ -38,7 +38,6 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.quest.result.RecipeQuestResult;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.TellrawUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.VersionUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PayloadPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -78,18 +77,18 @@ public class QuestBook {
 
         final List<BaseComponent[]> pages = new ArrayList<>();
         // 進行中クエスト
-        progress_quests.forEach((quest) -> addSpigotPage(pages, quest, 0));
+        progress_quests.forEach((quest) -> addSpigotPage(pages, quest, 0, player));
         // 重要クエスト
-        importantQuests.forEach((quest) -> addSpigotPage(pages, quest, 2));
+        importantQuests.forEach((quest) -> addSpigotPage(pages, quest, 2, player));
         // クリア済みクエスト
-        clear_quests.forEach((quest) -> addSpigotPage(pages, quest, 1));
+        clear_quests.forEach((quest) -> addSpigotPage(pages, quest, 1, player));
 
         final BookMeta meta = (BookMeta) book.getItemMeta();
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
     }
 
-    private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type) {
+    private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type, final Player player) {
         final String flag_text;
         final ChatColor color;
         switch (type) {
@@ -165,9 +164,7 @@ public class QuestBook {
                 if (name != null) {
                     view_meta.setDisplayName(name);
                 } else {
-                    name = LanguageItemUtil.getLocalizeName(
-                            VersionUtils.asVItemCopy(view_item).getLocalizationId()
-                    );
+                    name = LanguageItemUtil.getLocalizeName(view_item, player);
                 }
                 if (!flags.isEmpty()) {
                     view_meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
@@ -205,9 +202,7 @@ public class QuestBook {
                 });
                 final String name = view_item.hasItemMeta() && view_item.getItemMeta().hasDisplayName()
                         ? view_item.getItemMeta().getDisplayName()
-                        : LanguageItemUtil.getLocalizeName(
-                                VersionUtils.asVItemCopy(view_item).getLocalizationId()
-                        );
+                        : LanguageItemUtil.getLocalizeName(view_item, player);
                 builder.append("アイテム: ").append(
                         questItem.getName() == null ? name : questItem.getName()
                 ).event(TellrawUtils.createHoverEvent(view_item));

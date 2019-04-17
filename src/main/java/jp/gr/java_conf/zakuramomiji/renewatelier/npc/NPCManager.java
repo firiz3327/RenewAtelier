@@ -364,7 +364,7 @@ public enum NPCManager {
                     try {
                         npcc.getIv().invokeFunction("action", shift);
                     } catch (ScriptException ex) {
-                        Chore.log(ex);
+                        Chore.logWarning(ex);
                     } catch (NoSuchMethodException ignored) {
                     }
                 } else {
@@ -391,7 +391,7 @@ public enum NPCManager {
                                 try {
                                     npcc.getIv().invokeFunction("action", shift);
                                 } catch (ScriptException ex) {
-                                    Chore.log(ex);
+                                    Chore.logWarning(ex);
                                 } catch (NoSuchMethodException ignored) {
                                 }
                             } else {

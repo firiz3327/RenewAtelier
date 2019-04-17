@@ -27,6 +27,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMateria
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
+import jp.gr.java_conf.zakuramomiji.renewatelier.debug.DebugManagerKt;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.megaphone.Megaphone;
@@ -73,6 +74,7 @@ public class DebugListener implements Listener {
         //<editor-fold defaultstate="collapsed" desc="debug">
         try {
             final String[] strs = e.getMessage().split(" ");
+            DebugManagerKt.command(strs);
             switch (strs[0].trim().toLowerCase()) {
                 case "debug": {
                     final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524);
@@ -94,7 +96,7 @@ public class DebugListener implements Listener {
                     }
                     final String[] split3 = split(strs[3]);
                     for (int i = 0; i < split3.length; i++) {
-                        if (split3[i].equals("uuid")) {
+                        if ("uuid".equals(split3[i])) {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
@@ -104,7 +106,7 @@ public class DebugListener implements Listener {
                 case "insert": {
                     final String[] split3 = split(strs[3]);
                     for (int i = 0; i < split3.length; i++) {
-                        if (split3[i].equals("uuid")) {
+                        if ("uuid".equals(split3[i])) {
                             split3[i] = e.getPlayer().getUniqueId().toString();
                         }
                     }
@@ -285,7 +287,7 @@ public class DebugListener implements Listener {
             }
         } catch (Exception ex) {
             e.getPlayer().sendMessage(ex.getMessage());
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         //</editor-fold>
 
@@ -320,6 +322,20 @@ public class DebugListener implements Listener {
                         Chore.drop(player.getLocation(), item);
                     }
                 }, 20);
+                break;
+            }
+            case "addrecipe": {
+                final Player player = Bukkit.getServer().getPlayer(UUID.fromString(strs[1]));
+                final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+                final AlchemyRecipe search = AlchemyRecipe.search(strs[2]);
+                if (search != null) {
+                    final RecipeStatus rs = status.getRecipeStatus(strs[3]);
+                    if (rs == null) {
+                        status.addRecipeExp(player, true, search, 0);
+                    } else if (strs.length > 4) {
+                        status.addRecipeExp(player, true, search, Integer.parseInt(strs[4]));
+                    }
+                }
                 break;
             }
         }

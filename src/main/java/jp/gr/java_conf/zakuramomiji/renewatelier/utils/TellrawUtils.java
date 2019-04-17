@@ -20,9 +20,7 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.utils;
 
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.VersionUtils;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -54,13 +52,6 @@ public class TellrawUtils {
         return new HoverEvent(
                 HoverEvent.Action.SHOW_ITEM,
                 parseItemComponents(item)
-        );
-    }
-
-    public static String getLocalizeName(final ItemStack item) {
-        final VItemStack vitem = VersionUtils.asVItemCopy(item);
-        return LanguageItemUtil.getLocalizeName(
-                vitem.getLocalizationId()
         );
     }
 

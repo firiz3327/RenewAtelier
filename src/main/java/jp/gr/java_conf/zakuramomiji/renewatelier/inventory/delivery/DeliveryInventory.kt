@@ -27,6 +27,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket.InventoryPacketType
 import org.bukkit.Bukkit
@@ -102,13 +103,41 @@ object DeliveryInventory {
         val inv = Bukkit.createInventory(player, line_size * 9, text)
         for (i in size - 9 until size) {
             when (i) {
-                size - 4 -> inv.setItem(i, Chore.ci(Material.LIME_WOOL, 0, ChatColor.GREEN.toString() + "納品", null))
+                size - 4 -> inv.setItem(i, getConfirmItem(text, inv, player))
                 size - 6 -> inv.setItem(i, Chore.ci(Material.RED_WOOL, 0, ChatColor.RED.toString() + "キャンセル", null))
                 else -> inv.setItem(i, Chore.ci(Material.BARRIER, 0, "§r", null))
             }
         }
         player.openInventory(inv)
         InventoryPacket.update(player, title, InventoryPacketType.CHEST)
+    }
+
+    private fun getConfirmItem(title: String, inv: Inventory, player: Player): ItemStack {
+        // load valuations
+        val valuations = mutableMapOf<ItemStack, DeliveryValuation>()
+        for (i in 0..inv.size - 10) {
+            val item = inv.contents[i]
+            if (item != null && item.type != Material.AIR) {
+                valuations.put(item, checkItem(title, item, true, AlchemyMaterial.getMaterial(item)).right)
+            }
+        }
+
+        // creating lore
+        val lore = arrayListOf<String>()
+        lore.add("")
+        valuations.forEach { (item, valuation) ->
+            val itemMeta = item.itemMeta!!
+            val name = if (itemMeta.hasDisplayName()) {
+                itemMeta.displayName
+            } else {
+                LanguageItemUtil.getLocalizeName(item, player)
+            }
+            val ve = valuation.isEmpty()
+            lore.add("${if(ve) ChatColor.GRAY else ChatColor.GREEN}・$name${if(ve) "" else "${ChatColor.GRAY} - ${ChatColor.GREEN}${valuation.getAllValue()}"}")
+        }
+        lore.add("")
+
+        return Chore.ci(Material.LIME_WOOL, 0, ChatColor.GREEN.toString() + "納品", lore)
     }
 
     @JvmStatic
@@ -118,25 +147,37 @@ object DeliveryInventory {
         val confirmPos = inv.size - 4
         val cancelPos = inv.size - 6
 
-        if (e.rawSlot == confirmPos) { // confirm
-            e.isCancelled = true
-            confirm(player, inv, e.view)
-        } else if (e.rawSlot == cancelPos) { // cancel
-            e.isCancelled = true
-            invokeFunction(player.uniqueId, "cancel", null)
-            player.closeInventory() // invokeFunction(close)
-        } else if (e.slotType == SlotType.CONTAINER && e.rawSlot <= inv.size - 9) { // click inv
-            if (e.cursor != null) {
-                val cursor: ItemStack = e.cursor
-                e.isCancelled = cursor.type != Material.AIR && !checkItem(e.view, cursor)
+        when {
+            e.rawSlot == confirmPos -> { // confirm
+                e.isCancelled = true
+                confirm(player, inv, e.view)
+                return
             }
-        } else if(e.slotType == SlotType.CONTAINER && e.rawSlot <= inv.size) { // click inv bar(not quick bar)
-            e.isCancelled = true
-        } else if (e.isShiftClick) { // other slot shift click Item
-            e.isCancelled = true
-            if (e.currentItem != null && checkItem(e.view, e.currentItem)) {
-                e.currentItem = Chore.addItemNotDrop(inv, e.currentItem)
+            e.rawSlot == cancelPos -> { // cancel
+                e.isCancelled = true
+                invokeFunction(player.uniqueId, "cancel", null)
+                player.closeInventory() // invokeFunction(close)
+                return
             }
+            e.slotType == SlotType.CONTAINER && e.rawSlot <= inv.size - 9 -> // click inv
+                if (e.cursor != null) {
+                    val cursor = e.cursor!!
+                    e.isCancelled = cursor.type != Material.AIR && !checkItem(e.view, cursor)
+                }
+            e.slotType == SlotType.CONTAINER && e.rawSlot <= inv.size -> { // click inv bar(not quick bar)
+                e.isCancelled = true
+                return
+            }
+            e.isShiftClick -> { // other slot shift click Item
+                e.isCancelled = true
+                if (e.currentItem != null && checkItem(e.view, e.currentItem!!)) {
+                    e.currentItem = Chore.addItemNotDrop(inv, e.currentItem)
+                }
+                return
+            }
+        }
+        if(!e.isCancelled) {
+            inv.setItem(inv.size - 4, getConfirmItem(e.view.title, inv, player))
         }
     }
 
@@ -155,7 +196,7 @@ object DeliveryInventory {
             }
         }
         if (valuation.qualityValue != 0) {
-            invokeFunction(player.uniqueId, "confirm", valuation.toList())
+            invokeFunction(player.uniqueId, "confirm", valuation)
             player.closeInventory()
         } else {
             player.playSound(player.eyeLocation, Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1f)
@@ -166,14 +207,18 @@ object DeliveryInventory {
         return checkItem(view, item, false, AlchemyMaterial.getMaterial(item)).left
     }
 
-    // return DoubleData[true or false, DeliveryValuation]
     private fun checkItem(view: InventoryView, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): DoubleData<Boolean, DeliveryValuation> {
+        return checkItem(view.title, item, isReqAmount, am)
+    }
+
+    // return DoubleData[true or false, DeliveryValuation]
+    private fun checkItem(title: String, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): DoubleData<Boolean, DeliveryValuation> {
         if (am == null) {
             return DoubleData(false, DeliveryValuation())
         }
         val itemQuality = AlchemyItemStatus.getQuality(item)
         val deliveryArray = run {
-            val titleAllValues = view.title.substring(1 until view.title.length - DELI.length - 1).split(Regex("[ :,&]")).filterIndexed { index, _ -> index % 2 != 0 }
+            val titleAllValues = title.substring(1 until title.length - DELI.length - 1).split(Regex("[ :,&]")).filterIndexed { index, _ -> index % 2 != 0 }
             val titleValues = arrayListOf<ArrayList<String>>()
             for (i in 0 until titleAllValues.count() step 5) {
                 titleValues.add(arrayListOf(
@@ -247,16 +292,17 @@ object DeliveryInventory {
     }
 
     private fun invokeFunction(uuid: UUID, method: String, value: Any?) {
+        val conv = NPCManager.INSTANCE.getNPCConversation(uuid) ?: return
         try {
             if (value == null) {
-                NPCManager.INSTANCE.getNPCConversation(uuid).iv.invokeFunction(method)
+                conv.iv.invokeFunction(method)
             } else {
-                NPCManager.INSTANCE.getNPCConversation(uuid).iv.invokeFunction(method, value)
+                conv.iv.invokeFunction(method, value)
             }
         } catch (ex: ScriptException) {
-            Chore.log(ex)
+            Chore.logWarning(ex)
         } catch (ex: NoSuchMethodException) {
-            Chore.log(ex)
+            Chore.logWarning(ex)
         }
     }
 

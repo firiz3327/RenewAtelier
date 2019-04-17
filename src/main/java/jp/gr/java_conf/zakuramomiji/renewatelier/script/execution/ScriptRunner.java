@@ -60,13 +60,13 @@ final class ScriptRunner {
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Chore.log(ex);
+                    Chore.logWarning(ex);
                 }
             } else {
                 Chore.log(name.concat(" is not found or error for script."));
             }
         } catch (ScriptException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
     }
 
@@ -100,9 +100,9 @@ final class ScriptRunner {
             engine.eval(reader);
             return true;
         } catch (FileNotFoundException | ScriptException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         } catch (IOException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         return false;
     }

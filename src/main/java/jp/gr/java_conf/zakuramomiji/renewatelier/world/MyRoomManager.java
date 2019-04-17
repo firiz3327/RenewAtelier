@@ -95,7 +95,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         return null;
     }
@@ -109,7 +109,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
         return false;
     }
@@ -127,7 +127,7 @@ public enum MyRoomManager {
             );
             createDefaultRoom(loc);
         } catch (IOException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
     }
 
@@ -188,7 +188,7 @@ public enum MyRoomManager {
                         try {
                             f2.createNewFile();
                         } catch (IOException ex) {
-                            Chore.log(ex);
+                            Chore.logWarning(ex);
                         }
                         return f2;
                     }
@@ -204,7 +204,7 @@ public enum MyRoomManager {
                 try {
                     f.createNewFile();
                 } catch (IOException ex) {
-                    Chore.log(ex);
+                    Chore.logWarning(ex);
                 }
                 return f;
             }

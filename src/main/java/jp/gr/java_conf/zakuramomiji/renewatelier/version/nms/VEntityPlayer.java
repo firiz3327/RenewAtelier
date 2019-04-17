@@ -76,7 +76,7 @@ public class VEntityPlayer {
             final Field listNameField = entityPlayer.getClass().getField("listName");
             listNameField.set(entityPlayer, VersionUtils.createChatMessage(listName));
         } catch (SecurityException | IllegalArgumentException | NoSuchFieldException | IllegalAccessException ex) {
-            Chore.log(ex);
+            Chore.logWarning(ex);
         }
     }
 

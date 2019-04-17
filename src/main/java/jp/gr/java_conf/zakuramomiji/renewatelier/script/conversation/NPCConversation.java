@@ -26,6 +26,7 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMateria
 import jp.gr.java_conf.zakuramomiji.renewatelier.characteristic.Characteristic;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.delivery.DeliveryInventory;
 import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.delivery.DeliveryObject;
+import jp.gr.java_conf.zakuramomiji.renewatelier.inventory.delivery.DeliveryValuation;
 import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VEntityPlayer;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.EntityPacket;
