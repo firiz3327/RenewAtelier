@@ -89,7 +89,7 @@ public class InventoryListener implements Listener {
                     if (material != null && bag.getType() == material) {
                         e.setCancelled(true);
                         click_temp.put(uuid, e.getCursor());
-                        
+
                         final DoubleData<ItemStack, ItemStack> bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
                         e.setCurrentItem(bagItem.getLeft());
                     }

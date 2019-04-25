@@ -21,6 +21,7 @@
 package jp.gr.java_conf.zakuramomiji.renewatelier.megaphone;
 
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.TellrawUtils;
+import jp.gr.java_conf.zakuramomiji.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -55,7 +56,7 @@ public class Megaphone {
                 if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
                     builder.append(item.getItemMeta().getDisplayName()).color(ChatColor.AQUA);
                 } else {
-                    builder.append(TellrawUtils.getLocalizeName(item)).color(ChatColor.AQUA);
+                    builder.append(LanguageItemUtil.getLocalizeName(item)).color(ChatColor.AQUA);
                 }
                 builder.event(TellrawUtils.createHoverEvent(item));
                 builder.append("】").reset();

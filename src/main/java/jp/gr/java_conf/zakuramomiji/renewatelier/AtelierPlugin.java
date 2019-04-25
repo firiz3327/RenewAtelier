@@ -20,8 +20,6 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.BlockListener;
 import jp.gr.java_conf.zakuramomiji.renewatelier.listener.DebugListener;
@@ -32,25 +30,14 @@ import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jline.utils.AttributedStringBuilder;
-import org.jline.utils.AttributedStyle;
-import org.python.jline.console.ConsoleReader;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 /**
  * @author firiz
@@ -70,10 +57,6 @@ public final class AtelierPlugin extends JavaPlugin {
 
         // setup worlds
         Bukkit.getWorlds().forEach(AtelierPlugin::worldSettings);
-
-        // init PacketUtils
-        final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-        PacketUtils.init(protocolManager);
 
         // setup managers
         MyRoomManager.INSTANCE.setup();
@@ -103,57 +86,60 @@ public final class AtelierPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        final PluginLogger logger = new PluginLogger(this) {
-
-            final ConsoleReader console;
-
-            {
-                console = tryCatch(ConsoleReader.class, new Class[0]);
-            }
-
-            @Override
-            public void log(LogRecord logRecord) {
-                try {
-                    final AttributedStringBuilder builder = new AttributedStringBuilder();
-                    builder.append("[")
-                            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-                            .append("Atelier")
-                            .style(AttributedStyle.DEFAULT)
-                            .append("] ");
-                    if (logRecord.getLevel() == Level.WARNING) {
-                        builder.style(
-                                AttributedStyle.DEFAULT
-                                        .background(AttributedStyle.RED)
-                                        .foreground(AttributedStyle.WHITE)
-                        );
-                    }
-                    builder.append(logRecord.getMessage());
-                    console.print(builder.toAnsi());
-                    console.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            <T> T tryCatch(Class<T> clasz, Class<?>[] clazz, Object... args) {
-                try {
-                    return clasz.getConstructor(clazz).newInstance(args);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        try {
-            final Field loggerField = JavaPlugin.class.getDeclaredField("logger");
-            loggerField.setAccessible(true);
-            loggerField.set(this, logger);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        Chore.logWarning("test warning");
+//        final PluginLogger logger = new PluginLogger(this) {
+//
+//            final ConsoleReader console;
+//
+//            {
+//                console = tryCatch(ConsoleReader.class, new Class[0]);
+//            }
+//
+//            @Override
+//            public void log(LogRecord logRecord) {
+//                final AttributedStringBuilder builder = new AttributedStringBuilder();
+//                builder.append("[")
+//                        .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
+//                        .append("Atelier")
+//                        .style(AttributedStyle.DEFAULT)
+//                        .append("] ");
+//                if (logRecord.getLevel() == Level.WARNING) {
+//                    builder.style(
+//                            AttributedStyle.DEFAULT
+//                                    .background(AttributedStyle.RED)
+//                                    .foreground(AttributedStyle.WHITE)
+//                    );
+//                }
+////                    builder.append(logRecord.getMessage());
+////                    console.print(builder.toAnsi());
+////                    console.flush();
+//                logRecord.setMessage(builder.toAnsi() + logRecord.getMessage());
+//                try {
+//                    final Method method = Logger.class.getMethod("log");
+//                    method.invoke(this, logRecord);
+//                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+//
+//            <T> T tryCatch(Class<T> clasz, Class<?>[] clazz, Object... args) {
+//                try {
+//                    return clasz.getConstructor(clazz).newInstance(args);
+//                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+//                    e.printStackTrace();
+//                    System.exit(1);
+//                }
+//                return null;
+//            }
+//        };
+//        try {
+//            final Field loggerField = JavaPlugin.class.getDeclaredField("logger");
+//            loggerField.setAccessible(true);
+//            loggerField.set(this, logger);
+//        } catch (NoSuchFieldException e) {
+//            e.printStackTrace();
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void removePlayerNPCStands() {

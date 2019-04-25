@@ -71,14 +71,17 @@ public enum NPCManager {
         playerNpcs.stream().filter(
                 (npc) -> (player.getWorld().equals(npc.getWorld()))
         ).forEachOrdered(eps::add);
-        FakePlayerPacket.sendPlayer(player, eps, false);
-        eps.forEach((eplayer) -> {
-            FakePlayerPacket.sendSkin(player, eplayer, (byte) 127); // 127 = all flag value
-        });
-        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(),
-                () -> FakePlayerPacket.sendPlayer(player, eps, true),
-                200 // 10 sec
-        );
+        if (!eps.isEmpty()) {
+            System.out.println("eps = " + eps);
+            FakePlayerPacket.sendPlayer(player, eps, false);
+            eps.forEach((eplayer) -> {
+                FakePlayerPacket.sendSkin(player, eplayer, 127f); // 127 = all flag value
+            });
+            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(),
+                    () -> FakePlayerPacket.sendPlayer(player, eps, true),
+                    200 // 10 sec
+            );
+        }
     }
 
     public void stop() {

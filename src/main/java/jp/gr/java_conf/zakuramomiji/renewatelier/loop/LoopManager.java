@@ -1,20 +1,20 @@
 /*
  * LoopManager.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,8 +22,10 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.loop;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.drop.AnimatedDrop;
+import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,7 +39,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.material.Cauldron;
 
 /**
- *
  * @author firiz
  */
 public enum LoopManager {
@@ -147,6 +148,7 @@ public enum LoopManager {
                 }
             }
         }
+
         for (final Player player : players) {
             final StringBuilder sb = new StringBuilder();
             final String name = player.getDisplayName();
@@ -158,16 +160,6 @@ public enum LoopManager {
             player.setPlayerListName(sb.toString());
         }
 
-        /*
-        if(sec_period % 2 == 0) {
-            AtelierGUI gui = AtelierGUI.INSTANCE;
-            if(gui.isOfflinePlayer()) {
-                gui.setOfflinePlayerList(Bukkit.getOfflinePlayers());
-            } else {
-                gui.setPlayerList(Bukkit.getOnlinePlayers());
-            }
-        }
-         */
         if (sec_period - 60 == 0) {
             sec_period = 0;
             minute_loop();

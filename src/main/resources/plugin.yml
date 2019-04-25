@@ -1,6 +1,5 @@
 name: Atelier
 version: 1.0
 auther: firiz
-depend: [ProtocolLib]
 main: jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin
-api-version: 1.13
+api-version: 1.14

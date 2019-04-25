@@ -25,22 +25,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.version.nms.VEntityPlayer;
-import net.minecraft.server.v1_13_R2.ChatMessage;
-import net.minecraft.server.v1_13_R2.DataWatcher;
-import net.minecraft.server.v1_13_R2.DataWatcherRegistry;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import net.minecraft.server.v1_13_R2.MinecraftServer;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_13_R2.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_13_R2.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_13_R2.PlayerInteractManager;
-import net.minecraft.server.v1_13_R2.WorldServer;
+import net.minecraft.server.v1_14_R1.ChatMessage;
+import net.minecraft.server.v1_14_R1.DataWatcher;
+import net.minecraft.server.v1_14_R1.DataWatcherRegistry;
+import net.minecraft.server.v1_14_R1.EntityPlayer;
+import net.minecraft.server.v1_14_R1.MinecraftServer;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_14_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_14_R1.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_14_R1.PlayerInteractManager;
+import net.minecraft.server.v1_14_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.entity.Player;
 
 /**
@@ -51,22 +51,17 @@ public class FakePlayerPacket {
 
     public static VEntityPlayer createEntityPlayer(final World world, final Location location, final UUID uuid, final String name) {
         final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
-        final WorldServer nmsworld = ((CraftWorld) location.getWorld()).getHandle();
+        final WorldServer nmsWorld = ((CraftWorld) world).getHandle();
         final GameProfile profile = new GameProfile(uuid, name);
-        // テクスチャが変わらない
-//        final String value = "eyJ0aW1lc3RhbXAiOjE1NDg5MDEzMzg2NzYsInByb2ZpbGVJZCI6Ijg0MDEzYmIzYmJmMjQ2YzU5ZDFmN2ZkMWE3ZmQ0OGU5IiwicHJvZmlsZU5hbWUiOiJfX19Eb2xhIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9iMTFhMDk2NWY1N2FhNTkzODEzY2MwOWM4YjVjYzYyNjhmMThhNmIzYjcyNTg3ZTY3MjZlODIwOWM1OTk4MDE4IiwibWV0YWRhdGEiOnsibW9kZWwiOiJzbGltIn19fX0=";
-//        final String signature = "pEgASFAzeXFMzQAIoyM2/AeHaMUwCOzWKcRkx+kH8ckh5Q9QKkR7qdh/5UotPt02k6JSr6OancQhA7XjtWQWvdlyrwGVJQHYBWNEUSrQ+kx3lkRLbCcoYZkOwsVPfIocbGUZoDaKlmOtXOEpn6/to81teThJKgmlnspTePbQzWZvzSvO+60SjV5toTlUkuGX+whYMT99m9yaXh+HqnxTovdHp18VRBGCkGqetmEWxPn9WdUSGbR3VBT3Ws6YVJXv0lDo7ZoyIVFU7ejmhcjQ4SyNv8sHkPTmfY564zkxtr/Mp6yWR0PeVC2bHcFosXACIrJsIC+rGmbgEzF2bo5cFGJj77KH0t5lsK+xim+yPqVpXm1L66CZjrjnASbRBZjuqdcCoQAM6MeRT6Blz02wB2Lv87S4vIA7lmjZc8/RNdsIZUMwPU0JU89nbssq4kVo1f9KgXG7e4hpFUAgBNNCIyaXhmaDtB+w5diq0I/DGzei43WBOTJ8lmSTghDfo4zOIh/0DSJlSJ8un3EsHpRUhWiQlnbhCrPxeBLNGuOe2TnO/93i+f3kuQ6oHrvyskEuZHuw4hpdXM91PX+Hj6bESHX8vtJ0omwRZJGE2yCQDfWgMryQQ7RZGZLkXd6BBZFp+b5MzZO9mq2WzYcCEIaiPHdf5DFZHKvkuA7QyzwRga8=";
-//        profile.getProperties().put("textures", new Property(value, signature));
-
-        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsworld, profile, new PlayerInteractManager(nmsworld));
+        final EntityPlayer entityPlayer = new EntityPlayer(server, nmsWorld, profile, new PlayerInteractManager(nmsWorld));
         entityPlayer.listName = new ChatMessage("");
         entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         return new VEntityPlayer(entityPlayer, entityPlayer.getId(), uuid, name, location);
     }
 
-    private static PacketPlayOutPlayerInfo getInfo(final Player player, final List<VEntityPlayer> players, final boolean remove) {
+    private static PacketPlayOutPlayerInfo getInfo(final List<VEntityPlayer> players, final boolean remove) {
         final List<EntityPlayer> eps = new ArrayList<>();
-        players.forEach((veps) -> eps.add((EntityPlayer) veps.getEntityPlayer()));
+        players.forEach((vEps) -> eps.add((EntityPlayer) vEps.getEntityPlayer()));
         return new PacketPlayOutPlayerInfo(
                 remove
                         ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER
@@ -76,7 +71,7 @@ public class FakePlayerPacket {
     }
 
     public static void sendPlayer(final Player player, final List<VEntityPlayer> players, final boolean remove) {
-        PacketUtils.sendPackets(player, getInfo(player, players, remove));
+        PacketUtils.sendPackets(player, getInfo(players, remove));
     }
 
     public static void sendLogout(final Player player, final List<VEntityPlayer> players) {
@@ -86,23 +81,24 @@ public class FakePlayerPacket {
         }
         PacketUtils.sendPackets(
                 player,
-                getInfo(player, players, true),
+                getInfo(players, true),
                 new PacketPlayOutEntityDestroy(ids)
         );
     }
 
-    public static void sendSkin(final Player player, final VEntityPlayer veplayer, final byte bitmask) {
-        final EntityPlayer eplayer = (EntityPlayer) veplayer.getEntityPlayer();
-        final DataWatcher watcher = eplayer.getDataWatcher();
-        watcher.set(DataWatcherRegistry.a.a(13), bitmask);
+    public static void sendSkin(final Player player, final VEntityPlayer vePlayer, final float bitmask) {
+        final EntityPlayer ePlayer = (EntityPlayer) vePlayer.getEntityPlayer();
+        final DataWatcher watcher = ePlayer.getDataWatcher();
+//        watcher.set(DataWatcherRegistry.a.a(13), bitmask); - bitmask: byte
+        watcher.set(DataWatcherRegistry.c.a(13), bitmask);
         PacketUtils.sendPackets(
                 player,
                 new PacketPlayOutEntityMetadata(
-                        eplayer.getId(),
+                        ePlayer.getId(),
                         watcher,
                         true
                 ),
-                new PacketPlayOutNamedEntitySpawn(eplayer)
+                new PacketPlayOutNamedEntitySpawn(ePlayer)
         );
     }
 

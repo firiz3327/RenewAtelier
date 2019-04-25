@@ -132,23 +132,23 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.13.2-R0.1-SNAPSHOT</version>
+            <version>1.14-pre5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.13.2-R0.1-SNAPSHOT</version>
+            <version>1.14-pre5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.comphenix.protocol</groupId>
-            <artifactId>ProtocolLib-API</artifactId>
-            <version>4.4.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.comphenix.protocol</groupId>-->
+<!--            <artifactId>ProtocolLib-API</artifactId>-->
+<!--            <version>4.4.0-SNAPSHOT</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <!-- providedがないためjar内に自動的に含まれる -->
         <dependency>
@@ -184,9 +184,9 @@
         <dependency>
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-parent</artifactId>
-            <version>1.8.2-SNAPSHOT</version>
+            <version>1.8.2-firiz-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/libs/item-nbt-api-plugin-1.8.2-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/libs/item-nbt-api-plugin-1.8.2-firiz-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>

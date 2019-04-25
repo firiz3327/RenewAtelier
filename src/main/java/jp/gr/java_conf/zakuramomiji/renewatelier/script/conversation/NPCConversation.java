@@ -178,7 +178,7 @@ public final class NPCConversation extends ScriptConversation {
 
         MessageType.FAKE_ENTITY.boardcast(
                 this,
-                EntityType.ARMOR_STAND,
+                FakeEntity.FakeEntityType.ARMOR_STAND,
                 balloonLoc,
                 text
         );
@@ -198,7 +198,7 @@ public final class NPCConversation extends ScriptConversation {
             FakeEntity run(NPCConversation conv, Object... args) {
                 // https://wiki.vg/Protocol#Spawn_Mob
                 // https://wiki.vg/Entity_metadata#Entity_Metadata_Format
-                final FakeEntity fakeEntity = new FakeEntity(-1, (EntityType) args[0], 0);
+                final FakeEntity fakeEntity = new FakeEntity(-1, (FakeEntity.FakeEntityType) args[0], 0);
                 conv.fakeEntity = fakeEntity;
                 PacketUtils.sendPacket(conv.player, EntityPacket.getSpawnPacket(
                         fakeEntity,
@@ -206,6 +206,7 @@ public final class NPCConversation extends ScriptConversation {
                 ));
                 PacketUtils.sendPacket(conv.player, EntityPacket.getMetadataPacket(
                         fakeEntity,
+                        (byte) 0,
                         EntityPacket.setEntityCustomName(
                                 PacketUtils.createWatcher(new HashMap<Integer, Object>() {
                                     {
@@ -222,7 +223,7 @@ public final class NPCConversation extends ScriptConversation {
         DESTROY_FAKE_ENTITY {
             @Override
             Object run(NPCConversation conv, Object... args) {
-                PacketUtils.sendPacket(conv.player, EntityPacket.getDespawnPacket(conv.fakeEntity));
+                PacketUtils.sendPacket(conv.player, EntityPacket.getDespawnPacket(conv.fakeEntity.getEntityId()));
                 return null;
             }
         };

@@ -97,7 +97,7 @@ public class PlayerListener implements Listener {
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
             AlchemyKettle.pickup(e);
-            AlchemyBagItem.pickup(e);
+//            AlchemyBagItem.pickup(e);
         }
     }
 

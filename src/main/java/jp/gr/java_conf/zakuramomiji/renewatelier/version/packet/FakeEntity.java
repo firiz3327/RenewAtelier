@@ -22,6 +22,7 @@ package jp.gr.java_conf.zakuramomiji.renewatelier.version.packet;
 
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.DoubleData;
+import net.minecraft.server.v1_14_R1.EntityTypes;
 import org.bukkit.entity.EntityType;
 
 /**
@@ -34,35 +35,35 @@ public class FakeEntity {
 
     private final int entityId;
     private final UUID uniqueId;
-    private final EntityType type;
+    private final FakeEntityType type;
     private final int typeId;
     private final boolean object;
     private final int objectData;
 
-    public FakeEntity(int entityId, EntityType type, int objectData) {
+    public FakeEntity(int entityId, FakeEntityType type, int objectData) {
         this.entityId = entityId;
         this.uniqueId = UUID.randomUUID();
         this.type = type;
         this.objectData = objectData;
 
-        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type);
+        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type.type);
         this.typeId = check.getRight();
         this.object = check.getLeft();
     }
 
-    public FakeEntity(EntityType type, int objectData) {
+    public FakeEntity(FakeEntityType type, int objectData) {
         lastId--;
         this.entityId = lastId;
         this.uniqueId = UUID.randomUUID();
         this.type = type;
         this.objectData = objectData;
 
-        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type);
+        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type.type);
         this.typeId = check.getRight();
         this.object = check.getLeft();
     }
 
-    public FakeEntity(EntityType type) {
+    public FakeEntity(FakeEntityType type) {
         this(type, 0);
     }
 
@@ -78,7 +79,7 @@ public class FakeEntity {
         return uniqueId;
     }
 
-    public EntityType getType() {
+    public FakeEntityType getType() {
         return type;
     }
 
@@ -94,6 +95,26 @@ public class FakeEntity {
         return objectData;
     }
 
+    public enum FakeEntityType {
+        ARMOR_STAND(EntityType.ARMOR_STAND, EntityTypes.ARMOR_STAND);
+
+        private final EntityType type;
+        private final EntityTypes<?> typeNms;
+
+        FakeEntityType(EntityType type, EntityTypes<?> typeNms) {
+            this.type = type;
+            this.typeNms = typeNms;
+        }
+
+        public EntityType getType() {
+            return type;
+        }
+
+        public EntityTypes<?> getTypeNms() {
+            return typeNms;
+        }
+    }
+
     private enum ObjectChecker {
         BOAT(EntityType.BOAT, 1),
         DROPPED_ITEM(EntityType.DROPPED_ITEM, 2),
@@ -101,7 +122,7 @@ public class FakeEntity {
         MINECART(EntityType.MINECART, 10),
         PRIMED_TNT(EntityType.PRIMED_TNT, 50),
         ENDER_CRYSTAL(EntityType.ENDER_CRYSTAL, 51),
-        TIPPED_ARROW(EntityType.TIPPED_ARROW, 60),
+//        TIPPED_ARROW(EntityType.TIPPED_ARROW, 60), 1.14 deleted
         SNOWBALL(EntityType.SNOWBALL, 61),
         EGG(EntityType.EGG, 62),
         FIREBALL(EntityType.FIREBALL, 63),

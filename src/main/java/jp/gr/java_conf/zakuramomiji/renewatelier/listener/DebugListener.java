@@ -20,41 +20,24 @@
  */
 package jp.gr.java_conf.zakuramomiji.renewatelier.listener;
 
-import de.tr7zw.itemnbtapi.NBTItem;
 import java.util.UUID;
 import jp.gr.java_conf.zakuramomiji.renewatelier.AtelierPlugin;
-import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.material.AlchemyMaterial;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.AlchemyRecipe;
 import jp.gr.java_conf.zakuramomiji.renewatelier.alchemy.recipe.RecipeStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.config.ConfigManager;
-import jp.gr.java_conf.zakuramomiji.renewatelier.debug.DebugManagerKt;
 import jp.gr.java_conf.zakuramomiji.renewatelier.item.AlchemyItemStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.item.bag.AlchemyBagItem;
 import jp.gr.java_conf.zakuramomiji.renewatelier.megaphone.Megaphone;
-import jp.gr.java_conf.zakuramomiji.renewatelier.nodification.Nodification;
-import jp.gr.java_conf.zakuramomiji.renewatelier.npc.NPCManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerSaveManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.player.PlayerStatus;
-import jp.gr.java_conf.zakuramomiji.renewatelier.sql.SQLManager;
 import jp.gr.java_conf.zakuramomiji.renewatelier.utils.Chore;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.entity.CustomZombie;
-import jp.gr.java_conf.zakuramomiji.renewatelier.version.packet.InventoryPacket;
-import jp.gr.java_conf.zakuramomiji.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -70,226 +53,6 @@ public class DebugListener implements Listener {
             return;
         }
         e.setCancelled(true);
-
-        //<editor-fold defaultstate="collapsed" desc="debug">
-        try {
-            final String[] strs = e.getMessage().split(" ");
-            DebugManagerKt.command(strs);
-            switch (strs[0].trim().toLowerCase()) {
-                case "debug": {
-                    final ItemStack item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524);
-                    e.getPlayer().getInventory().addItem(item);
-                    break;
-                }
-                case "item": {
-                    final ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-                    AlchemyItemStatus.getItem(strs[1], item);
-                    break;
-                }
-                case "select": {
-                    final String[] split2 = split(strs[2]);
-                    final int length;
-                    if (strs.length > 4) {
-                        length = Integer.parseInt(strs[4]);
-                    } else {
-                        length = split2.length;
-                    }
-                    final String[] split3 = split(strs[3]);
-                    for (int i = 0; i < split3.length; i++) {
-                        if ("uuid".equals(split3[i])) {
-                            split3[i] = e.getPlayer().getUniqueId().toString();
-                        }
-                    }
-                    SQLManager.INSTANCE.select(strs[1], split2, split3, length).forEach((a) -> Chore.log(a.toString()));
-                    break;
-                }
-                case "insert": {
-                    final String[] split3 = split(strs[3]);
-                    for (int i = 0; i < split3.length; i++) {
-                        if ("uuid".equals(split3[i])) {
-                            split3[i] = e.getPlayer().getUniqueId().toString();
-                        }
-                    }
-                    SQLManager.INSTANCE.insert(strs[1], split(strs[2]), split3);
-                    break;
-                }
-                case "delete": {
-                    final String[] split3 = split(strs[3]);
-                    for (int i = 0; i < split3.length; i++) {
-                        if (split3[i].equals("uuid")) {
-                            split3[i] = e.getPlayer().getUniqueId().toString();
-                        }
-                    }
-                    SQLManager.INSTANCE.delete(strs[1], split(strs[2]), split3);
-                    break;
-                }
-                case "disable": {
-                    AtelierPlugin.getPlugin().getPluginLoader().disablePlugin(AtelierPlugin.getPlugin());
-                    break;
-                }
-                case "break": {
-                    nonbreak = !nonbreak;
-                    break;
-                }
-                case "anvil": {
-                    final Inventory inv = Bukkit.createInventory(
-                            e.getPlayer(), InventoryType.ANVIL
-                    );
-                    e.getPlayer().openInventory(inv);
-                    InventoryPacket.update(e.getPlayer(), strs[1], "anvil");
-                    break;
-                }
-                case "inv": {
-                    final Inventory inv = Bukkit.createInventory(e.getPlayer(), Integer.parseInt(strs[1]), strs[2]);
-                    e.getPlayer().openInventory(inv);
-                    e.getPlayer().sendMessage(strs[2]);
-                    break;
-                }
-                case "islandcreate": {
-                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                        final UUID uuid = UUID.randomUUID();
-                        MyRoomManager.INSTANCE.createRoom(uuid);
-                        MyRoomManager.INSTANCE.warpRoom(e.getPlayer(), uuid);
-                    });
-                    break;
-                }
-                case "addrecipe": {
-                    final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
-                    final AlchemyRecipe search = AlchemyRecipe.search(strs[1]);
-                    if (search != null) {
-                        final RecipeStatus rs = status.getRecipeStatus(strs[1]);
-                        if (rs == null) {
-                            status.addRecipeExp(e.getPlayer(), true, search, 0);
-                        } else if (strs.length > 2) {
-                            status.addRecipeExp(e.getPlayer(), true, search, Integer.parseInt(strs[2]));
-                        }
-                    }
-                    break;
-                }
-                case "configreload": {
-                    ConfigManager.INSTANCE.reloadConfigs();
-                    break;
-                }
-                case "bag": {
-                    final AlchemyMaterial am = AlchemyMaterial.getMaterial(strs[1]);
-                    if (am != null) {
-                        Chore.addItem(e.getPlayer(), new AlchemyBagItem(am).getItem());
-                    }
-                    break;
-                }
-                case "viewlore": {
-                    final ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
-                    if (mainHand != null && mainHand.hasItemMeta()) {
-                        final ItemMeta meta = mainHand.getItemMeta();
-                        if (meta.hasLore()) {
-                            e.getPlayer().sendMessage(meta.getLore().toString());
-                            Chore.log(meta.getLore());
-                        }
-                    }
-                    break;
-                }
-                case "test": {
-                    final ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
-                    if (mainHand != null && mainHand.hasItemMeta()) {
-                        final ItemMeta meta = mainHand.getItemMeta();
-                        if (meta.hasLore()) {
-                            final ItemStack item = new ItemStack(Material.STONE, 1);
-                            final NBTItem nbti = new NBTItem(item);
-                            nbti.setString("ddata", meta.getLore().toString());
-                            Chore.addItem(e.getPlayer(), nbti.getItem());
-                        }
-                    }
-                    break;
-                }
-                case "getnbt": {
-                    final ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
-                    if (item != null) {
-                        final NBTItem nbti = new NBTItem(item);
-                        Chore.log(nbti.getString(strs[1]));
-                    }
-                    break;
-                }
-                case "debugdrop": {
-                    final int val = Integer.parseInt(strs[1]);
-                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
-                        for (int i = 0; i < val; i++) {
-                            final ItemStack item = AlchemyItemStatus.getItem("kaen_stone", new ItemStack(Material.STONE));
-                            Chore.drop(e.getPlayer().getLocation(), item);
-                        }
-                    }, 20);
-                    break;
-                }
-                case "npc": { // npc <name> <script> <entityType>
-                    NPCManager.INSTANCE.createNPC(
-                            e.getPlayer().getLocation(),
-                            EntityType.valueOf(strs[3]),
-                            strs[1],
-                            strs[2]
-                    );
-                    break;
-                }
-                case "player": {
-                    NPCManager.INSTANCE.createNPCPlayer(
-                            e.getPlayer().getLocation(),
-                            strs[1],
-                            UUID.fromString(strs[3]),
-                            strs[2]
-                    );
-                    break;
-                }
-                case "save_player": {
-                    NPCManager.INSTANCE.createNPCPlayer(
-                            e.getPlayer().getLocation(),
-                            strs[1],
-                            UUID.fromString(strs[3]),
-                            strs[2],
-                            true
-                    );
-                    break;
-                }
-                case "quest_book": {
-                    final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-                    final ItemMeta meta = book.getItemMeta();
-                    meta.setUnbreakable(true);
-                    meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                    final BookMeta bookmeta = (BookMeta) meta;
-                    bookmeta.setTitle("クエスト一覧");
-                    bookmeta.setAuthor(e.getPlayer().getDisplayName());
-                    bookmeta.setGeneration(BookMeta.Generation.ORIGINAL);
-                    book.setItemMeta(meta);
-                    e.getPlayer().getInventory().addItem(book);
-                    break;
-                }
-                case "recipe_packet": {
-                    Nodification.recipeNodification(
-                            e.getPlayer(),
-                            Material.CAULDRON
-                    );
-                    break;
-                }
-//                case "advancement_packet": {
-//                    Nodification.advancementNodification(
-//                            e.getPlayer(),
-//                            strs[1]
-//                    );
-//                    break;
-//                }
-                case "czombie": {
-                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> CustomZombie.spawnEntity(new CustomZombie(
-                            e.getPlayer().getWorld()
-                    ), e.getPlayer().getLocation()));
-                    break;
-                }
-                default: {
-                    e.setCancelled(false);
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            e.getPlayer().sendMessage(ex.getMessage());
-            Chore.logWarning(ex);
-        }
-        //</editor-fold>
 
         if (!e.isCancelled()) {
             e.setCancelled(true);

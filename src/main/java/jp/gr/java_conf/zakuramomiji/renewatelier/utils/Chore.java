@@ -58,7 +58,12 @@ public final class Chore {
     private final static Logger log = AtelierPlugin.getPlugin().getLogger();
 
     public static void log(final Object obj) {
-        log.info(obj.toString());
+        if(obj instanceof Exception) {
+            final Exception ex = ((Exception) obj);
+            log.log(Level.WARNING, ex.getMessage(), ex);
+        } else {
+            log.info(obj.toString());
+        }
     }
 
     public static void log(final String str) {
@@ -66,7 +71,12 @@ public final class Chore {
     }
 
     public static void logWarning(final Object obj) {
-        log.warning(obj.toString());
+        if(obj instanceof Exception) {
+            final Exception ex = ((Exception) obj);
+            log.log(Level.WARNING, ex.getMessage(), ex);
+        } else {
+            log.warning(obj.toString());
+        }
     }
 
     public static void logWarning(final String str) {
