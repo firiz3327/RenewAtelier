@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>jp.gr.java_conf.zakuramomiji</groupId>
+    <groupId>net.firiz</groupId>
     <artifactId>RenewAtelier</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -55,7 +55,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>jp.gr.java_conf.zakuramomiji.atelier.AtelierPlugin</mainClass>
+                            <mainClass>net.firiz.renewatelier.AtelierPlugin</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -132,23 +132,16 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.14-pre5-SNAPSHOT</version>
+            <version>1.14.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.14-pre5-SNAPSHOT</version>
+            <version>1.14.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.comphenix.protocol</groupId>-->
-<!--            <artifactId>ProtocolLib-API</artifactId>-->
-<!--            <version>4.4.0-SNAPSHOT</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
 
         <!-- providedがないためjar内に自動的に含まれる -->
         <dependency>
@@ -166,27 +159,19 @@
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
-            <version>1.0.0-rc15</version>
+            <version>1.0.0-rc16</version>
         </dependency>
 
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
-            <version>1.0.0-rc15</version>
+            <version>1.0.0-rc16</version>
         </dependency>
 
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython-standalone</artifactId>
             <version>2.7.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>de.tr7zw</groupId>
-            <artifactId>item-nbt-parent</artifactId>
-            <version>1.8.2-firiz-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/libs/item-nbt-api-plugin-1.8.2-firiz-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>
