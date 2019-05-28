@@ -20,8 +20,11 @@
  */
 package net.firiz.renewatelier.alchemy.material;
 
+import com.google.common.collect.Maps;
 import net.firiz.renewatelier.utils.DoubleData;
 import org.bukkit.Material;
+
+import java.util.Map;
 
 /**
  *
@@ -65,8 +68,19 @@ public enum Category {
     CATALYST("触媒", new DoubleData<>(Material.DIAMOND_AXE, (short) 0)), // 触媒画像
     COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE);
 
+    private static final Map<String, Category> BY_NAME = Maps.newHashMap();
     private final String name;
     private final DoubleData<Material, Short> material;
+
+    static {
+        Category[] var3;
+        int var2 = (var3 = values()).length;
+
+        for(int var1 = 0; var1 < var2; ++var1) {
+            final Category c = var3[var1];
+            BY_NAME.put(c.name(), c);
+        }
+    }
 
     Category(String name, Material material) {
         this.name = name;
@@ -91,11 +105,15 @@ public enum Category {
         if (str.startsWith("(") || str.endsWith(")")) {
             search = str.replace("(", "").replace(")", "");
         }
-        for (final Category category : values()) {
-            if (category.name.equals(search)) {
-                return category;
+        final Category c = BY_NAME.get(str.toUpperCase());
+        if(c == null) {
+            for (final Category category : values()) {
+                if (category.name.equals(search)) {
+                    return category;
+                }
             }
         }
-        return null;
+        return c;
     }
+
 }

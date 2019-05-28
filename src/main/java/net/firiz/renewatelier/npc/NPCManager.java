@@ -72,7 +72,6 @@ public enum NPCManager {
                 (npc) -> (player.getWorld().equals(npc.getWorld()))
         ).forEachOrdered(eps::add);
         if (!eps.isEmpty()) {
-            System.out.println("eps = " + eps);
             FakePlayerPacket.sendPlayer(player, eps, false);
             eps.forEach((eplayer) -> {
                 FakePlayerPacket.sendSkin(player, eplayer, (byte) 127); // 127 = all flag value

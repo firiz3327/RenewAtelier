@@ -1,20 +1,20 @@
 /*
  * VItemStack.java
- * 
+ *
  * Copyright (c) 2019 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,11 +22,12 @@ package net.firiz.renewatelier.version.nms;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.VersionUtils;
+import org.bukkit.inventory.ItemStack;
 
 /**
- *
  * @author firiz
  */
 public class VItemStack {
@@ -37,8 +38,11 @@ public class VItemStack {
         this.nmsItem = nmsItem;
     }
 
+    public Object getNmsItem() {
+        return nmsItem;
+    }
+
     /**
-     * 
      * @return Example: "block.minecraft.stone"
      */
     public String getLocalizationId() {
@@ -46,7 +50,6 @@ public class VItemStack {
     }
 
     /**
-     * 
      * @return Example: "{id:"minecraft:stone",Count:1b}"
      */
     public String getMinecraftJson() {
@@ -59,7 +62,6 @@ public class VItemStack {
     }
 
     /**
-     * 
      * @return Example: "minecraft:stone"
      */
     public String getMinecraftId() {
@@ -105,6 +107,40 @@ public class VItemStack {
             Chore.logWarning(ex);
         }
         return obj;
+    }
+
+    public void setString(final String key, final Object value) {
+        final Object tag = VersionUtils.getField(this, "tag");
+        VersionUtils.invoke(
+                tag,
+                "setString",
+                new Class<?>[]{String.class, String.class},
+                new Object[]{key, value}
+        );
+    }
+
+    public String getString(final String key) {
+        final Object tag = VersionUtils.getField(this, "tag");
+        return (String) VersionUtils.invoke(
+                tag,
+                "getString",
+                new Class<?>[]{String.class},
+                new Object[]{key}
+        );
+    }
+
+    public boolean hasKey(final String key) {
+        final Object tag = VersionUtils.getField(this, "tag");
+        return (boolean) VersionUtils.invoke(
+                tag,
+                "hasKey",
+                new Class<?>[]{String.class},
+                new Object[]{key}
+        );
+    }
+
+    public ItemStack getItem() {
+        return VersionUtils.asItem(this);
     }
 
 }

@@ -26,6 +26,10 @@ import net.minecraft.server.v1_14_R1.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /**
  *
  * @author firiz
@@ -42,6 +46,45 @@ public class VersionUtils {
 
     public static VItemStack asVItemCopy(final ItemStack item) {
         return new VItemStack(CraftItemStack.asNMSCopy(item));
+    }
+
+    public static ItemStack asItem(final VItemStack item) {
+        final net.minecraft.server.v1_14_R1.ItemStack nms = (net.minecraft.server.v1_14_R1.ItemStack) item.getNmsItem();
+        return CraftItemStack.asBukkitCopy(nms);
+    }
+
+    public static Field getField(Object obj, String name) {
+        try {
+            final Field field = obj.getClass().getDeclaredField(name);
+            field.setAccessible(true);
+            return field;
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void setField(Object obj, String name, Object value) {
+        try {
+            getField(obj, name).set(obj, value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Object invoke(Object obj, String name, Class<?>[] params, Object[] args) {
+        try {
+            final Method method = obj.getClass().getMethod(name, params);
+            method.setAccessible(true);
+            return method.invoke(obj, args);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

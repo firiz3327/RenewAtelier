@@ -25,6 +25,7 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
+import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.DoubleData;
 import net.firiz.renewatelier.utils.Randomizer;
@@ -41,7 +42,6 @@ import java.util.*;
  */
 public enum AlchemyItemStatus {
     ID("§l§d"),
-    CATALYST_CATEGORY("§c§a§f§c§a§f§e§d§o§r§d"), // 触媒・カテゴリ
     CATALYST_SIZE("§c§a§f§2§1§d§e"), // 触媒・サイズ
     CATEGORY("§c§a§f§e§d§o§r§d"), // 錬金アイテム・カテゴリ
     SIZE("§2§1§d§e"), // 錬金アイテム・サイズ
@@ -196,7 +196,7 @@ public enum AlchemyItemStatus {
             lore.add(ID.check + Chore.createStridColor(am.getId()));
         }
         if (!not_visibles[1]) {
-            lore.add(QUALITY.check + "§7品質: §r" + (over_quality != -1 ? over_quality : Randomizer.nextInt(am.getQuality_max() - am.getQuality_min()) + am.getQuality_min()));
+            lore.add(QUALITY.check + "§7品質: §r" + (over_quality != -1 ? over_quality : Randomizer.nextInt(am.getQualityMax() - am.getQualityMin()) + am.getQualityMin()));
         }
 
         // 錬金成分
@@ -317,7 +317,7 @@ public enum AlchemyItemStatus {
         if (!not_visibles[4]) {
             final Catalyst catalyst = am.getCatalyst();
             if (catalyst != null) {
-                lore.add(CATALYST_CATEGORY.check + "§7触媒: §r" + catalyst.getCategory().getName());
+                lore.add("§7触媒:");
                 final List<Integer> allcs = new ArrayList<>();
                 for (final CatalystBonus bonus : catalyst.getBonus()) {
                     if (allcs.isEmpty()) {
@@ -335,7 +335,7 @@ public enum AlchemyItemStatus {
                     }
                 }
                 final int size = allcs.size();
-                final int rotate_value = size == 36 ? 4 : (size == 25 ? 5 : 6);
+                final int rotate_value = size == 36 ? 6 : (size == 25 ? 5 : 4);
                 final StringBuilder sb = new StringBuilder();
                 int count = 0;
                 for (int i = 0; i < rotate_value; i++) {
@@ -366,7 +366,6 @@ public enum AlchemyItemStatus {
                 am.getCharas().forEach((obj) -> {
                     if (obj instanceof CharacteristicTemplate) {
                         cs.addAll(Arrays.asList(((CharacteristicTemplate) obj).getCs()));
-//                        cs.addAll(Arrays.asList());
                     } else {
                         cs.add((DoubleData<Characteristic, Integer>) obj);
                     }
@@ -405,25 +404,7 @@ public enum AlchemyItemStatus {
         meta.setLore(lore);
 
         // unbreaking & flag系
-        meta.setUnbreakable(am.isUnbreaking());
-        if (am.isHideAttribute()) {
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        }
-        if (am.isHideDestroy()) {
-            meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
-        }
-        if (am.isHideEnchant()) {
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        if (am.isHidePlacedOn()) {
-            meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-        }
-        if (am.isHidePotionEffect()) {
-            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-        }
-        if (am.isHideUnbreaking()) {
-            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        }
+        Chore.addHideFlags(meta, am);
 
         // meta設定
         item.setItemMeta(meta);

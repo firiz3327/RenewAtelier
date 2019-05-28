@@ -1,12 +1,13 @@
 package net.firiz.renewatelier.debug
 
 import net.firiz.renewatelier.debug.annotations.Cmd
+import net.firiz.renewatelier.listener.DebugListener
 import org.bukkit.entity.Player
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
-class DebugManager {
-    private val debugCommand = DebugCommands()
+class DebugManager(debugListener: DebugListener) {
+    private val debugCommand: DebugCommands = DebugCommands(debugListener)
 
     fun command(player: Player, str: String) {
         val split = split(player, str)
@@ -23,7 +24,10 @@ class DebugManager {
                     invokeArgs.add(s)
                 }
             }
-            player.sendMessage(invoke(player, invokeArgs, true).toString())
+            val invokeResult: InvokeResult = invoke(player, invokeArgs, true) as InvokeResult
+            if (invokeResult.type != InvokeResult.Type.HIDE) {
+                player.sendMessage(invokeResult.toString())
+            }
         } catch (ex: IllegalArgumentException) {
             player.sendMessage("Not found command for ${split.single()}.")
         }
@@ -51,7 +55,10 @@ class DebugManager {
                     }
                 }
                 if (list.isNotEmpty()) {
-                    v.add(UniqueWrap(invoke(player, list, false)!!))
+                    val inv = invoke(player, list, false)
+                    if (inv != null) {
+                        v.add(UniqueWrap(inv!!))
+                    }
                 }
                 list = v
                 sb = SB()
@@ -74,7 +81,7 @@ class DebugManager {
             }
         }
 
-        val args = arrayListOf<Any>()
+        val args = arrayListOf<Any?>()
         var cmd = ""
         lhs.withIndex().forEach {
             when {
@@ -85,29 +92,31 @@ class DebugManager {
         }
 
         if (cmd.isNotEmpty()) {
-            val result = run {
-                var r: Any? = null
-                var notFound = true
-                for (it in DebugCommands::class.java.methods) {
-                    if (it.isAnnotationPresent(Cmd::class.java)
-                            && it.name.equals(cmd, true)) {
-                        r = it.invoke(debugCommand, player, args)
-                        notFound = false
-                        break
-                    }
+            var result: Any?
+            var hideReturn = false
+            var r: Any? = null
+            var notFound = true
+            for (it in DebugCommands::class.java.methods) {
+                if (it.isAnnotationPresent(Cmd::class.java)
+                        && it.name.equals(cmd, true)) {
+                    r = it.invoke(debugCommand, player, args)
+                    hideReturn = it.getAnnotation(Cmd::class.java).hideReturn
+                    notFound = false
+                    break
                 }
-                if(notFound) {
-                    throw IllegalArgumentException("not found command for $cmd.")
-                }
-                r
             }
+            if (notFound) {
+                throw IllegalArgumentException("not found command for $cmd.")
+            }
+            result = r
+
             if (shape) {
                 return InvokeResult(
-                        if (result == null) InvokeResult.Type.VOID else InvokeResult.Type.DATA,
+                        if (hideReturn) InvokeResult.Type.HIDE else if (result == null) InvokeResult.Type.VOID else InvokeResult.Type.DATA,
                         result
                 )
             }
-            return result!!
+            return result
         }
         return lhs
     }
@@ -116,7 +125,8 @@ class DebugManager {
 class InvokeResult(val type: Type, val data: Any?) {
     enum class Type {
         VOID,
-        DATA
+        DATA,
+        HIDE
     }
 
     override fun toString(): String {

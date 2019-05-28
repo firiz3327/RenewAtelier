@@ -43,6 +43,7 @@ public class AlchemyMaterial {
     private final DoubleData<Material, Short> material;
     private final int quality_min;
     private final int quality_max;
+    private final int price;
     private final List<Category> categorys;
     private final List<DoubleData<Ingredients, Integer>> ingredients;
     private final List<MaterialSizeData> sizes;
@@ -64,6 +65,7 @@ public class AlchemyMaterial {
             DoubleData<Material, Short> material,
             int quality_min,
             int quality_max,
+            int price,
             List<Category> categorys,
             List<DoubleData<Ingredients, Integer>> ingredients,
             List<MaterialSizeData> sizes,
@@ -84,6 +86,7 @@ public class AlchemyMaterial {
         this.material = material;
         this.quality_min = quality_min;
         this.quality_max = quality_max;
+        this.price = price;
         this.categorys = categorys;
         this.ingredients = ingredients;
         this.sizes = sizes;
@@ -133,12 +136,16 @@ public class AlchemyMaterial {
         return material;
     }
 
-    public int getQuality_min() {
+    public int getQualityMin() {
         return quality_min;
     }
 
-    public int getQuality_max() {
+    public int getQualityMax() {
         return quality_max;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public List<Category> getCategorys() {
@@ -169,15 +176,17 @@ public class AlchemyMaterial {
         final List<String> catalyst_categorys = recipe.getCatalyst_categorys();
         if (catalyst_categorys != null && catalyst != null) {
             for (final String str : catalyst_categorys) {
-                if (str.equals("material:".concat(id))
-                        || str.equals("category:".concat(catalyst.getCategory().name()))) {
+                if (str.equals("material:".concat(id))) {
                     return true;
+                }
+                for(final Category c : categorys) {
+                    if(str.equals("category:".concat(c.name()))) {
+                        return true;
+                    }
                 }
             }
         }
-        return catalyst_categorys != null && catalyst != null && catalyst_categorys.stream().anyMatch(
-                (str) -> (str.equals("material:".concat(id)) || str.equals("category:".concat(catalyst.getCategory().getName())))
-        );
+        return false;
     }
 
     public boolean isUnbreaking() {

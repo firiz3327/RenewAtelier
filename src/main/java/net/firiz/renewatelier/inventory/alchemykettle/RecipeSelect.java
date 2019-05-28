@@ -81,8 +81,10 @@ public final class RecipeSelect {
         InventoryPacket.update(player, "", InventoryPacketType.CHEST);
     }
 
-    private static void addRecipeStatus(final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
+    private static void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
+        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
         lore.add(Chore.createStridColor(recipe.getId()));
+        lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
 
         int add_amount = 0;
         final int level = rs.getLevel();
@@ -145,8 +147,8 @@ public final class RecipeSelect {
             }
         });
         ritem.sort(Comparator.comparing((DoubleData<RecipeStatus, DoubleData<Material, Short>> o) -> o.getLeft().getId()));
-        final int dscroll = scroll * 6;
-        if (ritem.size() > dscroll) {
+        final int dScroll = scroll * 6;
+        if (ritem.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
             final ItemMeta meta = setting.getItemMeta();
             meta.addEnchant(Enchantment.LUCK, scroll, true); // レシピページ数
@@ -173,7 +175,7 @@ public final class RecipeSelect {
             }
 
             slot = 9;
-            for (int i = dscroll; i < dscroll + 24; i++) {
+            for (int i = dScroll; i < dScroll + 24; i++) {
                 if (ritem.size() <= i) {
                     break;
                 }
@@ -183,43 +185,18 @@ public final class RecipeSelect {
                 final AlchemyRecipe recipe = AlchemyRecipe.search(rs.getId());
                 final ItemStack item;
                 final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
-                final ItemMeta imeta;
 
                 item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createDamageableItem(material.getLeft(), 1, material.getRight());
-                imeta = item.getItemMeta();
+                final ItemMeta iMeta = item.getItemMeta();
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
-                if (am != null) {
-                    if (!am.isDefaultName()) {
-                        imeta.setDisplayName(am.getName());
-                    }
-
-                    imeta.setUnbreakable(am.isUnbreaking());
-                    if (am.isHideAttribute()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                    }
-                    if (am.isHideDestroy()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_DESTROYS);
-                    }
-                    if (am.isHideEnchant()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                    }
-                    if (am.isHidePlacedOn()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-                    }
-                    if (am.isHidePotionEffect()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-                    }
-                    if (am.isHideUnbreaking()) {
-                        imeta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                    }
-                }
+                setMetaDatas(iMeta, am);
 
                 final List<String> lore = new ArrayList<>();
-                addRecipeStatus(recipe, rs, lore);
+                addRecipeStatus(uuid, recipe, rs, lore);
                 lore.add("");
-                imeta.setLore(lore);
+                iMeta.setLore(lore);
 
-                item.setItemMeta(imeta);
+                item.setItemMeta(iMeta);
                 inv.setItem(slot, item);
                 switch (slot) {
                     case 14:
@@ -237,7 +214,16 @@ public final class RecipeSelect {
         }
     }
 
-    public static void click(InventoryClickEvent e) {
+    private static void setMetaDatas(final ItemMeta meta, final AlchemyMaterial am) {
+        if (am != null) {
+            if (!am.isDefaultName()) {
+                meta.setDisplayName(am.getName());
+            }
+            Chore.addHideFlags(meta, am);
+        }
+    }
+
+    public static void click(final InventoryClickEvent e) {
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { // 増殖防止
             e.setCancelled(true);
             return;
@@ -277,9 +263,15 @@ public final class RecipeSelect {
                             || raw >= 18 && raw <= 23
                             || raw >= 27 && raw <= 32
                             || raw >= 36 && raw <= 41) {
-                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         if (item != null && item.getType() != Material.AIR && item.hasItemMeta()) {
                             final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(item.getItemMeta().getLore().get(0)));
+                            final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+                            if (!Chore.hasMaterial(player.getInventory(), recipe.getReqMaterial())) {
+                                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
+                                break;
+                            } else {
+                                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                            }
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
                             DoubleData<Material, Short> material = null;
@@ -292,41 +284,18 @@ public final class RecipeSelect {
 
                             final List<String> lore = new ArrayList<>();
                             lore.add(ChatColor.WHITE + "  を作成します。");
-                            final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
                             final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
                             if (recipe_status != null && material != null) {
-                                RecipeSelect.addRecipeStatus(recipe, recipe_status, lore);
+                                RecipeSelect.addRecipeStatus(player.getUniqueId(), recipe, recipe_status, lore);
                                 final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createDamageableItem(material.getLeft(), recipe.getAmount(), material.getRight());
                                 final ItemMeta meta = result_item.getItemMeta();
-                                if (am != null) {
-                                    if (!am.isDefaultName()) {
-                                        meta.setDisplayName(am.getName());
-                                    }
-
-                                    meta.setUnbreakable(am.isUnbreaking());
-                                    if (am.isHideAttribute()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                                    }
-                                    if (am.isHideDestroy()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
-                                    }
-                                    if (am.isHideEnchant()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                                    }
-                                    if (am.isHidePlacedOn()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-                                    }
-                                    if (am.isHidePotionEffect()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-                                    }
-                                    if (am.isHideUnbreaking()) {
-                                        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                                    }
-                                }
+                                setMetaDatas(meta, am);
                                 meta.setLore(lore);
                                 result_item.setItemMeta(meta);
                                 inv.setItem(25, result_item);
                             }
+                        } else {
+                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         }
                     }
                     break;

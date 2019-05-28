@@ -48,6 +48,8 @@ import org.bukkit.inventory.ItemStack;
 public final class PlayerStatus {
 
     private final int id;
+    private final int alchemy_level;
+    private final int alchemy_exp;
     private final List<RecipeStatus> recipe_statuses;
     private final List<QuestStatus> quest_statuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
@@ -55,11 +57,21 @@ public final class PlayerStatus {
     private ScriptEngine py2Engine;
     private ScriptEngine py3Engine;
 
-    public PlayerStatus(final int id, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
+    public PlayerStatus(final int id, final int alchemy_level, final int alchemy_exp, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
         this.id = id;
+        this.alchemy_level = alchemy_level;
+        this.alchemy_exp = alchemy_exp;
         this.recipe_statuses = recipe_statuses;
         this.quest_statuses = quest_statuses;
         this.saveTypes = saveTypes;
+    }
+
+    public int getAlchemyLevel() {
+        return alchemy_level;
+    }
+
+    public int getAlchemyExp() {
+        return alchemy_exp;
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
@@ -83,6 +95,19 @@ public final class PlayerStatus {
             }
         }
         return null;
+    }
+
+    public void setRecipeStatus(final RecipeStatus status) {
+        RecipeStatus rs = getRecipeStatus(status.getId());
+        if(rs == null) {
+            rs = status;
+            recipe_statuses.add(rs);
+        }
+        SQLManager.INSTANCE.insert(
+                "recipe_levels",
+                new String[]{"user_id", "recipe_id", "level", "exp"},
+                new Object[]{id, rs.getId(), rs.getLevel(), rs.getExp()}
+        );
     }
 
     public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {

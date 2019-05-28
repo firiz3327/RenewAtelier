@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.version.packet;
 
+import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
@@ -62,8 +63,8 @@ public class EntityPacket {
 
     public static Packet<?> getHeadRotationPacket(int entityId, double yaw) {
         final PacketPlayOutEntityHeadRotation packet = new PacketPlayOutEntityHeadRotation();
-        PacketUtils.setField(packet, "a", entityId);
-        PacketUtils.setField(packet, "b", (byte) (yaw * 256.0F / 360.0F));
+        VersionUtils.setField(packet, "a", entityId);
+        VersionUtils.setField(packet, "b", (byte) (yaw * 256.0F / 360.0F));
         return packet;
     }
 

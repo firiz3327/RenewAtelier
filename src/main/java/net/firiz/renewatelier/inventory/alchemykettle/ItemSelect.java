@@ -174,7 +174,7 @@ public final class ItemSelect {
             final ItemStack current = e.getCurrentItem();
             if (current != null && current.getType() != Material.AIR && !checkMaxSlot(uuid, recipe, page)) {
                 final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
-                if (Chore.hasMaterial(current, data[0]) != -1) {
+                if (Chore.checkMaterial(current, data[0])) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
                     KETTLE.addPageItem(uuid, cloneItem, page);
@@ -203,7 +203,7 @@ public final class ItemSelect {
                             }
                         } else if (!checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
                             final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
-                            if (Chore.hasMaterial(cursor, data[0]) != -1) {
+                            if (Chore.checkMaterial(cursor, data[0])) {
                                 final ItemStack cloneItem = cursor.clone();
                                 cloneItem.setAmount(1);
                                 cursor.setAmount(cursor.getAmount() - 1);

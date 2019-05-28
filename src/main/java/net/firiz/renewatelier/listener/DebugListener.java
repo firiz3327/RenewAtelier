@@ -46,8 +46,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class DebugListener implements Listener {
 
-    private final DebugManager debug = new DebugManager();
-    private boolean nonbreak = true;
+    private final DebugManager debug = new DebugManager(this);
+    public boolean nonbreak = true;
 
     @EventHandler
     private void debug(final AsyncPlayerChatEvent e) {

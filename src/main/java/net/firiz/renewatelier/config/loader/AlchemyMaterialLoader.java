@@ -62,27 +62,29 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             final String mat_str = item.getString("material");
             final DoubleData<Material, Short> mat;
             if (!mat_str.contains(",")) {
-                mat = new DoubleData<>(Material.getMaterial(mat_str), (short) 0);
+                mat = new DoubleData<>(Chore.getMaterial(mat_str), (short) 0);
             } else {
                 final String[] mat_split = mat_str.split(",");
-                mat = new DoubleData<>(Material.getMaterial(mat_split[0]), Short.parseShort(mat_split[1]));
+                mat = new DoubleData<>(Chore.getMaterial(mat_split[0]), Short.parseShort(mat_split[1]));
             }
             // 品質<最大・最小>
             final int quality_min = item.getInt("quality_min");
             final int quality_max = item.getInt("quality_max");
+            // 売価
+            final int price = item.contains("price") ? item.getInt("price") : 1;
             // カテゴリ取得
             final List<String> categorys_str = (List<String>) item.getList("categorys");
             final List<Category> categorys = new ArrayList<>();
-            categorys_str.forEach((c_str) -> categorys.add(Category.valueOf(c_str.toUpperCase())));
+            categorys_str.forEach((c_str) -> categorys.add(Category.searchName(c_str)));
             // 錬金成分取得
             final List<String> ings_str = (List<String>) item.getList("ingredients");
             final List<DoubleData<Ingredients, Integer>> ingredients = new ArrayList<>();
             if (ings_str != null) {
                 ings_str.forEach((ing) -> {
-                    final String[] ingdata = ing.split(",");
+                    final String[] ingData = ing.split(",");
                     ingredients.add(new DoubleData<>(
-                            AlchemyIngredients.valueOf(ingdata[0].trim().toUpperCase()),
-                            Integer.parseInt(ingdata[1].trim())
+                            AlchemyIngredients.searchName(ingData[0].trim()),
+                            Integer.parseInt(ingData[1].trim())
                     ));
                 });
             }
@@ -93,8 +95,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final String[] strs = s_str.split(",");
                 sizes.add(new MaterialSizeData(
                         MaterialSize.valueOf(strs[0].trim().toUpperCase()),
-                        Integer.parseInt(strs[1].trim()))
-                );
+                        Integer.parseInt(strs[1].trim())
+                ));
             });
             // 特性取得
             final List<String> charas_str = (List<String>) item.getList("characteristics");
@@ -116,13 +118,11 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             Catalyst catalyst = null;
             if (item.contains("catalyst")) {
                 final ConfigurationSection catalystConfig = item.getConfigurationSection("catalyst");
-                final Category category = Category.valueOf(catalystConfig.getString("category").toUpperCase());
                 final List<CatalystBonus> bonus = new ArrayList<>();
                 catalystConfig.getKeys(false).stream()
-                        .filter((c_key) -> (!c_key.equals("category")))
+                        .filter((c_key) -> (c_key.startsWith("bonus")))
                         .map(catalystConfig::getConfigurationSection)
                         .forEachOrdered((sec) -> {
-                            //final CatalystBonusType type = CatalystBonusType.valueOf(sec.getString("type"));
                             final List<Integer> size = sec.getIntegerList("size");
                             bonus.add(new CatalystBonus(
                                     Chore.parseInts(size),
@@ -133,7 +133,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                                     )
                             ));
                         });
-                catalyst = new Catalyst(category, bonus);
+                catalyst = new Catalyst(bonus);
             }
             // スクリプト取得
             final String script = item.getString("script");
@@ -153,6 +153,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     mat,
                     quality_min,
                     quality_max,
+                    price,
                     categorys,
                     ingredients,
                     sizes,

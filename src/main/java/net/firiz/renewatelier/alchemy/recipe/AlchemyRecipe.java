@@ -40,6 +40,7 @@ public class AlchemyRecipe {
     private final String result;
     private final int amount;
     private final List<String> req_material;
+    private final int req_alchemylevel;
     private final List<Ingredients> default_ingredients;
     private final int req_bar;
     private final List<RecipeEffect> effects;
@@ -52,6 +53,7 @@ public class AlchemyRecipe {
             final String result,
             final int amount,
             final List<String> req_material,
+            final int req_alchemylevel,
             final List<Ingredients> default_ingredients,
             final int req_bar,
             final List<RecipeEffect> effects,
@@ -63,6 +65,7 @@ public class AlchemyRecipe {
         this.result = result;
         this.amount = amount;
         this.req_material = req_material;
+        this.req_alchemylevel = req_alchemylevel;
         this.default_ingredients = default_ingredients;
         this.req_bar = req_bar;
         this.effects = effects;
@@ -95,6 +98,10 @@ public class AlchemyRecipe {
 
     public List<String> getReqMaterial() {
         return new ArrayList<>(req_material);
+    }
+
+    public int getReqAlchemyLevel() {
+        return req_alchemylevel;
     }
 
     public List<Ingredients> getDefaultIngredients() {

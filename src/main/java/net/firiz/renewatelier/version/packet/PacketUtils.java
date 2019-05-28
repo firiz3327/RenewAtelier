@@ -31,23 +31,4 @@ public class PacketUtils {
         return ((CraftPlayer) player).getHandle().ping;
     }
 
-    protected static Field getField(Packet<?> packet, String name) {
-        try {
-            final Field field = packet.getClass().getDeclaredField(name);
-            field.setAccessible(true);
-            return field;
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    protected static void setField(Packet<?> packet, String name, Object value) {
-        try {
-            getField(packet, name).set(packet, value);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

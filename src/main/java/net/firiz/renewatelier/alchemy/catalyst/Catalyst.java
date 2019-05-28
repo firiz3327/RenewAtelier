@@ -36,7 +36,6 @@ import org.bukkit.inventory.ItemStack;
 public class Catalyst {
 
     public final static Catalyst DEFAULT;
-    private final Category category;
     private final List<CatalystBonus> bonus;
     private final int[] maincs;
 
@@ -44,14 +43,9 @@ public class Catalyst {
         DEFAULT = new DefaultCatalyst();
     }
 
-    public Catalyst(Category category, List<CatalystBonus> bonus) {
-        this.category = category;
+    public Catalyst(List<CatalystBonus> bonus) {
         this.bonus = bonus;
         this.maincs = createAllCS();
-    }
-
-    public Category getCategory() {
-        return category;
     }
 
     public List<CatalystBonus> getBonus() {

@@ -1,20 +1,20 @@
 /*
  * Chore.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -38,6 +39,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -50,7 +52,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
  * @author firiz
  */
 public final class Chore {
@@ -58,7 +59,7 @@ public final class Chore {
     private final static Logger log = AtelierPlugin.getPlugin().getLogger();
 
     public static void log(final Object obj) {
-        if(obj instanceof Exception) {
+        if (obj instanceof Exception) {
             final Exception ex = ((Exception) obj);
             log.log(Level.WARNING, ex.getMessage(), ex);
         } else {
@@ -71,7 +72,7 @@ public final class Chore {
     }
 
     public static void logWarning(final Object obj) {
-        if(obj instanceof Exception) {
+        if (obj instanceof Exception) {
             final Exception ex = ((Exception) obj);
             log.log(Level.WARNING, ex.getMessage(), ex);
         } else {
@@ -167,26 +168,40 @@ public final class Chore {
         }
     }
 
-    public static int getAlchemyMaterialAmount(final ItemStack item, final AlchemyMaterial material) {
-        int amount = 0;
-        if (item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta.hasLore()) {
-//                final List<String> idLores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
-//                if (!idLores.isEmpty() && material.getId().equals(getStridColor(
-//                        idLores.get(0).replaceAll(AlchemyItemStatus.ID.getCheck(), "")
-//                ))) {
-//                    amount += item.getAmount();
-//                }
-                final String id = AlchemyItemStatus.getId(item);
-                if (material.getId().equals(id)) {
-                    amount += item.getAmount();
+    public static Material getMaterial(final String str) {
+        if (str.equalsIgnoreCase("XXX")) {
+            return Material.DIAMOND_AXE;
+        }
+
+        Material result = Material.getMaterial(str.toUpperCase());
+        if (result == null) {
+            if (str.contains(":")) {
+                final String[] kv = str.split(":");
+                for (final Material val : Material.values()) {
+                    final NamespacedKey key = val.getKey();
+                    if (key.getNamespace().equals(kv[0].toLowerCase()) && key.getKey().equals(kv[1].toLowerCase())) {
+                        return val;
+                    }
+                }
+            } else {
+                for (final Material val : Material.values()) {
+                    if (val.getKey().getKey().equals(str.toLowerCase())) {
+                        return val;
+                    }
                 }
             }
+        } else {
+            return result;
         }
-        return amount == 0 ? -1 : amount;
+        result = Material.getMaterial(str.toUpperCase(), true);
+        if (result == null) {
+            throw new IllegalStateException("material not found for " + str + ".");
+        }
+        Chore.logWarning("material " + str + " is legacy name.");
+        return result;
     }
 
+    @NotNull
     public static List<Category> getCategory(final ItemStack item) {
         final List<Category> result = new ArrayList<>();
         if (item.hasItemMeta()) {
@@ -199,33 +214,15 @@ public final class Chore {
         return result;
     }
 
-    public static boolean hasCategory(final ItemStack item, Category category) {
-        return getCategoryMaterialAmount(item, category) != -1;
-    }
-
-    public static int getCategoryMaterialAmount(final ItemStack item, final Category category) {
-        if (item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta.hasLore()) {
-                final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.CATEGORY, item);
-                for (int i = 1; i < lores.size(); i++) {
-                    final String cate_str = lores.get(i);
-                    if (category == Category.valueOf(Chore.getStridColor(cate_str.substring(cate_str.indexOf("§0") + 2)))) {
-                        return item.getAmount();
-                    }
-                }
-            }
-        }
-        return -1;
-    }
-
-    public static int hasMaterial(final ItemStack item, final String material) {
+    public static boolean checkMaterial(final ItemStack content, String material) {
         if (material.startsWith("material:")) {
-            return getAlchemyMaterialAmount(item, AlchemyMaterial.getMaterial(material.substring(9)));
+            final AlchemyMaterial am = AlchemyMaterial.getMaterial(material.substring(9));
+            return am.equals(AlchemyMaterial.getMaterial(content));
         } else if (material.startsWith("category:")) {
-            return getCategoryMaterialAmount(item, Category.valueOf(material.substring(9)));
+            final Category category = Category.valueOf(material.substring(9));
+            return Chore.getCategory(content).contains(category);
         }
-        return -1;
+        return false;
     }
 
     public static boolean hasMaterial(final Inventory inv, final List<String> materials) {
@@ -235,20 +232,33 @@ public final class Chore {
     public static boolean hasMaterial(final ItemStack[] contents, final List<String> materials) {
         if (contents.length != 0) {
             final Map<String, DoubleData<Integer, Integer>> check = new HashMap<>();
-            for (final ItemStack item : contents) {
-                if (item != null) {
-                    materials.stream().map((req) -> req.split(",")).forEachOrdered((data) -> {
-                        final int amount = hasMaterial(item, data[0]);
-                        if (amount != -1) {
-                            if (check.containsKey(data[0])) {
-                                final DoubleData<Integer, Integer> dd = check.get(data[0]);
-                                dd.setLeft(dd.getLeft() + amount);
-                            } else {
-                                final int req_amount = Integer.parseInt(data[1]);
-                                check.put(data[0], new DoubleData<>(amount, Integer.parseInt(data[1])));
+            for (final String data : materials) {
+                final String[] vals = data.split(",");
+                final String material = vals[0];
+                if (!check.containsKey(material)) {
+                    final int req_amount = Integer.parseInt(vals[1]);
+                    check.put(material, new DoubleData<>(0, req_amount));
+                }
+                if (material.startsWith("material:")) {
+                    final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(material.substring(9));
+                    for (final ItemStack item : contents) {
+                        if (item != null) {
+                            if (alchemyMaterial.equals(AlchemyMaterial.getMaterial(item))) {
+                                final DoubleData<Integer, Integer> dd = check.get(material);
+                                dd.setLeft(dd.getLeft() + item.getAmount());
                             }
                         }
-                    });
+                    }
+                } else if (material.startsWith("category:")) {
+                    final Category category = Category.valueOf(material.substring(9));
+                    for (final ItemStack item : contents) {
+                        if (item != null) {
+                            if (Chore.getCategory(item).contains(category)) {
+                                final DoubleData<Integer, Integer> dd = check.get(material);
+                                dd.setLeft(dd.getLeft() + item.getAmount());
+                            }
+                        }
+                    }
                 }
             }
             return !check.isEmpty() && check.values().stream().noneMatch((dd) -> (dd.getLeft() < dd.getRight()));
@@ -496,6 +506,28 @@ public final class Chore {
                         check_loc.getBlockZ()
                 )) <= rangeSq
                 && Math.abs(center_loc.getY() - check_loc.getY()) <= rangeY;
+    }
+
+    public static void addHideFlags(ItemMeta meta, AlchemyMaterial am) {
+        meta.setUnbreakable(am.isUnbreaking());
+        if (am.isHideAttribute()) {
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        }
+        if (am.isHideDestroy()) {
+            meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
+        }
+        if (am.isHideEnchant()) {
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        if (am.isHidePlacedOn()) {
+            meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
+        }
+        if (am.isHidePotionEffect()) {
+            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+        }
+        if (am.isHideUnbreaking()) {
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        }
     }
 
 }

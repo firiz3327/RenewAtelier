@@ -68,27 +68,25 @@ public enum PlayerSaveManager {
 
     public void loadStatus(final UUID uuid) {
         //<editor-fold defaultstate="collapsed" desc="select id">
-        List<List<Object>> select = sql.select(
-                "accounts",
-                new String[]{"uuid", "id"},
-                new Object[]{uuid.toString()}
-        );
+        final String[] columns = new String[]{"uuid", "id", "alchemy_level", "alchemy_exp"};
+        final Object[] wheres = new Object[]{uuid.toString()};
+        List<List<Object>> select = sql.select("accounts", columns, wheres);
         if (select.isEmpty()) {
             sql.insert("accounts", "uuid", uuid.toString());
-            select = sql.select(
-                    "accounts",
-                    new String[]{"uuid", "id"},
-                    new Object[]{uuid.toString()}
-            );
+            select = sql.select("accounts", columns, wheres);
         }
         //</editor-fold>
         final int id = (int) select.get(0).get(1);
+        final int alchemy_level = (int) select.get(0).get(2);
+        final int alchemy_exp = (int) select.get(0).get(3);
         final List<Object> objs = new ArrayList<>();
         for (final StatusLoader sloader : loaders) {
             objs.add(sloader.load(id));
         }
         final PlayerStatus status = new PlayerStatus(
                 id,
+                alchemy_level,
+                alchemy_exp,
                 (List<RecipeStatus>) objs.get(0), // recipeStatus
                 (List<QuestStatus>) objs.get(1), // questStatus
                 (List<MinecraftRecipeSaveType>) objs.get(2) // discoveredRecipes

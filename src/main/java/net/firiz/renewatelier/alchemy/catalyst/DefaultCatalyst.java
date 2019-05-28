@@ -30,7 +30,7 @@ import java.util.Arrays;
 public class DefaultCatalyst extends Catalyst {
 
     public DefaultCatalyst() {
-        super(Category.CATALYST, Arrays.asList(new CatalystBonus(
+        super(Arrays.asList(new CatalystBonus(
                 new int[]{
                         1, 1, 1, 1, 0,
                         1, 0, 0, 0, 0,

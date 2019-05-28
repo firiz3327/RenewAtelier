@@ -25,9 +25,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.version.VersionUtils;
+import net.firiz.renewatelier.version.nms.VItemStack;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -53,7 +56,6 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class AlchemyBagItem {
 
-    /*
     private final static List<UUID> OPEN_USERS = new ArrayList<>();
     private final AlchemyMaterial type;
     private final ItemStack item;
@@ -89,25 +91,7 @@ public class AlchemyBagItem {
         }
         meta.setLore(_lore);
 
-        meta.setUnbreakable(type.isUnbreaking());
-        if (type.isHideAttribute()) {
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        }
-        if (type.isHideDestroy()) {
-            meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
-        }
-        if (type.isHideEnchant()) {
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        if (type.isHidePlacedOn()) {
-            meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-        }
-        if (type.isHidePotionEffect()) {
-            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-        }
-        if (type.isHideUnbreaking()) {
-            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        }
+        Chore.addHideFlags(meta, type);
         item.setItemMeta(meta);
     }
 
@@ -117,7 +101,7 @@ public class AlchemyBagItem {
 
     public static DoubleData<ItemStack, ItemStack> addItem(final ItemStack bag_item, final ItemStack add_item) {
         final Object[] itemData = createItem(add_item);
-        final NBTItem nbti = new NBTItem(bag_item);
+        final VItemStack nbti = VersionUtils.asVItemCopy(bag_item);
         final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
 
         int amount = add_item.getAmount(); // 64
@@ -156,7 +140,7 @@ public class AlchemyBagItem {
 
     public static ItemStack removeItem(final ItemStack bag_item, final ItemStack remove_item) {
         final Object[] itemData = createItem(remove_item);
-        final NBTItem nbti = new NBTItem(bag_item);
+        final VItemStack nbti = VersionUtils.asVItemCopy(bag_item);
         final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
 
         int amount = remove_item.getAmount();
@@ -228,7 +212,7 @@ public class AlchemyBagItem {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.BAG, item);
         if (!lores.isEmpty()) {
             final Inventory inv = Bukkit.createInventory(player, 45, "AlchemyBag," + clickslot);
-            final NBTItem nbti = new NBTItem(item);
+            final VItemStack nbti = VersionUtils.asVItemCopy(item);
             final List<String> items = nbti.hasKey("items") ? new ArrayList<>(Arrays.asList(nbti.getString("items").split("\n"))) : new ArrayList<>();
             int slot = 0;
             final String bagstr = lores.get(0).substring(AlchemyItemStatus.BAG.getCheck().length());
@@ -247,25 +231,7 @@ public class AlchemyBagItem {
                 }
                 meta.setLore(Arrays.asList(data[2].split("¥0")));
 
-                meta.setUnbreakable(type.isUnbreaking());
-                if (type.isHideAttribute()) {
-                    meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                }
-                if (type.isHideDestroy()) {
-                    meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
-                }
-                if (type.isHideEnchant()) {
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                }
-                if (type.isHidePlacedOn()) {
-                    meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
-                }
-                if (type.isHidePotionEffect()) {
-                    meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-                }
-                if (type.isHideUnbreaking()) {
-                    meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-                }
+                Chore.addHideFlags(meta, type);
                 _item.setItemMeta(meta);
                 inv.setItem(slot, _item);
                 slot++;
@@ -386,6 +352,5 @@ public class AlchemyBagItem {
             }
         }
     }
-     */
 
 }

@@ -40,11 +40,13 @@ public class RecipeEffect {
     private final AlchemyAttribute attribute;
     private final List<Integer> star;
     private final List<StarEffect> starEffects;
+    private final StarEffect defaultStarEffect;
 
-    public RecipeEffect(AlchemyAttribute attribute, List<Integer> star, List<StarEffect> starEffects) {
+    public RecipeEffect(AlchemyAttribute attribute, List<Integer> star, List<StarEffect> starEffects, StarEffect defaultStarEffect) {
         this.attribute = attribute;
         this.star = star;
         this.starEffects = starEffects;
+        this.defaultStarEffect = defaultStarEffect;
     }
 
     public AlchemyAttribute getAttribute() {
@@ -127,13 +129,13 @@ public class RecipeEffect {
 
     public String getName(final UUID uuid) {
         final int bigstar = getBigStar(uuid);
-        final StarEffect effect = bigstar != 0 ? starEffects.get(bigstar - 1) : null;
+        final StarEffect effect = bigstar != 0 ? starEffects.get(bigstar - 1) : defaultStarEffect;
         return effect != null ? effect.getName() : null;
     }
 
     public StarEffect getActiveEffect(final UUID uuid) {
         final int bigstar = getBigStar(uuid);
-        return bigstar != 0 ? starEffects.get(bigstar - 1) : null;
+        return bigstar != 0 ? starEffects.get(bigstar - 1) : defaultStarEffect;
     }
 
 }

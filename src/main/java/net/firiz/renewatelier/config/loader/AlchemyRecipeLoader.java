@@ -56,10 +56,12 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             final int amount = item.getInt("amount");
             // 必要素材
             final List<String> req_materials = item.getStringList("req_materials");
+            // 必要錬金レベル
+            final int req_alchemylevel = item.contains("req_alchemylevel") ? item.getInt("req_alchemylevel") : 1;
             // 初期錬金属性
             final List<String> default_ingredients_str = item.getStringList("default_ingredients");
             final List<Ingredients> default_ingredients = new ArrayList<>();
-            default_ingredients_str.forEach((str) -> default_ingredients.add(AlchemyIngredients.valueOf(str)));
+            default_ingredients_str.forEach((str) -> default_ingredients.add(AlchemyIngredients.searchName(str)));
             // 効果-必要ゲージ数
             final int req_bar = item.getInt("req_bar");
             // 効果
@@ -67,21 +69,25 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             if (item.contains("effects")) {
                 final ConfigurationSection effects_item = item.getConfigurationSection("effects");
                 effects_item.getKeys(false).stream().map(effects_item::getConfigurationSection).forEachOrdered((esec) -> {
+                    StarEffect defaultSE = null;
+                    if (esec.contains("default_star_effect")) {
+                        defaultSE = getStarEffect(esec.getConfigurationSection("default_star_effect"));
+                    }
                     final AlchemyAttribute attribute = AlchemyAttribute.valueOf(esec.getString("attribute"));
                     final List<Integer> star = esec.getIntegerList("star");
                     final List<StarEffect> starEffects = new ArrayList<>();
-                    star.stream().filter((s) -> (s != 0)).map((s) -> esec.getConfigurationSection("star_effect_" + s)).map((star_effect) -> {
-                        StarEffect se = null;
-                        if (star_effect.contains("ingredient")) {
-                            se = new StarEffect(AlchemyIngredients.valueOf(star_effect.getString("ingredient")));
-                        } else if (star_effect.contains("category")) {
-                            se = new StarEffect(Category.valueOf(star_effect.getString("category")));
-                        } else if (star_effect.contains("name")) {
-                            se = new StarEffect(star_effect.getString("name"));
-                        }
-                        return se;
-                    }).filter(Objects::nonNull).forEachOrdered(starEffects::add);
-                    effects.add(new RecipeEffect(attribute, star, starEffects));
+                    star.stream()
+                            .filter((s) -> (s != 0))
+                            .map((s) -> esec.getConfigurationSection("star_effect_" + s))
+                            .map((star_effect) -> getStarEffect(star_effect))
+                            .filter(Objects::nonNull)
+                            .forEachOrdered(starEffects::add);
+                    effects.add(new RecipeEffect(
+                            attribute,
+                            star,
+                            starEffects,
+                            defaultSE
+                    ));
                 });
             }
             // 熟練度
@@ -113,7 +119,19 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                 );
             }
             // リストに追加
-            add(new AlchemyRecipe(key, result, amount, req_materials, default_ingredients, req_bar, effects, levels, catalyst_categorys, sizes));
+            add(new AlchemyRecipe(key, result, amount, req_materials, req_alchemylevel, default_ingredients, req_bar, effects, levels, catalyst_categorys, sizes));
         });
+    }
+
+    private StarEffect getStarEffect(ConfigurationSection star_effect) {
+        StarEffect se = null;
+        if (star_effect.contains("ingredient")) {
+            se = new StarEffect(AlchemyIngredients.searchName(star_effect.getString("ingredient")));
+        } else if (star_effect.contains("category")) {
+            se = new StarEffect(Category.searchName(star_effect.getString("category")));
+        } else if (star_effect.contains("name")) {
+            se = new StarEffect(star_effect.getString("name"));
+        }
+        return se;
     }
 }

@@ -21,12 +21,14 @@
 
 package net.firiz.renewatelier.alchemy.material;
 
+import com.google.common.collect.Maps;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.DoubleData;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author firiz
@@ -275,9 +277,20 @@ public enum AlchemyIngredients implements Ingredients {
     I240R10("わずかな熱", AlchemyAttribute.RED, 10),
     ;
 
+    private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
     private final String name;
     private final AlchemyAttribute type;
     private final int level;
+
+    static {
+        AlchemyIngredients[] var3;
+        int var2 = (var3 = values()).length;
+
+        for(int var1 = 0; var1 < var2; ++var1) {
+            final AlchemyIngredients ai = var3[var1];
+            BY_NAME.put(ai.name(), ai);
+        }
+    }
 
     AlchemyIngredients(String name, AlchemyAttribute type, int level) {
         this.name = name;
@@ -301,12 +314,15 @@ public enum AlchemyIngredients implements Ingredients {
     }
 
     public static AlchemyIngredients searchName(final String str) {
-        for (final AlchemyIngredients ing : values()) {
-            if (ing.getName().equals(str)) {
-                return ing;
+        final AlchemyIngredients ai = BY_NAME.get(str.toUpperCase());
+        if(ai == null) {
+            for (final AlchemyIngredients ing : values()) {
+                if (ing.name.equals(str)) {
+                    return ing;
+                }
             }
         }
-        return null;
+        return ai;
     }
 
     public static DoubleData<Integer, AlchemyAttribute[]> getAllLevel(final ItemStack item) {
