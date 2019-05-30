@@ -11,10 +11,12 @@ import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
 import net.md_5.bungee.api.ChatColor
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 import java.util.*
 
 class DebugCommands(val debugListener: DebugListener) {
@@ -257,6 +259,21 @@ class DebugCommands(val debugListener: DebugListener) {
                 (args[2] as String).toInt(),
                 (args[3] as String).toInt()
         ))
+    }
+
+    @Cmd(
+            desc = ["Damage"],
+            args = [Int::class],
+            examples = ["texture 1503"],
+            text = "テクスチャアイテムの取得"
+    )
+    fun texture(sender: Player, args: ArrayList<Any>) {
+        val item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, args[0].toString().toInt())
+        val meta = item.itemMeta!!
+        meta.isUnbreakable = true
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+        item.itemMeta = meta
+        Chore.addItem(sender, item)
     }
 
 
