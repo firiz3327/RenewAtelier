@@ -68,15 +68,7 @@ public class EntityPacket {
         return packet;
     }
 
-    public static DataWatcher setEntityCustomName(DataWatcher watcher, String name) {
-        final ChatComponentText wrap = new ChatComponentText("");
-        final ChatComponentText text = new ChatComponentText(name);
-        wrap.addSibling(text);
-        watcher.set(DataWatcherRegistry.f.a(0), Optional.of(wrap));
-        return watcher;
-    }
-
-    public static PacketPlayOutEntityMetadata getMessageStandMeta(final Player player, final FakeEntity fakeEntity, final Location loc, final String name) {
+    public static Packet<?> getMessageStandMeta(final Player player, final FakeEntity fakeEntity, final Location loc, final String name) {
         final WorldServer worldServer = ((CraftWorld) player.getWorld()).getHandle();
         final EntityArmorStand armorStand = new EntityArmorStand(
                 worldServer.getMinecraftWorld(),

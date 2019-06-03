@@ -195,7 +195,6 @@ public final class NPCConversation extends ScriptConversation {
         messagePacket(chatColor(text), time);
     }
 
-    @Export
     private void messagePacket(@NotNull final String text, final int time) {
         final Location balloonLoc = getLocation();
         balloonLoc.setY(balloonLoc.getY() + 0.25);
