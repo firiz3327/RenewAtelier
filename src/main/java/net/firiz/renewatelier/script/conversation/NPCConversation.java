@@ -228,12 +228,7 @@ public final class NPCConversation extends ScriptConversation {
                             fakeEntity,
                             (Location) args[1]
                     ));
-                    PacketUtils.sendPacket(conv.player, EntityPacket.getMessageStandMeta(
-                            conv.player,
-                            fakeEntity,
-                            (Location) args[1],
-                            (String) args[2]
-                    ));
+                    PacketUtils.sendPacket(conv.player, EntityPacket.getMessageStandMeta(conv.player, (String) args[2]).compile(fakeEntity.getEntityId()));
                     return fakeEntity;
                 } catch (Exception ex) {
                     ex.printStackTrace();

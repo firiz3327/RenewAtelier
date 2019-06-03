@@ -10,12 +10,16 @@ import net.firiz.renewatelier.nodification.Nodification
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
+import net.firiz.renewatelier.version.packet.EntityPacket
+import net.firiz.renewatelier.version.packet.PacketUtils
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.entity.Pose
 import org.bukkit.inventory.ItemFlag
 import java.util.*
 
@@ -276,6 +280,13 @@ class DebugCommands(val debugListener: DebugListener) {
         Chore.addItem(sender, item)
     }
 
+    @Cmd(
+            desc = ["Test"],
+            examples = ["test"],
+            text = "・・・"
+    )
+    fun test(sender: Player, args: ArrayList<Any>) {
 
+    }
 
 }

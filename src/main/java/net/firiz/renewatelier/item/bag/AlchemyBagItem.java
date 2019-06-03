@@ -321,12 +321,12 @@ public class AlchemyBagItem {
             e.setCancelled(true);
         }
         if(!e.isCancelled()) {
-            final ItemStack dropitem = e.getItem().getItemStack();
-            final AlchemyMaterial material = AlchemyMaterial.getMaterial(dropitem);
+            final ItemStack dropItem = e.getItem().getItemStack();
+            final AlchemyMaterial material = AlchemyMaterial.getMaterial(dropItem);
             if (material != null) {
                 final PlayerInventory inv = player.getInventory();
                 final ItemStack[] contents = inv.getContents();
-                ItemStack check = dropitem;
+                ItemStack check = dropItem;
                 for (int i = 0; i < contents.length; i++) {
                     final ItemStack item = contents[i];
                     final AlchemyBagItem bag = getBag(item);
@@ -342,13 +342,14 @@ public class AlchemyBagItem {
                     }
                 }
                 if (check != null) {
-                    final AlchemyBagItem bag = new AlchemyBagItem(material);
-                    final ItemStack item = bag.getItem();
-                    Chore.addItem(player, addItem(item, check).getLeft());
+//                    final AlchemyBagItem bag = new AlchemyBagItem(material);
+//                    final ItemStack item = bag.getItem();
+//                    Chore.addItem(player, addItem(item, check).getLeft());
+                } else {
+                    e.getItem().getWorld().playSound(e.getItem().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1);
+                    e.setCancelled(true);
+                    e.getItem().remove();
                 }
-                e.getItem().getWorld().playSound(e.getItem().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1);
-                e.setCancelled(true);
-                e.getItem().remove();
             }
         }
     }

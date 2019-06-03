@@ -76,26 +76,26 @@ public class InventoryListener implements Listener {
             CatalystSelect.click(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.click(e);
-//        } else if (AlchemyBagItem.isBagInventory(view)) {
-//            AlchemyBagItem.click(e);
-//        } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
-//            final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
-//            if (bag != null) {
-//                if (e.getCursor() == null || e.getCursor().getType() == Material.AIR) {
-//                    e.setCancelled(true);
-//                    AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem(), e.getSlot());
-//                }/* else { // アイテム追加
-//                    final AlchemyMaterial material = AlchemyMaterial.getMaterial(e.getCursor());
-//                    if (material != null && bag.getType() == material) {
-//                        e.setCancelled(true);
-//                        click_temp.put(uuid, e.getCursor());
-//
-//                        final DoubleData<ItemStack, ItemStack> bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
-//                        e.setCurrentItem(bagItem.getLeft());
-//                    }
-//                }
-//                 */
-//            }
+        } else if (AlchemyBagItem.isBagInventory(view)) {
+            AlchemyBagItem.click(e);
+        } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
+            final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
+            if (bag != null) {
+                if (e.getCursor() == null || e.getCursor().getType() == Material.AIR) {
+                    e.setCancelled(true);
+                    AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem(), e.getSlot());
+                }/* else { // アイテム追加
+                    final AlchemyMaterial material = AlchemyMaterial.getMaterial(e.getCursor());
+                    if (material != null && bag.getType() == material) {
+                        e.setCancelled(true);
+                        click_temp.put(uuid, e.getCursor());
+
+                        final DoubleData<ItemStack, ItemStack> bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
+                        e.setCurrentItem(bagItem.getLeft());
+                    }
+                }
+                 */
+            }
         }
     }
 
@@ -114,8 +114,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.drag(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.drag(e);
-//        } else if (AlchemyBagItem.isBagInventory(view)) {
-//            AlchemyBagItem.drag(e);
+        } else if (AlchemyBagItem.isBagInventory(view)) {
+            AlchemyBagItem.drag(e);
         }
     }
 
@@ -132,8 +132,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.close(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.close(e);
-//        } else if (AlchemyBagItem.isBagInventory(view)) {
-//            AlchemyBagItem.close(e);
+        } else if (AlchemyBagItem.isBagInventory(view)) {
+            AlchemyBagItem.close(e);
         }
     }
 

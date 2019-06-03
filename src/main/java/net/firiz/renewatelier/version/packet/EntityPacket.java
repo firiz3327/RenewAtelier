@@ -25,13 +25,18 @@ import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.entity.Player;
-
-import java.util.*;
+import org.bukkit.entity.Pose;
 
 /**
  * @author firiz
  */
 public class EntityPacket {
+
+    private static final DataWatcherObject POSE;
+
+    static {
+        POSE = DataWatcher.a(Entity.class, DataWatcherRegistry.s);
+    }
 
     public static Packet<?> getSpawnPacket(FakeEntity entity, Location loc) {
         return new PacketPlayOutSpawnEntity(
@@ -68,19 +73,25 @@ public class EntityPacket {
         return packet;
     }
 
-    public static Packet<?> getMessageStandMeta(final Player player, final FakeEntity fakeEntity, final Location loc, final String name) {
+    public static PEMeta getEmptyMeta() {
+        return getEmptyMeta(null);
+    }
+
+    public static PEMeta getEmptyMeta(final Entity entity) {
+        return new PEMeta(new DataWatcher(entity), false);
+    }
+
+    public static PEMeta getMeta(final DataWatcher dataWatcher) {
+        return new PEMeta(dataWatcher, false);
+    }
+
+    public static PEMeta getMessageStandMeta(final Player player, final String name) {
         final WorldServer worldServer = ((CraftWorld) player.getWorld()).getHandle();
-        final EntityArmorStand armorStand = new EntityArmorStand(
-                worldServer.getMinecraftWorld(),
-                loc.getX(),
-                loc.getY(),
-                loc.getZ()
-        );
+        final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
         armorStand.setInvisible(true);
-        return new PacketPlayOutEntityMetadata(
-                fakeEntity.getEntityId(),
+        return new PEMeta(
                 armorStand.getDataWatcher(),
                 false
         );

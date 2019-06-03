@@ -1,20 +1,20 @@
 /*
  * PlayerListener.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -23,6 +23,8 @@ package net.firiz.renewatelier.listener;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
+import net.firiz.renewatelier.item.bag.AlchemyBagItem;
+import net.firiz.renewatelier.item.tool.ToolDamage;
 import net.firiz.renewatelier.nodification.Nodification;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
@@ -39,20 +41,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- *
  * @author firiz
  */
 public class PlayerListener implements Listener {
@@ -96,7 +90,7 @@ public class PlayerListener implements Listener {
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
             AlchemyKettle.pickup(e);
-//            AlchemyBagItem.pickup(e);
+            AlchemyBagItem.pickup(e);
         }
     }
 
@@ -109,6 +103,7 @@ public class PlayerListener implements Listener {
 //            e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
 //        }
 //    }
+
     @EventHandler
     private void interactEntity(final PlayerInteractAtEntityEvent e) {
         final Player player = e.getPlayer();
@@ -129,7 +124,7 @@ public class PlayerListener implements Listener {
         NPCManager.INSTANCE.packet(e.getPlayer());
         Nodification.loginNodification(e.getPlayer());
     }
-    
+
     @EventHandler
     private void quit(final PlayerQuitEvent e) {
         PlayerSaveManager.INSTANCE.unloadStatus(e.getPlayer().getUniqueId());
@@ -167,6 +162,11 @@ public class PlayerListener implements Listener {
     private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
         status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
+    }
+
+    @EventHandler
+    private void itemDamage(final PlayerItemDamageEvent e) {
+        ToolDamage.damage(e);
     }
 
 }
