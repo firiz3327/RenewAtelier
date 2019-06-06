@@ -35,12 +35,14 @@ import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.tool.ToolDamage;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -95,14 +97,21 @@ public final class Chore {
         return item;
     }
 
-    private static void setDamage(final ItemStack item, final int damage) {
+    public static void setDamage(final ItemStack item, final int damage) {
         final ItemMeta meta = item.getItemMeta();
         setDamage(meta, damage);
+        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
         item.setItemMeta(meta);
     }
 
     public static void setDamage(final ItemMeta meta, final int damage) {
         ((Damageable) meta).setDamage(damage);
+    }
+
+    public static void setDamageInEvent(final ItemStack item, final int damage) {
+        final int now = getDamage(item);
+        final int texDamage = ToolDamage.damage(damage - now, item, true);
+        Chore.setDamage(item, texDamage);
     }
 
     public static int getDamage(final ItemStack item) {

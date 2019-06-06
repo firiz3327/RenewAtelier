@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.listener;
 
+import net.firiz.renewatelier.inventory.AnvilManager;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.CatalystSelect;
@@ -27,6 +28,8 @@ import net.firiz.renewatelier.inventory.alchemykettle.ItemSelect;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.item.bag.AlchemyBagItem;
+import net.firiz.renewatelier.item.tool.ToolDamage;
+import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +37,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -76,6 +80,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.click(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.click(e);
+        } else if (inv instanceof AnvilInventory) {
+            AnvilManager.click(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.click(e);
         } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
@@ -114,6 +120,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.drag(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.drag(e);
+        } else if (e.getInventory() instanceof AnvilInventory) {
+            AnvilManager.drag(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.drag(e);
         }
@@ -141,4 +149,10 @@ public class InventoryListener implements Listener {
     private void invOpen(final InventoryOpenEvent e) {
         final Player player = (Player) e.getPlayer();
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void prepareAnvil(final PrepareAnvilEvent e) {
+        AnvilManager.prepare(e);
+    }
+
 }

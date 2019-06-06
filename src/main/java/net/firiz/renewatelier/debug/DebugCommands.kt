@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.debug
 
+import net.firiz.renewatelier.AtelierPlugin
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
@@ -10,16 +11,12 @@ import net.firiz.renewatelier.nodification.Nodification
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
-import net.firiz.renewatelier.version.packet.EntityPacket
-import net.firiz.renewatelier.version.packet.PacketUtils
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.entity.Pose
 import org.bukkit.inventory.ItemFlag
 import java.util.*
 
@@ -278,6 +275,29 @@ class DebugCommands(val debugListener: DebugListener) {
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         item.itemMeta = meta
         Chore.addItem(sender, item)
+    }
+
+    @Cmd(
+            desc = ["Damage"],
+            args = [Int::class],
+            examples = ["damage 1514"],
+            text = "手持ちアイテムにダメージ値を設定"
+    )
+    fun damage(sender: Player, args: ArrayList<Any>) {
+        val item = sender.inventory.itemInMainHand
+        val meta = item.itemMeta!!
+        val damage = args[0].toString().toInt()
+
+        var i = Chore.getDamage(meta)
+        var j = 0
+        while (i == damage) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), {
+                Chore.setDamageInEvent(item, i)
+                item.itemMeta = meta
+            }, 100L * j)
+            if(i < damage) i++ else i--
+            j++
+        }
     }
 
     @Cmd(

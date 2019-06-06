@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ToolDamage {
 
-    private static final String DURABILITY = "§d§n§r§a§b§r§l§l§l§f§r耐久度: ";
+    private static final String DURABILITY = "§d§n§r§a§b§r§l§l§l§f§r耐久値: ";
 
 //        final int[] damages = {
 //                1, 61, 181, 301, 421,
@@ -18,24 +18,47 @@ public class ToolDamage {
 //                1141, 1261, 1381, 1501
 //        };
 
-    public static void damage(PlayerItemDamageEvent e) {
-        final int damage = e.getDamage();
-        e.setDamage(0);
+    public static boolean hasDamagedItem(final ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+            for (String lore : item.getItemMeta().getLore()) {
+                if (lore.startsWith(DURABILITY)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-        final ItemStack item = e.getItem();
+    public static int getDamage(final ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
+            for (String lore : item.getItemMeta().getLore()) {
+                if (lore.startsWith(DURABILITY)) {
+                    return Integer.parseInt(lore.substring(DURABILITY.length(), lore.indexOf(" / ")));
+                }
+            }
+        }
+        return Chore.getDamage(item);
+    }
+
+    public static void damage(PlayerItemDamageEvent e) {
+        e.setDamage(damage(e.getDamage(), e.getItem(), true));
+    }
+
+    public static int damage(int damage, ItemStack item, boolean replaceDurability) {
         final int maxDurability = item.getType().getMaxDurability();
         final ItemMeta meta = item.getItemMeta();
         final List<String> lores = meta.hasLore() ? meta.getLore() : new ArrayList<>();
         boolean first = true;
-        int damageValue = item.getType().getMaxDurability() - damage;
+        int damageValue = (item.getType().getMaxDurability() - Chore.getDamage(meta)) - damage;
         for (int i = 0; i < lores.size(); i++) {
             final String lore = lores.get(i);
             if (lore.startsWith(DURABILITY)) {
                 first = false;
-                damageValue = Integer.parseInt(lore.substring(DURABILITY.length(), lore.indexOf(" / "))) - damage;
-                if (damageValue < 0) {
-                    e.setDamage(10000);
-                    return;
+                if (replaceDurability) {
+                    damageValue = Integer.parseInt(lore.substring(DURABILITY.length(), lore.indexOf(" / "))) - damage;
+                    if (damageValue < 0) {
+                        return 10000;
+                    }
                 }
                 lores.set(i, DURABILITY + damageValue + " / " + maxDurability);
                 break;
@@ -61,6 +84,7 @@ public class ToolDamage {
         }
         meta.setLore(lores);
         item.setItemMeta(meta);
+        return 0;
     }
 
 }
