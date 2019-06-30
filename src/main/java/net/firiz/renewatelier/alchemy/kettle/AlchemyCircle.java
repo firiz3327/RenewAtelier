@@ -20,7 +20,9 @@
  */
 package net.firiz.renewatelier.alchemy.kettle;
 
+import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.utils.Chore;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -126,7 +128,7 @@ public enum AlchemyCircle {
     }
 
     public static ItemStack getCircle(final String value, final ItemStack sitem) {
-        return getCircle(Chore.colorCint(value), sitem);
+        return getCircle(colorCint(value), sitem);
     }
 
     public static ItemStack getCircle(final int value, final ItemStack sitem) {
@@ -159,6 +161,32 @@ public enum AlchemyCircle {
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static int colorCint(String str) {
+        if (str == null) {
+            return 0;
+        }
+
+        if (!str.contains("§")) {
+            str = "§".concat(str);
+        }
+        if (str.equals(ChatColor.GRAY.toString())) {
+            return 0;
+        } else if (str.equals(ChatColor.WHITE.toString())) {
+            return 1;
+        } else if (str.equals(AlchemyAttribute.RED.getColor())) {
+            return 2;
+        } else if (str.equals(AlchemyAttribute.BLUE.getColor())) {
+            return 3;
+        } else if (str.equals(AlchemyAttribute.GREEN.getColor())) {
+            return 4;
+        } else if (str.equals(AlchemyAttribute.YELLOW.getColor())) {
+            return 5;
+        } else if (str.equals(AlchemyAttribute.PURPLE.getColor())) {
+            return 6;
+        }
+        return 0;
     }
 
 }

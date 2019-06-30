@@ -108,7 +108,7 @@ public class PlayerListener implements Listener {
     private void interactEntity(final PlayerInteractAtEntityEvent e) {
         final Player player = e.getPlayer();
         final Entity rightClicked = e.getRightClicked();
-        if (e.getHand() == EquipmentSlot.HAND) {
+        if (e.getHand() == EquipmentSlot.HAND && rightClicked instanceof LivingEntity) {
             final LivingEntity entity = (LivingEntity) rightClicked;
             if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.WOODEN_AXE) {
                 entity.remove();

@@ -4,6 +4,7 @@ import net.firiz.renewatelier.AtelierPlugin
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
+import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
@@ -15,12 +16,13 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import java.util.*
 
-class DebugCommands(val debugListener: DebugListener) {
+class DebugCommands(private val debugListener: DebugListener) {
 
     @Cmd(
             desc = ["Name?"],
@@ -217,15 +219,15 @@ class DebugCommands(val debugListener: DebugListener) {
                 AlchemyItemStatus.getItem(
                         args[0] as AlchemyMaterial,
                         sender.inventory.itemInMainHand
-                );
+                )
             } else {
                 AlchemyItemStatus.getItem(
                         args[0].toString(),
                         sender.inventory.itemInMainHand
-                );
+                )
             }
         } else {
-            sender.sendMessage("ERROR: Your main hand is null.");
+            sender.sendMessage("ERROR: Your main hand is null.")
         }
     }
 
@@ -301,11 +303,34 @@ class DebugCommands(val debugListener: DebugListener) {
     }
 
     @Cmd(
+            desc = ["Config Reload"],
+            examples = ["configReload"],
+            text = "AtelierPluginのコンフィグをリロード"
+    )
+    fun configReload(sender: Player, args: ArrayList<Any>) {
+        ConfigManager.INSTANCE.reloadConfigs()
+    }
+
+    @Cmd(
             desc = ["Test"],
             examples = ["test"],
             text = "・・・"
     )
     fun test(sender: Player, args: ArrayList<Any>) {
+
+        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
+            val stand: ArmorStand = sender.world.spawnEntity(sender.location, EntityType.ARMOR_STAND) as ArmorStand
+            stand.setArms(true)
+
+            val item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524)
+            val meta = item.itemMeta!!
+            meta.isUnbreakable = true
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+            item.itemMeta = meta
+
+            stand.setItemInHand(item)
+            stand.isVisible = false
+        })
 
     }
 

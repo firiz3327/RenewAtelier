@@ -52,6 +52,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 
 /**
  * @author firiz
@@ -62,8 +64,7 @@ public final class Chore {
 
     public static void log(final Object obj) {
         if (obj instanceof Exception) {
-            final Exception ex = ((Exception) obj);
-            log.log(Level.WARNING, ex.getMessage(), ex);
+            logWarning(obj);
         } else {
             log.info(obj.toString());
         }
@@ -76,14 +77,24 @@ public final class Chore {
     public static void logWarning(final Object obj) {
         if (obj instanceof Exception) {
             final Exception ex = ((Exception) obj);
-            log.log(Level.WARNING, ex.getMessage(), ex);
+            log.log(Level.WARNING, "\u001B[41m".concat(ex.getMessage()), ex);
+            log.log(Level.OFF, "\u001B[0m");
         } else {
             log.warning(obj.toString());
         }
     }
 
     public static void logWarning(final String str) {
-        log.warning(str);
+        log.warning("\u001B[41m".concat(str).concat("\u001B[0m"));
+    }
+
+    public static void logWarning(final String str, final Throwable throwable) {
+        log.log(Level.WARNING, "\u001B[41m".concat(str), throwable);
+        log.log(Level.OFF, "\u001B[0m");
+    }
+
+    public static void logLightWarning(final String str) {
+        log.warning("\u001B[30m\u001B[103m".concat(str).concat("\u001B[0m"));
     }
 
     public static void log(final Level level, final String str, final Throwable throwable) {
@@ -100,7 +111,6 @@ public final class Chore {
     public static void setDamage(final ItemStack item, final int damage) {
         final ItemMeta meta = item.getItemMeta();
         setDamage(meta, damage);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
         item.setItemMeta(meta);
     }
 
@@ -128,32 +138,6 @@ public final class Chore {
             result[i] = list.get(i);
         }
         return result;
-    }
-
-    public static int colorCint(String str) {
-        if (str == null) {
-            return 0;
-        }
-
-        if (!str.contains("§")) {
-            str = "§".concat(str);
-        }
-        if (str.equals(ChatColor.GRAY.toString())) {
-            return 0;
-        } else if (str.equals(ChatColor.WHITE.toString())) {
-            return 1;
-        } else if (str.equals(AlchemyAttribute.RED.getColor())) {
-            return 2;
-        } else if (str.equals(AlchemyAttribute.BLUE.getColor())) {
-            return 3;
-        } else if (str.equals(AlchemyAttribute.GREEN.getColor())) {
-            return 4;
-        } else if (str.equals(AlchemyAttribute.YELLOW.getColor())) {
-            return 5;
-        } else if (str.equals(AlchemyAttribute.PURPLE.getColor())) {
-            return 6;
-        }
-        return 0;
     }
 
     public static String intCcolor(int i) {
@@ -289,7 +273,7 @@ public final class Chore {
 
     public static String getStridColor(final String idcolor) {
         final StringBuilder sb = new StringBuilder();
-        for (final String str : idcolor.replaceAll("§", "").split("r")) {
+        for (final String str : idcolor.replace("§", "").replace("a", "5").split("r")) {
             sb.append(Character.toChars(Integer.parseInt(str)));
         }
         return sb.toString();
@@ -360,14 +344,14 @@ public final class Chore {
     public static String setIntColor(int i) {
         StringBuilder result = new StringBuilder();
         for (char ic : String.valueOf(i).toCharArray()) {
-            result.append("§").append(ic);
+            result.append("§").append(ic == '5' ? 'a' : ic);
         }
         return result.append(ChatColor.RESET).toString();
 //        return result;
     }
 
-    public static int getColorId(String str) {
-        return Integer.parseInt(str.substring(0, str.indexOf("r")).replaceAll("§", ""));
+    public static int getIntColor(String str) {
+        return Integer.parseInt(str.substring(0, str.indexOf("r")).replace("§", "").replace("a", "5"));
     }
 
     public static void addItem(@NotNull Player player, @NotNull ItemStack item) {

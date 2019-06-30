@@ -26,7 +26,8 @@ package net.firiz.renewatelier.constants;
  */
 public interface GameConstants {
 
-    int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300}; // ブロンズ・シルバー・ゴールド・プラチナ
+    // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
+    int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
     int RECIPE_EXP = 25;
 
 }

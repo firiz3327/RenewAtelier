@@ -151,8 +151,9 @@ public final class RecipeSelect {
         if (ritem.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
             final ItemMeta meta = setting.getItemMeta();
-            meta.addEnchant(Enchantment.LUCK, scroll, true); // レシピページ数
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            AlchemyChore.setSetting(meta, 0, scroll, "レシピを選択してください。");
+//            meta.addEnchant(Enchantment.LUCK, scroll, true); // レシピページ数
+//            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             setting.setItemMeta(meta);
             inv.setItem(1, setting);
 
@@ -224,7 +225,7 @@ public final class RecipeSelect {
     }
 
     public static void click(final InventoryClickEvent e) {
-        if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { // 増殖防止
+        if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR || e.isShiftClick()) { // 増殖防止 || アイテム混入防止
             e.setCancelled(true);
             return;
         }
@@ -235,7 +236,8 @@ public final class RecipeSelect {
         }
         if (e.getSlotType() == SlotType.CONTAINER && inv.getItem(1) != null) {
             final Player player = (Player) e.getWhoClicked();
-            final int scroll = inv.getItem(1).getItemMeta().getEnchantLevel(Enchantment.LUCK);
+//            final int scroll = inv.getItem(1).getItemMeta().getEnchantLevel(Enchantment.LUCK);
+            final int scroll = AlchemyChore.getSetting(inv.getItem(1).getItemMeta(), 0);
             final ItemStack item = e.getCurrentItem();
 
             switch (raw) {

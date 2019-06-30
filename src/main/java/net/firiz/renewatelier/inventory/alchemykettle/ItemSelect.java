@@ -38,7 +38,6 @@ import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -66,10 +65,12 @@ public final class ItemSelect {
         final Inventory inv = Bukkit.createInventory(player, 45, AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
         final ItemStack setting_item = Chore.ci(Material.BARRIER, 0, "", null);
         final ItemMeta setting = setting_item.getItemMeta();
-        final List<String> lore = new ArrayList<>();
-        lore.add(Chore.createStridColor(recipe.getId())); // レシピID
-        setting.setLore(lore);
-        setting.addEnchant(Enchantment.ARROW_DAMAGE, 0, true); // ページ
+//        final List<String> lore = new ArrayList<>();
+//        lore.add(Chore.createStridColor(recipe.getId())); // レシピID
+//        setting.setLore(lore);
+//        setting.addEnchant(Enchantment.ARROW_DAMAGE, 0, true); // ページ
+        AlchemyChore.setSettingStr(setting, 0, recipe.getId(), ""); // レシピID
+        AlchemyChore.setSetting(setting, 1, 0, ""); // ページ
         setting_item.setItemMeta(setting);
         inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1507, "", null));
         inv.setItem(36, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
@@ -91,9 +92,11 @@ public final class ItemSelect {
         final List<String> reqs = recipe.getReqMaterial();
         final ItemStack setting_item = inv.getItem(1);
         final ItemMeta setting = setting_item.getItemMeta();
-        final int new_page = Math.min(reqs.size() - 1, Math.max(0, setting.getEnchantLevel(Enchantment.ARROW_DAMAGE) + add_page));
-        setting.removeEnchant(Enchantment.ARROW_DAMAGE);
-        setting.addEnchant(Enchantment.ARROW_DAMAGE, new_page, true);
+//        final int new_page = Math.min(reqs.size() - 1, Math.max(0, setting.getEnchantLevel(Enchantment.ARROW_DAMAGE) + add_page));
+//        setting.removeEnchant(Enchantment.ARROW_DAMAGE);
+//        setting.addEnchant(Enchantment.ARROW_DAMAGE, new_page, true);
+        final int new_page = Math.min(reqs.size() - 1, Math.max(0, AlchemyChore.getSetting(setting, 1) + add_page));
+        AlchemyChore.setSetting(setting, 1, new_page, "");
         setting_item.setItemMeta(setting);
 
         final String[] data = reqs.get(new_page).split(",");
@@ -166,14 +169,15 @@ public final class ItemSelect {
         final Player player = (Player) e.getWhoClicked();
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
-        final int page = setting.getEnchantLevel(Enchantment.ARROW_DAMAGE);
+//        final int page = setting.getEnchantLevel(Enchantment.ARROW_DAMAGE);
+        final int page = AlchemyChore.getSetting(setting, 1);
         final int raw = e.getRawSlot();
         final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
         if ((e.getSlotType() == InventoryType.SlotType.CONTAINER || e.getSlotType() == InventoryType.SlotType.QUICKBAR) && !(raw < inv.getSize()) && e.isShiftClick()) {
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();
             if (current != null && current.getType() != Material.AIR && !checkMaxSlot(uuid, recipe, page)) {
-                final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
+                final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
                 if (Chore.checkMaterial(current, data[0])) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
@@ -202,7 +206,7 @@ public final class ItemSelect {
                                 KETTLE.removePageItem(uuid, slot, page);
                             }
                         } else if (!checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
-                            final String[] data = recipe.getReqMaterial().get(setting.getEnchantLevel(Enchantment.ARROW_DAMAGE)).split(",");
+                            final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
                             if (Chore.checkMaterial(cursor, data[0])) {
                                 final ItemStack cloneItem = cursor.clone();
                                 cloneItem.setAmount(1);

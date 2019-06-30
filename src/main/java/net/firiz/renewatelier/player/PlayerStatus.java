@@ -140,7 +140,7 @@ public final class PlayerStatus {
         status.setExp(status.getExp() + exp);
         while (true) {
             final int level = status.getLevel();
-            final int req_exp = GameConstants.RECIPE_REQLEVELS[level];
+            final int req_exp = GameConstants.RECIPE_REQLEVELS[Math.min(level, GameConstants.RECIPE_REQLEVELS.length - 1)];
             if (status.getExp() >= req_exp) {
                 status.setLevel(level + 1);
                 status.setExp(status.getExp() - req_exp);

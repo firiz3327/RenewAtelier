@@ -33,7 +33,7 @@ public class ToolDamage {
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
             for (String lore : item.getItemMeta().getLore()) {
                 if (lore.startsWith(DURABILITY)) {
-                    return Integer.parseInt(lore.substring(DURABILITY.length(), lore.indexOf(" / ")));
+                    return item.getType().getMaxDurability() - Integer.parseInt(lore.substring(DURABILITY.length(), lore.indexOf(" / ")));
                 }
             }
         }
@@ -49,7 +49,7 @@ public class ToolDamage {
         final ItemMeta meta = item.getItemMeta();
         final List<String> lores = meta.hasLore() ? meta.getLore() : new ArrayList<>();
         boolean first = true;
-        int damageValue = (item.getType().getMaxDurability() - Chore.getDamage(meta)) - damage;
+        int damageValue = (maxDurability - Chore.getDamage(meta));
         for (int i = 0; i < lores.size(); i++) {
             final String lore = lores.get(i);
             if (lore.startsWith(DURABILITY)) {

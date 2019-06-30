@@ -110,7 +110,7 @@ public class VItemStack {
     }
 
     public void setString(final String key, final Object value) {
-        final Object tag = VersionUtils.getField(this, "tag");
+        final Object tag = VersionUtils.getField(nmsItem, "tag");
         VersionUtils.invoke(
                 tag,
                 "setString",
@@ -120,7 +120,7 @@ public class VItemStack {
     }
 
     public String getString(final String key) {
-        final Object tag = VersionUtils.getField(this, "tag");
+        final Object tag = VersionUtils.getField(nmsItem, "tag");
         return (String) VersionUtils.invoke(
                 tag,
                 "getString",
@@ -130,7 +130,7 @@ public class VItemStack {
     }
 
     public boolean hasKey(final String key) {
-        final Object tag = VersionUtils.getField(this, "tag");
+        final Object tag = VersionUtils.getField(nmsItem, "tag");
         return (boolean) VersionUtils.invoke(
                 tag,
                 "hasKey",

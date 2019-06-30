@@ -106,7 +106,6 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             }
             // 使用可能触媒
             final List<String> catalyst_categorys = item.getStringList("usable_catalysts_categorys");
-            Chore.log(result + " " + req_materials + " " + effects + " " + levels);
             // 調合品サイズ
             final List<MaterialSizeData> sizes = new ArrayList<>();
             final ConfigurationSection sizesec = item.getConfigurationSection("sizes");

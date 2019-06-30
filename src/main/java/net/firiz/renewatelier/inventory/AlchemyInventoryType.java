@@ -1,20 +1,20 @@
 /*
  * AlchemyInventoryType.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -25,6 +25,8 @@ import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.InventoryView;
@@ -32,7 +34,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Cauldron;
 
 /**
- *
  * @author firiz
  */
 public enum AlchemyInventoryType {
@@ -40,11 +41,26 @@ public enum AlchemyInventoryType {
     KETTLE_SELECT_RECIPE("KETTLE_SELECT_RECIPE"/*"§f§e§c§l§b§e"*/, new CheckRunnable() {
         @Override
         public boolean check(Action action, ItemStack item, Block block, Player player) {
-            return (block.getType() == Material.CAULDRON
-                    && !player.isSneaking()
-                    && Chore.isRightOnly(action, true)
-                    && ((Cauldron) block.getState().getData()).isFull()
-                    && block.getRelative(BlockFace.DOWN).getType() == Material.FIRE);
+            final BlockData blockData = block.getBlockData();
+            if(blockData instanceof Levelled) {
+                final Levelled cauldron = (Levelled) blockData;
+                boolean typeCheck;
+                switch (block.getRelative(BlockFace.DOWN).getType()) {
+                    case FIRE:
+                    case CAMPFIRE:
+                        typeCheck = true;
+                        break;
+                    default:
+                        typeCheck = false;
+                        break;
+                }
+                return block.getType() == Material.CAULDRON
+                        && !player.isSneaking()
+                        && Chore.isRightOnly(action, true)
+                        && cauldron.getLevel() == cauldron.getMaximumLevel()
+                        && typeCheck;
+            }
+            return false;
         }
 
         @Override

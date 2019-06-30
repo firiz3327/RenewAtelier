@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.alchemy.material;
 
+import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.Strings;
@@ -236,10 +237,8 @@ public enum MaterialSize {
                             String j = String.valueOf(l);
                             switch (j) {
                                 case Strings.W_W:
-                                    size.add(Chore.colorCint(b));
-                                    break;
                                 case Strings.W_B:
-                                    size.add(Chore.colorCint(b));
+                                    size.add(AlchemyCircle.colorCint(b));
                                     break;
                                 default:
                                     b = j;

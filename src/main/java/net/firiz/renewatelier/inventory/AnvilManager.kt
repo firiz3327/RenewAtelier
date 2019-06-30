@@ -12,12 +12,7 @@ import org.bukkit.inventory.ItemStack
 
 object AnvilManager {
 
-    fun toolRepair(anvil: AnvilInventory): ItemStack? {
-        if (anvil.getItem(0) != null
-                && anvil.getItem(1) != null
-                && anvil.getItem(2) != null
-                && ToolDamage.hasDamagedItem(anvil.getItem(2))) {
-
+    fun toolRepair(anvil: AnvilInventory) {
             Bukkit.getScheduler().runTaskLater(
                     AtelierPlugin.getPlugin(),
                     Runnable {
@@ -30,19 +25,17 @@ object AnvilManager {
                             Chore.setDamage(
                                     result,
                                     ToolDamage.damage(
-                                            Math.max(0, (result.type.maxDurability - ToolDamage.getDamage(result)) - ToolDamage.getDamage(cost)),
+                                            -ToolDamage.getDamage(cost),
                                             result,
                                             false
                                     )
                             )
-//                            return result
+//                return result
                             anvil.setItem(2, result)
                         }
                     },
-                    10
-            )
-        }
-        return anvil.getItem(2)
+                    1
+            );
     }
 
     @JvmStatic
@@ -57,6 +50,7 @@ object AnvilManager {
 
     @JvmStatic
     fun prepare(e: PrepareAnvilEvent) {
+//        toolRepair(e.inventory)
     }
 
 }
