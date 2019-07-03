@@ -29,5 +29,12 @@ public interface GameConstants {
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
     int RECIPE_EXP = 25;
+    String[] ROTATION_STR = {"上向き", "右向き", "下向き", "左向き"};
+    String[][] TURN_STR = {
+            {"左右反転： OFF", "上下反転： OFF"},
+            {"左右反転： ON", "上下反転： OFF"},
+            {"左右反転： OFF", "上下反転： ON"},
+            {"左右反転： ON", "上下反転： ON"}
+    };
 
 }

@@ -57,6 +57,7 @@ public enum MaterialSize {
     S3_3(1, 1, 0, 0, 1),
     S3_4(1, 0, 0, 0, 1, 0, 0, 0, 1),
     S3_5(1, 0, 1, 0, 1),
+    S3_6(1, 1, 0, 0, 0, 1),
     // SIZE 4
     // □■□ ■■■ ■■□ ■□■ ■■□ ■□■ □■□
     // ■■■ ■□□ ■■□ □■□ □■■ □■□ ■□■
@@ -208,6 +209,10 @@ public enum MaterialSize {
             a[k] = r[right_rotation[k]];
         }
         return a;
+    }
+
+    public static int[] left_rotation(int[] r) {
+        return right_rotation(right_rotation(right_rotation(r)));
     }
 
     public static int[] plusSize(int[] size) {

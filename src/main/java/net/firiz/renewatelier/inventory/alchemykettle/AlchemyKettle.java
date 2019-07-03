@@ -1,20 +1,20 @@
 /*
  * AlchemyKettle.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -60,7 +60,6 @@ import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -68,7 +67,6 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- *
  * @author firiz
  */
 public class AlchemyKettle {
@@ -76,10 +74,11 @@ public class AlchemyKettle {
     private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private final static KettleBonusManager BONUSMANAGER = KettleBonusManager.INSTANCE;
 
-    private final static String STR_CENTER = "";
-    private final static String STR_TURN = "";
-    private final static String STR_CHARACTERISTIC = "";
-    private final static String STR_RECIPEID = "";
+    private final static String STR_CENTER = "アイテムを投入してください";
+    private final static String STR_TURN = "投入すると、完成品プレビューが更新されます";
+    private final static String STR_CHARACTERISTIC = "入れ方によって様々な状態に変わるので";
+    private final static String STR_RECIPEID = "色々試してみましょう!";
+    private final static String STR_TURN2 = "";
 
     public static boolean isAlchemyKettle(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
@@ -155,6 +154,7 @@ public class AlchemyKettle {
         }
          */
         // 回転ボタンをレシピレベルに関係なく使用可能に変更
+        /*
         final ItemStack rc_setting = Chore.ci(
                 Material.DIAMOND_AXE,
                 1502,
@@ -162,13 +162,20 @@ public class AlchemyKettle {
                 null
         );
         inv.setItem(47, rc_setting);
+         */
+        playerInv.setItem(10, Chore.ci(Material.BARRIER, 0, ChatColor.RESET + "回転", new ArrayList<String>() {{
+            add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[0]);
+            add(ChatColor.GRAY + GameConstants.TURN_STR[0][0]);
+            add(ChatColor.GRAY + GameConstants.TURN_STR[0][1]);
+        }}));
 
         final ItemStack settingItem = catalystInv.getItem(1);
         final ItemMeta setting = settingItem.getItemMeta();
         AlchemyChore.setSetting(setting, 0, 4, STR_CENTER); // center data
-        AlchemyChore.setSetting(setting, 1, 0, STR_TURN); // right left turn data
+        AlchemyChore.setSetting(setting, 1, 0, STR_TURN); // rotation data
         AlchemyChore.setSetting(setting, 2, 0, STR_CHARACTERISTIC); // characteristic page data
         AlchemyChore.setSettingStr(setting, 3, recipe.getId(), STR_RECIPEID); // recipe id
+        AlchemyChore.setSetting(setting, 4, 0, STR_TURN2); // right left up down turn data
 //        setting.addEnchant(Enchantment.ARROW_FIRE, 4, true); // center data
 //        setting.addEnchant(Enchantment.ARROW_INFINITE, 0, true); // right left turn data
 //        setting.addEnchant(Enchantment.ARROW_KNOCKBACK, 0, true); // characteristic page data
@@ -229,6 +236,7 @@ public class AlchemyKettle {
             final int[] cs = bonus.getCS();
             final CatalystBonusData data = bonus.getData();
             int slot = defslot;
+            final List<Integer> activeSlots = new ArrayList<>();
             for (final int c : cs) {
                 if (c != 0) {
                     final ItemStack item = inv.getItem(slot);
@@ -260,8 +268,10 @@ public class AlchemyKettle {
                                     }
                                 }
                             }
+                            activeSlots.clear();
                             continue resultBonus;
                         }
+                        activeSlots.add(slot);
                     }
                 }
                 slot = Catalyst.nextSlot(slot, size);
@@ -269,6 +279,8 @@ public class AlchemyKettle {
             if (!KETTLE.hasCatalystBonus(uuid, bonus)) {
                 KETTLE.addCatalystBonus(uuid, bonus);
             }
+            // アクティブ触媒効果にGlowを付与
+            activeSlots.forEach(activeSlot -> inv.getItem(activeSlot).addUnsafeEnchantment(Enchantment.LUCK, 1));
         }
         final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
         int bonus_quality = 0;
@@ -502,10 +514,6 @@ public class AlchemyKettle {
                                         ChatColor.RESET + b.getData().getName(),
                                         b.getData().getDesc()
                                 );
-//                                item.addUnsafeEnchantment(Enchantment.LUCK, 1);
-//                                final ItemMeta meta = item.getItemMeta();
-//                                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-//                                item.setItemMeta(meta);
                                 slotItem = ignores.contains(b) ? null : item;
                                 break getSlotItem;
                             }
@@ -521,10 +529,6 @@ public class AlchemyKettle {
             resultCS.keySet().forEach((slotData) -> {
                 final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
-//                item.addUnsafeEnchantment(Enchantment.LUCK, 1);
-//                final ItemMeta meta = item.getItemMeta();
-//                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-//                item.setItemMeta(meta);
                 inv.setItem(slotData.getLeft(), item);
             });
         }
@@ -598,12 +602,11 @@ public class AlchemyKettle {
         if (e.isShiftClick()) {
             e.setCancelled(true);
         }
-        switch(e.getAction()) {
+        switch (e.getAction()) {
             case DROP_ALL_CURSOR:
             case DROP_ONE_CURSOR:
             case DROP_ALL_SLOT:
             case DROP_ONE_SLOT:
-            case NOTHING:
             case SWAP_WITH_CURSOR:
             case HOTBAR_SWAP:
                 e.setCancelled(true);
@@ -695,6 +698,10 @@ public class AlchemyKettle {
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
 
                         final ItemStack settingItem = inv.getItem(1);
+                        final ItemMeta setting = settingItem.getItemMeta();
+                        final int sl = AlchemyChore.getSetting(setting, 1);
+                        final int rludsl = AlchemyChore.getSetting(setting, 4);
+                        /*
                         final ItemStack button = inv.getItem(47);
                         if (settingItem != null && button != null) {
                             final ItemMeta setting = settingItem.getItemMeta();
@@ -712,6 +719,77 @@ public class AlchemyKettle {
                             }
                             settingItem.setItemMeta(setting);
                         }
+                         */
+                        final PlayerInventory playerInv = player.getInventory();
+                        final int nsl;
+                        final int rludnsl;
+                        if (e.isShiftClick()) {
+                            nsl = sl;
+                            int temp = e.isRightClick() ? 1 : 2;
+                            temp *= (((rludsl == 1 && e.isRightClick()) || rludsl + temp > 3) ? -1 : 1);
+                            rludnsl = rludsl + temp;
+                        } else {
+                            nsl = (sl + 1 >= 4) ? 0 : sl + 1;
+                            rludnsl = rludsl;
+                        }
+                        AlchemyChore.setSetting(setting, 1, nsl, STR_TURN);
+                        AlchemyChore.setSetting(setting, 4, rludnsl, STR_TURN2);
+                        playerInv.setItem(10, Chore.ci(Material.BARRIER, 0, ChatColor.RESET + "回転", new ArrayList<String>() {{
+                            add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[nsl]);
+                            add(ChatColor.GRAY + GameConstants.TURN_STR[rludnsl][0]);
+                            add(ChatColor.GRAY + GameConstants.TURN_STR[rludnsl][1]);
+                        }}));
+                        settingItem.setItemMeta(setting);
+
+                        for (int i = 1; i <= 4; i++) {
+                            for (int j = 3; j < 9; j++) {
+                                final ItemStack item = playerInv.getItem(i * 9 + j);
+                                if (item != null) {
+                                    final int[] size;
+                                    if (e.isShiftClick()) {
+                                        size = e.isRightClick()
+                                                ? MaterialSize.right_left_turn(MaterialSize.getSize(item))
+                                                : MaterialSize.up_down_turn(MaterialSize.getSize(item));
+                                    } else {
+                                        size = e.isRightClick()
+                                                ? MaterialSize.right_rotation(MaterialSize.getSize(item))
+                                                : MaterialSize.left_rotation(MaterialSize.getSize(item));
+                                    }
+                                    final ItemMeta meta = item.getItemMeta();
+                                    final List<String> lores = meta.getLore();
+                                    int sc = -1;
+                                    for (int l = 0; l < lores.size(); l++) {
+                                        if (sc >= 0) {
+                                            StringBuilder str = new StringBuilder();
+                                            int c_size = 0;
+                                            int c = 0;
+                                            for (final int k : size) {
+                                                if (k == 0) {
+                                                    str.append(Chore.intCcolor(k)).append(Strings.W_W);
+                                                } else {
+                                                    str.append(Chore.intCcolor(k)).append(Strings.W_B);
+                                                }
+                                                if (c_size >= 2) {
+                                                    lores.set(l + c, str.toString());
+                                                    c_size = 0;
+                                                    c++;
+                                                    str = new StringBuilder();
+                                                } else {
+                                                    c_size++;
+                                                }
+                                            }
+                                            break;
+                                        } else if (lores.get(l).startsWith(AlchemyItemStatus.SIZE.getCheck())) {
+                                            sc = 0;
+                                            continue;
+                                        }
+                                    }
+                                    meta.setLore(lores);
+                                    item.setItemMeta(meta);
+                                }
+                            }
+                        }
+
                         break;
                         //</editor-fold>
                     }
@@ -880,10 +958,11 @@ public class AlchemyKettle {
                                 final ItemStack cursor = e.getCursor();
                                 final AlchemyMaterial material = AlchemyMaterial.getMaterial(cursor);
                                 if (material != null) {
-                                    int[] size = MaterialSize.getSize(cursor);
+                                    final int[] size = MaterialSize.getSize(cursor);
                                     if (size != null) {
 //                                        final int center = inv.getItem(1).getEnchantmentLevel(Enchantment.ARROW_FIRE);
                                         final int center = AlchemyChore.getSetting(inv.getItem(1), 0);
+                                        /*
                                         final ItemStack rc_setting = inv.getItem(47);
                                         if (rc_setting != null) {
                                             final int damage = Chore.getDamage(rc_setting);
@@ -909,16 +988,17 @@ public class AlchemyKettle {
                                                 }
                                             }
                                         }
+                                        */
 
                                         final int[] sets = {
-                                            -10, -9, -8,
-                                            -1, 0, 1,
-                                            8, 9, 10
+                                                -10, -9, -8,
+                                                -1, 0, 1,
+                                                8, 9, 10
                                         };
                                         final int[] center_sets = {
-                                            10, 9, 8,
-                                            1, 0, -1,
-                                            -8, -9, -10
+                                                10, 9, 8,
+                                                1, 0, -1,
+                                                -8, -9, -10
                                         };
 
                                         final ItemStack catalyst_item = KETTLE.getCatalyst(uuid);

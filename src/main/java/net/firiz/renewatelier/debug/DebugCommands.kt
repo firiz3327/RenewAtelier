@@ -82,8 +82,7 @@ class DebugCommands(private val debugListener: DebugListener) {
         }
         if (notFound) {
             sender.sendMessage("")
-            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${cmd
-                    ?: "${page / 9} page"}.")
+            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${cmd ?: "${(page / 9) + 1} page"}.")
             if (cmd != null) {
                 val ccmds = arrayListOf<String>()
                 for (it in DebugCommands::class.java.methods) {
