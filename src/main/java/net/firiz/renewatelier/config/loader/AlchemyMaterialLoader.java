@@ -71,7 +71,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final DoubleData<Material, Short> mat;
                 if (!mat_str.contains(",")) {
                     if(mat_str.equalsIgnoreCase("XXX")) {
-                        Chore.logLightWarning("MaterialLoader: " + key + " -> No damage value has been set for XXX.");
+                        Chore.logSLightWarning("MaterialLoader: " + key + " -> No damage value has been set for XXX.");
                     }
                     mat = new DoubleData<>(Chore.getMaterial(mat_str), (short) 0);
                 } else {
@@ -119,8 +119,13 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final List<MaterialSizeData> sizes = new ArrayList<>();
                 sizes_str.forEach((s_str) -> {
                     final String[] strs = s_str.split(",");
+                    final String size_id = strs[0].trim();
+                    final MaterialSize materialSize = MaterialSize.valueOf(size_id.toUpperCase());
+                    if (materialSize == MaterialSize.S3_3) {
+                        Chore.logLightWarning("MaterialLoader: " + key + " -> " + size_id + " is deprecated.");
+                    }
                     sizes.add(new MaterialSizeData(
-                            MaterialSize.valueOf(strs[0].trim().toUpperCase()),
+                            materialSize,
                             Integer.parseInt(strs[1].trim())
                     ));
                 });

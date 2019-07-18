@@ -7,6 +7,7 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.item.AlchemyItemStatus
+import net.firiz.renewatelier.item.tool.ToolDamage
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.nodification.Nodification
 import net.firiz.renewatelier.npc.NPCManager
@@ -286,19 +287,8 @@ class DebugCommands(private val debugListener: DebugListener) {
     )
     fun damage(sender: Player, args: ArrayList<Any>) {
         val item = sender.inventory.itemInMainHand
-        val meta = item.itemMeta!!
         val damage = args[0].toString().toInt()
-
-        var i = Chore.getDamage(meta)
-        var j = 0
-        while (i == damage) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), {
-                Chore.setDamageInEvent(item, i)
-                item.itemMeta = meta
-            }, 100L * j)
-            if(i < damage) i++ else i--
-            j++
-        }
+        ToolDamage.setDamage(item, damage);
     }
 
     @Cmd(

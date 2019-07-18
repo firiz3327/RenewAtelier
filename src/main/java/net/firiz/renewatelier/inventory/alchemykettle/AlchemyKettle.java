@@ -189,8 +189,8 @@ public class AlchemyKettle {
         for (final int n : ss) {
             l++;
             sb.append(String.valueOf(n)
-                    .replaceAll("0", ChatColor.GRAY + Strings.W_W)
-                    .replaceAll("1", ChatColor.WHITE + Strings.W_B)
+                    .replace("0", ChatColor.GRAY + Strings.W_W)
+                    .replace("1", ChatColor.WHITE + Strings.W_B)
             );
             if (l % 3 == 0) {
                 lore.add(sb.toString());
@@ -602,19 +602,24 @@ public class AlchemyKettle {
         if (e.isShiftClick()) {
             e.setCancelled(true);
         }
+        final int raw = e.getRawSlot();
         switch (e.getAction()) {
             case DROP_ALL_CURSOR:
             case DROP_ONE_CURSOR:
             case DROP_ALL_SLOT:
             case DROP_ONE_SLOT:
-            case SWAP_WITH_CURSOR:
             case HOTBAR_SWAP:
                 e.setCancelled(true);
+                return;
+            case SWAP_WITH_CURSOR:
+                e.setCancelled(true);
+                if (raw < 54) {
+                    break;
+                }
                 return;
         }
 
         final Inventory inv = e.getInventory();
-        final int raw = e.getRawSlot();
         final Player player = (Player) e.getWhoClicked();
         final UUID uuid = player.getUniqueId();
         switch (e.getSlotType()) {
@@ -822,8 +827,8 @@ public class AlchemyKettle {
                         for (int n : ss) {
                             l++;
                             sb.append(String.valueOf(n)
-                                    .replaceAll("0", ChatColor.GRAY + Strings.W_W)
-                                    .replaceAll("1", ChatColor.WHITE + Strings.W_B)
+                                    .replace("0", ChatColor.GRAY + Strings.W_W)
+                                    .replace("1", ChatColor.WHITE + Strings.W_B)
                             );
                             if (l % 3 == 0) {
                                 lore.add(sb.toString());

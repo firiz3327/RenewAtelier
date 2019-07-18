@@ -80,7 +80,7 @@ public class InventoryListener implements Listener {
             CatalystSelect.click(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.click(e);
-        } else if (inv instanceof AnvilInventory) {
+        } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.click(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.click(e);
@@ -120,7 +120,7 @@ public class InventoryListener implements Listener {
             CatalystSelect.drag(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.drag(e);
-        } else if (e.getInventory() instanceof AnvilInventory) {
+        } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.drag(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.drag(e);
@@ -140,6 +140,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.close(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.close(e);
+        } else if (view.getTopInventory() instanceof AnvilInventory) {
+            AnvilManager.close(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {
             AlchemyBagItem.close(e);
         }
@@ -147,7 +149,11 @@ public class InventoryListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invOpen(final InventoryOpenEvent e) {
-        final Player player = (Player) e.getPlayer();
+//        final Player player = (Player) e.getPlayer();
+        final InventoryView view = e.getView();
+        if (view.getTopInventory() instanceof AnvilInventory) {
+            AnvilManager.open(e);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

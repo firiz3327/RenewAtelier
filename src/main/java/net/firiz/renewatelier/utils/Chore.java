@@ -97,6 +97,10 @@ public final class Chore {
         log.warning("\u001B[30m\u001B[103m".concat(str).concat("\u001B[0m"));
     }
 
+    public static void logSLightWarning(final String str) {
+        log.warning("\u001B[30m\u001B[43;1m".concat(str).concat("\u001B[0m"));
+    }
+
     public static void log(final Level level, final String str, final Throwable throwable) {
         log.log(level, str, throwable);
     }
@@ -116,12 +120,6 @@ public final class Chore {
 
     public static void setDamage(final ItemMeta meta, final int damage) {
         ((Damageable) meta).setDamage(damage);
-    }
-
-    public static void setDamageInEvent(final ItemStack item, final int damage) {
-        final int now = getDamage(item);
-        final int texDamage = ToolDamage.damage(damage - now, item, true);
-        Chore.setDamage(item, texDamage);
     }
 
     public static int getDamage(final ItemStack item) {
