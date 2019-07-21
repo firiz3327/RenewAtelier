@@ -93,7 +93,6 @@ public enum PlayerSaveManager {
         );
         new Thread(() -> {
             status.setJsEngine(script.createJsEngine());
-            status.setPy2Engine(script.createPy2Engine());
             status.setPy3Engine(script.createPy3Engine());
         }).start();
         statusList.put(uuid, status);

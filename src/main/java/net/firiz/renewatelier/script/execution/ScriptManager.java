@@ -30,7 +30,6 @@ import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.script.engine.GraalEngine;
 import net.firiz.renewatelier.script.engine.GraalEngine.Type;
 import org.bukkit.entity.Player;
-import org.python.jsr223.PyScriptEngineFactory;
 
 /**
  *
@@ -42,12 +41,10 @@ public enum ScriptManager {
     private final ScriptRunner script;
     private final ScriptEngineManager sem;
     private final GraalJSEngineFactory gjef;
-    private final PyScriptEngineFactory psef;
     
     ScriptManager() {
         sem = ServerConstants.NASHORN ? new ScriptEngineManager() : null;
         gjef = ServerConstants.NASHORN ? null : new GraalJSEngineFactory();
-        psef = ServerConstants.PYTHON_2 ? new PyScriptEngineFactory() : null;
         script = new ScriptRunner();
     }
 
@@ -63,11 +60,7 @@ public enum ScriptManager {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
         final ScriptEngine engine;
         if(name.endsWith(".py") || name.endsWith(".PY")) {
-            if(name.endsWith(".2.py") || name.endsWith(".2.PY")) {
-                engine = status.getPy2Engine();
-            } else {
-                engine = status.getPy3Engine();
-            }
+            engine = status.getPy3Engine();
         } else {
             engine = status.getJsEngine();
         }
@@ -78,12 +71,8 @@ public enum ScriptManager {
         return sem == null ? gjef.getScriptEngine() : sem.getEngineByName("javascript");
     }
     
-    public ScriptEngine createPy2Engine() {
-        return psef == null ? null : psef.getScriptEngine();
-    }
-    
     public ScriptEngine createPy3Engine() {
-        return ServerConstants.PYTHON_3 ? new GraalEngine(Type.PYTHON) : null;
+        return ServerConstants.PYTHON ? new GraalEngine(Type.PYTHON) : null;
     }
     
     

@@ -25,6 +25,7 @@ import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
@@ -38,7 +39,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -46,7 +46,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -57,14 +56,12 @@ import java.util.*;
  */
 public final class RecipeSelect {
 
-    private static final int[] RECIPE_REQLEVELS = new int[]{80, 140, 220}; // ブロンズ・シルバー・ゴールド・プラチナ
-    private static final String[] RANK_RECIPE = new String[]{
-            "熟練度なし",
-            ChatColor.GRAY + "ブロンズ",
-            ChatColor.WHITE + "シルバー",
-            ChatColor.GOLD + "ゴールド",
-            ChatColor.DARK_AQUA + "ダイアモンド"
-    };
+//    private static final int[] RECIPE_REQLEVELS = new int[]{80, 140, 220}; // ブロンズ・シルバー・ゴールド・プラチナ
+    private static final String RECIPE_VALUE1 = "レシピを選択してください。";
+    private static final List<String> RECIPE_LORES = new ArrayList<String>(){{
+        add(ChatColor.RESET + RECIPE_VALUE1);
+        add("");
+    }};
 
     public static boolean isKettleRecipe(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
@@ -72,9 +69,9 @@ public final class RecipeSelect {
 
     public static void openGUI(final Player player, final Location loc) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
-        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1521, "", null));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1521, "", RECIPE_LORES));
         inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
-        inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), null));
+        inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), RECIPE_LORES));
 
         setRecipeScroll(player.getUniqueId(), inv, 0);
         player.openInventory(inv);
@@ -89,10 +86,10 @@ public final class RecipeSelect {
         int add_amount = 0;
         final int level = rs.getLevel();
         if (level != 0) {
-            lore.add(ChatColor.GRAY + "熟練度: ".concat(RANK_RECIPE[rs.getLevel()]));
+            lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RANK_RECIPE[level]));
             final StringBuilder sb = new StringBuilder();
             if (level != 4) {
-                int exp_per = (int) (100 * ((double) rs.getExp() / RECIPE_REQLEVELS[level - 1]));
+                int exp_per = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQLEVELS[level]));
                 for (int j = 0; j < 100; j++) {
                     sb.append(exp_per > j ? ChatColor.GREEN : ChatColor.WHITE).append("|");
                 }
@@ -151,7 +148,8 @@ public final class RecipeSelect {
         if (ritem.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
             final ItemMeta meta = setting.getItemMeta();
-            AlchemyChore.setSetting(meta, 0, scroll, "レシピを選択してください。");
+            AlchemyChore.setSetting(meta, 0, scroll, RECIPE_VALUE1);
+            AlchemyChore.setSetting(meta, 1, 0, ""); // 改行用
 //            meta.addEnchant(Enchantment.LUCK, scroll, true); // レシピページ数
 //            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             setting.setItemMeta(meta);

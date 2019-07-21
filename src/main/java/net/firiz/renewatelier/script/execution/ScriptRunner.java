@@ -34,6 +34,7 @@ import javax.script.ScriptException;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.utils.Chore;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
 /**
@@ -70,19 +71,7 @@ final class ScriptRunner {
         }
     }
 
-    private boolean eval(final ScriptEngine engine, final String name) {
-        final String script;
-        if (name.endsWith(".js")
-                || name.endsWith(".JS")
-                || name.endsWith(".2.py")
-                || name.endsWith(".2.PY")
-                || name.endsWith(".3.py")
-                || name.equals(".3.PY")) {
-            script = name;
-        } else {
-            script = name.concat(".js");
-        }
-
+    private boolean eval(final ScriptEngine engine, final String script) {
         final File file;
         if (script.contains("/")) {
             final String[] split = script.split("/");

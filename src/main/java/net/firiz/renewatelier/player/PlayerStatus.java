@@ -54,7 +54,6 @@ public final class PlayerStatus {
     private final List<QuestStatus> quest_statuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
     private ScriptEngine jsEngine;
-    private ScriptEngine py2Engine;
     private ScriptEngine py3Engine;
 
     public PlayerStatus(final int id, final int alchemy_level, final int alchemy_exp, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
@@ -261,14 +260,6 @@ public final class PlayerStatus {
 
     public void setJsEngine(ScriptEngine jsEngine) {
         this.jsEngine = jsEngine;
-    }
-
-    public ScriptEngine getPy2Engine() {
-        return py2Engine;
-    }
-
-    public void setPy2Engine(ScriptEngine py2Engine) {
-        this.py2Engine = py2Engine;
     }
 
     public ScriptEngine getPy3Engine() {

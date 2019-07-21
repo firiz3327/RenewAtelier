@@ -27,7 +27,6 @@ package net.firiz.renewatelier.constants;
 public class ServerConstants {
     
     public static final boolean NASHORN = false;
-    public static final boolean PYTHON_2 = false;
-    public static final boolean PYTHON_3 = true;
+    public static final boolean PYTHON = true;
     
 }

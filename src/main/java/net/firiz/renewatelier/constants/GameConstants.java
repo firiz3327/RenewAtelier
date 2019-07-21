@@ -20,6 +20,8 @@
  */
 package net.firiz.renewatelier.constants;
 
+import net.md_5.bungee.api.ChatColor;
+
 /**
  *
  * @author firiz
@@ -28,6 +30,13 @@ public interface GameConstants {
 
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     int[] RECIPE_REQLEVELS = new int[]{0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
+    String[] RANK_RECIPE = new String[]{
+            "熟練度なし",
+            ChatColor.GRAY + "ブロンズ",
+            ChatColor.WHITE + "シルバー",
+            ChatColor.GOLD + "ゴールド",
+            ChatColor.DARK_AQUA + "ダイアモンド"
+    };
     int RECIPE_EXP = 25;
     String[] ROTATION_STR = {"上向き", "右向き", "下向き", "左向き"};
     String[][] TURN_STR = {

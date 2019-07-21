@@ -206,7 +206,7 @@ public final class NPCConversation extends ScriptConversation {
                 text
         );
         if (runTaskLater != null) {
-            runTaskLater.cancel();
+            Bukkit.getScheduler().cancelTask(runTaskLater.getTaskId());
         }
         runTaskLater = Bukkit.getScheduler().runTaskLater(
                 AtelierPlugin.getPlugin(),

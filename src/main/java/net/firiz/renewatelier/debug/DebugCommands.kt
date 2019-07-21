@@ -83,7 +83,8 @@ class DebugCommands(private val debugListener: DebugListener) {
         }
         if (notFound) {
             sender.sendMessage("")
-            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${cmd ?: "${(page / 9) + 1} page"}.")
+            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${cmd
+                    ?: "${(page / 9) + 1} page"}.")
             if (cmd != null) {
                 val ccmds = arrayListOf<String>()
                 for (it in DebugCommands::class.java.methods) {
@@ -163,12 +164,33 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "NPCをスポーンさせます"
     )
     fun npc(sender: Player, args: ArrayList<Any>) {
-        NPCManager.INSTANCE.createNPC(
+        npc(
                 args[0] as Location,
                 args[1] as EntityType,
                 args[2] as String,
-                args[3] as String
+                args[3] as String,
+                false
         )
+    }
+
+    @Cmd(
+            desc = ["Location", "EntityType", "Name", "Script"],
+            args = [Location::class, EntityType::class, String::class, String::class],
+            examples = ["npcSave {getLocation} {getEntityType skeleton} example test"],
+            text = "NPCをスポーンさせ、保存します。"
+    )
+    fun npcSave(sender: Player, args: ArrayList<Any>) {
+        npc(
+                args[0] as Location,
+                args[1] as EntityType,
+                args[2] as String,
+                args[3] as String,
+                true
+        )
+    }
+
+    private fun npc(loc: Location, type: EntityType, name: String, script: String, save: Boolean) {
+        NPCManager.INSTANCE.createNPC(loc, type, name, script, save);
     }
 
     @Cmd(
@@ -178,13 +200,39 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "プレイヤーNPCをスポーンさせます。"
     )
     fun playerNpc(sender: Player, args: ArrayList<Any>) {
-        NPCManager.INSTANCE.createNPCPlayer(
+        playerNpc(
                 args[0] as Location,
                 args[1] as String,
                 args[2] as UUID,
-                args[3] as String
+                args[3] as String,
+                false
         )
-        sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
+            sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+        })
+    }
+
+    @Cmd(
+            desc = ["Location", "Name", "UUID", "Script"],
+            args = [Location::class, String::class, UUID::class, String::class],
+            examples = ["playerNpcSave {getLocation} onamae {getUUID} test"],
+            text = "プレイヤーNPCをスポーンさせ、保存します。"
+    )
+    fun playerNpcSave(sender: Player, args: ArrayList<Any>) {
+        playerNpc(
+                args[0] as Location,
+                args[1] as String,
+                args[2] as UUID,
+                args[3] as String,
+                true
+        )
+        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
+            sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+        })
+    }
+
+    private fun playerNpc(loc: Location, name: String, uuid: UUID, script: String, save: Boolean) {
+        NPCManager.INSTANCE.createNPCPlayer(loc, name, uuid, script, save)
     }
 
     @Cmd(

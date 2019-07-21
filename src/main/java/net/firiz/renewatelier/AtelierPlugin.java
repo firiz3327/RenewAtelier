@@ -29,6 +29,7 @@ import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
 import net.firiz.renewatelier.sql.SQLManager;
+import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;

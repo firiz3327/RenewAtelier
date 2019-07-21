@@ -30,6 +30,7 @@ import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.firiz.renewatelier.version.packet.PacketUtils;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -370,7 +371,7 @@ public enum NPCManager {
                     } catch (NoSuchMethodException ignored) {
                     }
                 } else {
-                    final String script = "npc/".concat(datas[1]).concat(".js");
+                    final String script = "npc/".concat(datas[1].replace(ChatColor.BLACK.toString(), ""));
                     final NPCConversation conversation = new NPCConversation(entityPlayer, script, player);
                     ScriptManager.INSTANCE.start(script, player, conversation, "action", shift);
                     scriptPlayers.put(uuid, conversation);
