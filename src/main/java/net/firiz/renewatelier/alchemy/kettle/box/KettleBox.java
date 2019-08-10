@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.BonusItem;
+import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.utils.DoubleData;
 import org.bukkit.inventory.ItemStack;
 
@@ -36,8 +37,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class KettleBox {
 
-    // 設置されたアイテムとそのアイテムの配置とcirclevalue
-    private final DoubleData<BonusItem, Map<Integer, Integer>>[] items;
+    // 設置されたアイテムとそのアイテムの配置とcircleValue
+    private final DoubleData<BonusItem, KettleBoxData>[] items;
     private final List<CatalystBonus>[] usedBonus;
 
     public KettleBox(int count) {
@@ -50,25 +51,53 @@ public class KettleBox {
      *
      * @return 削除対象のデータ
      */
-    public final DoubleData<BonusItem, Map<Integer, Integer>> backData() {
+    public final DoubleData<BonusItem, KettleBoxData> backData(final int rotate, final int rlud) {
         for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, Map<Integer, Integer>> data = items[items.length - i];
+            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
             if (data != null) {
                 items[items.length - i] = null;
                 final int sel = items.length - i - 1;
                 if (sel >= 0) {
                     usedBonus[sel] = null;
                 }
+                final KettleBoxData kbd = data.getRight();
+                final ItemStack item = data.getLeft().getItem();
+                int[] size = MaterialSize.getSize(item);
+                if (kbd.getRotate() != 0) {
+                    for (int j = 0; j < 4 - kbd.getRotate(); j++) {
+                        size = MaterialSize.right_rotation(size);
+                    }
+                }
+                if (kbd.getRLUD() != 0) {
+                    size = getRLUDTypeSize(kbd.getRLUD(), size);
+                }
+                for (int j = 0; j < rotate; j++) {
+                    size = MaterialSize.right_rotation(size);
+                }
+                size = getRLUDTypeSize(rlud, size);
+                item.setItemMeta(MaterialSize.setSize(item, size));
                 return data;
             }
         }
         return null;
     }
 
-    public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots) {
+    private int[] getRLUDTypeSize(int rlud, int[] size) {
+        switch (rlud) {
+            case 1:
+                return MaterialSize.right_left_turn(size);
+            case 2:
+                return MaterialSize.up_down_turn(size);
+            case 3:
+                return MaterialSize.up_down_turn(MaterialSize.right_left_turn(size));
+        }
+        return size;
+    }
+
+    public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
         for (int i = 0; i < items.length; i++) {
             if (items[i] == null) {
-                items[i] = new DoubleData<>(new BonusItem(item), rslots);
+                items[i] = new DoubleData<>(new BonusItem(item), new KettleBoxData(rslots, rotate, rlud));
                 break;
             }
         }
@@ -87,7 +116,7 @@ public class KettleBox {
 
     public final void addBonus(final CatalystBonus cb) {
         for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, Map<Integer, Integer>> data = items[items.length - i];
+            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
             if (data != null) {
                 final int sel = items.length - i;
                 if (usedBonus[sel] == null) {
@@ -104,7 +133,7 @@ public class KettleBox {
 
     public final List<CatalystBonus> getBonus() {
         for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, Map<Integer, Integer>> data = items[items.length - i];
+            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
             if (data != null) {
                 final int select = items.length - i - 1; // 4:3 3:2
                 return select >= 0 ? usedBonus[select] : null;
@@ -116,10 +145,9 @@ public class KettleBox {
     public final List<ItemStack> getItemStacks() {
         final List<ItemStack> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, Map<Integer, Integer>> data : items) {
+        for (final DoubleData<BonusItem, KettleBoxData> data : items) {
             if (data != null) {
                 result.add(data.getLeft().getItem());
-
             }
         }
         return result;
@@ -129,10 +157,9 @@ public class KettleBox {
     public final List<BonusItem> getItems() {
         final List<BonusItem> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, Map<Integer, Integer>> data : items) {
+        for (final DoubleData<BonusItem, KettleBoxData> data : items) {
             if (data != null) {
                 result.add(data.getLeft());
-
             }
         }
         return result;
@@ -140,7 +167,7 @@ public class KettleBox {
     }
 
     public final Map<Integer, Integer> getSlots() {
-        return items[items.length - 1].getRight();
+        return items[items.length - 1].getRight().getRSlots();
     }
 
     public final int getCSize() {
@@ -149,41 +176,14 @@ public class KettleBox {
 
     /**
      *
-     * @return <slot, itemstack>, value
+     * @return <slot, itemStack>, value
      */
     public final Map<DoubleData<Integer, BonusItem>, Integer> getResultCS() {
         final Map<DoubleData<Integer, BonusItem>, Integer> result = new HashMap<>();
 
         // 配置
-        // <layer, itemstack>, <slot, value>
-        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
-
-        for (int i = 0; i < items.length; i++) {
-            final DoubleData<BonusItem, Map<Integer, Integer>> dd = items[i];
-
-            if (dd != null) {
-                final Map<Integer, Integer> right = dd.getRight();
-
-                for (final DoubleData<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
-                    boolean checkover = false;
-
-                    loop_checkover:
-                    for (final int slot : overlap.get(layer).keySet()) {
-                        for (final int ddslot : right.keySet()) {
-                            if (slot == ddslot) {
-                                checkover = true;
-                                break loop_checkover;
-                            }
-                        }
-                    }
-
-                    if (checkover) {
-                        overlap.remove(layer);
-                    }
-                }
-                overlap.put(new DoubleData<>(i, dd.getLeft()), right);
-            }
-        }
+        // <layer, itemStack>, <slot, value>
+        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
         overlap.keySet().forEach((layer) -> {
             final Map<Integer, Integer> datas = overlap.get(layer);
             datas.keySet().forEach((slot) -> result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot)));
@@ -197,38 +197,43 @@ public class KettleBox {
         final List<BonusItem> result = new ArrayList<>();
 
         // 配置
-        // <layer, itemstack>, <slot, value>
+        // <layer, itemStack>, <slot, value>
+        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
+        overlap.keySet().forEach((layer) -> result.add(layer.getRight()));
+
+        return result;
+    }
+
+    private Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
 
         for (int i = 0; i < items.length; i++) {
-            final DoubleData<BonusItem, Map<Integer, Integer>> dd = items[i];
+            final DoubleData<BonusItem, KettleBoxData> dd = items[i];
 
             if (dd != null) {
-                final Map<Integer, Integer> right = dd.getRight();
+                final Map<Integer, Integer> rslots = dd.getRight().getRSlots();
 
                 for (final DoubleData<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
-                    boolean checkover = false;
+                    boolean checkOver = false;
 
-                    loop_checkover:
+                    loop_checkOver:
                     for (final int slot : overlap.get(layer).keySet()) {
-                        for (final int ddslot : right.keySet()) {
+                        for (final int ddslot : rslots.keySet()) {
                             if (slot == ddslot) {
-                                checkover = true;
-                                break loop_checkover;
+                                checkOver = true;
+                                break loop_checkOver;
                             }
                         }
                     }
 
-                    if (checkover) {
+                    if (checkOver) {
                         overlap.remove(layer);
                     }
                 }
-                overlap.put(new DoubleData<>(i, dd.getLeft()), right);
+                overlap.put(new DoubleData<>(i, dd.getLeft()), rslots);
             }
         }
-        overlap.keySet().forEach((layer) -> result.add(layer.getRight()));
-
-        return result;
+        return overlap;
     }
 
 }

@@ -49,6 +49,7 @@ final class ScriptRunner {
         }
         try {
             final Bindings bindings = engine.createBindings();
+            bindings.put("polyglot.js.allowAllAccess", true);
             bindings.put("sc", conversation);
             engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             if (eval(engine, name)) {

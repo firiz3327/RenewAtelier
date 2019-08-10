@@ -272,36 +272,37 @@ public enum MaterialSize {
         return i;
     }
 
-    public static void setSize(final ItemStack item, final List<Integer> size) {
+    public static ItemMeta setSize(final ItemStack item, final int[] size) {
         final ItemMeta meta = item.getItemMeta();
         final List<String> lores = meta.getLore();
-        int start = -1;
-        for (int i = 0; i < lores.size(); i++) {
-            if (lores.get(i).contains(AlchemyItemStatus.SIZE.getCheck() + "§7サイズ:")) {
-                start = i;
+        int sc = -1;
+        for (int l = 0; l < lores.size(); l++) {
+            if (sc >= 0) {
+                StringBuilder str = new StringBuilder();
+                int c_size = 0;
+                int c = 0;
+                for (final int k : size) {
+                    if (k == 0) {
+                        str.append(Chore.intCcolor(k)).append(Strings.W_W);
+                    } else {
+                        str.append(Chore.intCcolor(k)).append(Strings.W_B);
+                    }
+                    if (c_size >= 2) {
+                        lores.set(l + c, str.toString());
+                        c_size = 0;
+                        c++;
+                        str = new StringBuilder();
+                    } else {
+                        c_size++;
+                    }
+                }
                 break;
+            } else if (lores.get(l).startsWith(AlchemyItemStatus.SIZE.getCheck())) {
+                sc = 0;
+                continue;
             }
         }
-        if (start != -1) {
-            StringBuilder str = new StringBuilder();
-            int c = 0;
-            for (final int i : size) {
-                if (i == 0) {
-                    str.append(Chore.intCcolor(i)).append(Strings.W_W);
-                } else {
-                    str.append(Chore.intCcolor(i)).append(Strings.W_B);
-                }
-                if (c >= 2) {
-                    lores.set(start + 1, str.toString());
-                    c = 0;
-                    str = new StringBuilder();
-                    start++;
-                } else {
-                    c++;
-                }
-            }
-            meta.setLore(lores);
-            item.setItemMeta(meta);
-        }
+        meta.setLore(lores);
+        return meta;
     }
 }

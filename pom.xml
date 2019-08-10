@@ -159,19 +159,19 @@
         <dependency>
             <groupId>org.graalvm.truffle</groupId>
             <artifactId>truffle-api</artifactId>
-            <version>19.0.0</version>
+            <version>19.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
-            <version>19.0.0</version>
+            <version>19.1.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
-            <version>19.0.0</version>
+            <version>19.1.1</version>
         </dependency>
     </dependencies>
 </project>

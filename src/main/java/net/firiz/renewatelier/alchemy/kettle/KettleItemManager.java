@@ -48,7 +48,7 @@ public enum KettleItemManager {
     private final Map<UUID, List<Characteristic>> select_characteristics = new HashMap<>();
     private final Map<UUID, List<Characteristic>> catalyst_characteristics = new HashMap<>();
 
-    public void reset(final Player player) {
+    private void clear(final Player player) {
         final UUID uuid = player.getUniqueId();
         KettleBonusManager.INSTANCE.removeData(uuid);
         catalyst_bonus.remove(uuid);
@@ -57,6 +57,11 @@ public enum KettleItemManager {
             player.getInventory().setContents(default_contents.get(uuid));
             default_contents.remove(uuid);
         }
+    }
+
+    public void reset(final Player player) {
+        final UUID uuid = player.getUniqueId();
+        clear(player);
         use_items.remove(uuid);
         use_catalyst.remove(uuid);
         characteristics.remove(uuid);
@@ -66,14 +71,7 @@ public enum KettleItemManager {
 
     public void allBack(final Player player) {
         final UUID uuid = player.getUniqueId();
-        KettleBonusManager.INSTANCE.removeData(uuid);
-        catalyst_bonus.remove(uuid);
-        kettleData.remove(uuid);
-
-        if (default_contents.containsKey(uuid)) {
-            player.getInventory().setContents(default_contents.get(uuid));
-            default_contents.remove(uuid);
-        }
+        clear(player);
         if (use_items.containsKey(uuid)) {
             final Map<Integer, List<ItemStack>> use_item = use_items.get(uuid);
             use_item.values().forEach((items) -> items.forEach((item) -> {
@@ -90,7 +88,8 @@ public enum KettleItemManager {
         select_characteristics.remove(uuid);
     }
 
-    /* アイテム選択画面 Start */
+
+    //<editor-fold desc="アイテム選択画面">
     public void addPageItem(final UUID uuid, final ItemStack item, final int page) {
         if (use_items.containsKey(uuid)) { // 追加処理
             final Map<Integer, List<ItemStack>> uses = use_items.get(uuid);
@@ -126,8 +125,8 @@ public enum KettleItemManager {
     public Map<Integer, List<ItemStack>> getPageItems(final UUID uuid) {
         return use_items.get(uuid);
     }
+    //</editor-fold>
 
-    /* アイテム選択画面 End */
     public void setCatalyst(final UUID uuid, final ItemStack item) {
         use_catalyst.put(uuid, item);
     }
@@ -143,7 +142,8 @@ public enum KettleItemManager {
         use_catalyst.remove(uuid);
     }
 
-    /* 錬金画面 Start */
+
+    //<editor-fold desc="錬金画面">
     public boolean isOpenKettle(final UUID uuid) {
         return default_contents.containsKey(uuid);
     }
@@ -185,11 +185,11 @@ public enum KettleItemManager {
         return false;
     }
 
-    public void addKettleData(final UUID uuid, final ItemStack item, final int csize, final Map<Integer, Integer> rslots) {
+    public void addKettleData(final UUID uuid, final ItemStack item, final int csize, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
         if (!kettleData.containsKey(uuid)) {
             kettleData.put(uuid, new KettleBox(csize));
         }
-        kettleData.get(uuid).addItem(item, rslots);
+        kettleData.get(uuid).addItem(item, rslots, rotate, rlud);
     }
 
     public KettleBox getKettleData(final UUID uuid) {
@@ -263,6 +263,7 @@ public enum KettleItemManager {
     public void resetSelectCharacteristic(final UUID uuid) {
         select_characteristics.remove(uuid);
     }
-    /* 錬金画面 End */
+    //</editor-fold>
+
 
 }

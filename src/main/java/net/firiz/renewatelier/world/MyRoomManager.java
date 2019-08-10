@@ -83,15 +83,17 @@ public enum MyRoomManager {
     public Location getRoom(final UUID uuid) {
         try {
             for (final File file : map_folder.listFiles()) {
-                final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
-                if (UUID.fromString(readLines.get(0)).equals(uuid)) {
-                    final String[] loc_str = file.getName().split(",");
-                    return new Location(
-                            world,
-                            Integer.parseInt(loc_str[0]) + 0.5,
-                            61,
-                            Integer.parseInt(loc_str[1]) + 0.5
-                    );
+                if (!file.getName().contains(".")) {
+                    final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+                    if (UUID.fromString(readLines.get(0)).equals(uuid)) {
+                        final String[] loc_str = file.getName().split(",");
+                        return new Location(
+                                world,
+                                Integer.parseInt(loc_str[0]) + 0.5,
+                                61,
+                                Integer.parseInt(loc_str[1]) + 0.5
+                        );
+                    }
                 }
             }
         } catch (IOException ex) {
@@ -103,9 +105,11 @@ public enum MyRoomManager {
     public boolean hasRoom(final UUID uuid) {
         try {
             for (final File file : map_folder.listFiles()) {
-                final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
-                if (UUID.fromString(readLines.get(0)).equals(uuid)) {
-                    return true;
+                if (!file.getName().contains(".")) {
+                    final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
+                    if (UUID.fromString(readLines.get(0)).equals(uuid)) {
+                        return true;
+                    }
                 }
             }
         } catch (IOException ex) {

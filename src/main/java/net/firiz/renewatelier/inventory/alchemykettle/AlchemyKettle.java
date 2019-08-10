@@ -31,6 +31,7 @@ import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.alchemy.kettle.BonusItem;
 import net.firiz.renewatelier.alchemy.kettle.KettleBonusManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
+import net.firiz.renewatelier.alchemy.kettle.box.KettleBoxData;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -734,7 +735,7 @@ public class AlchemyKettle {
                             temp *= (((rludsl == 1 && e.isRightClick()) || rludsl + temp > 3) ? -1 : 1);
                             rludnsl = rludsl + temp;
                         } else {
-                            nsl = (sl + 1 >= 4) ? 0 : sl + 1;
+                            nsl = e.isRightClick() ? (sl + 1 >= 4) ? 0 : sl + 1 : (sl - 1 < 0) ? 3 : sl - 1;
                             rludnsl = rludsl;
                         }
                         AlchemyChore.setSetting(setting, 1, nsl, STR_TURN);
@@ -760,37 +761,7 @@ public class AlchemyKettle {
                                                 ? MaterialSize.right_rotation(MaterialSize.getSize(item))
                                                 : MaterialSize.left_rotation(MaterialSize.getSize(item));
                                     }
-                                    final ItemMeta meta = item.getItemMeta();
-                                    final List<String> lores = meta.getLore();
-                                    int sc = -1;
-                                    for (int l = 0; l < lores.size(); l++) {
-                                        if (sc >= 0) {
-                                            StringBuilder str = new StringBuilder();
-                                            int c_size = 0;
-                                            int c = 0;
-                                            for (final int k : size) {
-                                                if (k == 0) {
-                                                    str.append(Chore.intCcolor(k)).append(Strings.W_W);
-                                                } else {
-                                                    str.append(Chore.intCcolor(k)).append(Strings.W_B);
-                                                }
-                                                if (c_size >= 2) {
-                                                    lores.set(l + c, str.toString());
-                                                    c_size = 0;
-                                                    c++;
-                                                    str = new StringBuilder();
-                                                } else {
-                                                    c_size++;
-                                                }
-                                            }
-                                            break;
-                                        } else if (lores.get(l).startsWith(AlchemyItemStatus.SIZE.getCheck())) {
-                                            sc = 0;
-                                            continue;
-                                        }
-                                    }
-                                    meta.setLore(lores);
-                                    item.setItemMeta(meta);
+                                    item.setItemMeta(MaterialSize.setSize(item, size));
                                 }
                             }
                         }
@@ -851,7 +822,10 @@ public class AlchemyKettle {
 
                         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                         if (kettleBox != null) {
-                            final DoubleData<BonusItem, Map<Integer, Integer>> backData = kettleBox.backData();
+                            final ItemMeta setting = inv.getItem(1).getItemMeta();
+                            final int sl = AlchemyChore.getSetting(setting, 1);
+                            final int rludsl = AlchemyChore.getSetting(setting, 4);
+                            final DoubleData<BonusItem, KettleBoxData> backData = kettleBox.backData(sl, rludsl);
                             if (backData != null) {
                                 final PlayerInventory pinv = player.getInventory();
                                 boolean check = false;
@@ -1067,7 +1041,9 @@ public class AlchemyKettle {
                                                     allLevel.getRight()
                                             );
                                             cursor.setAmount(cursor.getAmount() - 1);
-                                            KETTLE.addKettleData(uuid, clone, csize, rslots); // 配置いる
+                                            final int sl = AlchemyChore.getSetting(setting, 1);
+                                            final int rludsl = AlchemyChore.getSetting(setting, 4);
+                                            KETTLE.addKettleData(uuid, clone, csize, rslots, sl, rludsl);
                                             setResultSlot(inv, player);
                                         }
                                     }

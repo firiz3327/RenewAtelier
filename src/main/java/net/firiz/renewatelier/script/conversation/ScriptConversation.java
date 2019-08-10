@@ -187,13 +187,13 @@ public class ScriptConversation {
     }
 
     @Export
-    public boolean hasRoom(final Player player) {
-        return MyRoomManager.INSTANCE.hasRoom(player.getUniqueId());
+    public boolean hasRoom(final UUID uuid) {
+        return MyRoomManager.INSTANCE.hasRoom(uuid);
     }
 
     @Export
-    public void createRoom(final Player player) {
-        MyRoomManager.INSTANCE.createRoom(player.getUniqueId());
+    public void createRoom(final UUID uuid) {
+        MyRoomManager.INSTANCE.createRoom(uuid);
     }
 
     @Export
