@@ -40,6 +40,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -175,13 +176,14 @@ public final class PlayerStatus {
         return new ArrayList<>(quest_statuses);
     }
 
+    @NotNull
     public QuestStatus getQuestStatus(final String id) {
         for (final QuestStatus rs : quest_statuses) {
             if (rs.getId().equals(id)) {
                 return rs;
             }
         }
-        return null;
+        throw new IllegalStateException("not found questStatus for ".concat(id));
     }
 
     public void questClear(final Player player, final String id, final boolean view) {

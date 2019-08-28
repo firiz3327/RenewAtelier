@@ -35,7 +35,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class Catalyst {
 
-    public final static Catalyst DEFAULT;
+    public static final Catalyst DEFAULT;
     private final List<CatalystBonus> bonus;
     private final int[] maincs;
 
@@ -60,26 +60,26 @@ public class Catalyst {
         final int size = bonus.get(0).getCS().length;
         switch (size) {
             case 36: // 0 6x6
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1560, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
                 break;
             case 25: // 1 5x5
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1522, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1523, "", null));
                 break;
             case 16: // 2 4x4
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1508 : 1523, "", null));
+                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, "", null));
                 break;
         }
-        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
+        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
 
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach((b) -> {
             int slot = defslot;
             for (int c : b.getCS()) {
-                short itemDamage = getDamage(c);
-                if (itemDamage != -1) {
+                short cmd = getCustomModelData(c);
+                if (cmd != -1) {
                     inv.setItem(slot, Chore.ci(
                             Material.DIAMOND_AXE,
-                            itemDamage,
+                            cmd,
                             ChatColor.RESET + b.getData().getName(),
                             b.getData().getDesc()
                     ));
@@ -109,9 +109,9 @@ public class Catalyst {
             int slot = defslot;
             for (int c : b.getCS()) {
                 if (cslot == slot) {
-                    short itemDamage = getDamage(c);
-                    if (itemDamage != -1) {
-                        return Chore.ci(Material.DIAMOND_AXE, itemDamage, ChatColor.RESET + b.getData().getName(), null);
+                    short cmd = getCustomModelData(c);
+                    if (cmd != -1) {
+                        return Chore.ci(Material.DIAMOND_AXE, cmd, ChatColor.RESET + b.getData().getName(), null);
                     }
                 }
                 slot = nextSlot(slot, size);
@@ -120,22 +120,22 @@ public class Catalyst {
         return null;
     }
 
-    public static short getDamage(int d) {
+    public static short getCustomModelData(int d) {
         switch (d) {
             case 0:
                 return -1;
             case 1:
-                return 1526;
+                return 1527;
             case 2:
-                return 1533;
+                return 1534;
             case 3:
-                return 1540;
+                return 1541;
             case 4:
-                return 1547;
+                return 1548;
             case 5:
-                return 1554;
+                return 1555;
             case 6:
-                return 1513;
+                return 1514;
         }
         return -1;
     }

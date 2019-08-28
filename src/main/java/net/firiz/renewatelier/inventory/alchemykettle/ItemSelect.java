@@ -54,8 +54,8 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public final class ItemSelect {
 
-    private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private final static List<UUID> OPEN_USERS = new ArrayList<>();
+    private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
+    private static final List<UUID> OPEN_USERS = new ArrayList<>();
 
     public static boolean isItemSelect(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
@@ -72,8 +72,8 @@ public final class ItemSelect {
         AlchemyChore.setSettingStr(setting, 0, recipe.getId(), ""); // レシピID
         AlchemyChore.setSetting(setting, 1, 0, ""); // ページ
         setting_item.setItemMeta(setting);
-        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1507, "", null));
-        inv.setItem(36, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1508, "", null));
+        inv.setItem(36, Chore.ci(Material.DIAMOND_AXE, 1562, "", null));
         inv.setItem(1, setting_item);
         inv.setItem(2, recipeInv.getItem(2).clone());
 

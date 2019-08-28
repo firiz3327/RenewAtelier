@@ -171,7 +171,7 @@ object DeliveryInventory {
             e.isShiftClick -> { // other slot shift click Item
                 e.isCancelled = true
                 if (e.currentItem != null && checkItem(e.view, e.currentItem!!)) {
-                    e.currentItem = Chore.addItemNotDrop(inv, e.currentItem)
+                    e.currentItem = Chore.addItemNotDrop(inv, e.currentItem!!)
                 }
                 return
             }

@@ -51,8 +51,8 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class CatalystSelect {
 
-    private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private final static List<UUID> OPEN_USERS = new ArrayList<>();
+    private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
+    private static final List<UUID> OPEN_USERS = new ArrayList<>();
 
     public static boolean isCatalystSelect(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());

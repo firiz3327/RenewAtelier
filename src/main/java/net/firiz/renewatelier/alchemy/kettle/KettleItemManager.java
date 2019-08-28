@@ -20,11 +20,8 @@
  */
 package net.firiz.renewatelier.alchemy.kettle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.characteristic.Characteristic;
@@ -74,9 +71,7 @@ public enum KettleItemManager {
         clear(player);
         if (use_items.containsKey(uuid)) {
             final Map<Integer, List<ItemStack>> use_item = use_items.get(uuid);
-            use_item.values().forEach((items) -> items.forEach((item) -> {
-                Chore.addItem(player, item);
-            }));
+            use_item.values().stream().flatMap(Collection::stream).forEach(item -> Chore.addItem(player, item));
             use_items.remove(uuid);
         }
         if (use_catalyst.containsKey(uuid)) {

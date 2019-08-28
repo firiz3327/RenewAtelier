@@ -125,12 +125,12 @@ public class QuestBook {
                 final List<ItemFlag> flags = new ArrayList<>();
                 String name;
                 Material material;
-                final int damage;
+                final int cmd;
                 if (result_str.startsWith("material:")) {
                     final AlchemyMaterial am = AlchemyMaterial.getMaterial(result_str.substring(9));
                     name = am.getName();
                     material = am.getMaterial().getLeft();
-                    damage = am.getMaterial().getRight();
+                    cmd = am.getMaterial().getRight();
                     if (am.isHideAttribute()) {
                         flags.add(ItemFlag.HIDE_ATTRIBUTES);
                     }
@@ -155,11 +155,11 @@ public class QuestBook {
                         material = Material.matchMaterial(result_str, true);
                     }
                     name = null;
-                    damage = 0;
+                    cmd = 0;
                 } else {
                     continue;
                 }
-                final ItemStack view_item = Chore.createDamageableItem(material, 1, damage);
+                final ItemStack view_item = Chore.createCustomModelItem(material, 1, cmd);
                 final ItemMeta view_meta = view_item.getItemMeta();
                 if (name != null) {
                     view_meta.setDisplayName(name);

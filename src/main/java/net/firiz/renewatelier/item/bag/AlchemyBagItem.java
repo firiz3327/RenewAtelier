@@ -49,6 +49,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -56,19 +57,19 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class AlchemyBagItem {
 
-    private final static List<UUID> OPEN_USERS = new ArrayList<>();
+    private static final List<UUID> OPEN_USERS = new ArrayList<>();
     private final AlchemyMaterial type;
     private final ItemStack item;
 
     public AlchemyBagItem(final AlchemyMaterial type) {
         this.type = type;
-        this.item = Chore.createDamageableItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
+        this.item = Chore.createCustomModelItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
         init(null);
     }
 
     public AlchemyBagItem(final AlchemyMaterial type, final List<String> lore) {
         this.type = type;
-        this.item = Chore.createDamageableItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
+        this.item = Chore.createCustomModelItem(type.getMaterial().getLeft(), 1, type.getMaterial().getRight());
         init(lore);
     }
 
@@ -106,10 +107,10 @@ public class AlchemyBagItem {
 
         int amount = add_item.getAmount(); // 64
         for (int i = 0; i < items.size(); i++) { // 0:16
-            final String[] data = items.get(i).split(","); // amount, damage, lore, (name) -> isDisplayName(true)
+            final String[] data = items.get(i).split(","); // amount, customModelData, lore, (name) -> isDisplayName(true)
             if (amount > 0) {
                 if (data[1].equals(itemData[1]) && data[2].equals(itemData[2])
-                        && (data.length == 4 ? (itemData.length == 4 && data[3].equals(itemData[3])) : itemData.length != 4)) { // damageとloreとnameが一致した時
+                        && (data.length == 4 ? (itemData.length == 4 && data[3].equals(itemData[3])) : itemData.length != 4)) { // customModelDataとloreとnameが一致した時
                     final int da = Integer.parseInt(data[0]) + amount; // 16 + 64 = 80
                     amount = da - 64;
                     data[0] = String.valueOf(Math.min(64, da));
@@ -200,8 +201,8 @@ public class AlchemyBagItem {
             sb.append(str);
         });
         return meta.hasDisplayName()
-                ? new Object[]{item.getAmount(), item.getType().toString() + ":" + Chore.getDamage(meta), sb.toString(), meta.getDisplayName().replace(",", "¥.¥")}
-                : new Object[]{item.getAmount(), Chore.getDamage(meta), sb.toString()};
+                ? new Object[]{item.getAmount(), item.getType().toString() + ":" + Chore.getCustomModelData(meta), sb.toString(), meta.getDisplayName().replace(",", "¥.¥")}
+                : new Object[]{item.getAmount(), Chore.getCustomModelData(meta), sb.toString()};
     }
 
     public static boolean isBagInventory(final InventoryView view) {
@@ -220,7 +221,7 @@ public class AlchemyBagItem {
             for (final String datastr : items) {
                 final String[] data = datastr.split(","); // amount, damage, lore
                 final String[] idData = data[1].split(":");
-                final ItemStack _item = Chore.createDamageableItem(
+                final ItemStack _item = Chore.createCustomModelItem(
                         Material.valueOf(idData[0]),
                         Integer.parseInt(data[0]),
                         Integer.parseInt(idData[1])
@@ -243,6 +244,7 @@ public class AlchemyBagItem {
         }
     }
 
+    @NotNull
     public static AlchemyBagItem getBag(final ItemStack item) {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.BAG, item);
         if (!lores.isEmpty()) {
@@ -252,7 +254,7 @@ public class AlchemyBagItem {
                     item.getItemMeta().getLore()
             );
         }
-        return null;
+        throw new IllegalStateException("not have lore.");
     }
 
     public static void click(final InventoryClickEvent e) {
@@ -330,7 +332,7 @@ public class AlchemyBagItem {
                 for (int i = 0; i < contents.length; i++) {
                     final ItemStack item = contents[i];
                     final AlchemyBagItem bag = getBag(item);
-                    if (bag != null && bag.getType() == material) {
+                    if (bag.getType() == material) {
                         final DoubleData<ItemStack, ItemStack> bagItem = addItem(item, check);
                         contents[i] = bagItem.getLeft();
                         inv.setContents(contents);
@@ -341,14 +343,14 @@ public class AlchemyBagItem {
                         break;
                     }
                 }
-                if (check != null) {
-//                    final AlchemyBagItem bag = new AlchemyBagItem(material);
-//                    final ItemStack item = bag.getItem();
-//                    Chore.addItem(player, addItem(item, check).getLeft());
-                } else {
+                if (check == null) {
                     e.getItem().getWorld().playSound(e.getItem().getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.1f, 1);
                     e.setCancelled(true);
                     e.getItem().remove();
+                } else {
+//                    final AlchemyBagItem bag = new AlchemyBagItem(material);
+//                    final ItemStack item = bag.getItem();
+//                    Chore.addItem(player, addItem(item, check).getLeft());
                 }
             }
         }

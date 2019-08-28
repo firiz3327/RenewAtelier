@@ -24,7 +24,6 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.item.bag.AlchemyBagItem;
-import net.firiz.renewatelier.item.tool.ToolDamage;
 import net.firiz.renewatelier.nodification.Nodification;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
@@ -162,11 +161,6 @@ public class PlayerListener implements Listener {
     private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
         status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
-    }
-
-    @EventHandler
-    private void itemDamage(final PlayerItemDamageEvent e) {
-        ToolDamage.damage(e);
     }
 
 }

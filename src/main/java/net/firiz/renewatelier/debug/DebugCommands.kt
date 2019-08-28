@@ -7,7 +7,6 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.item.AlchemyItemStatus
-import net.firiz.renewatelier.item.tool.ToolDamage
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.nodification.Nodification
 import net.firiz.renewatelier.npc.NPCManager
@@ -313,30 +312,17 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
-            desc = ["Damage"],
+            desc = ["CustomModelData"],
             args = [Int::class],
-            examples = ["texture 1503"],
+            examples = ["customModel 1514"],
             text = "テクスチャアイテムの取得"
     )
-    fun texture(sender: Player, args: ArrayList<Any>) {
-        val item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, args[0].toString().toInt())
-        val meta = item.itemMeta!!
-        meta.isUnbreakable = true
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
-        item.itemMeta = meta
-        Chore.addItem(sender, item)
-    }
-
-    @Cmd(
-            desc = ["Damage"],
-            args = [Int::class],
-            examples = ["damage 1514"],
-            text = "手持ちアイテムにダメージ値を設定"
-    )
-    fun damage(sender: Player, args: ArrayList<Any>) {
+    fun customModel(sender: Player, args: ArrayList<Any>) {
         val item = sender.inventory.itemInMainHand
-        val damage = args[0].toString().toInt()
-        ToolDamage.setDamage(item, damage);
+        val value = args[0].toString().toInt()
+        val meta = item.itemMeta
+        Chore.setCustomModelData(meta, value)
+        item.itemMeta = meta
     }
 
     @Cmd(
@@ -359,7 +345,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             val stand: ArmorStand = sender.world.spawnEntity(sender.location, EntityType.ARMOR_STAND) as ArmorStand
             stand.setArms(true)
 
-            val item = Chore.createDamageableItem(Material.DIAMOND_AXE, 1, 1524)
+            val item = Chore.createCustomModelItem(Material.DIAMOND_AXE, 1, 1524)
             val meta = item.itemMeta!!
             meta.isUnbreakable = true
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)

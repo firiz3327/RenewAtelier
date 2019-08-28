@@ -20,11 +20,13 @@
  */
 package net.firiz.renewatelier.version;
 
+import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.minecraft.server.v1_14_R1.ChatMessage;
 import net.minecraft.server.v1_14_R1.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -53,22 +55,23 @@ public class VersionUtils {
         return CraftItemStack.asBukkitCopy(nms);
     }
 
+    @NotNull
     public static Field getField(Object obj, String name) {
         try {
             final Field field = obj.getClass().getDeclaredField(name);
             field.setAccessible(true);
             return field;
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            Chore.logWarning(e);
         }
-        return null;
+        throw new IllegalStateException("getField error");
     }
 
     public static void setField(Object obj, String name, Object value) {
         try {
             getField(obj, name).set(obj, value);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Chore.logWarning(e);
         }
     }
 
@@ -77,12 +80,8 @@ public class VersionUtils {
             final Method method = obj.getClass().getMethod(name, params);
             method.setAccessible(true);
             return method.invoke(obj, args);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            Chore.logWarning(e);
         }
         return null;
     }

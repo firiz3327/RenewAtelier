@@ -16,7 +16,6 @@
         <maven.compiler.target>${jvm.version}</maven.compiler.target>
         <kotlin.version>1.3.31</kotlin.version>
     </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -88,6 +87,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.6.0.1398</version>
             </plugin>
         </plugins>
     </build>

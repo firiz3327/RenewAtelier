@@ -28,8 +28,8 @@ import java.util.Random;
  */
 public final class Randomizer {
 
-    private final static Random RAND = new Random();
-    private final static Sfmt RAND2 = new Sfmt(new int[]{(int) System.currentTimeMillis(), (int) Runtime.getRuntime().freeMemory()});
+    private static final Random RAND = new Random();
+    private static final Sfmt RAND2 = new Sfmt(new int[]{(int) System.currentTimeMillis(), (int) Runtime.getRuntime().freeMemory()});
 
     public static int nextInt(final int arg0) {
         return RAND2.NextInt(arg0);

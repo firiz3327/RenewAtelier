@@ -28,8 +28,6 @@ import net.firiz.renewatelier.inventory.alchemykettle.ItemSelect;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.item.bag.AlchemyBagItem;
-import net.firiz.renewatelier.item.tool.ToolDamage;
-import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

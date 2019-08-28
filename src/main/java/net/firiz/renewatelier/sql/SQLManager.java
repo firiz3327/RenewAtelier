@@ -73,7 +73,6 @@ public enum SQLManager {
             user = prop.getProperty("user");
             password = prop.getProperty("password");
         } catch (FileNotFoundException ex) {
-            //Chore.logWarning(ex);
         } catch (IOException ex) {
             Chore.logWarning(ex);
         }
@@ -238,13 +237,14 @@ public enum SQLManager {
                     addObject(sb, columnDatas[i]);
                 }
             }
-            final ResultSet resultSet = stmt.executeQuery(sb.toString());
-            while (resultSet.next()) {
-                final List<Object> dataList = new ArrayList<>();
-                for (int i = 0; i < select_size; i++) {
-                    dataList.add(resultSet.getObject(columns[i]));
+            try (final ResultSet resultSet = stmt.executeQuery(sb.toString())) {
+                while (resultSet.next()) {
+                    final List<Object> dataList = new ArrayList<>();
+                    for (int i = 0; i < select_size; i++) {
+                        dataList.add(resultSet.getObject(columns[i]));
+                    }
+                    result.add(dataList);
                 }
-                result.add(dataList);
             }
         } catch (SQLException ex) {
             Chore.logWarning(ex);

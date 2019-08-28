@@ -69,8 +69,8 @@ public final class RecipeSelect {
 
     public static void openGUI(final Player player, final Location loc) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
-        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1521, "", RECIPE_LORES));
-        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1561, "", null));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1522, "", RECIPE_LORES));
+        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1562, "", null));
         inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), RECIPE_LORES));
 
         setRecipeScroll(player.getUniqueId(), inv, 0);
@@ -185,7 +185,7 @@ public final class RecipeSelect {
                 final ItemStack item;
                 final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
 
-                item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createDamageableItem(material.getLeft(), 1, material.getRight());
+                item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createCustomModelItem(material.getLeft(), 1, material.getRight());
                 final ItemMeta iMeta = item.getItemMeta();
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 setMetaDatas(iMeta, am);
@@ -287,7 +287,7 @@ public final class RecipeSelect {
                             final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
                             if (recipe_status != null && material != null) {
                                 RecipeSelect.addRecipeStatus(player.getUniqueId(), recipe, recipe_status, lore);
-                                final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createDamageableItem(material.getLeft(), recipe.getAmount(), material.getRight());
+                                final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createCustomModelItem(material.getLeft(), recipe.getAmount(), material.getRight());
                                 final ItemMeta meta = result_item.getItemMeta();
                                 setMetaDatas(meta, am);
                                 meta.setLore(lore);

@@ -21,14 +21,10 @@
 package net.firiz.renewatelier.utils;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -46,7 +42,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,13 +50,19 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class Chore {
 
-    private final static Logger log = AtelierPlugin.getPlugin().getLogger();
+    private static final Logger log = AtelierPlugin.getPlugin().getLogger();
+    private static final String S_WARNING = "\u001B[41m";
+    private static final String S_OFF = "\u001B[0m";
+
+    private Chore() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void log(final Object obj) {
         if (obj instanceof Exception) {
             logWarning(obj);
         } else {
-            log.info(obj.toString());
+            log.log(Level.INFO, String.valueOf(obj));
         }
     }
 
@@ -72,57 +73,52 @@ public final class Chore {
     public static void logWarning(final Object obj) {
         if (obj instanceof Exception) {
             final Exception ex = ((Exception) obj);
-            log.log(Level.WARNING, "\u001B[41m".concat(ex.getMessage()), ex);
-            log.log(Level.OFF, "\u001B[0m");
+            log.log(Level.WARNING, S_WARNING.concat(ex.getMessage()), ex);
+            log.log(Level.OFF, S_OFF);
         } else {
-            log.warning(obj.toString());
+            log.log(Level.WARNING, String.valueOf(obj));
         }
     }
 
     public static void logWarning(final String str) {
-        log.warning("\u001B[41m".concat(str).concat("\u001B[0m"));
+        log.warning(S_WARNING.concat(str).concat(S_OFF));
     }
 
     public static void logWarning(final String str, final Throwable throwable) {
-        log.log(Level.WARNING, "\u001B[41m".concat(str), throwable);
-        log.log(Level.OFF, "\u001B[0m");
+        log.log(Level.WARNING, S_WARNING.concat(str), throwable);
+        log.log(Level.OFF, S_OFF);
     }
 
     public static void logLightWarning(final String str) {
-        log.warning("\u001B[30m\u001B[103m".concat(str).concat("\u001B[0m"));
+        log.warning("\u001B[30m\u001B[103m".concat(str).concat(S_OFF));
     }
 
     public static void logSLightWarning(final String str) {
-        log.warning("\u001B[30m\u001B[43;1m".concat(str).concat("\u001B[0m"));
+        log.warning("\u001B[30m\u001B[43;1m".concat(str).concat(S_OFF));
     }
 
     public static void log(final Level level, final String str, final Throwable throwable) {
         log.log(level, str, throwable);
     }
 
-    @NotNull
-    public static ItemStack createDamageableItem(final Material material, int amount, int damage) {
+    public static ItemStack createCustomModelItem(final Material material, int amount, int value) {
         final ItemStack item = new ItemStack(material, amount);
-        setDamage(item, damage);
+        final ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(value);
+        item.setItemMeta(meta);
         return item;
     }
 
-    public static void setDamage(final ItemStack item, final int damage) {
-        final ItemMeta meta = item.getItemMeta();
-        setDamage(meta, damage);
-        item.setItemMeta(meta);
+    public static int getCustomModelData(final ItemStack item) {
+        return item.getItemMeta().getCustomModelData();
     }
 
-    public static void setDamage(final ItemMeta meta, final int damage) {
-        ((Damageable) meta).setDamage(damage);
+    public static int getCustomModelData(final ItemMeta meta) {
+        return meta.getCustomModelData();
     }
 
-    public static int getDamage(final ItemStack item) {
-        return getDamage(item.getItemMeta());
-    }
-
-    public static int getDamage(final ItemMeta meta) {
-        return ((Damageable) meta).getDamage();
+    public static void setCustomModelData(final ItemMeta meta, final int value) {
+        meta.setCustomModelData(value);
     }
 
     public static int[] parseInts(final List<Integer> list) {
@@ -154,6 +150,20 @@ public final class Chore {
         }
     }
 
+    /**
+     * 文字列から特定のマテリアルを検索し、返します
+     * <p>
+     * マテリアル名で使用可能な名前
+     * ・SpigotのMaterialクラスのEnum名
+     * ・マインクラフトのNamespace名
+     * ・SpigotのMaterialクラスの古いEnum名 - 非推奨
+     * <p>
+     * ダメージ値、CustomModelDataなどを示す：を用いたマテリアル名は自動的に：からが除去されます。
+     *
+     * @param str String -> マテリアル名
+     * @return
+     */
+    @NotNull
     public static Material getMaterial(final String str) {
         if (str.equalsIgnoreCase("XXX")) {
             return Material.DIAMOND_AXE;
@@ -228,21 +238,17 @@ public final class Chore {
                 if (material.startsWith("material:")) {
                     final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(material.substring(9));
                     for (final ItemStack item : contents) {
-                        if (item != null) {
-                            if (alchemyMaterial.equals(AlchemyMaterial.getMaterial(item))) {
-                                final DoubleData<Integer, Integer> dd = check.get(material);
-                                dd.setLeft(dd.getLeft() + item.getAmount());
-                            }
+                        if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterial(item))) {
+                            final DoubleData<Integer, Integer> dd = check.get(material);
+                            dd.setLeft(dd.getLeft() + item.getAmount());
                         }
                     }
                 } else if (material.startsWith("category:")) {
                     final Category category = Category.valueOf(material.substring(9));
                     for (final ItemStack item : contents) {
-                        if (item != null) {
-                            if (Chore.getCategory(item).contains(category)) {
-                                final DoubleData<Integer, Integer> dd = check.get(material);
-                                dd.setLeft(dd.getLeft() + item.getAmount());
-                            }
+                        if (item != null && Chore.getCategory(item).contains(category)) {
+                            final DoubleData<Integer, Integer> dd = check.get(material);
+                            dd.setLeft(dd.getLeft() + item.getAmount());
                         }
                     }
                 }
@@ -305,31 +311,17 @@ public final class Chore {
         return near(tree, val);
     }
 
-    public static int near(TreeSet<Integer> truncation, int val) {
+    public static int near(NavigableSet<Integer> truncation, int val) {
         int floor = truncation.floor(val);
         int ceiling = truncation.ceiling(val);
         return Math.abs(floor - val) <= Math.abs(ceiling - val) ? floor : ceiling;
     }
 
-    public static boolean isWand(ItemStack item) {
-        return item.getType() == Material.DIAMOND_AXE && Chore.getDamage(item) == 1524;
-    }
-
     public static String setLocXYZ(Location loc) {
-//        String result = setIntColor(loc.getBlockX()) + setIntColor(loc.getBlockY()) + setIntColor(loc.getBlockZ());
         return createStridColor(loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
     }
 
     public static int[] getXYZString(String str) {
-//        String memo = str;
-//        int[] result = new int[3];
-//        for (int i = 0; i < result.length; i++) {
-//            result[i] = getColorId(memo);
-//            if (i + 1 < result.length) {
-//                memo = memo.substring(memo.indexOf("r") + 1);
-//            }
-//        }
-//        return result;
         final String[] split = Chore.getStridColor(str).split(",");
         return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
     }
@@ -340,72 +332,71 @@ public final class Chore {
             result.append("§").append(ic == '5' ? 'a' : ic);
         }
         return result.append(ChatColor.RESET).toString();
-//        return result;
     }
 
     public static int getIntColor(String str) {
-        return Integer.parseInt(str.substring(0, str.indexOf("r")).replace("§", "").replace("a", "5"));
+        return Integer.parseInt(str.substring(0, str.indexOf('r')).replace("§", "").replace("a", "5"));
     }
 
-    public static void addItem(@NotNull Player player, @NotNull ItemStack item) {
-        addItem(player.getInventory(), item, player.getLocation());
+    public static void addItem(@NotNull Player player, ItemStack item) {
+        if (item != null) {
+            addItem(player.getInventory(), item, player.getLocation());
+        }
     }
 
-    public static void addItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull Location loc) {
-        if (inv != null && item != null) {
-            int amount = item.getAmount();
-
-            final ItemStack[] contents = inv.getStorageContents();
-            for (final ItemStack v : contents) {
-                if (v != null) {
-                    final int max_stack = v.getType().getMaxStackSize();
-                    if (v.isSimilar(item) && v.getAmount() < max_stack) {
-                        final int da = v.getAmount() + amount;
-                        amount = da - max_stack;
-                        v.setAmount(Math.min(max_stack, da));
-                    }
+    public static void addItem(@NotNull Inventory inv, ItemStack item, @NotNull Location loc) {
+        if (item == null) {
+            return;
+        }
+        int amount = item.getAmount();
+        final ItemStack[] contents = inv.getStorageContents();
+        for (final ItemStack v : contents) {
+            if (v != null) {
+                final int max_stack = v.getType().getMaxStackSize();
+                if (v.isSimilar(item) && v.getAmount() < max_stack) {
+                    final int da = v.getAmount() + amount;
+                    amount = da - max_stack;
+                    v.setAmount(Math.min(max_stack, da));
                 }
             }
-            inv.setStorageContents(contents);
-            if (amount > 0) {
-                if (Arrays.asList(inv.getStorageContents()).contains(null)) {
-                    item.setAmount(amount);
-                    inv.addItem(item);
-                } else {
-                    final ItemStack remainder = item.clone();
-                    remainder.setAmount(amount);
-                    Chore.drop(loc, item);
-                }
+        }
+        inv.setStorageContents(contents);
+        if (amount > 0) {
+            if (Arrays.asList(inv.getStorageContents()).contains(null)) {
+                item.setAmount(amount);
+                inv.addItem(item);
+            } else {
+                final ItemStack remainder = item.clone();
+                remainder.setAmount(amount);
+                Chore.drop(loc, item);
             }
         }
     }
 
-    public static ItemStack addItemNotDrop(Inventory inv, ItemStack item) {
-        if (inv != null && item != null) {
-            int amount = item.getAmount();
+    public static ItemStack addItemNotDrop(@NotNull Inventory inv, @NotNull ItemStack item) {
+        int amount = item.getAmount();
 
-            final ItemStack[] contents = inv.getStorageContents();
-            for (int i = 0; i < contents.length; i++) {
-                final ItemStack v = contents[i];
-                if (v != null) {
-                    final int max_stack = v.getType().getMaxStackSize();
-                    if (v.isSimilar(item) && v.getAmount() < max_stack) {
-                        final int da = v.getAmount() + amount;
-                        amount = da - max_stack;
-                        v.setAmount(Math.min(max_stack, da));
-                    }
+        final ItemStack[] contents = inv.getStorageContents();
+        for (int i = 0; i < contents.length; i++) {
+            final ItemStack v = contents[i];
+            if (v != null) {
+                final int max_stack = v.getType().getMaxStackSize();
+                if (v.isSimilar(item) && v.getAmount() < max_stack) {
+                    final int da = v.getAmount() + amount;
+                    amount = da - max_stack;
+                    v.setAmount(Math.min(max_stack, da));
                 }
             }
-            inv.setStorageContents(contents);
-            if (amount > 0) {
-                if (Arrays.asList(inv.getStorageContents()).contains(null)) {
-                    item.setAmount(amount);
-                    inv.addItem(item);
-                } else {
-                    final ItemStack remainder = item.clone();
-                    remainder.setAmount(amount);
-                    return remainder;
-                }
+        }
+        inv.setStorageContents(contents);
+        if (amount > 0) {
+            if (Arrays.asList(inv.getStorageContents()).contains(null)) {
+                item.setAmount(amount);
+                inv.addItem(item);
+            } else {
+                final ItemStack remainder = item.clone();
+                remainder.setAmount(amount);
+                return remainder;
             }
         }
         return null;
@@ -428,8 +419,9 @@ public final class Chore {
             case ACACIA_DOOR:
             case DARK_OAK_DOOR:
                 return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     public static boolean isRight(Action a) {
@@ -470,7 +462,7 @@ public final class Chore {
 
     @NotNull
     public static ItemStack ci(Material m, int d, String name, List<String> lore) {
-        final ItemStack item = createDamageableItem(m, 1, (short) d);
+        final ItemStack item = createCustomModelItem(m, 1, d);
         final ItemMeta meta = item.getItemMeta();
         if (name != null) {
             meta.setDisplayName(name.isEmpty() ? "§r" : name);
@@ -485,13 +477,13 @@ public final class Chore {
         return item;
     }
 
-    public static boolean distanceSq(final Location center_loc, final Location check_loc, int rangeSq, int rangeY) {
-        return new Point(center_loc.getBlockX(), center_loc.getBlockZ())
+    public static boolean distanceSq(final Location locCenter, final Location locCheck, int rangeSq, int rangeY) {
+        return new Point(locCenter.getBlockX(), locCenter.getBlockZ())
                 .distanceSq(new Point(
-                        check_loc.getBlockX(),
-                        check_loc.getBlockZ()
+                        locCheck.getBlockX(),
+                        locCheck.getBlockZ()
                 )) <= rangeSq
-                && Math.abs(center_loc.getY() - check_loc.getY()) <= rangeY;
+                && Math.abs(locCenter.getY() - locCheck.getY()) <= rangeY;
     }
 
     public static void addHideFlags(ItemMeta meta, AlchemyMaterial am) {

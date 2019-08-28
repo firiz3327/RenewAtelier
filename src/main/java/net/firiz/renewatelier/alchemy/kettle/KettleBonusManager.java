@@ -1,20 +1,20 @@
 /*
  * KettleBonusManager.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
@@ -36,7 +37,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 /**
- *
  * @author firiz
  */
 public enum KettleBonusManager {
@@ -110,20 +110,22 @@ public enum KettleBonusManager {
             bonus += getBonus(uuid, aa);
         }
         final KettleBox kettleBox = KETTLE.getKettleData(uuid);
-        final List<BonusItem> kettleSelects = kettleBox == null ? null : kettleBox.getItems();
-        plus += plus * (((double) bonus * 0.01) + ((kettleSelects == null || kettleSelects.isEmpty()) ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));
+        if (kettleBox != null) {
+            final List<BonusItem> kettleSelects = kettleBox.getItems();
+            plus += plus * ((double) bonus * 0.01 + (kettleSelects.isEmpty() ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));
 
-        final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
-        if (bonusDatas != null) {
-            for (final CatalystBonus cb : bonusDatas) {
-                final List<CatalystBonus> usedBonus = kettleBox.getBonus();
-                if (cb.getData().getType().isOnce() && (usedBonus == null || !usedBonus.contains(cb))) {
-                    plus += Math.round(plus * (cb.getData().getX() * 0.01));
-                    kettleBox.addBonus(cb);
+            final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+            if (bonusDatas != null) {
+                for (final CatalystBonus cb : bonusDatas) {
+                    final List<CatalystBonus> usedBonus = kettleBox.getBonus();
+                    if (cb.getData().getType().isOnce() && (usedBonus == null || !usedBonus.contains(cb))) {
+                        plus += Math.round(plus * (cb.getData().getX() * 0.01));
+                        kettleBox.addBonus(cb);
+                    }
                 }
             }
+            bpd.add(plus, aas);
         }
-        bpd.add(plus, aas);
     }
 
     public List<AlchemyAttribute[]> getLevelUps(UUID uuid) {

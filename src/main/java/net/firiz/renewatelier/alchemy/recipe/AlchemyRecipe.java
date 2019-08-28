@@ -35,7 +35,7 @@ import net.firiz.renewatelier.config.loader.AlchemyRecipeLoader;
  */
 public class AlchemyRecipe {
 
-    private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
+    private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
     private final String result;
     private final int amount;

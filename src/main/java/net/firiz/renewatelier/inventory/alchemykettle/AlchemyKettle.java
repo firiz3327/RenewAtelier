@@ -72,14 +72,14 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class AlchemyKettle {
 
-    private final static KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private final static KettleBonusManager BONUSMANAGER = KettleBonusManager.INSTANCE;
+    private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
+    private static final KettleBonusManager BONUSMANAGER = KettleBonusManager.INSTANCE;
 
-    private final static String STR_CENTER = "アイテムを投入してください";
-    private final static String STR_TURN = "投入すると、完成品プレビューが更新されます";
-    private final static String STR_CHARACTERISTIC = "入れ方によって様々な状態に変わるので";
-    private final static String STR_RECIPEID = "色々試してみましょう!";
-    private final static String STR_TURN2 = "";
+    private static final String STR_CENTER = "アイテムを投入してください";
+    private static final String STR_TURN = "投入すると、完成品プレビューが更新されます";
+    private static final String STR_CHARACTERISTIC = "入れ方によって様々な状態に変わるので";
+    private static final String STR_RECIPE_ID = "色々試してみましょう!";
+    private static final String STR_TURN2 = "";
 
     public static boolean isAlchemyKettle(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
@@ -175,7 +175,7 @@ public class AlchemyKettle {
         AlchemyChore.setSetting(setting, 0, 4, STR_CENTER); // center data
         AlchemyChore.setSetting(setting, 1, 0, STR_TURN); // rotation data
         AlchemyChore.setSetting(setting, 2, 0, STR_CHARACTERISTIC); // characteristic page data
-        AlchemyChore.setSettingStr(setting, 3, recipe.getId(), STR_RECIPEID); // recipe id
+        AlchemyChore.setSettingStr(setting, 3, recipe.getId(), STR_RECIPE_ID); // recipe id
         AlchemyChore.setSetting(setting, 4, 0, STR_TURN2); // right left up down turn data
 //        setting.addEnchant(Enchantment.ARROW_FIRE, 4, true); // center data
 //        setting.addEnchant(Enchantment.ARROW_INFINITE, 0, true); // right left turn data
@@ -242,14 +242,14 @@ public class AlchemyKettle {
                 if (c != 0) {
                     final ItemStack item = inv.getItem(slot);
                     if (item != null) {
-                        final int durability = Chore.getDamage(item);
-                        final int defdamage = Catalyst.getDamage(c);
+                        final int customModel = Chore.getCustomModelData(item);
+                        final int defcmd = Catalyst.getCustomModelData(c);
                         boolean stop = false;
-                        if (durability == defdamage) {
+                        if (customModel == defcmd) {
                             stop = true;
                         } else {
-                            final AlchemyCircle circle = AlchemyCircle.sertchData(defdamage);
-                            if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.sertchData(durability).getCircleType()) {
+                            final AlchemyCircle circle = AlchemyCircle.sertchData(defcmd);
+                            if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.sertchData(customModel).getCircleType()) {
                                 stop = true;
                             }
                         }
@@ -382,7 +382,7 @@ public class AlchemyKettle {
             resultItem = AlchemyItemStatus.getItem(
                     result,
                     ings, // 錬金属性 書き換え
-                    Chore.createDamageableItem(
+                    Chore.createCustomModelItem(
                             result.getMaterial().getLeft(),
                             recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonus_amount,
                             result.getMaterial().getRight()
@@ -507,11 +507,11 @@ public class AlchemyKettle {
                     int slot = defslot;
                     for (int c2 : b.getCS()) {
                         if (j == slot) {
-                            short itemDamage = Catalyst.getDamage(c2);
-                            if (itemDamage != -1) {
+                            short cmd = Catalyst.getCustomModelData(c2);
+                            if (cmd != -1) {
                                 final ItemStack item = Chore.ci(
                                         Material.DIAMOND_AXE,
-                                        itemDamage,
+                                        cmd,
                                         ChatColor.RESET + b.getData().getName(),
                                         b.getData().getDesc()
                                 );
@@ -628,7 +628,7 @@ public class AlchemyKettle {
                 if (raw >= 81 && raw <= 83) {
                     e.setCancelled(true);
                     final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                    final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                    final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                     player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                     final KettleBox kettleBox = KETTLE.getKettleData(uuid);
                     if (kettleBox != null) {
@@ -658,7 +658,7 @@ public class AlchemyKettle {
                                 resultItem = AlchemyItemStatus.getItem(
                                         result,
                                         ings, // 錬金属性 書き換え
-                                        Chore.createDamageableItem(
+                                        Chore.createCustomModelItem(
                                                 result.getMaterial().getLeft(),
                                                 result_slot_item.getAmount(),
                                                 result.getMaterial().getRight()
@@ -776,7 +776,7 @@ public class AlchemyKettle {
                         Chore.log("中心点移動");
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                         player.playSound(loc, Sound.UI_BUTTON_CLICK, 0.1f, 1);
 
                         final ItemStack settingItem = inv.getItem(1);
@@ -864,7 +864,7 @@ public class AlchemyKettle {
                         //<editor-fold defaultstate="collapsed" desc="特性一覧 ページ移動-上">
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         setCharacteristicPage(inv, player, -1);
                         Chore.log("特性一覧 ページ移動-上");
@@ -875,7 +875,7 @@ public class AlchemyKettle {
                         //<editor-fold defaultstate="collapsed" desc="特性一覧 ページ移動-下">
                         e.setCancelled(true);
                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         setCharacteristicPage(inv, player, 1);
                         Chore.log("特性一覧 ページ移動-下");
@@ -892,7 +892,7 @@ public class AlchemyKettle {
                                 e.setCancelled(true);
                                 final ItemStack item = inv.getItem(raw);
                                 final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                                final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                                final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                                 if (item != null && (item.getType() == Material.BOOK || item.getType() == Material.ENCHANTED_BOOK)) {
                                     Chore.log("特性 追加・削除");
                                     final ItemMeta setting = inv.getItem(1).getItemMeta();
@@ -1023,7 +1023,7 @@ public class AlchemyKettle {
                                         }
 
                                         final int[] xyz = Chore.getXYZString(inv.getItem(2).getItemMeta().getDisplayName());
-                                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1, xyz[2]);
+                                        final Location loc = new Location(player.getWorld(), xyz[0], xyz[1] + 1.0, xyz[2]);
                                         if (rslots == null) {
                                             Chore.log("アイテムを錬金釜に投入できない");
                                             player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);

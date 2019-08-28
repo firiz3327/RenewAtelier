@@ -32,7 +32,7 @@ import net.firiz.renewatelier.config.loader.QuestLoader;
  */
 public class Quest {
 
-    private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
+    private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private static List<Quest> IMPORTANT_QUESTS;
     private final String id;
     private final String name;

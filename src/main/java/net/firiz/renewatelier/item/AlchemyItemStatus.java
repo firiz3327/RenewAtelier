@@ -184,7 +184,7 @@ public enum AlchemyItemStatus {
         }
         if (item == null) {
             final DoubleData<Material, Short> matdata = am.getMaterial();
-            item = Chore.createDamageableItem(matdata.getLeft(), 1, matdata.getRight());
+            item = Chore.createCustomModelItem(matdata.getLeft(), 1, matdata.getRight());
         }
         final ItemMeta meta = item.getItemMeta();
         if (!am.isDefaultName()) {

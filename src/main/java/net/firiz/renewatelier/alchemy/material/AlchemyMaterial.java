@@ -36,7 +36,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class AlchemyMaterial {
 
-    private final static ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
+    private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
     private final String name;
     private final boolean default_name;
