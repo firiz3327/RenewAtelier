@@ -27,6 +27,7 @@ import net.firiz.renewatelier.inventory.alchemykettle.CatalystSelect;
 import net.firiz.renewatelier.inventory.alchemykettle.ItemSelect;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
+import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.item.bag.AlchemyBagItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -78,6 +79,8 @@ public class InventoryListener implements Listener {
             CatalystSelect.click(e);
         } else if (AlchemyKettle.isAlchemyKettle(view)) {
             AlchemyKettle.click(e);
+        } else if (ShopInventory.isShopInventory(view)) {
+            ShopInventory.click(e);
         } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.click(e);
         } else if (AlchemyBagItem.isBagInventory(view)) {

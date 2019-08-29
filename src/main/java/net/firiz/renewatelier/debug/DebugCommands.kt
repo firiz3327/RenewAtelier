@@ -6,6 +6,8 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
+import net.firiz.renewatelier.inventory.shop.ShopInventory
+import net.firiz.renewatelier.inventory.shop.ShopItem
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.nodification.Nodification
@@ -16,10 +18,8 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemFlag
 import java.util.*
 
 class DebugCommands(private val debugListener: DebugListener) {
@@ -214,7 +214,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             desc = ["Location", "Name", "UUID", "Script"],
             args = [Location::class, String::class, UUID::class, String::class],
-            examples = ["playerNpcSave {getLocation} onamae {getUUID} test"],
+            examples = ["playerNpcSave {getLocation} name {getUUID} test"],
             text = "プレイヤーNPCをスポーンさせ、保存します。"
     )
     fun playerNpcSave(sender: Player, args: ArrayList<Any>) {
@@ -232,6 +232,38 @@ class DebugCommands(private val debugListener: DebugListener) {
 
     private fun playerNpc(loc: Location, name: String, uuid: UUID, script: String, save: Boolean) {
         NPCManager.INSTANCE.createNPCPlayer(loc, name, uuid, script, save)
+    }
+
+    @Cmd(
+            desc = ["Name"],
+            args = [String::class],
+            examples = ["testNpc name", "testNpc name player"],
+            text = "プレイヤーNPCをスポーンさせます。"
+    )
+    fun testNpc(sender: Player, args: ArrayList<Any>) {
+        if (args.size >= 2
+                && args[1] is String
+                && (args[1] as String).equals("player", true)
+        ) {
+            playerNpc(
+                    sender.location,
+                    args[0] as String,
+                    sender.uniqueId,
+                    "test.js",
+                    false
+            )
+            Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
+                sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+            })
+        } else {
+            npc(
+                    sender.location,
+                    EntityType.VILLAGER,
+                    args[0] as String,
+                    "test.js",
+                    false
+            )
+        }
     }
 
     @Cmd(
@@ -281,7 +313,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             text = "ブロックの破壊をON・OFFします。"
     )
-    fun Break(sender: Player, args: ArrayList<Any>): Boolean {
+    fun cbreak(sender: Player, args: ArrayList<Any>): Boolean {
         debugListener.nonbreak = !debugListener.nonbreak
         return debugListener.nonbreak
     }
@@ -340,21 +372,17 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "・・・"
     )
     fun test(sender: Player, args: ArrayList<Any>) {
-
-        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
-            val stand: ArmorStand = sender.world.spawnEntity(sender.location, EntityType.ARMOR_STAND) as ArmorStand
-            stand.setArms(true)
-
-            val item = Chore.createCustomModelItem(Material.DIAMOND_AXE, 1, 1524)
-            val meta = item.itemMeta!!
-            meta.isUnbreakable = true
-            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
-            item.itemMeta = meta
-
-            stand.setItemInHand(item)
-            stand.isVisible = false
-        })
-
+        Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin()) {
+            ShopInventory.openInventory(sender, "Shop", arrayListOf(ShopItem(
+                    AlchemyItemStatus.getItem(
+                            AlchemyMaterial.getMaterial("flam"),
+                            Chore.ci(Material.DIAMOND_AXE, 1, "", null)
+                    ),
+                    1,
+                    10,
+                    null
+            )))
+        }
     }
 
 }

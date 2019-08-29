@@ -258,6 +258,42 @@ public final class Chore {
         return false;
     }
 
+    public static boolean hasMaterial(final Inventory inv, final AlchemyMaterial material, int req_amount) {
+        return hasMaterial(inv.getContents(), material, req_amount);
+    }
+
+    public static boolean hasMaterial(final ItemStack[] contents, final AlchemyMaterial material, int req_amount) {
+        if (contents.length != 0) {
+            int amount = 0;
+            for (final ItemStack item : contents) {
+                if (item != null && material.equals(AlchemyMaterial.getMaterial(item))) {
+                    amount += item.getAmount();
+                }
+            }
+            return req_amount <= amount;
+        }
+        return false;
+    }
+
+    public static boolean hasMaterial(final Inventory inv, final Material material, final int customDataModel, int req_amount) {
+        return hasMaterial(inv.getContents(), material, customDataModel, req_amount);
+    }
+
+    public static boolean hasMaterial(final ItemStack[] contents, final Material material, final int customDataModel, int req_amount) {
+        if (contents.length != 0) {
+            int amount = 0;
+            for (final ItemStack item : contents) {
+                if (item != null
+                        && material.equals(item.getType())
+                        && (customDataModel == -1 || (item.hasItemMeta() && item.getItemMeta().hasCustomModelData() && item.getItemMeta().getCustomModelData() == customDataModel))) {
+                    amount += item.getAmount();
+                }
+            }
+            return req_amount <= amount;
+        }
+        return false;
+    }
+
     public static void warp(final Player player, final Location loc) {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> player.teleport(loc));
     }
@@ -265,7 +301,7 @@ public final class Chore {
     public static String createStridColor(final String id) {
         final StringBuilder sb = new StringBuilder();
         for (final char c : id.toCharArray()) {
-            sb.append(setIntColor((int) c));
+            sb.append(setIntColor(c));
         }
         return sb.toString();
     }

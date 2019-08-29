@@ -239,9 +239,13 @@ public enum NPCManager {
         Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
             final LivingEntity entity = (LivingEntity) location.getWorld().spawnEntity(location, type);
             entity.setCustomName(name);
-            entity.setCustomNameVisible(true);
+            entity.setCustomNameVisible(false);
             entity.setRemoveWhenFarAway(false);
             entity.setAI(false);
+            entity.setCanPickupItems(false);
+            entity.setInvulnerable(true);
+            entity.setCollidable(false);
+            entity.setGravity(false);
             npcs.add(entity);
 
             final ItemStack item = new ItemStack(Material.STONE_BUTTON);
