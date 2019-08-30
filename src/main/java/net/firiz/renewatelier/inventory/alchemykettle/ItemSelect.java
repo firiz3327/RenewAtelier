@@ -101,7 +101,7 @@ public final class ItemSelect {
 
         final String[] data = reqs.get(new_page).split(",");
         String name = null;
-        DoubleData<Material, Short> material = null;
+        DoubleData<Material, Integer> material = null;
         if (data[0].startsWith("material:")) {
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(data[0].substring(9));
             if (!am.isDefaultName()) {
@@ -148,7 +148,7 @@ public final class ItemSelect {
         final List<String> reqs = recipe.getReqMaterial();
         final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
         final String[] data = reqs.get(page).split(",");
-        final DoubleData<Material, Short> material = data[0].startsWith("material:")
+        final DoubleData<Material, Integer> material = data[0].startsWith("material:")
                 ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);

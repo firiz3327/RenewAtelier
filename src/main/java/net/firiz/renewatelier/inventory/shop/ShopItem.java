@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ShopItem {
@@ -27,7 +28,7 @@ public class ShopItem {
         clone.setAmount(amount);
 
         final ItemMeta meta = clone.getItemMeta();
-        final List<String> lore = meta.getLore();
+        final List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
         lore.add("");
         final StringBuilder sb = new StringBuilder();
         sb.append(Chore.createStridColor(coinType == null ? "$null" : coinType.getId()))

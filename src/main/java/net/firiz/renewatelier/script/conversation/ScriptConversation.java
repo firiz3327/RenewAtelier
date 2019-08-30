@@ -1,32 +1,36 @@
 /*
  * ScriptConversation.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package net.firiz.renewatelier.script.conversation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.script.Invocable;
 import javax.script.ScriptException;
+
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
+import net.firiz.renewatelier.inventory.shop.ShopInventory;
+import net.firiz.renewatelier.inventory.shop.ShopItem;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
 import net.firiz.renewatelier.player.PlayerStatus;
@@ -42,7 +46,6 @@ import org.bukkit.inventory.ItemStack;
 import org.graalvm.polyglot.HostAccess.Export;
 
 /**
- *
  * @author firiz
  */
 public class ScriptConversation {
@@ -223,28 +226,60 @@ public class ScriptConversation {
     }
 
     @Export
-    public AlchemyMaterial getMaterial(final String material_id) {
+    public ShopItem shopItem(final ItemStack item, final int amount, final int price) {
+        return new ShopItem(item, amount, price, null);
+    }
+
+    @Export
+    public ShopItem shopItem(final ItemStack item, final int amount, final int price, final AlchemyMaterial coinType) {
+        return new ShopItem(item, amount, price, coinType);
+    }
+
+    @Export
+    public void openShopInventory(final String title, List<ShopItem> shopItems) {
+        ShopInventory.openInventory(player, title, shopItems);
+    }
+
+    @Export
+    public AlchemyMaterial getAlchemyMaterial(final String material_id) {
         return AlchemyMaterial.getMaterial(material_id);
     }
 
     @Export
-    public AlchemyMaterial getMaterial(final ItemStack item) {
+    public AlchemyMaterial getAlchemyMaterial(final ItemStack item) {
         return AlchemyMaterial.getMaterial(item);
     }
 
     @Export
-    public ItemStack createItemStack(final Material material, int amount) {
+    public ItemStack itemStack(final Material material) {
+        return itemStack(material, 1);
+    }
+
+    @Export
+    public ItemStack itemStack(final Material material, int amount) {
         return new ItemStack(material, amount);
     }
 
     @Export
-    public Material getItemMaterial(final String material_id) {
-        return Material.valueOf(material_id.toUpperCase());
+    public ItemStack itemStack(final AlchemyMaterial material) {
+        return itemStack(material, 1);
+    }
+
+    @Export
+    public ItemStack itemStack(final AlchemyMaterial material, int amount) {
+        final ItemStack item = AlchemyItemStatus.getItem(material);
+        item.setAmount(amount);
+        return item;
+    }
+
+    @Export
+    public Material getMaterial(final String material_id) {
+        return Chore.getMaterial(material_id);
     }
 
     @Export
     public EntityType getEntityType(final String entityType) {
         return EntityType.valueOf(entityType.toUpperCase());
     }
-    
+
 }

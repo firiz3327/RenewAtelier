@@ -68,15 +68,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     notFounds.add("material");
                 }
                 final String mat_str = item.getString("material");
-                final DoubleData<Material, Short> mat;
+                final DoubleData<Material, Integer> mat;
                 if (!mat_str.contains(",")) {
                     if(mat_str.equalsIgnoreCase("XXX")) {
                         Chore.logSLightWarning("MaterialLoader: " + key + " -> No customModelData value has been set for XXX.");
                     }
-                    mat = new DoubleData<>(Chore.getMaterial(mat_str), (short) 0);
+                    mat = new DoubleData<>(Chore.getMaterial(mat_str), 0);
                 } else {
                     final String[] mat_split = mat_str.split(",");
-                    mat = new DoubleData<>(Chore.getMaterial(mat_split[0]), Short.parseShort(mat_split[1]));
+                    mat = new DoubleData<>(Chore.getMaterial(mat_split[0]), Integer.parseInt(mat_split[1]));
                 }
                 // *品質<最大・最小>
                 if(!item.contains("quality_min")) {

@@ -40,7 +40,7 @@ public class AlchemyMaterial {
     private final String id;
     private final String name;
     private final boolean default_name;
-    private final DoubleData<Material, Short> material;
+    private final DoubleData<Material, Integer> material;
     private final int quality_min;
     private final int quality_max;
     private final int price;
@@ -62,7 +62,7 @@ public class AlchemyMaterial {
             String id,
             String name,
             boolean default_name,
-            DoubleData<Material, Short> material,
+            DoubleData<Material, Integer> material,
             int quality_min,
             int quality_max,
             int price,
@@ -103,6 +103,9 @@ public class AlchemyMaterial {
     }
 
     public static AlchemyMaterial getMaterial(final String id) {
+        if(id == null) {
+            return null;
+        }
         for (final Object obj : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class)) {
             final AlchemyMaterial am = (AlchemyMaterial) obj;
             if (am.getId().equalsIgnoreCase(id)) {
@@ -132,7 +135,7 @@ public class AlchemyMaterial {
         return default_name;
     }
 
-    public DoubleData<Material, Short> getMaterial() {
+    public DoubleData<Material, Integer> getMaterial() {
         return material;
     }
 

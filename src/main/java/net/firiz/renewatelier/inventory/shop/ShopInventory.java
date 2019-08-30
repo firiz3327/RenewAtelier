@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,8 @@ import java.util.UUID;
 public final class ShopInventory {
 
     private static final String TITLE = "SHOP";
-    private static final ItemStack glassPane = Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
+    private static final ItemStack EMERALD = new ItemStack(Material.EMERALD);
+    private static final ItemStack GLASS_PANE = Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
 
     private ShopInventory() {
     }
@@ -32,13 +34,13 @@ public final class ShopInventory {
         final Inventory inv = Bukkit.createInventory(null, 54, uuid.toString().concat(TITLE));
         for (int i = 0; i < 54; i++) {
             if (i < 9) {
-                inv.setItem(i, glassPane);
+                inv.setItem(i, GLASS_PANE);
             } else if (i >= 45) {
-                inv.setItem(i, glassPane);
+                inv.setItem(i, GLASS_PANE);
             } else {
-                inv.setItem(i, glassPane);
+                inv.setItem(i, GLASS_PANE);
                 i += 8;
-                inv.setItem(i, glassPane);
+                inv.setItem(i, GLASS_PANE);
             }
         }
         for (int i = 0; i < shopItems.size() && i < 28; i++) {
@@ -56,8 +58,11 @@ public final class ShopInventory {
         final int raw = e.getRawSlot();
         if (raw >= 0 && raw < inv.getSize()) {
             e.setCancelled(true);
+            if (player.hasCooldown(Material.GRAY_STAINED_GLASS_PANE)) {
+                return;
+            }
             final ItemStack item = inv.getItem(e.getRawSlot());
-            if (item != null && !glassPane.isSimilar(item)) {
+            if (item != null && !GLASS_PANE.isSimilar(item)) {
                 final List<String> lore = item.getItemMeta().getLore();
                 final String str = lore.get(lore.size() - 1);
                 final String id = Chore.getStridColor(str.substring(0, str.indexOf(
@@ -69,11 +74,26 @@ public final class ShopInventory {
                 ));
                 final String v = str.substring(str.lastIndexOf(": ") + 2);
                 final int price = Integer.parseInt(v.substring(0, v.indexOf(" ")));
-                final boolean check = id.equals("$null")
-                        ? Chore.hasMaterial(player.getInventory(), Material.EMERALD, -1, price)
-                        : Chore.hasMaterial(player.getInventory(), AlchemyMaterial.getMaterial(id), price);
-                if (check) {
-                    System.out.println("success");
+                final AlchemyMaterial am = AlchemyMaterial.getMaterial(id);
+                final int check = id.equals("$null")
+                        ? Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1
+                        : Chore.hasMaterial(player.getInventory(), am, price) ? 2 : -1;
+                if (check != -1) {
+                    player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
+                    if (check == 1) {
+                        Chore.reduceItem(player.getInventory(), EMERALD, price);
+                    } else {
+                        Chore.reduceItem(player.getInventory(), am, price);
+                    }
+                    final ItemStack clone = item.clone();
+                    final ItemMeta meta = clone.getItemMeta();
+                    final List<String> clore = meta.getLore();
+                    for (int i = 0; i < 2; i++) {
+                        clore.remove(clore.size() - 1);
+                    }
+                    meta.setLore(clore);
+                    clone.setItemMeta(meta);
+                    Chore.addItem(player, clone);
                 }
             }
         }

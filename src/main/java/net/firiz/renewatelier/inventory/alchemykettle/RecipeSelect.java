@@ -128,22 +128,22 @@ public final class RecipeSelect {
     }
 
     private static void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final List<DoubleData<RecipeStatus, DoubleData<Material, Short>>> ritem = new ArrayList<>();
+        final List<DoubleData<RecipeStatus, DoubleData<Material, Integer>>> ritem = new ArrayList<>();
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
         status.getRecipeStatusList().forEach((rs) -> {
             final String result_str = AlchemyRecipe.search(rs.getId()).getResult();
             final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
-            DoubleData<Material, Short> material = null;
+            DoubleData<Material, Integer> material = null;
             if (result[0].startsWith("material:")) {
                 material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
             } else if (result[0].startsWith("minecraft:")) {
-                material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Short.parseShort(result[1]) : 0);
+                material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
             }
             if (material != null) {
                 ritem.add(new DoubleData<>(rs, material));
             }
         });
-        ritem.sort(Comparator.comparing((DoubleData<RecipeStatus, DoubleData<Material, Short>> o) -> o.getLeft().getId()));
+        ritem.sort(Comparator.comparing((DoubleData<RecipeStatus, DoubleData<Material, Integer>> o) -> o.getLeft().getId()));
         final int dScroll = scroll * 6;
         if (ritem.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
@@ -178,8 +178,8 @@ public final class RecipeSelect {
                 if (ritem.size() <= i) {
                     break;
                 }
-                final DoubleData<RecipeStatus, DoubleData<Material, Short>> dd = ritem.get(i);
-                final DoubleData<Material, Short> material = dd.getRight();
+                final DoubleData<RecipeStatus, DoubleData<Material, Integer>> dd = ritem.get(i);
+                final DoubleData<Material, Integer> material = dd.getRight();
                 final RecipeStatus rs = dd.getLeft();
                 final AlchemyRecipe recipe = AlchemyRecipe.search(rs.getId());
                 final ItemStack item;
@@ -274,12 +274,12 @@ public final class RecipeSelect {
                             }
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
-                            DoubleData<Material, Short> material = null;
+                            DoubleData<Material, Integer> material = null;
                             if (result[0].startsWith("material:")) {
                                 am = AlchemyMaterial.getMaterial(result[0].substring(9));
                                 material = am.getMaterial();
                             } else if (result[0].startsWith("minecraft:")) {
-                                material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Short.parseShort(result[1]) : 0);
+                                material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
                             }
 
                             final List<String> lore = new ArrayList<>();

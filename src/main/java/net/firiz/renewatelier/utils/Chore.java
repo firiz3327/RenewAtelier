@@ -275,18 +275,16 @@ public final class Chore {
         return false;
     }
 
-    public static boolean hasMaterial(final Inventory inv, final Material material, final int customDataModel, int req_amount) {
-        return hasMaterial(inv.getContents(), material, customDataModel, req_amount);
+    public static boolean hasMaterial(final Inventory inv, final ItemStack item, int req_amount) {
+        return hasMaterial(inv.getContents(), item, req_amount);
     }
 
-    public static boolean hasMaterial(final ItemStack[] contents, final Material material, final int customDataModel, int req_amount) {
+    public static boolean hasMaterial(final ItemStack[] contents, final ItemStack item, int req_amount) {
         if (contents.length != 0) {
             int amount = 0;
-            for (final ItemStack item : contents) {
-                if (item != null
-                        && material.equals(item.getType())
-                        && (customDataModel == -1 || (item.hasItemMeta() && item.getItemMeta().hasCustomModelData() && item.getItemMeta().getCustomModelData() == customDataModel))) {
-                    amount += item.getAmount();
+            for (final ItemStack i : contents) {
+                if (i != null && item.isSimilar(i)) {
+                    amount += i.getAmount();
                 }
             }
             return req_amount <= amount;
@@ -387,14 +385,7 @@ public final class Chore {
         int amount = item.getAmount();
         final ItemStack[] contents = inv.getStorageContents();
         for (final ItemStack v : contents) {
-            if (v != null) {
-                final int max_stack = v.getType().getMaxStackSize();
-                if (v.isSimilar(item) && v.getAmount() < max_stack) {
-                    final int da = v.getAmount() + amount;
-                    amount = da - max_stack;
-                    v.setAmount(Math.min(max_stack, da));
-                }
-            }
+            amount = getAmount(item, amount, v);
         }
         inv.setStorageContents(contents);
         if (amount > 0) {
@@ -409,20 +400,25 @@ public final class Chore {
         }
     }
 
+    private static int getAmount(ItemStack item, int amount, ItemStack v) {
+        if (v != null) {
+            final int max_stack = v.getType().getMaxStackSize();
+            if (v.isSimilar(item) && v.getAmount() < max_stack) {
+                final int da = v.getAmount() + amount;
+                amount = da - max_stack;
+                v.setAmount(Math.min(max_stack, da));
+            }
+        }
+        return amount;
+    }
+
     public static ItemStack addItemNotDrop(@NotNull Inventory inv, @NotNull ItemStack item) {
         int amount = item.getAmount();
 
         final ItemStack[] contents = inv.getStorageContents();
         for (int i = 0; i < contents.length; i++) {
             final ItemStack v = contents[i];
-            if (v != null) {
-                final int max_stack = v.getType().getMaxStackSize();
-                if (v.isSimilar(item) && v.getAmount() < max_stack) {
-                    final int da = v.getAmount() + amount;
-                    amount = da - max_stack;
-                    v.setAmount(Math.min(max_stack, da));
-                }
-            }
+            amount = getAmount(item, amount, v);
         }
         inv.setStorageContents(contents);
         if (amount > 0) {
@@ -436,6 +432,38 @@ public final class Chore {
             }
         }
         return null;
+    }
+
+    public static void reduceItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull int reduceAmount) {
+        final ItemStack[] contents = inv.getStorageContents();
+        int amount = reduceAmount;
+        for (final ItemStack i : contents) {
+            if (i != null && item.isSimilar(i)) {
+                int v = Math.max(i.getAmount() - amount, 0);
+                amount = -(i.getAmount() - amount);
+                i.setAmount(v);
+                if (amount <= 0) {
+                    break;
+                }
+            }
+        }
+        inv.setStorageContents(contents);
+    }
+
+    public static void reduceItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, @NotNull int reduceAmount) {
+        final ItemStack[] contents = inv.getStorageContents();
+        int amount = reduceAmount;
+        for (final ItemStack i : contents) {
+            if (i != null && material.equals(AlchemyMaterial.getMaterial(i))) {
+                int v = Math.max(i.getAmount() - amount, 0);
+                amount = -(i.getAmount() - amount);
+                i.setAmount(v);
+                if (amount <= 0) {
+                    break;
+                }
+            }
+        }
+        inv.setStorageContents(contents);
     }
 
     public static boolean isFuncBlock(Block block) {

@@ -195,6 +195,18 @@ public final class NPCConversation extends ScriptConversation {
         messagePacket(chatColor(text), time);
     }
 
+    @Export
+    public void sendNpcChat(@NotNull final String msg, @NotNull final int maxStatus, @NotNull final int status) {
+        final StringBuilder val = new StringBuilder();
+        for (int i = 0; i < maxStatus; i++) {
+            val.append(i <= status ? "●" : "○");
+        }
+        sendNext(
+                chatColor(val.insert(0, "&7[").append("] &2" + getNPCName() + " ").toString()),
+                chatColor("&a" + msg)
+        );
+    }
+
     private void messagePacket(@NotNull final String text, final int time) {
         final Location balloonLoc = getLocation();
         balloonLoc.setY(balloonLoc.getY() + 0.25);
