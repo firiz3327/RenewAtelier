@@ -109,7 +109,9 @@ public class DebugListener implements Listener {
 
     @EventHandler
     public final void blockbreak(BlockBreakEvent e) {
-        e.setCancelled(nonbreak);
+        e.setCancelled(
+                nonbreak || e.getPlayer().getInventory().getItemInMainHand().getType() == Material.DEBUG_STICK
+        );
     }
 
     private String[] split(final String str) {
