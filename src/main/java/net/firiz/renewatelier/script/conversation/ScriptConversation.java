@@ -21,13 +21,15 @@
 package net.firiz.renewatelier.script.conversation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.alchemy.material.*;
+import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.inventory.shop.ShopItem;
@@ -237,6 +239,9 @@ public class ScriptConversation {
 
     @Export
     public void openShopInventory(final String title, List<ShopItem> shopItems) {
+        if (shopItems != null && shopItems.size() > 28) {
+            throw new IllegalArgumentException("No more than 29 shop items can be placed.");
+        }
         ShopInventory.openInventory(player, title, shopItems);
     }
 
@@ -261,25 +266,89 @@ public class ScriptConversation {
     }
 
     @Export
-    public ItemStack itemStack(final AlchemyMaterial material) {
-        return itemStack(material, 1);
+    public Material getMaterial(final String id) {
+        return Chore.getMaterial(id);
     }
 
     @Export
-    public ItemStack itemStack(final AlchemyMaterial material, int amount) {
+    public EntityType getEntityType(final String entityType) {
+        return EntityType.valueOf(entityType.toUpperCase());
+    }
+
+    @Export
+    public Ingredients getIngredients(final String id) {
+        return AlchemyIngredients.valueOf(id);
+    }
+
+    @Export
+    public Ingredients getIngredientsForName(final String name) {
+        return AlchemyIngredients.searchName(name);
+    }
+
+    @Export
+    public int[] getSize(final String id, final int rotate) {
+        return MaterialSize.valueOf(id).getSize(rotate);
+    }
+
+    @Export
+    public ItemStack alchemyMaterial(final AlchemyMaterial material) {
+        return alchemyMaterial(material, 1);
+    }
+
+    @Export
+    public ItemStack alchemyMaterial(final AlchemyMaterial material, int amount) {
         final ItemStack item = AlchemyItemStatus.getItem(material);
         item.setAmount(amount);
         return item;
     }
 
     @Export
-    public Material getMaterial(final String material_id) {
-        return Chore.getMaterial(material_id);
+    public ItemStack alchemyMaterial(
+            final AlchemyMaterial material,
+            final int over_quality,
+            final List<Ingredients> over_ings,
+            int[] over_size,
+            final List<String> active_effects,
+            final List<Characteristic> over_characteristics,
+            final List<Category> over_category,
+            final boolean not_visible_catalyst
+    ) {
+        return AlchemyItemStatus.getItem(
+                material,
+                over_ings,
+                null,
+                over_quality,
+                over_size,
+                active_effects,
+                over_characteristics,
+                over_category,
+                not_visible_catalyst
+        );
     }
 
     @Export
-    public EntityType getEntityType(final String entityType) {
-        return EntityType.valueOf(entityType.toUpperCase());
+    public void applyAlchemyMaterial(
+            final ItemStack item,
+            final AlchemyMaterial material,
+            final List<Ingredients> over_ings,
+            final int over_quality,
+            final int[] over_size,
+            final List<String> active_effects,
+            final List<Characteristic> over_characteristics,
+            final List<Category> over_category,
+            final boolean not_visible_catalyst
+    ) {
+        AlchemyItemStatus.getItem(
+                material,
+                over_ings,
+                item,
+                over_quality,
+                over_size,
+                active_effects,
+                over_characteristics,
+                over_category,
+                not_visible_catalyst
+        );
     }
 
 }

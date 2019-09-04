@@ -34,6 +34,7 @@ import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,31 +58,29 @@ public class PlayerListener implements Listener {
         final Block block = e.getClickedBlock();
         final Player player = e.getPlayer();
 
-        if (action != null && player != null) {
-            if (Chore.isRight(action)) {
-                if (item != null && item.getType() == Material.WRITTEN_BOOK) {
-                    final ItemMeta meta = item.getItemMeta();
-                    if (meta != null && meta.isUnbreakable()) {
-                        e.setCancelled(true);
-                        QuestBook.openQuestBook(player, item, e.getHand());
-                        return;
-                    }
-                }
-
-                if (block != null) {
-                    final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
-                    if (type != null) {
-                        e.setCancelled(type.run(action, item, block, player));
-                        RecipeSelect.openGUI(player, block.getLocation());
-                        return;
-                    }
-                }
-                // use_item -------
-                if (ScriptItem.start(e)) {
+        if (Chore.isRight(action)) {
+            if (item != null && item.getType() == Material.WRITTEN_BOOK) {
+                final ItemMeta meta = item.getItemMeta();
+                if (meta != null && meta.isUnbreakable()) {
+                    e.setCancelled(true);
+                    QuestBook.openQuestBook(player, item, e.getHand());
                     return;
                 }
-                //---
             }
+
+            if (block != null) {
+                final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
+                if (type != null) {
+                    e.setCancelled(type.run(action, item, block, player));
+                    RecipeSelect.openGUI(player, block.getLocation());
+                    return;
+                }
+            }
+            // use_item -------
+            if (ScriptItem.start(e)) {
+                return;
+            }
+            //---
         }
     }
 
@@ -93,18 +92,8 @@ public class PlayerListener implements Listener {
         }
     }
 
-//    @EventHandler
-//    private void interactEntity(final PlayerInteractEntityEvent e) {
-//        final Player player = e.getPlayer();
-//        final Entity rightClicked = e.getRightClicked();
-//        if (rightClicked instanceof LivingEntity && e.getHand() == EquipmentSlot.HAND) {
-//            final LivingEntity entity = (LivingEntity) rightClicked;
-//            e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
-//        }
-//    }
-
     @EventHandler
-    private void interactEntity(final PlayerInteractAtEntityEvent e) {
+    private void interactEntity(final PlayerInteractEntityEvent e) {
         final Player player = e.getPlayer();
         final Entity rightClicked = e.getRightClicked();
         if (e.getHand() == EquipmentSlot.HAND && rightClicked instanceof LivingEntity) {

@@ -33,7 +33,8 @@ public class ShopItem {
         final StringBuilder sb = new StringBuilder();
         sb.append(Chore.createStridColor(coinType == null ? "$null" : coinType.getId()))
                 .append(ChatColor.ITALIC).append(ChatColor.RESET).append(ChatColor.GREEN)
-                .append(coinType == null ? "価格" : coinType.getName() + ChatColor.RESET)
+                .append(coinType == null ? "価格" : coinType.getName())
+                .append(ChatColor.RESET)
                 .append(": ")
                 .append(price)
                 .append(coinType == null ? " エメラルド" : " 個");

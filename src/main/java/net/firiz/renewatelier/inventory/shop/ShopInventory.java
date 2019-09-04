@@ -43,12 +43,18 @@ public final class ShopInventory {
                 inv.setItem(i, GLASS_PANE);
             }
         }
-        for (int i = 0; i < shopItems.size() && i < 28; i++) {
-            final ShopItem shopItem = shopItems.get(i);
-            inv.addItem(shopItem.create());
+        if (shopItems != null) {
+            for (int i = 0; i < shopItems.size() && i < 28; i++) {
+                final ShopItem shopItem = shopItems.get(i);
+                inv.addItem(shopItem.create());
+            }
         }
         player.openInventory(inv);
-        InventoryPacket.update(player, title, InventoryPacket.InventoryPacketType.CHEST);
+        InventoryPacket.update(
+                player,
+                ChatColor.translateAlternateColorCodes('&', title),
+                InventoryPacket.InventoryPacketType.CHEST
+        );
     }
 
     public static void click(final InventoryClickEvent e) {

@@ -72,7 +72,7 @@ public enum LoopManager {
         animDrops.add(drop);
     }
 
-    public void removeAdnimatedDrop(AnimatedDrop drop) {
+    public void removeAnimatedDrop(AnimatedDrop drop) {
         animDrops.remove(drop);
     }
 

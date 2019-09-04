@@ -129,6 +129,14 @@ public final class Chore {
         return result;
     }
 
+    public static List<Integer> parseInts(final int[] array) {
+        final List<Integer> result = new ArrayList<>();
+        for (int val : array) {
+            result.add(val);
+        }
+        return result;
+    }
+
     public static String intCcolor(int i) {
         switch (i) {
             case 0:

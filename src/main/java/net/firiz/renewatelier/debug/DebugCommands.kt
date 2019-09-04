@@ -159,7 +159,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             desc = ["Location", "EntityType", "Name", "Script"],
             args = [Location::class, EntityType::class, String::class, String::class],
-            examples = ["npc {getLocation} {getEntityType skeleton} example test"],
+            examples = ["npc {getLocation} {getEntityType skeleton} example test.js"],
             text = "NPCをスポーンさせます"
     )
     fun npc(sender: Player, args: ArrayList<Any>) {
@@ -175,7 +175,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             desc = ["Location", "EntityType", "Name", "Script"],
             args = [Location::class, EntityType::class, String::class, String::class],
-            examples = ["npcSave {getLocation} {getEntityType skeleton} example test"],
+            examples = ["npcSave {getLocation} {getEntityType skeleton} example test.js"],
             text = "NPCをスポーンさせ、保存します。"
     )
     fun npcSave(sender: Player, args: ArrayList<Any>) {
@@ -195,7 +195,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             desc = ["Location", "Name", "UUID", "Script"],
             args = [Location::class, String::class, UUID::class, String::class],
-            examples = ["playerNpc {getLocation} onamae {getUUID} test"],
+            examples = ["playerNpc {getLocation} onamae {getUUID} test.js"],
             text = "プレイヤーNPCをスポーンさせます。"
     )
     fun playerNpc(sender: Player, args: ArrayList<Any>) {
@@ -214,7 +214,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     @Cmd(
             desc = ["Location", "Name", "UUID", "Script"],
             args = [Location::class, String::class, UUID::class, String::class],
-            examples = ["playerNpcSave {getLocation} name {getUUID} test"],
+            examples = ["playerNpcSave {getLocation} name {getUUID} test.js"],
             text = "プレイヤーNPCをスポーンさせ、保存します。"
     )
     fun playerNpcSave(sender: Player, args: ArrayList<Any>) {
@@ -290,23 +290,15 @@ class DebugCommands(private val debugListener: DebugListener) {
             desc = ["AlchemyMaterial or String"],
             args = [Object::class],
             examples = ["item {getAMaterial atelier_book}", "item atelier_book"],
-            text = "手に持っているアイテムに錬金マテリアルを適用します。"
+            text = "錬金マテリアルを適用もしくは適用されたアイテムを取得します。"
     )
     fun item(sender: Player, args: ArrayList<Any>) {
-        if (sender.inventory.itemInMainHand != null) {
-            if (args[0] is AlchemyMaterial) {
-                AlchemyItemStatus.getItem(
-                        args[0] as AlchemyMaterial,
-                        sender.inventory.itemInMainHand
-                )
-            } else {
-                AlchemyItemStatus.getItem(
-                        args[0].toString(),
-                        sender.inventory.itemInMainHand
-                )
-            }
-        } else {
-            sender.sendMessage("ERROR: Your main hand is null.")
+        val item = AlchemyItemStatus.getItem(
+                if (args[0] is AlchemyMaterial) args[0] as AlchemyMaterial else AlchemyMaterial.getMaterial(args[0].toString()),
+                sender.inventory.itemInMainHand
+        )
+        if (sender.inventory.itemInMainHand.type == Material.AIR) {
+            sender.inventory.setItemInMainHand(item)
         }
     }
 
@@ -316,6 +308,13 @@ class DebugCommands(private val debugListener: DebugListener) {
     fun cbreak(sender: Player, args: ArrayList<Any>): Boolean {
         debugListener.nonbreak = !debugListener.nonbreak
         return debugListener.nonbreak
+    }
+
+    @Cmd(
+            text = "全てのイベントのログを表示します。"
+    )
+    fun chandle(sender: Player, args: ArrayList<Any>): Boolean {
+        return debugListener.changeAllHandles()
     }
 
     @Cmd(

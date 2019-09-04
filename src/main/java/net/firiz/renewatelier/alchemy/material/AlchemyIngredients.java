@@ -23,6 +23,7 @@ package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.DoubleData;
 import org.bukkit.inventory.ItemStack;
 
@@ -275,6 +276,7 @@ public enum AlchemyIngredients implements Ingredients {
     I238B15("煙が出る", AlchemyAttribute.BLUE, 15),
     I239R15("火薬臭", AlchemyAttribute.RED, 15),
     I240R10("わずかな熱", AlchemyAttribute.RED, 10),
+    I241P25("奇妙な香り", AlchemyAttribute.PURPLE, 25),
     ;
 
     private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
@@ -321,6 +323,7 @@ public enum AlchemyIngredients implements Ingredients {
                     return ing;
                 }
             }
+            throw new IllegalStateException(str.concat(" is not found."));
         }
         return ai;
     }

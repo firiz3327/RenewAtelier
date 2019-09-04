@@ -156,12 +156,15 @@ public enum NPCManager {
         // send player npcs
         Bukkit.getWorlds().forEach((world) -> world.getPlayers().forEach(this::packet));
 
-        // addLoopEffect 0.5sec
-        LoopManager.INSTANCE.addLoopEffectHalfSec(() -> Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
+        LoopManager.INSTANCE.addLoopEffect(() -> Bukkit.getServer().getOnlinePlayers().forEach((player) -> {
             for (final VEntityPlayer npc : playerNpcs) {
                 final Location loc = npc.getLocation().clone();
-                if (Chore.distanceSq(loc, player.getLocation(), 300, 5)) {
-                    final Vector target = player.getLocation().toVector();
+                if (Chore.distanceSq(loc, player.getLocation(), 15, 5)) {
+                    final Location eyeLoc = player.getLocation();
+                    if (player.isSneaking()) {
+                        eyeLoc.setY(eyeLoc.getY() - 0.5);
+                    }
+                    final Vector target = eyeLoc.toVector();
                     loc.setDirection(target.subtract(loc.toVector()));
                     PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
                             npc.getId(),
@@ -176,29 +179,31 @@ public enum NPCManager {
                 }
             }
 
-            player.getNearbyEntities(10, 5, 10).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
-                if (entity instanceof LivingEntity) {
-                    final LivingEntity lentity = (LivingEntity) entity;
-                    final EntityEquipment equipment = lentity.getEquipment();
-                    if (equipment != null && equipment.getBoots() != null && equipment.getBoots().hasItemMeta()) {
-                        final String name = equipment.getBoots().getItemMeta().getDisplayName();
-                        if (name != null && name.contains("§k§k§k")) {
-                            final String[] datas = name.split("§k§k§k");
-                            if (datas[0].equals(NPCManager.CHECK)) {
-                                final Location loc = entity.getLocation();
-                                final Vector target = player.getLocation().toVector();
-                                loc.setDirection(target.subtract(loc.toVector()));
-                                PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
-                                        entity.getEntityId(),
-                                        loc.getPitch(),
-                                        loc.getYaw(),
-                                        entity.isOnGround()
-                                ));
-                                PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
-                                        entity.getEntityId(),
-                                        loc.getYaw()
-                                ));
+            player.getNearbyEntities(3, 5, 3).stream().filter((entity) -> (entity instanceof LivingEntity)).forEachOrdered((entity) -> {
+                final LivingEntity lEntity = (LivingEntity) entity;
+                final EntityEquipment equipment = lEntity.getEquipment();
+                if (equipment != null && equipment.getBoots() != null && equipment.getBoots().hasItemMeta()) {
+                    final String name = equipment.getBoots().getItemMeta().getDisplayName();
+                    if (name.contains("§k§k§k")) {
+                        final String[] datas = name.split("§k§k§k");
+                        if (datas[0].equals(NPCManager.CHECK)) {
+                            final Location loc = lEntity.getLocation();
+                            final Location eyeLoc = player.getLocation();
+                            if (player.isSneaking()) {
+                                eyeLoc.setY(eyeLoc.getY() - 0.5);
                             }
+                            final Vector target = eyeLoc.toVector();
+                            loc.setDirection(target.subtract(loc.toVector()));
+                            PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
+                                    lEntity.getEntityId(),
+                                    loc.getPitch(),
+                                    loc.getYaw(),
+                                    lEntity.isOnGround()
+                            ));
+                            PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
+                                    lEntity.getEntityId(),
+                                    loc.getYaw()
+                            ));
                         }
                     }
                 }
@@ -214,15 +219,13 @@ public enum NPCManager {
                 if (entity.getEquipment() != null && entity.getEquipment().getBoots() != null) {
                     final ItemStack boots = entity.getEquipment().getBoots();
                     if (boots.hasItemMeta()) {
-                        final String item_name = boots.getItemMeta().getDisplayName();
-                        if (item_name != null) {
-                            if (item_name.contains("§k§k§k")) {
-                                final String[] datas = item_name.split("§k§k§k");
-                                if (datas[0].equals(CHECK) && datas[1].equals(script)) {
-                                    npcs.remove(entity);
-                                    entity.remove();
-                                    break;
-                                }
+                        final String itemName = boots.getItemMeta().getDisplayName();
+                        if (itemName.contains("§k§k§k")) {
+                            final String[] datas = itemName.split("§k§k§k");
+                            if (datas[0].equals(CHECK) && datas[1].equals(script)) {
+                                npcs.remove(entity);
+                                entity.remove();
+                                break;
                             }
                         }
                     }
@@ -238,7 +241,7 @@ public enum NPCManager {
     public void createNPC(@NotNull final Location location, @NotNull final EntityType type, @NotNull final String name, @NotNull final String script, final boolean save) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
             final LivingEntity entity = (LivingEntity) location.getWorld().spawnEntity(location, type);
-            entity.setCustomName(name);
+            entity.setCustomName(ChatColor.translateAlternateColorCodes('&', name));
             entity.setCustomNameVisible(false);
             entity.setRemoveWhenFarAway(false);
             entity.setAI(false);
@@ -278,9 +281,7 @@ public enum NPCManager {
 
                 // remove armorstand
                 for (int i = 0; i < 4; i++) {
-                    final Location cloc = location.clone();
-                    cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
-                    cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
+                    final Location cloc = getStandLocation(location, i);
                     int j = 1;
                     for (final Entity entity : cloc.getWorld().getEntities()) {
                         if (cloc.equals(entity.getLocation())) {
@@ -302,7 +303,12 @@ public enum NPCManager {
     }
 
     public void createNPCPlayer(@NotNull final Location location, @NotNull final String name, @NotNull final UUID uuid, @NotNull final String script, final boolean save) {
-        final VEntityPlayer entityPlayer = FakePlayerPacket.createEntityPlayer(location.getWorld(), location, uuid, name);
+        final VEntityPlayer entityPlayer = FakePlayerPacket.createEntityPlayer(
+                location.getWorld(),
+                location,
+                uuid,
+                ChatColor.translateAlternateColorCodes('&', name)
+        );
         entityPlayer.setListName("");
         playerNpcs.add(entityPlayer);
         playerNpcLocs.put(new Location(
@@ -314,10 +320,7 @@ public enum NPCManager {
 
         Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
             for (int i = 0; i < 4; i++) {
-                final Location cloc = location.clone();
-                cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
-                cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
-
+                final Location cloc = getStandLocation(location, i);
                 final ArmorStand stand = (ArmorStand) location.getWorld().spawnEntity(cloc, EntityType.ARMOR_STAND);
                 stand.setVisible(false);
                 stand.setGravity(false);
@@ -386,34 +389,39 @@ public enum NPCManager {
             final ItemStack boots = entity.getEquipment().getBoots();
             if (boots.hasItemMeta()) {
                 final String name = boots.getItemMeta().getDisplayName();
-                if (name != null) {
-                    if (name.contains("§k§k§k")) {
-                        final String[] datas = name.split("§k§k§k");
-                        if (datas[0].equals(CHECK)) {
-                            final UUID uuid = player.getUniqueId();
-                            if (scriptPlayers.containsKey(uuid)
-                                    && scriptPlayers.get(uuid).getNPC() != null
-                                    && scriptPlayers.get(uuid).getNPC().equals(entity)) {
-                                final NPCConversation npcc = scriptPlayers.get(uuid);
-                                try {
-                                    npcc.getIv().invokeFunction("action", shift);
-                                } catch (ScriptException ex) {
-                                    Chore.logWarning(ex);
-                                } catch (NoSuchMethodException ignored) {
-                                }
-                            } else {
-                                final String script = "npc/".concat(Chore.getStridColor(datas[1]));
-                                final NPCConversation conversation = new NPCConversation(entity, script, player);
-                                ScriptManager.INSTANCE.start(script, player, conversation, "action", shift);
-                                scriptPlayers.put(uuid, conversation);
+                if (name.contains("§k§k§k")) {
+                    final String[] datas = name.split("§k§k§k");
+                    if (datas[0].equals(CHECK)) {
+                        final UUID uuid = player.getUniqueId();
+                        if (scriptPlayers.containsKey(uuid)
+                                && scriptPlayers.get(uuid).getNPC() != null
+                                && scriptPlayers.get(uuid).getNPC().equals(entity)) {
+                            final NPCConversation npcc = scriptPlayers.get(uuid);
+                            try {
+                                npcc.getIv().invokeFunction("action", shift);
+                            } catch (ScriptException ex) {
+                                Chore.logWarning(ex);
+                            } catch (NoSuchMethodException ignored) {
                             }
-                            return true;
+                        } else {
+                            final String script = "npc/".concat(Chore.getStridColor(datas[1]));
+                            final NPCConversation conversation = new NPCConversation(entity, script, player);
+                            ScriptManager.INSTANCE.start(script, player, conversation, "action", shift);
+                            scriptPlayers.put(uuid, conversation);
                         }
+                        return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    private Location getStandLocation(Location location, int i) {
+        final Location cloc = location.clone();
+        cloc.setX(location.getX() + (i == 0 ? 0.2 : i == 1 ? -0.2 : 0));
+        cloc.setZ(location.getZ() + (i == 2 ? 0.35 : i == 3 ? -0.35 : 0));
+        return cloc;
     }
 
     public void dispose(final UUID uuid) {

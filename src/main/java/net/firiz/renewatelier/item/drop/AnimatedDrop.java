@@ -69,7 +69,7 @@ public abstract class AnimatedDrop {
             run();
             tick -= 1;
         } else {
-            loop.removeAdnimatedDrop(this);
+            loop.removeAnimatedDrop(this);
             end();
         }
     }

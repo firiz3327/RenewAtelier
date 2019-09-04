@@ -182,7 +182,7 @@ public enum AlchemyItemStatus {
         if (am == null || (am.getIngredients().isEmpty() && (over_ings == null || over_ings.isEmpty()))) {
             return null;
         }
-        if (item == null) {
+        if (item == null || item.getType() == Material.AIR) {
             final DoubleData<Material, Integer> matdata = am.getMaterial();
             item = Chore.createCustomModelItem(matdata.getLeft(), 1, matdata.getRight());
         }

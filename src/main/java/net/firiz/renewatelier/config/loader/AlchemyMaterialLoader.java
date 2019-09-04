@@ -1,20 +1,20 @@
 /*
  * AlchemyMaterialLoader.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,6 +22,7 @@ package net.firiz.renewatelier.config.loader;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
@@ -35,13 +36,14 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 /**
- *
  * @author firiz
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
@@ -56,21 +58,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             final List<String> notFounds = new ArrayList<>();
             try {
                 final ConfigurationSection item = config.getConfigurationSection(key);
-                // *名前取得
-                if(!item.contains("name")) {
-                    notFounds.add("name");
-                }
-                final String name = ChatColor.translateAlternateColorCodes('&', item.getString("name"));
-                // デフォルト名優先
-                final boolean default_name = item.contains("default_name") && item.getBoolean("default_name");
                 // *アイテムのマテリアルを取得
-                if(!item.contains("material")) {
+                if (!item.contains("material")) {
                     notFounds.add("material");
                 }
                 final String mat_str = item.getString("material");
                 final DoubleData<Material, Integer> mat;
                 if (!mat_str.contains(",")) {
-                    if(mat_str.equalsIgnoreCase("XXX")) {
+                    if (mat_str.equalsIgnoreCase("XXX")) {
                         Chore.logSLightWarning("MaterialLoader: " + key + " -> No customModelData value has been set for XXX.");
                     }
                     mat = new DoubleData<>(Chore.getMaterial(mat_str), 0);
@@ -78,11 +73,23 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     final String[] mat_split = mat_str.split(",");
                     mat = new DoubleData<>(Chore.getMaterial(mat_split[0]), Integer.parseInt(mat_split[1]));
                 }
+                // デフォルト名優先
+                final boolean default_name = item.contains("default_name") && item.getBoolean("default_name");
+                // *名前取得
+                final String name;
+                if (default_name) {
+                    name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getLeft())); // クエストブック用に名前を設定しておく
+                } else {
+                    if (!item.contains("name")) {
+                        notFounds.add("name");
+                    }
+                    name = ChatColor.translateAlternateColorCodes('&', item.getString("name"));
+                }
                 // *品質<最大・最小>
-                if(!item.contains("quality_min")) {
+                if (!item.contains("quality_min")) {
                     notFounds.add("quality_min");
                 }
-                if(!item.contains("quality_max")) {
+                if (!item.contains("quality_max")) {
                     notFounds.add("quality_max");
                 }
                 final int quality_min = item.getInt("quality_min");
@@ -90,14 +97,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 // 売価
                 final int price = item.contains("price") ? item.getInt("price") : 1;
                 // *カテゴリ取得
-                if(!item.contains("categorys")) {
+                if (!item.contains("categorys")) {
                     notFounds.add("categorys");
                 }
                 final List<String> categorys_str = (List<String>) item.getList("categorys");
                 final List<Category> categorys = new ArrayList<>();
                 categorys_str.forEach((c_str) -> categorys.add(Category.searchName(c_str)));
                 // *錬金成分取得
-                if(!item.contains("ingredients")) {
+                if (!item.contains("ingredients")) {
                     notFounds.add("ingredients");
                 }
                 final List<String> ings_str = (List<String>) item.getList("ingredients");
@@ -112,7 +119,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     });
                 }
                 // サイズ取得
-                if(!item.contains("sizes")) {
+                if (!item.contains("sizes")) {
                     notFounds.add("sizes");
                 }
                 final List<String> sizes_str = (List<String>) item.getList("sizes");
@@ -199,7 +206,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                         hidePotionEffect,
                         hideUnbreaking
                 ));
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 Chore.logWarning("MaterialLoader: " + key + " -> ", ex);
             } finally {
                 if (!notFounds.isEmpty()) {

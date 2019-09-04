@@ -34,12 +34,16 @@ import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerStatisticIncrementEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredListener;
 
 /**
  * @author firiz
@@ -48,6 +52,38 @@ public class DebugListener implements Listener {
 
     private final DebugManager debug = new DebugManager(this);
     public boolean nonbreak = true;
+    private boolean allhandle = false;
+    private final RegisteredListener alarmListener = new RegisteredListener(
+            this,
+            (listener, event) -> {
+                if (allhandle) {
+                    if (!(event instanceof PlayerStatisticIncrementEvent
+                            || event instanceof EntityAirChangeEvent
+                            || event instanceof VehicleUpdateEvent
+                            || event instanceof VehicleBlockCollisionEvent
+                    )) {
+                        System.out.println(event.getEventName());
+                    }
+                }
+            },
+            EventPriority.NORMAL,
+            AtelierPlugin.getPlugin(),
+            false
+    );
+
+    public boolean changeAllHandles() {
+        allhandle = !allhandle;
+        if(allhandle) {
+            for (final HandlerList handler : HandlerList.getHandlerLists()) {
+                handler.register(alarmListener);
+            }
+        } else {
+            for (final HandlerList handler : HandlerList.getHandlerLists()) {
+                handler.unregister(alarmListener);
+            }
+        }
+        return allhandle;
+    }
 
     @EventHandler
     private void debug(final AsyncPlayerChatEvent e) {
@@ -62,7 +98,7 @@ public class DebugListener implements Listener {
             final String msg = e.getMessage();
             if (msg.contains("%item%")) {
                 final ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
-                if (mainHand != null && mainHand.getType() != Material.AIR) {
+                if (mainHand.getType() != Material.AIR) {
                     Megaphone.itemMegaPhone(
                             e.getPlayer(),
                             msg,
