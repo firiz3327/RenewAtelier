@@ -201,7 +201,7 @@ public final class Chore {
         if (result == null) {
             throw new IllegalStateException("material not found for " + str + ".");
         }
-        Chore.logWarning("material " + str + " is legacy name.");
+        Chore.logWarning("Chore.getMaterial: material " + str + " is legacy name.");
         return result;
     }
 
