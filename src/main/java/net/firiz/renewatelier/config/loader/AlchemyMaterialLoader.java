@@ -66,7 +66,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final DoubleData<Material, Integer> mat;
                 if (!mat_str.contains(",")) {
                     if (mat_str.equalsIgnoreCase("XXX")) {
-                        Chore.logSLightWarning("MaterialLoader: " + key + " -> No customModelData value has been set for XXX.");
+                        Chore.logWhiteWarning("MaterialLoader: " + key + " -> No customModelData value has been set for XXX.");
                     }
                     mat = new DoubleData<>(Chore.getMaterial(mat_str), 0);
                 } else {

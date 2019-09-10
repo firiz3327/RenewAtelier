@@ -90,11 +90,11 @@ public final class Chore {
     }
 
     public static void logLightWarning(final String str) {
-        log.warning("\u001B[30m\u001B[103m".concat(str).concat(S_OFF));
+        log.warning("\u001B[30m\u001B[43m".concat(str).concat(S_OFF));
     }
 
-    public static void logSLightWarning(final String str) {
-        log.warning("\u001B[30m\u001B[43;1m".concat(str).concat(S_OFF));
+    public static void logWhiteWarning(final String str) {
+        log.warning("\u001B[30m\u001B[47m".concat(str).concat(S_OFF));
     }
 
     public static void log(final Level level, final String str, final Throwable throwable) {

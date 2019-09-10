@@ -118,7 +118,7 @@ object DeliveryInventory {
         for (i in 0..inv.size - 10) {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
-                valuations.put(item, checkItem(title, item, true, AlchemyMaterial.getMaterial(item)).right)
+                valuations[item] = checkItem(title, item, true, AlchemyMaterial.getMaterial(item)).second
             }
         }
 
@@ -187,8 +187,8 @@ object DeliveryInventory {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
                 val checkItemData = checkItem(view, item, true, AlchemyMaterial.getMaterial(item))
-                if (checkItemData.left) {
-                    valuation.add(checkItemData.right)
+                if (checkItemData.first) {
+                    valuation.add(checkItemData.second)
                 } else {
                     valuation.reset()
                     break
@@ -204,17 +204,17 @@ object DeliveryInventory {
     }
 
     private fun checkItem(view: InventoryView, item: ItemStack): Boolean {
-        return checkItem(view, item, false, AlchemyMaterial.getMaterial(item)).left
+        return checkItem(view, item, false, AlchemyMaterial.getMaterial(item)).first
     }
 
-    private fun checkItem(view: InventoryView, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): DoubleData<Boolean, DeliveryValuation> {
+    private fun checkItem(view: InventoryView, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): Pair<Boolean, DeliveryValuation> {
         return checkItem(view.title, item, isReqAmount, am)
     }
 
     // return DoubleData[true or false, DeliveryValuation]
-    private fun checkItem(title: String, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): DoubleData<Boolean, DeliveryValuation> {
+    private fun checkItem(title: String, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): Pair<Boolean, DeliveryValuation> {
         if (am == null) {
-            return DoubleData(false, DeliveryValuation())
+            return Pair(false, DeliveryValuation())
         }
         val itemQuality = AlchemyItemStatus.getQuality(item)
         val deliveryArray = run {
@@ -280,7 +280,7 @@ object DeliveryInventory {
                     && reqQuality <= itemQuality
                     && checkList
             ) {
-                return DoubleData(true, DeliveryValuation(
+                return Pair(true, DeliveryValuation(
                         qualityValue = reqQuality - itemQuality, // 品質評価
                         amountValue = item.amount - reqAmount, // 個数評価
                         characteristicValue = characteristicValue, // 特性評価
@@ -288,7 +288,7 @@ object DeliveryInventory {
                 ))
             }
         }
-        return DoubleData(false, DeliveryValuation())
+        return Pair(false, DeliveryValuation())
     }
 
     private fun invokeFunction(uuid: UUID, method: String, value: Any?) {

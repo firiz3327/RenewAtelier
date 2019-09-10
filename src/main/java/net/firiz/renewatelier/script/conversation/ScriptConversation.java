@@ -291,6 +291,16 @@ public class ScriptConversation {
     }
 
     @Export
+    public Characteristic getCharacteristic(final String id) {
+        return Characteristic.valueOf(id);
+    }
+
+    @Export
+    public Characteristic getCharacteristicForName(final String name) {
+        return Characteristic.search(name);
+    }
+
+    @Export
     public ItemStack alchemyMaterial(final AlchemyMaterial material) {
         return alchemyMaterial(material, 1);
     }

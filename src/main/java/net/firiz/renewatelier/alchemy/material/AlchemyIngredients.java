@@ -95,7 +95,7 @@ public enum AlchemyIngredients implements Ingredients {
     I57G15("模様がある", AlchemyAttribute.GREEN, 15),
     I58G10("粒が大きい", AlchemyAttribute.GREEN, 10),
     I59G5("くっつく", AlchemyAttribute.GREEN, 5),
-    I60G30("コクがある", AlchemyAttribute.GREEN, 30),
+    I60G30("コクがある", AlchemyAttribute.GREEN, 15),
     I61G5("とげがある", AlchemyAttribute.GREEN, 5),
     I62G35("鋭い", AlchemyAttribute.GREEN, 35),
     I63G30("鋭いうまみ", AlchemyAttribute.GREEN, 30),
