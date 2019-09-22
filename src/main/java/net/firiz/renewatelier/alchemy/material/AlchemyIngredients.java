@@ -23,8 +23,7 @@ package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -285,8 +284,8 @@ public enum AlchemyIngredients implements Ingredients {
     private final int level;
 
     static {
-        AlchemyIngredients[] var3;
-        int var2 = (var3 = values()).length;
+        AlchemyIngredients[] var3 = values();
+        int var2 = var3.length;
 
         for(int var1 = 0; var1 < var2; ++var1) {
             final AlchemyIngredients ai = var3[var1];
@@ -332,8 +331,8 @@ public enum AlchemyIngredients implements Ingredients {
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
             final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ALCHEMY_INGREDIENTS, item);
             final String values = lores.get(0).substring(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
-            final int level = Integer.parseInt(values.substring(0, values.indexOf(" ")));
-            final String[] types = values.substring(values.indexOf(" ") + 1).split("●");
+            final int level = Integer.parseInt(values.substring(0, values.indexOf(' ')));
+            final String[] types = values.substring(values.indexOf(' ') + 1).split("●");
             final List<AlchemyAttribute> list = new ArrayList<>();
             for (final String type : types) {
                 list.add(AlchemyAttribute.searchColor(type));
@@ -346,24 +345,24 @@ public enum AlchemyIngredients implements Ingredients {
     public static int getLevel(final ItemStack item, final AlchemyAttribute type) {
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
             final List<String> lores = item.getItemMeta().getLore();
-            boolean lorearea = false;
-            int all_level = 0;
+            boolean loreArea = false;
+            int allLevel = 0;
             for (final String lore : lores) {
-                if (lorearea) {
+                if (loreArea) {
                     if (lore.contains("-")) {
-                        String ingredients = lore.substring(lore.lastIndexOf(" ") + 1);
+                        String ingredients = lore.substring(lore.lastIndexOf(' ') + 1);
                         AlchemyAttribute aa = AlchemyAttribute.searchColor(ingredients.substring(0, 2));
                         if (type == aa) {
-                            all_level += Integer.parseInt(ingredients.substring(2));
+                            allLevel += Integer.parseInt(ingredients.substring(2));
                         }
                     } else {
                         break;
                     }
                 } else if (lore.startsWith(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck())) {
-                    lorearea = true;
+                    loreArea = true;
                 }
             }
-            return all_level;
+            return allLevel;
         }
         return 0;
     }

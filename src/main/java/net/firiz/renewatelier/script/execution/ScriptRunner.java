@@ -22,7 +22,6 @@ package net.firiz.renewatelier.script.execution;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +33,6 @@ import javax.script.ScriptException;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.utils.Chore;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
 /**
@@ -89,9 +87,7 @@ final class ScriptRunner {
                 final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
             engine.eval(reader);
             return true;
-        } catch (FileNotFoundException | ScriptException ex) {
-            Chore.logWarning(ex);
-        } catch (IOException ex) {
+        } catch (ScriptException | IOException ex) {
             Chore.logWarning(ex);
         }
         return false;

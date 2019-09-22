@@ -28,11 +28,14 @@ import java.util.Random;
  */
 public final class Randomizer {
 
+    private Randomizer() {
+    }
+
     private static final Random RAND = new Random();
     private static final Sfmt RAND2 = new Sfmt(new int[]{(int) System.currentTimeMillis(), (int) Runtime.getRuntime().freeMemory()});
 
     public static int nextInt(final int arg0) {
-        return RAND2.NextInt(arg0);
+        return RAND2.nextInt(arg0);
     }
 
     public static boolean nextBoolean() {
@@ -40,7 +43,7 @@ public final class Randomizer {
     }
 
     public static double nextDouble() {
-        return RAND2.NextUnif();
+        return RAND2.nextUnif();
     }
 
     public static int rand(final int lbound, final int ubound) {

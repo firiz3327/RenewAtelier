@@ -33,6 +33,7 @@ import net.md_5.bungee.api.ChatColor;
  */
 public class CatalystBonusData {
 
+    private static final String ERROR_NAME = "ERROR";
     private final BonusType type;
     private final int x;
     private final Object y;
@@ -46,20 +47,20 @@ public class CatalystBonusData {
     public CatalystBonusData(BonusType type, int x, String y) {
         this.type = type;
         this.x = x;
-        this.y = type.y_parse(y);
+        this.y = type.yParse(y);
     }
 
     public String getName() {
         return type.name
                 .replace("$x", (x >= 0 ? "+" : "-") + x)
-                .replace("$y", y != null ? (String) type.y_parse(y, true) : "ERROR");
+                .replace("$y", y != null ? (String) type.yParse(y, true) : ERROR_NAME);
     }
 
     public List<String> getDesc() {
         final String[] desc = type.desc
                 .replace("$x", String.valueOf(x))
-                .replace("$y", y != null ? (String) type.y_parse(y, true) : "ERROR")
-                .replace("$z", type.descRepletion != null ? type.descRepletion.run(x).toString() : "ERROR")
+                .replace("$y", y != null ? (String) type.yParse(y, true) : ERROR_NAME)
+                .replace("$z", type.descRepletion != null ? type.descRepletion.run(x).toString() : ERROR_NAME)
                 .split("\n");
         final List<String> result = new ArrayList<>();
         for(final String str : desc) {
@@ -121,7 +122,7 @@ public class CatalystBonusData {
                 "$y色で示されている\n効果のレベルを全て\n$x段階$zさせます",
                 false,
                 (Object... objs) -> { // ok type: STARLEVEL, x: level, y: AlchemyAttribute_ID
-                    if (!(Boolean) objs[1]) {
+                    if (!(boolean) objs[1]) {
                         return AlchemyAttribute.valueOf((String) objs[0]);
                     }
                     return ((AlchemyAttribute) objs[0]).getName();
@@ -143,8 +144,8 @@ public class CatalystBonusData {
                 (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
         ), // ok
         CHARACTERISTIC("$y付与", "できあがるアイテムに\n「$y」の特性が\n追加されます", false, (Object... objs) -> { // ok type: CHARACTERISTIC, y: Characteristic_ID
-            if (!(Boolean) objs[1]) {
-                return Characteristic.valueOf((String) objs[0]);
+            if (!(boolean) objs[1]) {
+                return Characteristic.getCharacteristic((String) objs[0]);
             }
             return ((Characteristic) objs[0]).getName();
         }); // ok
@@ -152,30 +153,30 @@ public class CatalystBonusData {
         private final String name;
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
-        private final ReturnObjectRunnable y_parse;
+        private final ReturnObjectRunnable yParse;
         private final ReturnObjectRunnable descRepletion;
 
         BonusType(final String name, final String desc, final boolean once) {
             this.name = name;
             this.desc = desc;
-            this.y_parse = null;
+            this.yParse = null;
             this.once = once;
             this.descRepletion = null;
         }
 
-        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse) {
+        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable yParse) {
             this.name = name;
             this.desc = desc;
             this.once = once;
-            this.y_parse = y_parse;
+            this.yParse = yParse;
             this.descRepletion = null;
         }
 
-        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable y_parse, final ReturnObjectRunnable descRepletion) {
+        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable yParse, final ReturnObjectRunnable descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;
-            this.y_parse = y_parse;
+            this.yParse = yParse;
             this.descRepletion = descRepletion;
         }
         
@@ -183,13 +184,13 @@ public class CatalystBonusData {
             return once;
         }
 
-        private Object y_parse(final String y_str) {
-            return y_parse(y_str, false);
+        private Object yParse(final String y_str) {
+            return yParse(y_str, false);
         }
 
-        private Object y_parse(final Object y, final boolean visible) {
-            if (y_parse != null) {
-                return y_parse.run(y, visible);
+        private Object yParse(final Object y, final boolean visible) {
+            if (yParse != null) {
+                return yParse.run(y, visible);
             }
             return y;
         }

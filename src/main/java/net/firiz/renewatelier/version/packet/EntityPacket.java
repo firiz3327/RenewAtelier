@@ -25,20 +25,16 @@ import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Pose;
 
 /**
  * @author firiz
  */
 public class EntityPacket {
 
-    private static final DataWatcherObject POSE;
-
-    static {
-        POSE = DataWatcher.a(Entity.class, DataWatcherRegistry.s);
+    private EntityPacket() {
     }
 
-    public static Packet<?> getSpawnPacket(FakeEntity entity, Location loc) {
+    public static PacketPlayOutSpawnEntity getSpawnPacket(FakeEntity entity, Location loc) {
         return new PacketPlayOutSpawnEntity(
                 entity.getEntityId(),
                 entity.getUniqueId(),
@@ -53,11 +49,11 @@ public class EntityPacket {
         );
     }
 
-    public static Packet<?> getDespawnPacket(int... entityIds) {
+    public static PacketPlayOutEntityDestroy getDespawnPacket(int... entityIds) {
         return new PacketPlayOutEntityDestroy(entityIds);
     }
 
-    public static Packet<?> getLookPacket(int entityId, double pitch, double yaw, boolean onGround) {
+    public static PacketPlayOutEntity.PacketPlayOutEntityLook getLookPacket(int entityId, double pitch, double yaw, boolean onGround) {
         return new PacketPlayOutEntity.PacketPlayOutEntityLook(
                 entityId,
                 (byte) (yaw * 256.0F / 360.0F),
@@ -66,7 +62,7 @@ public class EntityPacket {
         );
     }
 
-    public static Packet<?> getHeadRotationPacket(int entityId, double yaw) {
+    public static PacketPlayOutEntityHeadRotation getHeadRotationPacket(int entityId, double yaw) {
         final PacketPlayOutEntityHeadRotation packet = new PacketPlayOutEntityHeadRotation();
         VersionUtils.setField(packet, "a", entityId);
         VersionUtils.setField(packet, "b", (byte) (yaw * 256.0F / 360.0F));
@@ -91,6 +87,19 @@ public class EntityPacket {
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
         armorStand.setInvisible(true);
+        return new PEMeta(
+                armorStand.getDataWatcher(),
+                false
+        );
+    }
+
+    public static PEMeta getMessageSmallStandMeta(final Player player, final String name) {
+        final WorldServer worldServer = ((CraftWorld) player.getWorld()).getHandle();
+        final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
+        armorStand.setCustomName(new ChatComponentText(name));
+        armorStand.setCustomNameVisible(true);
+        armorStand.setInvisible(true);
+        armorStand.setSmall(true);
         return new PEMeta(
                 armorStand.getDataWatcher(),
                 false

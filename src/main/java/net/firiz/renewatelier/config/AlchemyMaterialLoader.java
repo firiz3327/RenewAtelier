@@ -18,24 +18,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.config.loader;
+package net.firiz.renewatelier.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
-import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
-import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
-import net.firiz.renewatelier.alchemy.material.MaterialSize;
-import net.firiz.renewatelier.alchemy.material.MaterialSizeData;
+import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.chores.CollectionUtils;
+import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
@@ -48,30 +48,39 @@ import org.bukkit.inventory.ItemStack;
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
-    public AlchemyMaterialLoader() {
-        super("materials");
+    private static final String ERROR_PREFIX = "MaterialLoader: ";
+    private static final String KEY_MATERIAL = "material";
+    private static final String KEY_QUALITY_MIN = "quality_min";
+    private static final String KEY_QUALITY_MAX = "quality_max";
+    private static final String KEY_CATEGORYS = "categorys";
+    private static final String KEY_INGREDIENTS = "ingredients";
+
+    AlchemyMaterialLoader() {
+        super(new File(AtelierPlugin.getPlugin().getDataFolder(), "materials"), true);
     }
 
     @Override
     protected void loadConfig(final FileConfiguration config) {
-        config.getKeys(false).forEach((key) -> {
+        config.getKeys(false).forEach(key -> {
             final List<String> notFounds = new ArrayList<>();
             try {
                 final ConfigurationSection item = config.getConfigurationSection(key);
+                assert item != null;
+
                 // *アイテムのマテリアルを取得
-                if (!item.contains("material")) {
-                    notFounds.add("material");
+                if (!item.contains(KEY_MATERIAL)) {
+                    notFounds.add(KEY_MATERIAL);
                 }
-                final String mat_str = item.getString("material");
-                final DoubleData<Material, Integer> mat;
+                final String mat_str = item.getString(KEY_MATERIAL);
+                final FinalDoubleData<Material, Integer> mat;
                 if (!mat_str.contains(",")) {
                     if (mat_str.equalsIgnoreCase("XXX")) {
-                        Chore.logWhiteWarning("MaterialLoader: " + key + " -> No customModelData value has been set for XXX.");
+                        Chore.logWhiteWarning(ERROR_PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                     }
-                    mat = new DoubleData<>(Chore.getMaterial(mat_str), 0);
+                    mat = new FinalDoubleData<>(Chore.getMaterial(mat_str), 0);
                 } else {
-                    final String[] mat_split = mat_str.split(",");
-                    mat = new DoubleData<>(Chore.getMaterial(mat_split[0]), Integer.parseInt(mat_split[1]));
+                    final String[] matSplit = mat_str.split(",");
+                    mat = new FinalDoubleData<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
                 }
                 // デフォルト名優先
                 final boolean default_name = item.contains("default_name") && item.getBoolean("default_name");
@@ -83,72 +92,59 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     if (!item.contains("name")) {
                         notFounds.add("name");
                     }
-                    name = ChatColor.translateAlternateColorCodes('&', item.getString("name"));
+                    name = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(item.getString("name")));
                 }
                 // *品質<最大・最小>
-                if (!item.contains("quality_min")) {
-                    notFounds.add("quality_min");
+                if (!item.contains(KEY_QUALITY_MIN)) {
+                    notFounds.add(KEY_QUALITY_MIN);
                 }
-                if (!item.contains("quality_max")) {
-                    notFounds.add("quality_max");
+                if (!item.contains(KEY_QUALITY_MAX)) {
+                    notFounds.add(KEY_QUALITY_MAX);
                 }
-                final int quality_min = item.getInt("quality_min");
-                final int quality_max = item.getInt("quality_max");
+                final int quality_min = item.getInt(KEY_QUALITY_MIN);
+                final int quality_max = item.getInt(KEY_QUALITY_MAX);
                 // 売価
                 final int price = item.contains("price") ? item.getInt("price") : 1;
                 // *カテゴリ取得
-                if (!item.contains("categorys")) {
-                    notFounds.add("categorys");
+                if (!item.contains(KEY_CATEGORYS)) {
+                    notFounds.add(KEY_CATEGORYS);
                 }
-                final List<String> categorys_str = (List<String>) item.getList("categorys");
+                final List<String> categorysStr = CollectionUtils.castList(item.getList(KEY_CATEGORYS));
                 final List<Category> categorys = new ArrayList<>();
-                categorys_str.forEach((c_str) -> categorys.add(Category.searchName(c_str)));
+                categorysStr.forEach(cStr -> categorys.add(Category.searchName(cStr)));
                 // *錬金成分取得
-                if (!item.contains("ingredients")) {
-                    notFounds.add("ingredients");
+                if (!item.contains(KEY_INGREDIENTS)) {
+                    notFounds.add(KEY_INGREDIENTS);
                 }
-                final List<String> ings_str = (List<String>) item.getList("ingredients");
-                final List<DoubleData<Ingredients, Integer>> ingredients = new ArrayList<>();
-                if (ings_str != null) {
-                    ings_str.forEach((ing) -> {
+                final List<String> ingsStr = CollectionUtils.castList(item.getList(KEY_INGREDIENTS));
+                final List<FinalDoubleData<Ingredients, Integer>> ingredients = new ArrayList<>();
+                if (ingsStr != null) {
+                    ingsStr.forEach(ing -> {
                         final String[] ingData = ing.split(",");
-                        ingredients.add(new DoubleData<>(
+                        ingredients.add(new FinalDoubleData<>(
                                 AlchemyIngredients.searchName(ingData[0].trim()),
                                 Integer.parseInt(ingData[1].trim())
                         ));
                     });
                 }
                 // サイズ取得
-                if (!item.contains("sizes")) {
-                    notFounds.add("sizes");
+                if (!item.contains("size")) {
+                    notFounds.add("size");
                 }
-                final List<String> sizes_str = (List<String>) item.getList("sizes");
-                final List<MaterialSizeData> sizes = new ArrayList<>();
-                sizes_str.forEach((s_str) -> {
-                    final String[] strs = s_str.split(",");
-                    final String size_id = strs[0].trim();
-                    final MaterialSize materialSize = MaterialSize.valueOf(size_id.toUpperCase());
-                    if (materialSize == MaterialSize.S3_3) {
-                        Chore.logLightWarning("MaterialLoader: " + key + " -> " + size_id + " is deprecated.");
-                    }
-                    sizes.add(new MaterialSizeData(
-                            materialSize,
-                            Integer.parseInt(strs[1].trim())
-                    ));
-                });
+                final MaterialSizeTemplate sizeTemplate = MaterialSizeTemplate.valueOf(item.getString("size"));
                 // 特性取得
-                final List<String> charas_str = (List<String>) item.getList("characteristics");
+                final List<String> charasStr = CollectionUtils.castList(item.getList("characteristics"));
                 final List<Object> charas = new ArrayList<>();
-                if (charas_str != null) {
-                    charas_str.forEach((c_str) -> {
-                        if (c_str.contains(",")) {
-                            final String[] strs = c_str.split(",");
+                if (charasStr != null) {
+                    charasStr.forEach(cStr -> {
+                        if (cStr.contains(",")) {
+                            final String[] strs = cStr.split(",");
                             charas.add(new DoubleData<>(
-                                    Characteristic.valueOf(strs[0].trim().toUpperCase()),
+                                    Characteristic.getCharacteristic(strs[0].trim().toUpperCase()),
                                     Integer.parseInt(strs[1].trim())
                             ));
                         } else {
-                            charas.add(CharacteristicTemplate.valueOf(c_str.toUpperCase()));
+                            charas.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
                         }
                     });
                 }
@@ -157,13 +153,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 if (item.contains("catalyst")) {
                     final ConfigurationSection catalystConfig = item.getConfigurationSection("catalyst");
                     final List<CatalystBonus> bonus = new ArrayList<>();
+                    assert catalystConfig != null;
                     catalystConfig.getKeys(false).stream()
-                            .filter((c_key) -> (c_key.startsWith("bonus")))
+                            .filter(cKey -> (cKey.startsWith("bonus")))
                             .map(catalystConfig::getConfigurationSection)
-                            .forEachOrdered((sec) -> {
+                            .filter(Objects::nonNull)
+                            .forEachOrdered(sec -> {
                                 final List<Integer> size = sec.getIntegerList("size");
                                 bonus.add(new CatalystBonus(
-                                        Chore.parseInts(size),
+                                        CollectionUtils.parseInts(size),
                                         new CatalystBonusData(
                                                 CatalystBonusData.BonusType.valueOf(sec.getString("type")),
                                                 sec.contains("x") ? sec.getInt("x") : 0,
@@ -194,7 +192,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                         price,
                         categorys,
                         ingredients,
-                        sizes,
+                        sizeTemplate,
                         charas,
                         catalyst,
                         script,
@@ -207,10 +205,10 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                         hideUnbreaking
                 ));
             } catch (Exception ex) {
-                Chore.logWarning("MaterialLoader: " + key + " -> ", ex);
+                Chore.logWarning(ERROR_PREFIX.concat(key).concat(" -> "), ex);
             } finally {
                 if (!notFounds.isEmpty()) {
-                    Chore.logWarning("MaterialLoader: " + key + " -> Not found columns for " + notFounds.toString() + ".");
+                    Chore.logWarning(ERROR_PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
                 }
             }
         });

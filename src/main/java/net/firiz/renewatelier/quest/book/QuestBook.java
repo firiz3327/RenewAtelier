@@ -1,20 +1,20 @@
 /*
  * QuestBook.java
- * 
+ *
  * Copyright (c) 2019 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,6 +22,8 @@ package net.firiz.renewatelier.quest.book;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
@@ -52,24 +54,26 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- *
  * @author firiz
  */
 public class QuestBook {
 
+    private QuestBook() {
+    }
+
     public static void openQuestBook(final Player player, final ItemStack book, final EquipmentSlot hand) {
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
-        final List<Quest> progress_quests = new ArrayList<>();
-        final List<Quest> clear_quests = new ArrayList<>();
+        final List<Quest> progressQuests = new ArrayList<>();
+        final List<Quest> clearQuests = new ArrayList<>();
         final List<Quest> importantQuests = Quest.getImportantQuests();
-        status.getQuestStatusList().forEach((qs) -> {
+        status.getQuestStatusList().forEach(qs -> {
             final Quest quest = Quest.getQuest(qs.getId());
             importantQuests.remove(quest);
 
             if (qs.isClear()) {
-                clear_quests.add(quest);
+                clearQuests.add(quest);
             } else {
-                progress_quests.add(quest);
+                progressQuests.add(quest);
             }
         });
         // 本を開くパケット
@@ -77,11 +81,11 @@ public class QuestBook {
 
         final List<BaseComponent[]> pages = new ArrayList<>();
         // 進行中クエスト
-        progress_quests.forEach((quest) -> addSpigotPage(pages, quest, 0, player));
+        progressQuests.forEach(quest -> addSpigotPage(pages, quest, 0, player));
         // 重要クエスト
-        importantQuests.forEach((quest) -> addSpigotPage(pages, quest, 2, player));
+        importantQuests.forEach(quest -> addSpigotPage(pages, quest, 2, player));
         // クリア済みクエスト
-        clear_quests.forEach((quest) -> addSpigotPage(pages, quest, 1, player));
+        clearQuests.forEach(quest -> addSpigotPage(pages, quest, 1, player));
 
         final BookMeta meta = (BookMeta) book.getItemMeta();
         meta.spigot().setPages(pages);
@@ -159,53 +163,50 @@ public class QuestBook {
                 } else {
                     continue;
                 }
-                final ItemStack view_item = Chore.createCustomModelItem(material, 1, cmd);
-                final ItemMeta view_meta = view_item.getItemMeta();
+                final ItemStack viewItem = Chore.createCustomModelItem(material, 1, cmd);
+                final ItemMeta viewMeta = Objects.requireNonNull(viewItem.getItemMeta());
                 if (name != null) {
-                    view_meta.setDisplayName(name);
+                    viewMeta.setDisplayName(name);
                 } else {
-                    name = LanguageItemUtil.getLocalizeName(view_item, player);
+                    name = LanguageItemUtil.getLocalizeName(viewItem, player);
                 }
                 if (!flags.isEmpty()) {
-                    view_meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
+                    viewMeta.addItemFlags(flags.toArray(new ItemFlag[0]));
                 }
-                view_meta.setLore(new ArrayList<String>() {
-                    {
-                        add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
-                        add(ChatColor.GRAY + "必要素材:");
-                        for (final String req : recipe.getReqMaterial()) {
-                            final String[] data = req.split(",");
-                            if (data[0].startsWith("category:")) {
-                                add(AlchemyItemStatus.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
-                            } else if (data[0].startsWith("material:")) {
-                                add(AlchemyItemStatus.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]
-                                );
-                            }
-                        }
+                final List<String> viewLore = new ArrayList<>();
+                viewLore.add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
+                viewLore.add(ChatColor.GRAY + "必要素材:");
+                for (final String req : recipe.getReqMaterial()) {
+                    final String[] data = req.split(",");
+                    if (data[0].startsWith("category:")) {
+                        viewLore.add(AlchemyItemStatus.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
+                    } else if (data[0].startsWith("material:")) {
+                        viewLore.add(AlchemyItemStatus.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
                     }
-                });
-                view_item.setItemMeta(view_meta);
+                }
+                viewMeta.setLore(viewLore);
+                viewItem.setItemMeta(viewMeta);
                 builder.append(name).event(
-                        TellrawUtils.createHoverEvent(view_item)
+                        TellrawUtils.createHoverEvent(viewItem)
                 );
             } else if (qr instanceof ItemQuestResult) {
                 final ItemQuestResult result = (ItemQuestResult) qr;
                 final QuestItem questItem = result.getResult();
-                final ItemStack view_item = questItem.getItem(new boolean[]{
-                    true, // id
-                    false, // quality - default min
-                    (questItem.getIngredients() == null), // ings
-                    true, // size
-                    true, // catalyst
-                    true, // category
-                    true // end
+                final ItemStack viewItem = questItem.getItem(new boolean[]{
+                        true, // id
+                        false, // quality - default min
+                        (questItem.getIngredients() == null), // ings
+                        true, // size
+                        true, // catalyst
+                        true, // category
+                        true // end
                 });
-                final String name = view_item.hasItemMeta() && view_item.getItemMeta().hasDisplayName()
-                        ? view_item.getItemMeta().getDisplayName()
-                        : LanguageItemUtil.getLocalizeName(view_item, player);
+                final String name = viewItem.hasItemMeta() && viewItem.getItemMeta().hasDisplayName()
+                        ? viewItem.getItemMeta().getDisplayName()
+                        : LanguageItemUtil.getLocalizeName(viewItem, player);
                 builder.append("アイテム: ").append(
                         questItem.getName() == null ? name : questItem.getName()
-                ).event(TellrawUtils.createHoverEvent(view_item));
+                ).event(TellrawUtils.createHoverEvent(viewItem));
             } else if (qr instanceof MoneyQuestResult) {
                 final MoneyQuestResult result = (MoneyQuestResult) qr;
                 final int money = result.getResult();

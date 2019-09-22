@@ -67,7 +67,7 @@ public class VItemStack {
     public String getMinecraftId() {
         String json = getMinecraftJson();
         json = json.substring(json.indexOf("id:\"") + 4);
-        return json.substring(0, json.indexOf("\""));
+        return json.substring(0, json.indexOf('\"'));
     }
 
     public Object getMethodItem(final String... methodNames) {

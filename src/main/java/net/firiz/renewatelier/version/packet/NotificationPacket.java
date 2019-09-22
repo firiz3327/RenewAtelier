@@ -38,14 +38,14 @@ import org.bukkit.entity.Player;
  *
  * @author firiz
  */
-public class NodificationPacket {
+public class NotificationPacket {
+
+    private NotificationPacket() {
+    }
 
     public static void sendRecipe(final Player player, final String id, final boolean remove) {
-        final ArrayList<MinecraftKey> var1 = new ArrayList<MinecraftKey>() {
-            {
-                add(new MinecraftKey(id));
-            }
-        };
+        final ArrayList<MinecraftKey> var1 = new ArrayList<>();
+        var1.add(new MinecraftKey(id));
         final PacketPlayOutRecipes packet = new PacketPlayOutRecipes(
                 remove ? PacketPlayOutRecipes.Action.REMOVE : PacketPlayOutRecipes.Action.ADD,
                 var1,
@@ -60,33 +60,28 @@ public class NodificationPacket {
 
     @Deprecated
     public static void sendAdvancement(final Player player, final String id, final boolean remove) {
-        final HashMap<MinecraftKey, AdvancementProgress> var3 = new HashMap<MinecraftKey, AdvancementProgress>() {
-            {
-                final AdvancementProgress progress = new AdvancementProgress();
-                if (!remove) {
-                    try {
-                        final Field a = progress.getClass().getDeclaredField("a");
-                        a.setAccessible(true);
-                        a.set(progress, new HashMap<String, CriterionProgress>() {
-                            {
-                                final CriterionProgress cp = new CriterionProgress();
-                                final Field b2 = cp.getClass().getDeclaredField("b");
-                                b2.setAccessible(true);
-                                b2.set(cp, new Date());
-                                put("traded", cp);
-                            }
-                        });
+        final HashMap<MinecraftKey, AdvancementProgress> var3 = new HashMap<>();
+        final AdvancementProgress progress = new AdvancementProgress();
+        if (!remove) {
+            try {
+                final Field a = progress.getClass().getDeclaredField("a");
+                a.setAccessible(true);
+                final HashMap<String, CriterionProgress> p = new HashMap<>();
+                final CriterionProgress cp = new CriterionProgress();
+                final Field b2 = cp.getClass().getDeclaredField("b");
+                b2.setAccessible(true);
+                b2.set(cp, new Date());
+                p.put("traded", cp);
+                a.set(progress, p);
 
-                        final Field b = progress.getClass().getDeclaredField("b");
-                        b.setAccessible(true);
-                        b.set(progress, new String[][]{new String[]{"traded"}});
-                    } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-                        Logger.getLogger(NodificationPacket.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                put(new MinecraftKey(id), progress);
+                final Field b = progress.getClass().getDeclaredField("b");
+                b.setAccessible(true);
+                b.set(progress, new String[][]{new String[]{"traded"}});
+            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                Logger.getLogger(NotificationPacket.class.getName()).log(Level.SEVERE, null, ex);
             }
-        };
+        }
+        var3.put(new MinecraftKey(id), progress);
         final PacketPlayOutAdvancements packet = new PacketPlayOutAdvancements(
                 false,
                 new ArrayList<>(),

@@ -42,7 +42,7 @@ import java.util.UUID;
 public enum MyRoomManager {
     INSTANCE; // enum singleton style
 
-    private final File map_folder = new File(
+    private final File mapFolder = new File(
             AtelierPlugin.getPlugin().getDataFolder(), "rooms"
     );
     private World world;
@@ -74,24 +74,24 @@ public enum MyRoomManager {
         warpRoom(player, player.getUniqueId());
     }
 
-    public void warpRoom(final Player warp_player, final UUID island_uuid) {
-        if (hasRoom(island_uuid)) {
-            Chore.warp(warp_player, getRoom(island_uuid));
+    public void warpRoom(final Player warpPlayer, final UUID islandUuid) {
+        if (hasRoom(islandUuid)) {
+            Chore.warp(warpPlayer, getRoom(islandUuid));
         }
     }
 
     public Location getRoom(final UUID uuid) {
         try {
-            for (final File file : map_folder.listFiles()) {
+            for (final File file : mapFolder.listFiles()) {
                 if (!file.getName().contains(".")) {
                     final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
                     if (UUID.fromString(readLines.get(0)).equals(uuid)) {
-                        final String[] loc_str = file.getName().split(",");
+                        final String[] locStr = file.getName().split(",");
                         return new Location(
                                 world,
-                                Integer.parseInt(loc_str[0]) + 0.5,
+                                Integer.parseInt(locStr[0]) + 0.5,
                                 61,
-                                Integer.parseInt(loc_str[1]) + 0.5
+                                Integer.parseInt(locStr[1]) + 0.5
                         );
                     }
                 }
@@ -104,7 +104,7 @@ public enum MyRoomManager {
 
     public boolean hasRoom(final UUID uuid) {
         try {
-            for (final File file : map_folder.listFiles()) {
+            for (final File file : mapFolder.listFiles()) {
                 if (!file.getName().contains(".")) {
                     final List<String> readLines = FileUtils.readLines(file, StandardCharsets.UTF_8);
                     if (UUID.fromString(readLines.get(0)).equals(uuid)) {
@@ -122,12 +122,12 @@ public enum MyRoomManager {
         final File file = createFile();
         try {
             FileUtils.write(file, uuid.toString(), StandardCharsets.UTF_8);
-            final String[] loc_str = file.getName().split(",");
+            final String[] locStr = file.getName().split(",");
             final Location loc = new Location(
                     world,
-                    Integer.parseInt(loc_str[0]),
+                    Integer.parseInt(locStr[0]),
                     60,
-                    Integer.parseInt(loc_str[1])
+                    Integer.parseInt(locStr[1])
             );
             createDefaultRoom(loc);
         } catch (IOException ex) {
@@ -139,7 +139,6 @@ public enum MyRoomManager {
         int locy = loc.getBlockY() - 1;
         final int defx = loc.getBlockX() + 7;
         final int defz = loc.getBlockZ() + 7;
-//        world.getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()).setType(Material.BEDROCK);
         for (int n = 0; n < 20; n++) {
             for (int i = 0; i < 15; i++) {
                 for (int j = 0; j < 15; j++) {
@@ -170,7 +169,7 @@ public enum MyRoomManager {
         int y = 0;
         int angle = 0;
         while (true) {
-            final File f = new File(map_folder, x + "," + y);
+            final File f = new File(mapFolder, x + "," + y);
             if (f.exists()) {
                 for (int i = 0; i < (distance / 2); i++) {
                     switch (angle) {
@@ -186,8 +185,10 @@ public enum MyRoomManager {
                         case 3: // left
                             x -= island_distance;
                             break;
+                        default:
+                            break;
                     }
-                    final File f2 = new File(map_folder, x + "," + y);
+                    final File f2 = new File(mapFolder, x + "," + y);
                     if (!f2.exists()) {
                         try {
                             f2.createNewFile();

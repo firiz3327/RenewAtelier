@@ -82,8 +82,8 @@ public abstract class AnimatedDrop {
         loop.addAnimatedDrop(this);
     }
 
-    abstract protected void run();
+    protected abstract void run();
 
-    abstract protected void end();
+    protected abstract void end();
 
 }

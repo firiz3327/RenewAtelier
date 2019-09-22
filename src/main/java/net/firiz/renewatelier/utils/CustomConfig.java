@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
@@ -43,19 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.composer.Composer;
-import org.yaml.snakeyaml.composer.ComposerException;
-import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.events.AliasEvent;
-import org.yaml.snakeyaml.events.Event;
-import org.yaml.snakeyaml.events.NodeEvent;
-import org.yaml.snakeyaml.nodes.CollectionNode;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.parser.ParserImpl;
-import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.representer.Representer;
 
 /**
@@ -92,7 +79,6 @@ public class CustomConfig {
 
     public void reloadConfig() {
         try {
-//            config = YamlConfiguration.loadConfiguration(new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8));
             final InputStreamReader reader = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8);
             Validate.notNull(reader, "Stream cannot be null");
             config = new CConfiguration();

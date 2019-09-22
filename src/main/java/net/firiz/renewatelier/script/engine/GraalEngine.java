@@ -54,7 +54,6 @@ public final class GraalEngine extends AbstractScriptEngine implements Compilabl
 
     private final Type type;
     private final Context c;
-    private volatile boolean closed;
 
     public GraalEngine(Type type) {
         this.type = type;
@@ -69,24 +68,6 @@ public final class GraalEngine extends AbstractScriptEngine implements Compilabl
 
     @Override
     public Object eval(Reader reader, ScriptContext scriptContext) throws ScriptException {
-//        final Bindings engineBindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
-//        if (engineBindings != null && engineBindings instanceof GraalBindings) {
-//            engineBindings.clear();
-//        }
-
-//        final StringBuilder sb = new StringBuilder();
-//        sb.append(type.importText); // import文を含ませるため、一度文字列に変換してSourceを作成
-//        final BufferedReader br = IOUtils.toBufferedReader(reader);
-//        try {
-//            String str;
-//            while ((str = br.readLine()) != null) {
-//                sb.append(str).append("\n");
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(GraalEngine.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return eval(createSource(sb.toString(), scriptContext), scriptContext);
-
         return eval(createSource(createScriptCode(reader), scriptContext), scriptContext);
     }
 
@@ -114,15 +95,14 @@ public final class GraalEngine extends AbstractScriptEngine implements Compilabl
     }
 
     private Object eval(Source source, ScriptContext scriptContext) throws ScriptException {
-//        c.initialize(source.getLanguage());
         final Bindings globalBindings = scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
         final Bindings engineBindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
         try {
             if (globalBindings != null) {
-                globalBindings.keySet().forEach((key) -> c.getPolyglotBindings().putMember(key, globalBindings.get(key)));
+                globalBindings.keySet().forEach(key -> c.getPolyglotBindings().putMember(key, globalBindings.get(key)));
             }
             if (engineBindings != null) {
-                engineBindings.keySet().forEach((key) -> c.getPolyglotBindings().putMember(key, engineBindings.get(key)));
+                engineBindings.keySet().forEach(key -> c.getPolyglotBindings().putMember(key, engineBindings.get(key)));
             }
             return c.eval(source).as(Object.class);
         } catch (PolyglotException ex) {
@@ -186,61 +166,32 @@ public final class GraalEngine extends AbstractScriptEngine implements Compilabl
     @Override
     public void close() {
         c.close();
-        this.closed = true;
     }
 
     @NotNull
     public CompiledScript compile(String script) {
-//        if (this.closed) {
-            throw new IllegalStateException("Context already closed.");
-//        } else {
-//            final Source source = createSource(script, this.getContext());
-//            return new CompiledScript() {
-//                public ScriptEngine getEngine() {
-//                    return GraalEngine.this;
-//                }
-//
-//                public Object eval(ScriptContext ctx) throws ScriptException {
-//                    return GraalEngine.this.eval(source, ctx);
-//                }
-//            };
-//        }
+        throw new IllegalStateException("Context already closed.");
     }
 
     @NotNull
     public CompiledScript compile(Reader reader) {
-//        if (this.closed) {
-            throw new IllegalStateException("Context already closed.");
-//        } else {
-//            final Source source = createSource(createScriptCode(reader), this.getContext());
-//            return new CompiledScript() {
-//                public ScriptEngine getEngine() {
-//                    return GraalEngine.this;
-//                }
-//
-//                public Object eval(ScriptContext ctx) throws ScriptException {
-//                    return GraalEngine.this.eval(source, ctx);
-//                }
-//            };
-//        }
+        throw new IllegalStateException("Context already closed.");
     }
 
 
     public <T> T getInterface(Class<T> clasz) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        return evalInternal(c, "this", type.language).as(clasz);
+        throw new UnsupportedOperationException("getInterface is not supported.");
     }
 
     public <T> T getInterface(Object thiz, Class<T> clasz) {
-        throw new UnsupportedOperationException("Not supported yet.");
-//        return c.asValue(thiz).as(clasz);
+        throw new UnsupportedOperationException("getInterface is not supported.");
     }
 
     @Contract(" -> fail")
     @Override
     @Deprecated
     public ScriptEngineFactory getFactory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("getFactory is not supported.");
     }
 
 }

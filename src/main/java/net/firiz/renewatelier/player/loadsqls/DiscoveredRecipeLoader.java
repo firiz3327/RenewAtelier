@@ -1,7 +1,7 @@
 /*
- * BonusItem.java
+ * DiscoveredRecipeLoader.java
  * 
- * Copyright (c) 2018 firiz.
+ * Copyright (c) 2019 firiz.
  * 
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
  * 
@@ -18,36 +18,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.alchemy.kettle;
+package net.firiz.renewatelier.player.loadsqls;
 
-import org.bukkit.inventory.ItemStack;
+import java.util.ArrayList;
+import java.util.List;
+import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.sql.SQLManager;
 
 /**
  *
  * @author firiz
  */
-public class BonusItem {
-    private final ItemStack item;
-    private int bonus;
+public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
 
-    public BonusItem(ItemStack item) {
-        this.item = item;
+    @Override
+    public List<MinecraftRecipeSaveType> load(int id) {
+        final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
+                "discoveredRecipes",
+                new String[]{"user_id", "item_id"},
+                new Object[]{id}
+        );
+        final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
+        saveTypesObj.forEach(datas -> {
+            final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
+            if (type != null) {
+                saveTypes.add(type);
+            }
+        });
+        return saveTypes;
     }
 
-    public BonusItem(ItemStack item, int bonus) {
-        this.item = item;
-        this.bonus = bonus;
-    }
-
-    public ItemStack getItem() {
-        return item;
-    }
-
-    public int getBonus() {
-        return bonus;
-    }
-
-    public void setBonus(int bonus) {
-        this.bonus = bonus;
-    }
 }

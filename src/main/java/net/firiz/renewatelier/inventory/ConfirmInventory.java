@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -76,14 +76,17 @@ public final class ConfirmInventory {
             case 3:
                 cr.run(player, 0);
                 break;
+            default:
+                // Yes・Noボタンのスロット以外、想定しない
+                break;
         }
     }
 
     public static void drag(final InventoryDragEvent e) {
         final Inventory inv = e.getInventory();
         e.getRawSlots().stream()
-                .filter((raw) -> (raw >= 0 && raw < inv.getSize()))
-                .forEach((_item) -> e.setCancelled(true));
+                .filter(raw -> (raw >= 0 && raw < inv.getSize()))
+                .forEach(itemValue -> e.setCancelled(true));
     }
 
     public static void close(final InventoryCloseEvent e) {

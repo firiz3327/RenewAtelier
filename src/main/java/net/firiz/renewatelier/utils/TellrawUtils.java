@@ -34,6 +34,9 @@ import org.bukkit.inventory.ItemStack;
  */
 public class TellrawUtils {
 
+    private TellrawUtils() {
+    }
+
     public static ClickEvent createClickEvent(final ClickEvent.Action action, final String value) {
         return new ClickEvent(
                 action,

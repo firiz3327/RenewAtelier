@@ -20,8 +20,6 @@
  */
 package net.firiz.renewatelier.script.conversation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.script.Invocable;
@@ -292,7 +290,7 @@ public class ScriptConversation {
 
     @Export
     public Characteristic getCharacteristic(final String id) {
-        return Characteristic.valueOf(id);
+        return Characteristic.getCharacteristic(id);
     }
 
     @Export
@@ -316,23 +314,23 @@ public class ScriptConversation {
     public ItemStack alchemyMaterial(
             final AlchemyMaterial material,
             final int over_quality,
-            final List<Ingredients> over_ings,
-            int[] over_size,
-            final List<String> active_effects,
-            final List<Characteristic> over_characteristics,
-            final List<Category> over_category,
-            final boolean not_visible_catalyst
+            final List<Ingredients> overIngs,
+            int[] overSize,
+            final List<String> activeEffects,
+            final List<Characteristic> overCharacteristics,
+            final List<Category> overCategory,
+            final boolean notVisibleCatalyst
     ) {
         return AlchemyItemStatus.getItem(
                 material,
-                over_ings,
+                overIngs,
                 null,
                 over_quality,
-                over_size,
-                active_effects,
-                over_characteristics,
-                over_category,
-                not_visible_catalyst
+                overSize,
+                activeEffects,
+                overCharacteristics,
+                overCategory,
+                notVisibleCatalyst
         );
     }
 
@@ -340,23 +338,23 @@ public class ScriptConversation {
     public void applyAlchemyMaterial(
             final ItemStack item,
             final AlchemyMaterial material,
-            final List<Ingredients> over_ings,
-            final int over_quality,
-            final int[] over_size,
-            final List<String> active_effects,
-            final List<Characteristic> over_characteristics,
-            final List<Category> over_category,
+            final List<Ingredients> overIngs,
+            final int overQuality,
+            final int[] overSize,
+            final List<String> activeEffects,
+            final List<Characteristic> overCharacteristics,
+            final List<Category> overCategory,
             final boolean not_visible_catalyst
     ) {
         AlchemyItemStatus.getItem(
                 material,
-                over_ings,
+                overIngs,
                 item,
-                over_quality,
-                over_size,
-                active_effects,
-                over_characteristics,
-                over_category,
+                overQuality,
+                overSize,
+                activeEffects,
+                overCharacteristics,
+                overCategory,
                 not_visible_catalyst
         );
     }

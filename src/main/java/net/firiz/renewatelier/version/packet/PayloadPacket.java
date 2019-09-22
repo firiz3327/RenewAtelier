@@ -29,6 +29,9 @@ import org.bukkit.inventory.EquipmentSlot;
  */
 public class PayloadPacket {
 
+    private PayloadPacket() {
+    }
+
     public static void openBook(final Player player, final EquipmentSlot hand) {
         PacketUtils.sendPacket(
                 player,

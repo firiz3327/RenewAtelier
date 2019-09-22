@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import net.firiz.renewatelier.quest.result.QuestResult;
 import java.util.List;
 import net.firiz.renewatelier.config.ConfigManager;
-import net.firiz.renewatelier.config.loader.QuestLoader;
+import net.firiz.renewatelier.config.QuestLoader;
 
 /**
  *
@@ -33,7 +33,7 @@ import net.firiz.renewatelier.config.loader.QuestLoader;
 public class Quest {
 
     private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
-    private static List<Quest> IMPORTANT_QUESTS;
+    private static List<Quest> importantQuests;
     private final String id;
     private final String name;
     private final String[] description;
@@ -51,8 +51,7 @@ public class Quest {
     }
 
     public static Quest getQuest(final String id) {
-        for (final Object obj : CONFIG_MANAGER.getList(QuestLoader.class)) {
-            final Quest quest = (Quest) obj;
+        for (final Quest quest : CONFIG_MANAGER.getList(QuestLoader.class, Quest.class)) {
             if (quest.getId().equals(id)) {
                 return quest;
             }
@@ -61,11 +60,11 @@ public class Quest {
     }
     
     public static void setImportantQuests(final List<Quest> importantQuests) {
-        IMPORTANT_QUESTS = importantQuests;
+        Quest.importantQuests = importantQuests;
     }
     
     public static List<Quest> getImportantQuests() {
-        return new ArrayList<>(IMPORTANT_QUESTS);
+        return new ArrayList<>(importantQuests);
     }
 
     public String getId() {

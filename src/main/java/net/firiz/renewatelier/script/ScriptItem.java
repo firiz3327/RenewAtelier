@@ -33,13 +33,16 @@ import org.bukkit.inventory.ItemStack;
  */
 public class ScriptItem {
 
+    private ScriptItem() {
+    }
+
     public static boolean start(final PlayerInteractEvent e) {
         final Player player = e.getPlayer();
         final ItemStack item = e.getItem();
 
         if (item != null && player.getCooldown(item.getType()) == 0 && item.hasItemMeta() && item.getItemMeta().hasLore()) {
             final AlchemyMaterial material = AlchemyMaterial.getMaterial(item);
-            if (material != null && material.getScript() != null) {
+            if (material.getScript() != null) {
                 final String scriptName = "item/".concat(material.getScript());
                 ScriptManager.INSTANCE.start(scriptName, player, new ItemConversation(
                         scriptName,

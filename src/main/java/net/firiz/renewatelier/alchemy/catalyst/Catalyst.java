@@ -1,27 +1,27 @@
 /*
  * Catalyst.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.List;
-import net.firiz.renewatelier.alchemy.material.Category;
+
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.utils.Chore;
 import net.md_5.bungee.api.ChatColor;
@@ -30,22 +30,24 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
- *
  * @author firiz
  */
 public class Catalyst {
 
-    public static final Catalyst DEFAULT;
     private final List<CatalystBonus> bonus;
     private final int[] maincs;
-
-    static {
-        DEFAULT = new DefaultCatalyst();
-    }
+    private static DefaultCatalyst defaultCatalyst;
 
     public Catalyst(List<CatalystBonus> bonus) {
         this.bonus = bonus;
         this.maincs = createAllCS();
+    }
+
+    public static DefaultCatalyst getDefaultCatalyst() {
+        if (defaultCatalyst == null) {
+            defaultCatalyst = new DefaultCatalyst();
+        }
+        return defaultCatalyst;
     }
 
     public List<CatalystBonus> getBonus() {
@@ -68,11 +70,13 @@ public class Catalyst {
             case 16: // 2 4x4
                 inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, "", null));
                 break;
+            default:
+                throw new IllegalStateException("catalyst bonus size number is not supported.");
         }
         inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
 
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
-        bonus.forEach((b) -> {
+        bonus.forEach(b -> {
             int slot = defslot;
             for (int c : b.getCS()) {
                 short cmd = getCustomModelData(c);
@@ -91,17 +95,18 @@ public class Catalyst {
 
     private int[] createAllCS() {
         final int[] result = new int[bonus.get(0).getCS().length];
-        bonus.stream().map(CatalystBonus::getCS).forEachOrdered((cs) -> {
+        for (CatalystBonus catalystBonus : bonus) {
+            int[] cs = catalystBonus.getCS();
             for (int i = 0; i < cs.length; i++) {
                 int slot = cs[i];
                 if (slot != 0) {
                     result[i] = slot;
                 }
             }
-        });
+        }
         return result;
     }
-    
+
     public ItemStack getSlotItem(int cslot) {
         final int size = bonus.get(0).getCS().length;
         final int defslot = (size == 36 || size == 25 ? 3 : 13);
@@ -122,8 +127,6 @@ public class Catalyst {
 
     public static short getCustomModelData(int d) {
         switch (d) {
-            case 0:
-                return -1;
             case 1:
                 return 1527;
             case 2:
@@ -136,8 +139,9 @@ public class Catalyst {
                 return 1555;
             case 6:
                 return 1514;
+            default:
+                return -1;
         }
-        return -1;
     }
 
     public static int nextSlot(int slot, int size) {
@@ -148,7 +152,9 @@ public class Catalyst {
                     case 25:
                     case 34:
                     case 43:
-                        slot += 5;
+                        return slot + 6;
+                    default:
+                        break;
                 }
                 break;
             case 25:
@@ -158,7 +164,9 @@ public class Catalyst {
                     case 25:
                     case 34:
                     case 43:
-                        slot += 4;
+                        return slot + 5;
+                    default:
+                        break;
                 }
                 break;
             case 36:
@@ -169,11 +177,14 @@ public class Catalyst {
                     case 35:
                     case 44:
                     case 53:
-                        slot += 3;
+                        return slot + 4;
+                    default:
+                        break;
                 }
                 break;
+            default:
+                break;
         }
-        slot++;
-        return slot;
+        return slot + 1;
     }
 }

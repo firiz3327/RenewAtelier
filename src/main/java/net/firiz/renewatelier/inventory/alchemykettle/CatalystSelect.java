@@ -51,6 +51,9 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class CatalystSelect {
 
+    private CatalystSelect() {
+    }
+
     private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private static final List<UUID> OPEN_USERS = new ArrayList<>();
 
@@ -74,7 +77,7 @@ public class CatalystSelect {
         final ItemStack citem = KETTLE.getCatalyst(player.getUniqueId());
         Catalyst catalyst;
         if (citem == null) {
-            catalyst = Catalyst.DEFAULT;
+            catalyst = Catalyst.getDefaultCatalyst();
         } else {
             catalyst = AlchemyMaterial.getMaterial(citem).getCatalyst();
         }
@@ -82,7 +85,7 @@ public class CatalystSelect {
         final List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
-        recipe.getCatalyst_categorys().forEach((ct) -> {
+        recipe.getCatalystCategorys().forEach(ct -> {
             if (ct.startsWith("material:")) {
                 lore.add(ChatColor.RESET + "- "
                         + AlchemyMaterial.getMaterial(ct.substring(9)).getName()
@@ -113,14 +116,14 @@ public class CatalystSelect {
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final int raw = e.getRawSlot();
         final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(setting.getLore().get(0)));
-        if (!(raw < inv.getSize()) && e.isShiftClick()) {
+        if (raw >= inv.getSize() && e.isShiftClick()) {
             e.setCancelled(true);
             if (inv.getItem(37).getType() != Material.BARRIER) {
                 Chore.addItem(player, KETTLE.getCatalyst(uuid));
             }
             final ItemStack current = e.getCurrentItem();
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(current);
-            if (am != null && am.hasUsefulCatalyst(recipe)) {
+            if (am.hasUsefulCatalyst(recipe)) {
                 final ItemStack cloneItem = current.clone();
                 cloneItem.setAmount(1);
                 current.setAmount(current.getAmount() - 1);
@@ -129,39 +132,40 @@ public class CatalystSelect {
             }
             return;
         }
-        if (e.getSlotType() == InventoryType.SlotType.CONTAINER) {
-            if (raw < inv.getSize()) {
-                e.setCancelled(true);
-                switch (raw) {
-                    case 37: {
-                        if (e.getCurrentItem().getType() == Material.BARRIER) {
-                            final ItemStack cursor = e.getCursor();
-                            final AlchemyMaterial am = AlchemyMaterial.getMaterial(cursor);
-                            if (am != null && am.hasUsefulCatalyst(recipe)) {
-                                final ItemStack cloneItem = cursor.clone();
-                                cloneItem.setAmount(1);
-                                cursor.setAmount(cursor.getAmount() - 1);
-                                KETTLE.setCatalyst(uuid, cloneItem);
-                                setCatalystSlot(player, inv, recipe);
-                            }
-                        } else {
-                            Chore.addItem(player, KETTLE.getCatalyst(uuid));
-                            KETTLE.removeCatalyst(uuid);
+        if (e.getSlotType() == InventoryType.SlotType.CONTAINER && raw < inv.getSize()) {
+            e.setCancelled(true);
+            switch (raw) {
+                case 37: {
+                    if (e.getCurrentItem().getType() == Material.BARRIER) {
+                        final ItemStack cursor = e.getCursor();
+                        final AlchemyMaterial am = AlchemyMaterial.getMaterial(cursor);
+                        if (am != null && am.hasUsefulCatalyst(recipe)) {
+                            final ItemStack cloneItem = cursor.clone();
+                            cloneItem.setAmount(1);
+                            cursor.setAmount(cursor.getAmount() - 1);
+                            KETTLE.setCatalyst(uuid, cloneItem);
                             setCatalystSlot(player, inv, recipe);
                         }
-                        break;
+                    } else {
+                        Chore.addItem(player, KETTLE.getCatalyst(uuid));
+                        KETTLE.removeCatalyst(uuid);
+                        setCatalystSlot(player, inv, recipe);
                     }
-                    case 19: {
-                        if (KETTLE.getCatalyst(uuid) == null) {
-                            KETTLE.setCatalyst(uuid, null);
-                        }
-                        OPEN_USERS.add(player.getUniqueId());
-                        player.closeInventory();
-                        AlchemyKettle.openKettle(player, recipe, inv);
-                        OPEN_USERS.remove(uuid);
-                        break;
-                    }
+                    break;
                 }
+                case 19: {
+                    if (KETTLE.getCatalyst(uuid) == null) {
+                        KETTLE.setCatalyst(uuid, null);
+                    }
+                    OPEN_USERS.add(player.getUniqueId());
+                    player.closeInventory();
+                    AlchemyKettle.openKettle(player, recipe, inv);
+                    OPEN_USERS.remove(uuid);
+                    break;
+                }
+                default:
+                    // 想定外スロット
+                    break;
             }
         }
     }
@@ -169,7 +173,7 @@ public class CatalystSelect {
     public static void drag(final InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
-        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> e.setCancelled(true));
+        raws.stream().filter(raw -> (raw >= 0 && raw < inv.getSize())).forEach(itemValue -> e.setCancelled(true));
     }
 
     public static void close(final InventoryCloseEvent e) {

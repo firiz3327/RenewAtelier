@@ -51,19 +51,17 @@ import org.bukkit.plugin.RegisteredListener;
 public class DebugListener implements Listener {
 
     private final DebugManager debug = new DebugManager(this);
-    public boolean nonbreak = true;
-    private boolean allhandle = false;
+    private boolean nonBreak = true;
+    private boolean logHandle = false;
     private final RegisteredListener alarmListener = new RegisteredListener(
             this,
             (listener, event) -> {
-                if (allhandle) {
-                    if (!(event instanceof PlayerStatisticIncrementEvent
-                            || event instanceof EntityAirChangeEvent
-                            || event instanceof VehicleUpdateEvent
-                            || event instanceof VehicleBlockCollisionEvent
-                    )) {
-                        System.out.println(event.getEventName());
-                    }
+                if (logHandle && !(event instanceof PlayerStatisticIncrementEvent
+                        || event instanceof EntityAirChangeEvent
+                        || event instanceof VehicleUpdateEvent
+                        || event instanceof VehicleBlockCollisionEvent
+                )) {
+                    Chore.log(event.getEventName());
                 }
             },
             EventPriority.NORMAL,
@@ -72,8 +70,8 @@ public class DebugListener implements Listener {
     );
 
     public boolean changeAllHandles() {
-        allhandle = !allhandle;
-        if(allhandle) {
+        logHandle = !logHandle;
+        if(logHandle) {
             for (final HandlerList handler : HandlerList.getHandlerLists()) {
                 handler.register(alarmListener);
             }
@@ -82,7 +80,7 @@ public class DebugListener implements Listener {
                 handler.unregister(alarmListener);
             }
         }
-        return allhandle;
+        return logHandle;
     }
 
     @EventHandler
@@ -140,21 +138,24 @@ public class DebugListener implements Listener {
                 }
                 break;
             }
+            default:
+                // 想定されない
+                break;
         }
     }
 
     @EventHandler
     public final void blockbreak(BlockBreakEvent e) {
         e.setCancelled(
-                nonbreak || e.getPlayer().getInventory().getItemInMainHand().getType() == Material.DEBUG_STICK
+                nonBreak || e.getPlayer().getInventory().getItemInMainHand().getType() == Material.DEBUG_STICK
         );
     }
 
-    private String[] split(final String str) {
-        if (str.contains(",")) {
-            return str.split(",");
-        }
-        return new String[]{str};
+    public boolean isNonBreak() {
+        return nonBreak;
     }
 
+    public void setNonBreak(boolean nonBreak) {
+        this.nonBreak = nonBreak;
+    }
 }

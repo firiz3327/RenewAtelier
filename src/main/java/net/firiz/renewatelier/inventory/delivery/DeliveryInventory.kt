@@ -26,7 +26,6 @@ import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.utils.Chore
-import net.firiz.renewatelier.utils.DoubleData
 import net.firiz.renewatelier.version.LanguageItemUtil
 import net.firiz.renewatelier.version.packet.InventoryPacket
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType
@@ -66,11 +65,11 @@ object DeliveryInventory {
     fun openInventory(
             player: Player,
             title: String,
-            line_size: Int,
+            lineSize: Int,
             deliveryObjects: List<DeliveryObject>
     ) {
-        if (line_size < 2) {
-            throw IllegalArgumentException("The line_size variable must be 2 or more.")
+        if (lineSize < 2) {
+            throw IllegalArgumentException("The lineSize variable must be 2 or more.")
         }
 
         // {id:material.id, a:amount, q:quality, c:[characteristics] or none, i:[ingredients] or none}-Delivery
@@ -99,8 +98,8 @@ object DeliveryInventory {
             append("}").append(DELI)
         }
 
-        val size = line_size * 9
-        val inv = Bukkit.createInventory(player, line_size * 9, text)
+        val size = lineSize * 9
+        val inv = Bukkit.createInventory(player, lineSize * 9, text)
         for (i in size - 9 until size) {
             when (i) {
                 size - 4 -> inv.setItem(i, getConfirmItem(text, inv, player))
@@ -156,7 +155,7 @@ object DeliveryInventory {
             e.rawSlot == cancelPos -> { // cancel
                 e.isCancelled = true
                 invokeFunction(player.uniqueId, "cancel", null)
-                player.closeInventory() // invokeFunction(close)
+                player.closeInventory() // -> invokeFunction(close)
                 return
             }
             e.slotType == SlotType.CONTAINER && e.rawSlot <= inv.size - 9 -> // click inv
@@ -211,7 +210,9 @@ object DeliveryInventory {
         return checkItem(view.title, item, isReqAmount, am)
     }
 
-    // return DoubleData[true or false, DeliveryValuation]
+    /**
+     * return DoubleData[true or false, DeliveryValuation]
+     */
     private fun checkItem(title: String, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): Pair<Boolean, DeliveryValuation> {
         if (am == null) {
             return Pair(false, DeliveryValuation())
@@ -222,11 +223,11 @@ object DeliveryInventory {
             val titleValues = arrayListOf<ArrayList<String>>()
             for (i in 0 until titleAllValues.count() step 5) {
                 titleValues.add(arrayListOf(
-                        titleAllValues[i], // material.id
-                        titleAllValues[i + 1], // amount
-                        titleAllValues[i + 2], // quality
-                        titleAllValues[i + 3], // characteristic
-                        titleAllValues[i + 4] // ingredients
+                        titleAllValues[i], // -> material.id
+                        titleAllValues[i + 1], // -> amount
+                        titleAllValues[i + 2], // -> quality
+                        titleAllValues[i + 3], // -> characteristic
+                        titleAllValues[i + 4] // -> ingredients
                 ))
             }
             titleValues
@@ -237,7 +238,7 @@ object DeliveryInventory {
         val checkList = run {
             val list = arrayListOf<Boolean>()
             for (deliveryData in deliveryArray) {
-                val reqCharacteristics = deliveryData[3].split(",").filter { it != "none" }.map { Characteristic.valueOf(it) }
+                val reqCharacteristics = deliveryData[3].split(",").filter { it != "none" }.map { Characteristic.getCharacteristic(it) }
                 val reqIngredients = deliveryData[4].split(",").filter { it != "none" }.map { AlchemyIngredients.valueOf(it) }
                 list.add(run {
                     var result = 0

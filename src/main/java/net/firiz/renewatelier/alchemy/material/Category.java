@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import org.bukkit.Material;
 
 import java.util.Map;
@@ -72,8 +72,8 @@ public enum Category {
     private final DoubleData<Material, Integer> material;
 
     static {
-        Category[] var3;
-        int var2 = (var3 = values()).length;
+        Category[] var3 = values();
+        int var2 = var3.length;
 
         for (int var1 = 0; var1 < var2; ++var1) {
             final Category c = var3[var1];

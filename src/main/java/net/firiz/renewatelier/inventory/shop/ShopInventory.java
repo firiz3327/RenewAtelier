@@ -59,7 +59,6 @@ public final class ShopInventory {
 
     public static void click(final InventoryClickEvent e) {
         final Player player = (Player) e.getWhoClicked();
-        final UUID uuid = player.getUniqueId();
         final Inventory inv = e.getInventory();
         final int raw = e.getRawSlot();
         if (raw >= 0 && raw < inv.getSize()) {
@@ -79,7 +78,7 @@ public final class ShopInventory {
                                 .toString())
                 ));
                 final String v = str.substring(str.lastIndexOf(": ") + 2);
-                final int price = Integer.parseInt(v.substring(0, v.indexOf(" ")));
+                final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial(id);
                 final int check = id.equals("$null")
                         ? Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1
@@ -108,7 +107,7 @@ public final class ShopInventory {
     public static void drag(final InventoryDragEvent e) {
         final Inventory inv = e.getInventory();
         e.getRawSlots().stream()
-                .filter((raw) -> (raw >= 0 && raw < inv.getSize()))
-                .forEach((_item) -> e.setCancelled(true));
+                .filter(raw -> (raw >= 0 && raw < inv.getSize()))
+                .forEach(itemValue -> e.setCancelled(true));
     }
 }

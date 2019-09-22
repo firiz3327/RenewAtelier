@@ -18,16 +18,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.alchemy.kettle;
+package net.firiz.renewatelier.alchemy.kettle.bonus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
+import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
@@ -35,6 +31,7 @@ import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author firiz
@@ -43,7 +40,7 @@ public enum KettleBonusManager {
     INSTANCE; // enum singleton style
 
     private final Map<UUID, BonusPlayerData> datas;
-    private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
+    private final KettleItemManager kettleItemManager = KettleItemManager.INSTANCE;
 
     KettleBonusManager() {
         datas = new HashMap<>();
@@ -55,7 +52,7 @@ public enum KettleBonusManager {
 
     public int getBonus(UUID uuid, AlchemyAttribute type) {
         int sizes = 0;
-        final KettleBox kettleBox = KETTLE.getKettleData(uuid);
+        final KettleBox kettleBox = kettleItemManager.getKettleData(uuid);
         if (kettleBox != null) {
             final List<BonusItem> kettleSelects = kettleBox.getResultItems();
             for (final BonusItem itemData : kettleSelects) {
@@ -76,7 +73,7 @@ public enum KettleBonusManager {
         if (datas.containsKey(uuid)) {
             final StringBuilder sb = new StringBuilder();
             final BonusPlayerData bpd = datas.get(uuid);
-            final int bar = (int) ((double) bpd.getBar() / bpd.req * 10);
+            final int bar = (int) ((double) bpd.getBar() / bpd.getReq() * 10);
             for (int i = 0; i < 10; i++) {
                 if (i < bar) {
                     final AlchemyAttribute[] aas = bpd.getUp();
@@ -90,7 +87,7 @@ public enum KettleBonusManager {
                     sb.append(ChatColor.RESET).append("||||||");
                 }
             }
-            sb.append(ChatColor.RESET).append(" [").append(bpd.getLevel()).append("] ").append(bpd.getBar()).append("/").append(bpd.req).append("        ");
+            sb.append(ChatColor.RESET).append(" [").append(bpd.getLevel()).append("] ").append(bpd.getBar()).append("/").append(bpd.getReq()).append("        ");
             return sb.toString();
         }
         return ChatColor.RESET + "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| [0] 0/" + req + "        ";
@@ -105,20 +102,17 @@ public enum KettleBonusManager {
             datas.put(uuid, bpd);
         }
 
-        int bonus = 0;
-        for (final AlchemyAttribute aa : aas) {
-            bonus += getBonus(uuid, aa);
-        }
-        final KettleBox kettleBox = KETTLE.getKettleData(uuid);
+        int bonus = Arrays.stream(aas).mapToInt(aa -> getBonus(uuid, aa)).sum();
+        final KettleBox kettleBox = kettleItemManager.getKettleData(uuid);
         if (kettleBox != null) {
             final List<BonusItem> kettleSelects = kettleBox.getItems();
             plus += plus * ((double) bonus * 0.01 + (kettleSelects.isEmpty() ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));
 
-            final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+            final List<CatalystBonus> bonusDatas = kettleItemManager.getCatalystBonusList(uuid);
             if (bonusDatas != null) {
                 for (final CatalystBonus cb : bonusDatas) {
                     final List<CatalystBonus> usedBonus = kettleBox.getBonus();
-                    if (cb.getData().getType().isOnce() && (usedBonus == null || !usedBonus.contains(cb))) {
+                    if (cb.getData().getType().isOnce() && (usedBonus.isEmpty() || !usedBonus.contains(cb))) {
                         plus += Math.round(plus * (cb.getData().getX() * 0.01));
                         kettleBox.addBonus(cb);
                     }
@@ -128,12 +122,13 @@ public enum KettleBonusManager {
         }
     }
 
+    @NotNull
     public List<AlchemyAttribute[]> getLevelUps(UUID uuid) {
         final BonusPlayerData bpd = datas.get(uuid);
         if (bpd != null) {
             return bpd.getLevelUps();
         }
-        return null;
+        return new ArrayList<>(0);
     }
 
     public int getLevel(UUID uuid) {
@@ -151,65 +146,6 @@ public enum KettleBonusManager {
     public void back(UUID uuid) {
         if (datas.containsKey(uuid)) {
             datas.get(uuid).back();
-        }
-    }
-
-    private class BonusPlayerData {
-
-        private final int req;
-        private final List<Integer> bars;
-        private final List<AlchemyAttribute[]> ups;
-        private final Map<Integer, AlchemyAttribute[]> levelups;
-
-        public BonusPlayerData(int req) {
-            this.req = req;
-            this.bars = new ArrayList<>();
-            this.ups = new ArrayList<>();
-            this.levelups = new LinkedHashMap<>();
-        }
-
-        public int getBar() {
-            int bar = bars.size() - 1;
-            if (bar != -1) {
-                return bars.get(bar) % req;
-            }
-            return 0;
-        }
-
-        public int getLevel() {
-            int bar = bars.size() - 1;
-            if (bar != -1) {
-                return bars.get(bar) / req;
-            }
-            return 0;
-        }
-
-        public AlchemyAttribute[] getUp() {
-            return ups.get(ups.size() - 1);
-        }
-
-        public List<AlchemyAttribute[]> getLevelUps() {
-            List<AlchemyAttribute[]> result = new ArrayList<>();
-            levelups.keySet().forEach((i) -> result.add(levelups.get(i)));
-            return result;
-        }
-
-        public void add(int plus, AlchemyAttribute[] ups) {
-            int old_level = getLevel();
-            bars.add(plus + (bars.isEmpty() ? 0 : bars.get(bars.size() - 1)));
-            this.ups.add(ups);
-            if (old_level < getLevel()) {
-                levelups.put(bars.size() - 1, ups);
-            }
-        }
-
-        public void back() {
-            int remove = bars.size() - 1;
-            if (remove != -1) {
-                bars.remove(remove);
-                ups.remove(remove);
-                levelups.remove(remove);
-            }
         }
     }
 

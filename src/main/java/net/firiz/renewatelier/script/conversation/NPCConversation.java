@@ -27,6 +27,7 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.inventory.delivery.DeliveryObject;
 import net.firiz.renewatelier.npc.NPCManager;
+import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
@@ -202,7 +203,7 @@ public final class NPCConversation extends ScriptConversation {
             val.append(i <= status ? "●" : "○");
         }
         sendNext(
-                chatColor(val.insert(0, "&7[").append("] &2" + getNPCName() + " ").toString()),
+                chatColor(val.insert(0, "&7[").append("] &2").append(getNPCName()).append(" ").toString()),
                 chatColor("&a" + msg)
         );
     }
@@ -211,7 +212,7 @@ public final class NPCConversation extends ScriptConversation {
         final Location balloonLoc = getLocation();
         balloonLoc.setY(balloonLoc.getY() + 0.25);
 
-        MessageType.FAKE_ENTITY.boardcast(
+        MessageType.FAKE_ENTITY.broadcast(
                 this,
                 FakeEntity.FakeEntityType.ARMOR_STAND,
                 balloonLoc,
@@ -222,60 +223,47 @@ public final class NPCConversation extends ScriptConversation {
         }
         runTaskLater = Bukkit.getScheduler().runTaskLater(
                 AtelierPlugin.getPlugin(),
-                () -> MessageType.DESTROY_FAKE_ENTITY.boardcast(this),
+                () -> MessageType.DESTROY_FAKE_ENTITY.broadcast(this),
                 time
         );
     }
 
     private enum MessageType {
-        FAKE_ENTITY(EntityType.class, Location.class, String.class) {
+        FAKE_ENTITY {
+            /**
+             *　アーマースタンドのパケットを生成し、Scriptの対象プレイヤーへ送信します。
+             *
+             * @param conversation
+             * @param args EntityType, Location, Stringを引数とします
+             */
             @Override
-            FakeEntity run(NPCConversation conv, Object... args) {
+            void run(NPCConversation conversation, Object... args) {
                 // https://wiki.vg/Protocol#Spawn_Mob
                 // https://wiki.vg/Entity_metadata#Entity_Metadata_Format
                 try {
                     final FakeEntity fakeEntity = new FakeEntity(-1, (FakeEntity.FakeEntityType) args[0], 0);
-                    conv.fakeEntity = fakeEntity;
-                    PacketUtils.sendPacket(conv.player, EntityPacket.getSpawnPacket(
+                    conversation.fakeEntity = fakeEntity;
+                    PacketUtils.sendPacket(conversation.player, EntityPacket.getSpawnPacket(
                             fakeEntity,
                             (Location) args[1]
                     ));
-                    PacketUtils.sendPacket(conv.player, EntityPacket.getMessageStandMeta(conv.player, (String) args[2]).compile(fakeEntity.getEntityId()));
-                    return fakeEntity;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                    PacketUtils.sendPacket(conversation.player, EntityPacket.getMessageStandMeta(conversation.player, (String) args[2]).compile(fakeEntity.getEntityId()));
+                } catch (Exception e) {
+                    Chore.logWarning(e);
                 }
-                return null;
             }
         },
         DESTROY_FAKE_ENTITY {
             @Override
-            Object run(NPCConversation conv, Object... args) {
-                PacketUtils.sendPacket(conv.player, EntityPacket.getDespawnPacket(conv.fakeEntity.getEntityId()));
-                return null;
+            void run(NPCConversation conversation, Object... args) {
+                PacketUtils.sendPacket(conversation.player, EntityPacket.getDespawnPacket(conversation.fakeEntity.getEntityId()));
             }
         };
 
-        abstract <T> T run(NPCConversation conv, Object... args);
+        abstract void run(NPCConversation conversation, Object... args);
 
-        private final Class<?>[] clasz;
-
-        MessageType(Class<?>... clasz) {
-            this.clasz = clasz;
-        }
-
-        public <T> T boardcast(@NotNull final NPCConversation conv, @NotNull final Object... args) {
-            if (clasz.length != args.length) {
-                throw new IllegalArgumentException("The value of args Length is different.");
-            }
-            /*
-            for (int i = 0; i < clasz.length; i++) {
-                if (!clasz[i].isInstance(args[i])) {
-                    throw new IllegalArgumentException("The argument class is different.");
-                }
-            }
-            */
-            return run(conv, args);
+        public void broadcast(@NotNull final NPCConversation conversation, @NotNull final Object... args) {
+            run(conversation, args);
         }
     }
 

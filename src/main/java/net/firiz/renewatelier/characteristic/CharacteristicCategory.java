@@ -27,7 +27,8 @@ package net.firiz.renewatelier.characteristic;
  */
 public enum CharacteristicCategory {
     ALL("全種"),
-    DAMAGE("攻撃"),
+    ALCHEMY("調合"),
+    ATTACK("攻撃"),
     HEAL("回復"),
     WEAPON("武器"),
     ARMOR("防具"),

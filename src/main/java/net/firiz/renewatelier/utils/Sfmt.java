@@ -7,13 +7,13 @@ coded by isaku@pb4.so-net.ne.jp
 final class Sfmt {
 
     int index;
-    int coin_bits;
+    int coinBits;
     /* NextBit での残りのビット */
-    int coin_save;
+    int coinSave;
     /* NextBit での値保持 */
-    int byte_pos;
+    int bytePos;
     /* NextByte で使用したバイト数 */
-    int byte_save;
+    int byteSave;
     /* NextByte での値保持 */
     int range;
     /* NextIntEx で前回の範囲 */
@@ -21,23 +21,23 @@ final class Sfmt {
     /* NextIntEx で前回の基準値 */
     int shift;
     /* NextIntEx で前回のシフト数 */
-    int normal_sw;
+    int normalSw;
     /* NextNormal で残りを持っている */
-    double normal_save;
+    double normalSave;
     /* NextNormal の残りの値 */
     protected final int[] x = new int[1392];
 
     /* 状態テーブル */
-    protected int[] GetParity() {
+    protected int[] getParity() {
         return new int[]{0x00000001, 0x00000000, 0xa3ac4000, 0xecc1327a};
     }
 
-    public String IdString() {
-        return "SFMT-44497:330-5-3-9-3:effffffb-dfbebfff-bfbf7bef-9ffd7bff";
-    }
-
-    public void gen_rand_all() {
-        int a = 0, b = 1320, c = 1384, d = 1388, y;
+    public void genRandAll() {
+        int a = 0;
+        int b = 1320;
+        int c = 1384;
+        int d = 1388;
+        int y;
         int[] p = x;
 
         do {
@@ -59,16 +59,18 @@ final class Sfmt {
         } while (a != 1392);
     }
 
-    void period_certification() {
-        int work, inner = 0;
-        int i, j;
-        int[] parity = GetParity();
+    void periodCertification() {
+        int work;
+        int inner = 0;
+        int i;
+        int j;
+        int[] parity = getParity();
 
         index = 1392;
         range = 0;
-        normal_sw = 0;
-        coin_bits = 0;
-        byte_pos = 0;
+        normalSw = 0;
+        coinBits = 0;
+        bytePos = 0;
         for (i = 0; i < 4; i++) {
             inner ^= x[i] & parity[i];
         }
@@ -90,42 +92,46 @@ final class Sfmt {
     }
 
     /* 整数の種 s による初期化 */
- /*synchronized*/ public void InitMt(int s) {
+ /*synchronized*/ public void initMt(int s) {
         x[0] = s;
         for (int p = 1; p < 1392; p++) {
             x[p] = s = 1812433253 * (s ^ (s >>> 30)) + p;
         }
-        period_certification();
+        periodCertification();
     }
 
     Sfmt(int s) {
-        InitMt(s);
+        initMt(s);
     }
 
-    /* 配列 init_key による初期化 */
- /*synchronized*/ public void InitMtEx(int[] init_key) {
-        int r, i, j, c, key_len = init_key.length;
+    /* 配列 initKey による初期化 */
+ /*synchronized*/ public void initMtEx(int[] initKey) {
+        int r;
+        int i;
+        int j;
+        int c;
+        int keyLen = initKey.length;
 
         for (i = 0; i < 1392; i++) {
             x[i] = 0x8b8b8b8b;
         }
-        if (key_len + 1 > 1392) {
-            c = key_len + 1;
+        if (keyLen + 1 > 1392) {
+            c = keyLen + 1;
         } else {
             c = 1392;
         }
         r = x[0] ^ x[690] ^ x[1391];
         r = (r ^ (r >>> 27)) * 1664525;
         x[690] += r;
-        r += key_len;
+        r += keyLen;
         x[701] += r;
         x[0] = r;
         c--;
-        for (i = 1, j = 0; j < c && j < key_len; j++) {
+        for (i = 1, j = 0; j < c && j < keyLen; j++) {
             r = x[i] ^ x[(i + 690) % 1392] ^ x[(i + 1391) % 1392];
             r = (r ^ (r >>> 27)) * 1664525;
             x[(i + 690) % 1392] += r;
-            r += init_key[j] + i;
+            r += initKey[j] + i;
             x[(i + 701) % 1392] += r;
             x[i] = r;
             i = (i + 1) % 1392;
@@ -148,25 +154,25 @@ final class Sfmt {
             x[i] = r;
             i = (i + 1) % 1392;
         }
-        period_certification();
+        periodCertification();
     }
 
-    Sfmt(int[] init_key) {
-        InitMtEx(init_key);
+    Sfmt(int[] initKey) {
+        initMtEx(initKey);
     }
 
     /* 32ビット符号あり整数の乱数 */
- /*synchronized*/ public int NextMt() {
+ /*synchronized*/ public int nextMt() {
         if (index == 1392) {
-            gen_rand_all();
+            genRandAll();
             index = 0;
         }
         return x[index++];
     }
 
     /* ０以上 n 未満の整数乱数 */
-    public int NextInt(int n) {
-        double z = NextMt();
+    public int nextInt(int n) {
+        double z = nextMt();
         if (z < 0) {
             z += 4294967296.0;
         }
@@ -174,8 +180,9 @@ final class Sfmt {
     }
 
     /* ０以上１未満の乱数(53bit精度) */
-    public double NextUnif() {
-        double z = NextMt() >>> 11, y = NextMt();
+    public double nextUnif() {
+        double z = nextMt() >>> 11;
+        double y = nextMt();
         if (y < 0) {
             y += 4294967296.0;
         }
@@ -183,134 +190,140 @@ final class Sfmt {
     }
 
     /* ０か１を返す乱数 */
- /*synchronized*/ public int NextBit() {
-        if (--coin_bits == -1) {
-            coin_bits = 31;
-            return (coin_save = NextMt()) & 1;
+ /*synchronized*/ public int nextBit() {
+        if (--coinBits == -1) {
+            coinBits = 31;
+            return (coinSave = nextMt()) & 1;
         } else {
-            return (coin_save >>>= 1) & 1;
+            return (coinSave >>>= 1) & 1;
         }
     }
 
     /* ０から２５５を返す乱数 */
- /*synchronized*/ public int NextByte() {
-        if (--byte_pos == -1) {
-            byte_pos = 3;
-            return (byte_save = NextMt()) & 255;
+ /*synchronized*/ public int nextByte() {
+        if (--bytePos == -1) {
+            bytePos = 3;
+            return (byteSave = nextMt()) & 255;
         } else {
-            return (byte_save >>>= 8) & 255;
+            return (byteSave >>>= 8) & 255;
         }
     }
 
-    /* 丸め誤差のない０以上 range_ 未満の整数乱数 */
- /*synchronized*/ public int NextIntEx(int range_) {
-        int y_, base_, remain_;
-        int shift_;
+    /* 丸め誤差のない０以上 range1 未満の整数乱数 */
+ /*synchronized*/ public int nextIntEx(int range1) {
+        int y1;
+        int base1;
+        int remain1;
+        int shift1;
 
-        if (range_ <= 0) {
+        if (range1 <= 0) {
             return 0;
         }
-        if (range_ != range) {
-            base = (range = range_);
+        if (range1 != range) {
+            base = (range = range1);
             for (shift = 0; base <= (1 << 30) && base != 1 << 31; shift++) {
                 base <<= 1;
             }
         }
         for (;;) {
-            y_ = NextMt() >>> 1;
-            if (y_ < base || base == 1 << 31) {
-                return (y_ >>> shift);
+            y1 = nextMt() >>> 1;
+            if (y1 < base || base == 1 << 31) {
+                return (y1 >>> shift);
             }
-            base_ = base;
-            shift_ = shift;
-            y_ -= base_;
-            remain_ = (1 << 31) - base_;
-            for (; remain_ >= range_; remain_ -= base_) {
-                for (; base_ > remain_; base_ >>>= 1) {
-                    shift_--;
+            base1 = base;
+            shift1 = shift;
+            y1 -= base1;
+            remain1 = (1 << 31) - base1;
+            for (; remain1 >= range1; remain1 -= base1) {
+                for (; base1 > remain1; base1 >>>= 1) {
+                    shift1--;
                 }
-                if (y_ < base_) {
-                    return (y_ >>> shift_);
+                if (y1 < base1) {
+                    return (y1 >>> shift1);
                 } else {
-                    y_ -= base_;
+                    y1 -= base1;
                 }
             }
         }
     }
 
     /* 自由度νのカイ２乗分布 */
-    public double NextChisq(double n) {
-        return 2 * NextGamma(0.5 * n);
+    public double nextChisq(double n) {
+        return 2 * nextGamma(0.5 * n);
     }
 
     /* パラメータａのガンマ分布 */
-    public double NextGamma(double a) {
-        double t, u, X, y;
+    public double nextGamma(double a) {
+        double t;
+        double u;
+        double x1;
+        double y;
         if (a > 1) {
             t = Math.sqrt(2 * a - 1);
             do {
                 do {
                     do {
-                        X = 1 - NextUnif();
-                        y = 2 * NextUnif() - 1;
-                    } while (X * X + y * y > 1);
-                    y /= X;
-                    X = t * y + a - 1;
-                } while (X <= 0);
-                u = (a - 1) * Math.log(X / (a - 1)) - t * y;
-            } while (u < -50 || NextUnif() > (1 + y * y) * Math.exp(u));
+                        x1 = 1 - nextUnif();
+                        y = 2 * nextUnif() - 1;
+                    } while (x1 * x1 + y * y > 1);
+                    y /= x1;
+                    x1 = t * y + a - 1;
+                } while (x1 <= 0);
+                u = (a - 1) * Math.log(x1 / (a - 1)) - t * y;
+            } while (u < -50 || nextUnif() > (1 + y * y) * Math.exp(u));
         } else {
             t = 2.718281828459045235 / (a + 2.718281828459045235);
             do {
-                if (NextUnif() < t) {
-                    X = Math.pow(NextUnif(), 1 / a);
-                    y = Math.exp(-X);
+                if (nextUnif() < t) {
+                    x1 = Math.pow(nextUnif(), 1 / a);
+                    y = Math.exp(-x1);
                 } else {
-                    X = 1 - Math.log(1 - NextUnif());
-                    y = Math.pow(X, a - 1);
+                    x1 = 1 - Math.log(1 - nextUnif());
+                    y = Math.pow(x1, a - 1);
                 }
-            } while (NextUnif() >= y);
+            } while (nextUnif() >= y);
         }
-        return X;
+        return x1;
     }
 
     /* 確率Ｐの幾何分布 */
-    public int NextGeometric(double p) {
-        return (int) Math.ceil(Math.log(1.0 - NextUnif()) / Math.log(1 - p));
+    public int nextGeometric(double p) {
+        return (int) Math.ceil(Math.log(1.0 - nextUnif()) / Math.log(1 - p));
     }
 
     /* 三角分布 */
-    public double NextTriangle() {
-        double a = NextUnif(), b = NextUnif();
+    public double nextTriangle() {
+        double a = nextUnif();
+        double b = nextUnif();
         return a - b;
     }
 
     /* 平均１の指数分布 */
-    public double NextExp() {
-        return -Math.log(1 - NextUnif());
+    public double nextExp() {
+        return -Math.log(1 - nextUnif());
     }
 
     /* 標準正規分布(最大8.57σ) */
- /*synchronized*/ public double NextNormal() {
-        if (normal_sw == 0) {
-            double t = Math.sqrt(-2 * Math.log(1.0 - NextUnif()));
-            double u = 3.141592653589793 * 2 * NextUnif();
-            normal_save = t * Math.sin(u);
-            normal_sw = 1;
+ /*synchronized*/ public double nextNormal() {
+        if (normalSw == 0) {
+            double t = Math.sqrt(-2 * Math.log(1.0 - nextUnif()));
+            double u = 3.141592653589793 * 2 * nextUnif();
+            normalSave = t * Math.sin(u);
+            normalSw = 1;
             return t * Math.cos(u);
         } else {
-            normal_sw = 0;
-            return normal_save;
+            normalSw = 0;
+            return normalSave;
         }
     }
 
     /* Ｎ次元のランダム単位ベクトル */
-    public double[] NextUnitVect(int n) {
+    public double[] nextUnitVect(int n) {
         int i;
         double r = 0;
         double[] v = new double[n];
         for (i = 0; i < n; i++) {
-            v[i] = NextNormal();
+            v[i] = nextNormal();
             r += v[i] * v[i];
         }
         if (r == 0.0) {
@@ -324,10 +337,11 @@ final class Sfmt {
     }
 
     /* パラメータＮ,Ｐの２項分布 */
-    public int NextBinomial(int n, double p) {
-        int i, r = 0;
+    public int nextBinomial(int n, double p) {
+        int i;
+        int r = 0;
         for (i = 0; i < n; i++) {
-            if (NextUnif() < p) {
+            if (nextUnif() < p) {
                 r++;
             }
         }
@@ -335,11 +349,13 @@ final class Sfmt {
     }
 
     /* 相関係数Ｒの２変量正規分布 */
-    public double[] NextBinormal(double r) {
-        double r1, r2, s;
+    public double[] nextBinormal(double r) {
+        double r1;
+        double r2;
+        double s;
         do {
-            r1 = 2 * NextUnif() - 1;
-            r2 = 2 * NextUnif() - 1;
+            r1 = 2 * nextUnif() - 1;
+            r2 = 2 * nextUnif() - 1;
             s = r1 * r1 + r2 * r2;
         } while (s > 1 || s == 0);
         s = -Math.log(s) / s;
@@ -349,70 +365,74 @@ final class Sfmt {
     }
 
     /* パラメータＡ,Ｂのベータ分布 */
-    public double NextBeta(double a, double b) {
-        double temp = NextGamma(a);
-        return temp / (temp + NextGamma(b));
+    public double nextBeta(double a, double b) {
+        double temp = nextGamma(a);
+        return temp / (temp + nextGamma(b));
     }
 
     /* パラメータＮの累乗分布 */
-    public double NextPower(double n) {
-        return Math.pow(NextUnif(), 1.0 / (n + 1));
+    public double nextPower(double n) {
+        return Math.pow(nextUnif(), 1.0 / (n + 1));
     }
 
     /* ロジスティック分布 */
-    public double NextLogistic() {
+    public double nextLogistic() {
         double r;
         do {
-            r = NextUnif();
+            r = nextUnif();
         } while (r == 0);
         return Math.log(r / (1 - r));
     }
 
     /* コーシー分布 */
-    public double NextCauchy() {
-        double x, y;
+    public double nextCauchy() {
+        double x1;
+        double y;
         do {
-            x = 1 - NextUnif();
-            y = 2 * NextUnif() - 1;
-        } while (x * x + y * y > 1);
-        return y / x;
+            x1 = 1 - nextUnif();
+            y = 2 * nextUnif() - 1;
+        } while (x1 * x1 + y * y > 1);
+        return y / x1;
     }
 
     /* 自由度 n1,n2 のＦ分布 */
-    public double NextFDist(double n1, double n2) {
-        double nc1 = NextChisq(n1), nc2 = NextChisq(n2);
+    public double nextFDist(double n1, double n2) {
+        double nc1 = nextChisq(n1);
+        double nc2 = nextChisq(n2);
         return (nc1 * n2) / (nc2 * n1);
     }
 
     /* 平均λのポアソン分布 */
-    public int NextPoisson(double lambda) {
+    public int nextPoisson(double lambda) {
         int k;
-        lambda = Math.exp(lambda) * NextUnif();
+        lambda = Math.exp(lambda) * nextUnif();
         for (k = 0; lambda > 1; k++) {
-            lambda *= NextUnif();
+            lambda *= nextUnif();
         }
         return k;
     }
 
     /* 自由度Ｎのｔ分布 */
-    public double NextTDist(double n) {
-        double a, b, c;
+    public double nextTDist(double n) {
+        double a;
+        double b;
+        double c;
         if (n <= 2) {
             do {
-                a = NextChisq(n);
+                a = nextChisq(n);
             } while (a == 0);
-            return NextNormal() / Math.sqrt(a / n);
+            return nextNormal() / Math.sqrt(a / n);
         }
         do {
-            a = NextNormal();
+            a = nextNormal();
             b = a * a / (n - 2);
-            c = Math.log(1 - NextUnif()) / (1 - 0.5 * n);
+            c = Math.log(1 - nextUnif()) / (1 - 0.5 * n);
         } while (Math.exp(-b - c) > 1 - b);
         return a / Math.sqrt((1 - 2.0 / n) * (1 - b));
     }
 
     /* パラメータαのワイブル分布 */
-    public double NextWeibull(double alpha) {
-        return Math.pow(-Math.log(1 - NextUnif()), 1 / alpha);
+    public double nextWeibull(double alpha) {
+        return Math.pow(-Math.log(1 - nextUnif()), 1 / alpha);
     }
 }

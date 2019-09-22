@@ -23,8 +23,7 @@ package net.firiz.renewatelier.listener;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
-import net.firiz.renewatelier.item.bag.AlchemyBagItem;
-import net.firiz.renewatelier.nodification.Nodification;
+import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
 import net.firiz.renewatelier.player.PlayerStatus;
@@ -34,7 +33,6 @@ import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -78,7 +76,7 @@ public class PlayerListener implements Listener {
             }
             // use_item -------
             if (ScriptItem.start(e)) {
-                return;
+                // なんか作る
             }
             //---
         }
@@ -88,7 +86,6 @@ public class PlayerListener implements Listener {
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
             AlchemyKettle.pickup(e);
-            AlchemyBagItem.pickup(e);
         }
     }
 
@@ -110,7 +107,7 @@ public class PlayerListener implements Listener {
     private void join(final PlayerJoinEvent e) {
         PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer().getUniqueId());
         NPCManager.INSTANCE.packet(e.getPlayer());
-        Nodification.loginNodification(e.getPlayer());
+        Notification.loginNotification(e.getPlayer());
     }
 
     @EventHandler
@@ -126,24 +123,6 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void respawn(final PlayerRespawnEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
-    }
-
-    @EventHandler
-    private void fishing(final PlayerFishEvent e) {
-        switch (e.getState()) {
-            case BITE:
-                break;
-            case CAUGHT_ENTITY:
-                break;
-            case CAUGHT_FISH:
-                break;
-            case FAILED_ATTEMPT:
-                break;
-            case FISHING:
-                break;
-            case IN_GROUND:
-                break;
-        }
     }
 
     @EventHandler

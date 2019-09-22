@@ -10,7 +10,7 @@ import net.firiz.renewatelier.inventory.shop.ShopInventory
 import net.firiz.renewatelier.inventory.shop.ShopItem
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
-import net.firiz.renewatelier.nodification.Nodification
+import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
@@ -23,6 +23,8 @@ import org.bukkit.entity.Player
 import java.util.*
 
 class DebugCommands(private val debugListener: DebugListener) {
+
+    private val messagePlayerNpc = "プレイヤーNPCを設置しました。再ログインしてください。";
 
     @Cmd(
             desc = ["Name?"],
@@ -87,10 +89,8 @@ class DebugCommands(private val debugListener: DebugListener) {
             if (cmd != null) {
                 val ccmds = arrayListOf<String>()
                 for (it in DebugCommands::class.java.methods) {
-                    if (it.isAnnotationPresent(Cmd::class.java)) {
-                        if (it.name.contains(cmd, true)) {
-                            ccmds.add("${ChatColor.DARK_GRAY}command ${ChatColor.GREEN}'${it.name}' ${ChatColor.RESET}- ${it.getAnnotation(Cmd::class.java).text}")
-                        }
+                    if (it.isAnnotationPresent(Cmd::class.java) && it.name.contains(cmd, true)) {
+                        ccmds.add("${ChatColor.DARK_GRAY}command ${ChatColor.GREEN}'${it.name}' ${ChatColor.RESET}- ${it.getAnnotation(Cmd::class.java).text}")
                     }
                 }
                 if (ccmds.isNotEmpty()) {
@@ -207,7 +207,7 @@ class DebugCommands(private val debugListener: DebugListener) {
                 false
         )
         Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
-            sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+            sender.kickPlayer(messagePlayerNpc)
         })
     }
 
@@ -226,7 +226,7 @@ class DebugCommands(private val debugListener: DebugListener) {
                 true
         )
         Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), Runnable {
-            sender.kickPlayer("プレイヤーNPCを設置しました。再ログインしてください。")
+            sender.kickPlayer(messagePlayerNpc)
         })
     }
 
@@ -273,7 +273,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "自身にレシピ開放パケットを送ります。"
     )
     fun packetRecipe(sender: Player, args: ArrayList<Any>) {
-        Nodification.recipeNodification(sender, args[0] as Material)
+        Notification.recipeNotification(sender, args[0] as Material)
     }
 
     @Cmd(
@@ -306,8 +306,8 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "ブロックの破壊をON・OFFします。"
     )
     fun cbreak(sender: Player, args: ArrayList<Any>): Boolean {
-        debugListener.nonbreak = !debugListener.nonbreak
-        return debugListener.nonbreak
+        debugListener.isNonBreak = !debugListener.isNonBreak
+        return debugListener.isNonBreak
     }
 
     @Cmd(

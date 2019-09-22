@@ -28,9 +28,6 @@ import net.firiz.renewatelier.inventory.alchemykettle.ItemSelect;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
-import net.firiz.renewatelier.item.bag.AlchemyBagItem;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,16 +47,15 @@ import java.util.UUID;
  */
 public class InventoryListener implements Listener {
 
-    private final Map<UUID, ItemStack> click_temp = new HashMap<>();
+    private final Map<UUID, ItemStack> clickTemp = new HashMap<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invClick(final InventoryClickEvent e) {
         final UUID uuid = e.getWhoClicked().getUniqueId();
-        final Inventory inv = e.getInventory();
         final InventoryView view = e.getView();
 
-        if (click_temp.containsKey(uuid)) {
-            final ItemStack rCursor = click_temp.remove(uuid);
+        if (clickTemp.containsKey(uuid)) {
+            final ItemStack rCursor = clickTemp.remove(uuid);
             if (rCursor.isSimilar(e.getCursor())) {
                 e.setCancelled(true);
                 return;
@@ -83,26 +79,6 @@ public class InventoryListener implements Listener {
             ShopInventory.click(e);
         } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.click(e);
-        } else if (AlchemyBagItem.isBagInventory(view)) {
-            AlchemyBagItem.click(e);
-        } else if (inv.getType() == InventoryType.CRAFTING && e.getClick() == ClickType.RIGHT) { // player inv
-            final AlchemyBagItem bag = AlchemyBagItem.getBag(e.getCurrentItem());
-            if (bag != null) {
-                if (e.getCursor() == null || e.getCursor().getType() == Material.AIR) {
-                    e.setCancelled(true);
-                    AlchemyBagItem.openInventory((Player) e.getWhoClicked(), e.getCurrentItem(), e.getSlot());
-                }/* else { // アイテム追加
-                    final AlchemyMaterial material = AlchemyMaterial.getMaterial(e.getCursor());
-                    if (material != null && bag.getType() == material) {
-                        e.setCancelled(true);
-                        click_temp.put(uuid, e.getCursor());
-
-                        final DoubleData<ItemStack, ItemStack> bagItem = AlchemyBagItem.addItem(e.getCurrentItem(), bag, e.getCursor());
-                        e.setCurrentItem(bagItem.getLeft());
-                    }
-                }
-                 */
-            }
         }
     }
 
@@ -123,8 +99,6 @@ public class InventoryListener implements Listener {
             AlchemyKettle.drag(e);
         } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.drag(e);
-        } else if (AlchemyBagItem.isBagInventory(view)) {
-            AlchemyBagItem.drag(e);
         }
     }
 
@@ -143,14 +117,11 @@ public class InventoryListener implements Listener {
             AlchemyKettle.close(e);
         } else if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.close(e);
-        } else if (AlchemyBagItem.isBagInventory(view)) {
-            AlchemyBagItem.close(e);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invOpen(final InventoryOpenEvent e) {
-//        final Player player = (Player) e.getPlayer();
         final InventoryView view = e.getView();
         if (view.getTopInventory() instanceof AnvilInventory) {
             AnvilManager.open(e);

@@ -116,7 +116,7 @@ public enum AlchemyCircle {
                 return ai;
             }
         }
-        throw new IllegalArgumentException("not found " + value);
+        throw new IllegalArgumentException(value + " not found.");
     }
 
     public static AlchemyCircle sertchData(final int data) {

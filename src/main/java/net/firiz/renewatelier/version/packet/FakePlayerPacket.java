@@ -49,6 +49,9 @@ import org.bukkit.entity.Player;
  */
 public class FakePlayerPacket {
 
+    private FakePlayerPacket() {
+    }
+
     public static VEntityPlayer createEntityPlayer(final World world, final Location location, final UUID uuid, final String name) {
         final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         final WorldServer nmsWorld = ((CraftWorld) world).getHandle();
@@ -61,7 +64,7 @@ public class FakePlayerPacket {
 
     private static PacketPlayOutPlayerInfo getInfo(final List<VEntityPlayer> players, final boolean remove) {
         final List<EntityPlayer> eps = new ArrayList<>();
-        players.forEach((vEps) -> eps.add((EntityPlayer) vEps.getEntityPlayer()));
+        players.forEach(vEps -> eps.add((EntityPlayer) vEps.getEntityPlayer()));
         return new PacketPlayOutPlayerInfo(
                 remove
                         ? PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER

@@ -10,6 +10,9 @@ import java.util.List;
 
 public class AlchemyChore {
 
+    private AlchemyChore() {
+    }
+
     protected static void setSetting(final ItemMeta meta, final int line, final int data, final String desc) {
         final List<String> lores = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
         if (lores.size() > line) {
@@ -40,16 +43,14 @@ public class AlchemyChore {
         final List<String> lores = meta.hasLore() ? meta.getLore() : new ArrayList<>();
         if (lores.size() > line) {
             lores.set(line, Chore.createStridColor(data) + desc);
-        } else {
-            while(true) {
-                if(lores.size() >= line) {
-                    lores.add(Chore.createStridColor(data) + desc);
-                } else {
-                    lores.add("");
-                    continue;
-                }
-                break;
+        } else while (true) {
+            if (lores.size() >= line) {
+                lores.add(Chore.createStridColor(data) + desc);
+            } else {
+                lores.add("");
+                continue;
             }
+            break;
         }
         meta.setLore(lores);
     }

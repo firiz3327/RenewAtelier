@@ -25,9 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.firiz.renewatelier.alchemy.material.Ingredients;
-import net.firiz.renewatelier.alchemy.material.MaterialSizeData;
 import net.firiz.renewatelier.config.ConfigManager;
-import net.firiz.renewatelier.config.loader.AlchemyRecipeLoader;
+import net.firiz.renewatelier.config.AlchemyRecipeLoader;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -39,44 +39,40 @@ public class AlchemyRecipe {
     private final String id;
     private final String result;
     private final int amount;
-    private final List<String> req_material;
-    private final int req_alchemylevel;
-    private final List<Ingredients> default_ingredients;
-    private final int req_bar;
+    private final List<String> reqMaterial;
+    private final int reqAlchemylevel;
+    private final List<Ingredients> defaultIngredients;
+    private final int reqBar;
     private final List<RecipeEffect> effects;
     private final Map<Integer, List<RecipeLevelEffect>> levels;
-    private final List<String> catalyst_categorys;
-    private final List<MaterialSizeData> sizes;
+    private final List<String> catalystCategorys;
 
     public AlchemyRecipe(
             final String id,
             final String result,
             final int amount,
-            final List<String> req_material,
-            final int req_alchemylevel,
-            final List<Ingredients> default_ingredients,
-            final int req_bar,
+            final List<String> reqMaterial,
+            final int reqAlchemylevel,
+            final List<Ingredients> defaultIngredients,
+            final int reqBar,
             final List<RecipeEffect> effects,
             final Map<Integer, List<RecipeLevelEffect>> levels,
-            final List<String> catalyst_categorys,
-            final List<MaterialSizeData> sizes
+            final List<String> catalystCategorys
     ) {
         this.id = id;
         this.result = result;
         this.amount = amount;
-        this.req_material = req_material;
-        this.req_alchemylevel = req_alchemylevel;
-        this.default_ingredients = default_ingredients;
-        this.req_bar = req_bar;
+        this.reqMaterial = reqMaterial;
+        this.reqAlchemylevel = reqAlchemylevel;
+        this.defaultIngredients = defaultIngredients;
+        this.reqBar = reqBar;
         this.effects = effects;
         this.levels = levels;
-        this.catalyst_categorys = catalyst_categorys;
-        this.sizes = sizes;
+        this.catalystCategorys = catalystCategorys;
     }
 
-    public static AlchemyRecipe search(final String id) {
-        for (final Object obj : CONFIG_MANAGER.getList(AlchemyRecipeLoader.class)) {
-            final AlchemyRecipe recipe = (AlchemyRecipe) obj;
+    public static AlchemyRecipe search(@NotNull final String id) {
+        for (final AlchemyRecipe recipe : CONFIG_MANAGER.getList(AlchemyRecipeLoader.class, AlchemyRecipe.class)) {
             if (id.equals(recipe.getId())) {
                 return recipe;
             }
@@ -97,19 +93,19 @@ public class AlchemyRecipe {
     }
 
     public List<String> getReqMaterial() {
-        return new ArrayList<>(req_material);
+        return new ArrayList<>(reqMaterial);
     }
 
     public int getReqAlchemyLevel() {
-        return req_alchemylevel;
+        return reqAlchemylevel;
     }
 
     public List<Ingredients> getDefaultIngredients() {
-        return new ArrayList<>(default_ingredients);
+        return new ArrayList<>(defaultIngredients);
     }
 
     public int getReqbar() {
-        return req_bar;
+        return reqBar;
     }
 
     public List<RecipeEffect> getEffects() {
@@ -120,12 +116,8 @@ public class AlchemyRecipe {
         return new HashMap<>(levels);
     }
 
-    public List<String> getCatalyst_categorys() {
-        return new ArrayList<>(catalyst_categorys);
-    }
-
-    public List<MaterialSizeData> getSizes() {
-        return sizes;
+    public List<String> getCatalystCategorys() {
+        return new ArrayList<>(catalystCategorys);
     }
 
 }

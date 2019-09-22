@@ -31,7 +31,7 @@ import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
 import net.firiz.renewatelier.player.PlayerStatus;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import net.md_5.bungee.api.ChatColor;
@@ -56,12 +56,18 @@ import java.util.*;
  */
 public final class RecipeSelect {
 
-//    private static final int[] RECIPE_REQLEVELS = new int[]{80, 140, 220}; // ブロンズ・シルバー・ゴールド・プラチナ
+    private RecipeSelect() {
+    }
+
     private static final String RECIPE_VALUE1 = "レシピを選択してください。";
-    private static final List<String> RECIPE_LORES = new ArrayList<String>(){{
-        add(ChatColor.RESET + RECIPE_VALUE1);
-        add("");
-    }};
+    private static final List<String> RECIPE_LORES;
+    private static final String STRING_MATERIAL = "material:";
+
+    static {
+        RECIPE_LORES = new ArrayList<>();
+        RECIPE_LORES.add(ChatColor.RESET + RECIPE_VALUE1);
+        RECIPE_LORES.add("");
+    }
 
     public static boolean isKettleRecipe(final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
@@ -83,15 +89,15 @@ public final class RecipeSelect {
         lore.add(Chore.createStridColor(recipe.getId()));
         lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
 
-        int add_amount = 0;
+        int addAmount = 0;
         final int level = rs.getLevel();
         if (level != 0) {
             lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RANK_RECIPE[level]));
             final StringBuilder sb = new StringBuilder();
             if (level != 4) {
-                int exp_per = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQLEVELS[level]));
+                int expPer = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQLEVELS[level]));
                 for (int j = 0; j < 100; j++) {
-                    sb.append(exp_per > j ? ChatColor.GREEN : ChatColor.WHITE).append("|");
+                    sb.append(expPer > j ? ChatColor.GREEN : ChatColor.WHITE).append("|");
                 }
             } else {
                 sb.append(ChatColor.GREEN).append("||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
@@ -104,7 +110,7 @@ public final class RecipeSelect {
                     final RecipeLevelEffect.RecipeLEType type = rle.getType();
                     lore.add(ChatColor.GRAY + "- ".concat(type.getName()).concat(type.isViewNumber() ? " +".concat(String.valueOf(rle.getCount(type))) : ""));
                     if (type == RecipeLevelEffect.RecipeLEType.ADD_AMOUNT) {
-                        add_amount += rle.getCount();
+                        addAmount += rle.getCount();
                     }
                 }
             } else {
@@ -115,13 +121,13 @@ public final class RecipeSelect {
         }
         lore.add("");
 
-        lore.add(ChatColor.GRAY + "作成量: " + (recipe.getAmount() + add_amount));
+        lore.add(ChatColor.GRAY + "作成量: " + (recipe.getAmount() + addAmount));
         lore.add(ChatColor.GRAY + "必要素材:");
         for (final String req : recipe.getReqMaterial()) {
             final String[] data = req.split(",");
             if (data[0].startsWith("category:")) {
                 lore.add(AlchemyItemStatus.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
-            } else if (data[0].startsWith("material:")) {
+            } else if (data[0].startsWith(STRING_MATERIAL)) {
                 lore.add(AlchemyItemStatus.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
             }
         }
@@ -130,11 +136,11 @@ public final class RecipeSelect {
     private static void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
         final List<DoubleData<RecipeStatus, DoubleData<Material, Integer>>> ritem = new ArrayList<>();
         final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
-        status.getRecipeStatusList().forEach((rs) -> {
+        status.getRecipeStatusList().forEach(rs -> {
             final String result_str = AlchemyRecipe.search(rs.getId()).getResult();
             final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
             DoubleData<Material, Integer> material = null;
-            if (result[0].startsWith("material:")) {
+            if (result[0].startsWith(STRING_MATERIAL)) {
                 material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
             } else if (result[0].startsWith("minecraft:")) {
                 material = new DoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
@@ -150,8 +156,6 @@ public final class RecipeSelect {
             final ItemMeta meta = setting.getItemMeta();
             AlchemyChore.setSetting(meta, 0, scroll, RECIPE_VALUE1);
             AlchemyChore.setSetting(meta, 1, 0, ""); // 改行用
-//            meta.addEnchant(Enchantment.LUCK, scroll, true); // レシピページ数
-//            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             setting.setItemMeta(meta);
             inv.setItem(1, setting);
 
@@ -183,9 +187,9 @@ public final class RecipeSelect {
                 final RecipeStatus rs = dd.getLeft();
                 final AlchemyRecipe recipe = AlchemyRecipe.search(rs.getId());
                 final ItemStack item;
-                final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
+                final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 
-                item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createCustomModelItem(material.getLeft(), 1, material.getRight());
+                item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createCustomModelItem(material.getLeft(), 1, material.getRight());
                 final ItemMeta iMeta = item.getItemMeta();
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 setMetaDatas(iMeta, am);
@@ -234,7 +238,6 @@ public final class RecipeSelect {
         }
         if (e.getSlotType() == SlotType.CONTAINER && inv.getItem(1) != null) {
             final Player player = (Player) e.getWhoClicked();
-//            final int scroll = inv.getItem(1).getItemMeta().getEnchantLevel(Enchantment.LUCK);
             final int scroll = AlchemyChore.getSetting(inv.getItem(1).getItemMeta(), 0);
             final ItemStack item = e.getCurrentItem();
 
@@ -275,7 +278,7 @@ public final class RecipeSelect {
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
                             DoubleData<Material, Integer> material = null;
-                            if (result[0].startsWith("material:")) {
+                            if (result[0].startsWith(STRING_MATERIAL)) {
                                 am = AlchemyMaterial.getMaterial(result[0].substring(9));
                                 material = am.getMaterial();
                             } else if (result[0].startsWith("minecraft:")) {
@@ -284,15 +287,15 @@ public final class RecipeSelect {
 
                             final List<String> lore = new ArrayList<>();
                             lore.add(ChatColor.WHITE + "  を作成します。");
-                            final RecipeStatus recipe_status = status.getRecipeStatus(recipe.getId());
-                            if (recipe_status != null && material != null) {
-                                RecipeSelect.addRecipeStatus(player.getUniqueId(), recipe, recipe_status, lore);
-                                final ItemStack result_item = recipe_status.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createCustomModelItem(material.getLeft(), recipe.getAmount(), material.getRight());
-                                final ItemMeta meta = result_item.getItemMeta();
+                            final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
+                            if (recipeStatus != null && material != null) {
+                                RecipeSelect.addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, lore);
+                                final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createCustomModelItem(material.getLeft(), recipe.getAmount(), material.getRight());
+                                final ItemMeta meta = resultItem.getItemMeta();
                                 setMetaDatas(meta, am);
                                 meta.setLore(lore);
-                                result_item.setItemMeta(meta);
-                                inv.setItem(25, result_item);
+                                resultItem.setItemMeta(meta);
+                                inv.setItem(25, resultItem);
                             }
                         } else {
                             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
@@ -306,6 +309,6 @@ public final class RecipeSelect {
     public static void drag(InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
-        raws.stream().filter((raw) -> (raw >= 0 && raw < inv.getSize())).forEach((_item) -> e.setCancelled(true));
+        raws.stream().filter(raw -> (raw >= 0 && raw < inv.getSize())).forEach(itemValue -> e.setCancelled(true));
     }
 }

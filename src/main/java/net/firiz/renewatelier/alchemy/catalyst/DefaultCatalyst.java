@@ -20,16 +20,14 @@
  */
 package net.firiz.renewatelier.alchemy.catalyst;
 
-import net.firiz.renewatelier.alchemy.material.Category;
-
 import java.util.Arrays;
 
 /**
  * @author firiz
  */
-public class DefaultCatalyst extends Catalyst {
+class DefaultCatalyst extends Catalyst {
 
-    public DefaultCatalyst() {
+    DefaultCatalyst() {
         super(Arrays.asList(new CatalystBonus(
                 new int[]{
                         1, 1, 1, 1, 0,

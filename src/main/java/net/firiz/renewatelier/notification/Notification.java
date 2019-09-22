@@ -1,24 +1,24 @@
 /*
  * Nodification.java
- * 
+ *
  * Copyright (c) 2019 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.nodification;
+package net.firiz.renewatelier.notification;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.player.PlayerSaveManager;
@@ -26,7 +26,7 @@ import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.PayloadPacket;
-import net.firiz.renewatelier.version.packet.NodificationPacket;
+import net.firiz.renewatelier.version.packet.NotificationPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -39,13 +39,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 
+import java.util.Objects;
+
 /**
- *
  * @author firiz
  */
-public class Nodification {
+public class Notification {
 
-    public static void loginNodification(final Player player) {
+    private Notification() {
+    }
+
+    public static void loginNotification(final Player player) {
         final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
 
@@ -77,13 +81,13 @@ public class Nodification {
         }, 20); // 1 sec
     }
 
-    public static void recipeNodification(final Player player, final Material material) {
-        recipeNodification(player, new ItemStack(material));
+    public static void recipeNotification(final Player player, final Material material) {
+        recipeNotification(player, new ItemStack(material));
     }
 
-    public static void recipeNodification(final Player player, final ItemStack item) {
+    public static void recipeNotification(final Player player, final ItemStack item) {
         final String itemId = VersionUtils.asVItemCopy(item).getMinecraftId();
-        NodificationPacket.sendRecipe(player, itemId, false); // add
+        NotificationPacket.sendRecipe(player, itemId, false); // add
 
         /*
         所持しているレシピを取得する方法がまったくわからないので、所持確認はSQLで管理する
@@ -92,26 +96,22 @@ public class Nodification {
         if (!PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId()).discoveredRecipe(
                 MinecraftRecipeSaveType.search(itemId)
         )) {
-            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-                NodificationPacket.sendRecipe(player, itemId, true); // remove
-            }, 2); // 0.1 sec
+            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> NotificationPacket.sendRecipe(player, itemId, true), 2); // 0.1 sec
         }
     }
 
     @Deprecated
-    public static void advancementNodification(final Player player, final String id) {
-        NodificationPacket.sendAdvancement(player, id, false); // add
+    public static void advancementNotification(final Player player, final String id) {
+        NotificationPacket.sendAdvancement(player, id, false); // add
 
         // java.lang.IllegalArgumentException: advancement
         if (!player.getAdvancementProgress(
-                Bukkit.getAdvancement(new NamespacedKey(
+                Objects.requireNonNull(Bukkit.getAdvancement(new NamespacedKey(
                         AtelierPlugin.getPlugin(),
                         id.replace("minecraft:", "")
-                ))
+                )))
         ).isDone()) {
-            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-                NodificationPacket.sendAdvancement(player, id, true); // remove
-            }, 2); // 0.1 sec
+            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> NotificationPacket.sendAdvancement(player, id, true), 2); // 0.1 sec
         }
     }
 

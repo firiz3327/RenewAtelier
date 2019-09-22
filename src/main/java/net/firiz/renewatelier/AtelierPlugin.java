@@ -21,10 +21,7 @@
 package net.firiz.renewatelier;
 
 import net.firiz.renewatelier.config.ConfigManager;
-import net.firiz.renewatelier.listener.BlockListener;
-import net.firiz.renewatelier.listener.DebugListener;
-import net.firiz.renewatelier.listener.InventoryListener;
-import net.firiz.renewatelier.listener.PlayerListener;
+import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
@@ -52,6 +49,7 @@ public final class AtelierPlugin extends JavaPlugin {
         pluginManager.registerEvents(new DebugListener(), this);
         pluginManager.registerEvents(new BlockListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new DamageListener(), this);
         pluginManager.registerEvents(new InventoryListener(), this);
 
         // setup worlds
@@ -93,7 +91,7 @@ public final class AtelierPlugin extends JavaPlugin {
     }
 
     public static AtelierPlugin getPlugin() {
-        return AtelierPlugin.getPlugin(AtelierPlugin.class);
+        return getPlugin(AtelierPlugin.class);
     }
 
 }

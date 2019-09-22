@@ -24,7 +24,10 @@ package net.firiz.renewatelier.utils;
  *
  * @author firiz
  */
-public interface Strings {
+public class Strings {
+
+    private Strings() {
+    }
     
     public static final String W_W = "⬜";
     

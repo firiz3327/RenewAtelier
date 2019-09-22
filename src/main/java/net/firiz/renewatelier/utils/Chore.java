@@ -24,12 +24,15 @@ import java.awt.Point;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -62,7 +65,7 @@ public final class Chore {
         if (obj instanceof Exception) {
             logWarning(obj);
         } else {
-            log.log(Level.INFO, String.valueOf(obj));
+            log.log(Level.INFO, "{0}", obj);
         }
     }
 
@@ -76,12 +79,12 @@ public final class Chore {
             log.log(Level.WARNING, S_WARNING.concat(ex.getMessage()), ex);
             log.log(Level.OFF, S_OFF);
         } else {
-            log.log(Level.WARNING, String.valueOf(obj));
+            log.log(Level.WARNING, "{0}", obj);
         }
     }
 
     public static void logWarning(final String str) {
-        log.warning(S_WARNING.concat(str).concat(S_OFF));
+        log.log(Level.WARNING, "{0}", S_WARNING.concat(str).concat(S_OFF));
     }
 
     public static void logWarning(final String str, final Throwable throwable) {
@@ -90,15 +93,21 @@ public final class Chore {
     }
 
     public static void logLightWarning(final String str) {
-        log.warning("\u001B[30m\u001B[43m".concat(str).concat(S_OFF));
+        log.log(Level.WARNING, "{0}", "\u001B[30m\u001B[43m".concat(str).concat(S_OFF));
     }
 
     public static void logWhiteWarning(final String str) {
-        log.warning("\u001B[30m\u001B[47m".concat(str).concat(S_OFF));
+        log.log(Level.WARNING, "{0}", "\u001B[30m\u001B[47m".concat(str).concat(S_OFF));
     }
 
     public static void log(final Level level, final String str, final Throwable throwable) {
         log.log(level, str, throwable);
+    }
+
+    public static boolean isNumMatch(String number) {
+        final Pattern pattern = Pattern.compile("^[0-9]*$");
+        final Matcher matcher = pattern.matcher(number);
+        return matcher.matches();
     }
 
     public static ItemStack createCustomModelItem(final Material material, int amount, int value) {
@@ -119,22 +128,6 @@ public final class Chore {
 
     public static void setCustomModelData(final ItemMeta meta, final int value) {
         meta.setCustomModelData(value);
-    }
-
-    public static int[] parseInts(final List<Integer> list) {
-        final int[] result = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            result[i] = list.get(i);
-        }
-        return result;
-    }
-
-    public static List<Integer> parseInts(final int[] array) {
-        final List<Integer> result = new ArrayList<>();
-        for (int val : array) {
-            result.add(val);
-        }
-        return result;
     }
 
     public static String intCcolor(int i) {
@@ -183,13 +176,13 @@ public final class Chore {
                 final String[] kv = str.split(":");
                 for (final Material val : Material.values()) {
                     final NamespacedKey key = val.getKey();
-                    if (key.getNamespace().equals(kv[0].toLowerCase()) && key.getKey().equals(kv[1].toLowerCase())) {
+                    if (key.getNamespace().equalsIgnoreCase(kv[0]) && key.getKey().equalsIgnoreCase(kv[1])) {
                         return val;
                     }
                 }
             } else {
                 for (final Material val : Material.values()) {
-                    if (val.getKey().getKey().equals(str.toLowerCase())) {
+                    if (val.getKey().getKey().equalsIgnoreCase(str)) {
                         return val;
                     }
                 }
@@ -212,7 +205,7 @@ public final class Chore {
             final ItemMeta meta = item.getItemMeta();
             if (meta.hasLore()) {
                 AlchemyItemStatus.getLores(AlchemyItemStatus.CATEGORY, item).stream()
-                        .filter((cate_str) -> (!cate_str.contains("カテゴリ"))).forEachOrdered((cate_str) -> result.add(Category.valueOf(Chore.getStridColor(cate_str.substring(cate_str.indexOf("§0") + 2)))));
+                        .filter(cateStr -> (!cateStr.contains("カテゴリ"))).forEachOrdered(cateStr -> result.add(Category.valueOf(Chore.getStridColor(cateStr.substring(cateStr.indexOf("§0") + 2)))));
             }
         }
         return result;
@@ -261,16 +254,16 @@ public final class Chore {
                     }
                 }
             }
-            return !check.isEmpty() && check.values().stream().noneMatch((dd) -> (dd.getLeft() < dd.getRight()));
+            return !check.isEmpty() && check.values().stream().noneMatch(dd -> (dd.getLeft() < dd.getRight()));
         }
         return false;
     }
 
-    public static boolean hasMaterial(final Inventory inv, final AlchemyMaterial material, int req_amount) {
-        return hasMaterial(inv.getContents(), material, req_amount);
+    public static boolean hasMaterial(final Inventory inv, final AlchemyMaterial material, int reqAmount) {
+        return hasMaterial(inv.getContents(), material, reqAmount);
     }
 
-    public static boolean hasMaterial(final ItemStack[] contents, final AlchemyMaterial material, int req_amount) {
+    public static boolean hasMaterial(final ItemStack[] contents, final AlchemyMaterial material, int reqAmount) {
         if (contents.length != 0) {
             int amount = 0;
             for (final ItemStack item : contents) {
@@ -278,16 +271,16 @@ public final class Chore {
                     amount += item.getAmount();
                 }
             }
-            return req_amount <= amount;
+            return reqAmount <= amount;
         }
         return false;
     }
 
-    public static boolean hasMaterial(final Inventory inv, final ItemStack item, int req_amount) {
-        return hasMaterial(inv.getContents(), item, req_amount);
+    public static boolean hasMaterial(final Inventory inv, final ItemStack item, int reqAmount) {
+        return hasMaterial(inv.getContents(), item, reqAmount);
     }
 
-    public static boolean hasMaterial(final ItemStack[] contents, final ItemStack item, int req_amount) {
+    public static boolean hasMaterial(final ItemStack[] contents, final ItemStack item, int reqAmount) {
         if (contents.length != 0) {
             int amount = 0;
             for (final ItemStack i : contents) {
@@ -295,7 +288,7 @@ public final class Chore {
                     amount += i.getAmount();
                 }
             }
-            return req_amount <= amount;
+            return reqAmount <= amount;
         }
         return false;
     }

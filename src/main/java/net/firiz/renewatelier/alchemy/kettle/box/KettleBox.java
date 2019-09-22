@@ -1,20 +1,20 @@
 /*
  * KettleBox.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -25,25 +25,26 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
-import net.firiz.renewatelier.alchemy.kettle.BonusItem;
+import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
-import net.firiz.renewatelier.utils.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
- *
  * @author firiz
  */
 public class KettleBox {
 
     // 設置されたアイテムとそのアイテムの配置とcircleValue
-    private final DoubleData<BonusItem, KettleBoxData>[] items;
-    private final List<CatalystBonus>[] usedBonus;
+    private final List<DoubleData<BonusItem, KettleBoxData>> items;
+    private final List<List<CatalystBonus>> usedBonus;
 
     public KettleBox(int count) {
-        this.items = new DoubleData[count];
-        this.usedBonus = new List[count];
+        this.items = new ArrayList<>(count);
+        this.usedBonus = new ArrayList<>(count);
     }
 
     /**
@@ -52,27 +53,27 @@ public class KettleBox {
      * @return 削除対象のデータ
      */
     public final DoubleData<BonusItem, KettleBoxData> backData(final int rotate, final int rlud) {
-        for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
+        for (int i = 1; i <= items.size(); i++) {
+            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
             if (data != null) {
-                items[items.length - i] = null;
-                final int sel = items.length - i - 1;
+                items.set(items.size() - i, null);
+                final int sel = items.size() - i - 1;
                 if (sel >= 0) {
-                    usedBonus[sel] = null;
+                    usedBonus.set(sel, null);
                 }
                 final KettleBoxData kbd = data.getRight();
                 final ItemStack item = data.getLeft().getItem();
                 int[] size = MaterialSize.getSize(item);
                 if (kbd.getRotate() != 0) {
                     for (int j = 0; j < 4 - kbd.getRotate(); j++) {
-                        size = MaterialSize.right_rotation(size);
+                        size = MaterialSize.rightRotation(size);
                     }
                 }
                 if (kbd.getRLUD() != 0) {
                     size = getRLUDTypeSize(kbd.getRLUD(), size);
                 }
                 for (int j = 0; j < rotate; j++) {
-                    size = MaterialSize.right_rotation(size);
+                    size = MaterialSize.rightRotation(size);
                 }
                 size = getRLUDTypeSize(rlud, size);
                 item.setItemMeta(MaterialSize.setSize(item, size));
@@ -85,19 +86,20 @@ public class KettleBox {
     private int[] getRLUDTypeSize(int rlud, int[] size) {
         switch (rlud) {
             case 1:
-                return MaterialSize.right_left_turn(size);
+                return MaterialSize.rightLeftTurn(size);
             case 2:
-                return MaterialSize.up_down_turn(size);
+                return MaterialSize.upDownTurn(size);
             case 3:
-                return MaterialSize.up_down_turn(MaterialSize.right_left_turn(size));
+                return MaterialSize.upDownTurn(MaterialSize.rightLeftTurn(size));
+            default:
+                return size;
         }
-        return size;
     }
 
     public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] == null) {
-                items[i] = new DoubleData<>(new BonusItem(item), new KettleBoxData(rslots, rotate, rlud));
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i) == null) {
+                items.set(i, new DoubleData<>(new BonusItem(item), new KettleBoxData(rslots, rotate, rlud)));
                 break;
             }
         }
@@ -105,41 +107,40 @@ public class KettleBox {
 
     public final boolean usedBonus(final CatalystBonus cb) {
         for (final List<CatalystBonus> bonus : usedBonus) {
-            if (bonus != null) {
-                if (bonus.contains(cb)) {
-                    return true;
-                }
+            if (bonus != null && bonus.contains(cb)) {
+                return true;
             }
         }
         return false;
     }
 
     public final void addBonus(final CatalystBonus cb) {
-        for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
+        for (int i = 1; i <= items.size(); i++) {
+            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
             if (data != null) {
-                final int sel = items.length - i;
-                if (usedBonus[sel] == null) {
+                final int sel = items.size() - i;
+                if (usedBonus.get(sel) == null) {
                     final List<CatalystBonus> cbs = new ArrayList<>();
                     cbs.add(cb);
-                    usedBonus[sel] = cbs;
+                    usedBonus.set(sel, cbs);
                 } else {
-                    usedBonus[sel].add(cb);
+                    usedBonus.get(sel).add(cb);
                 }
                 break;
             }
         }
     }
 
+    @NotNull
     public final List<CatalystBonus> getBonus() {
-        for (int i = 1; i <= items.length; i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items[items.length - i];
+        for (int i = 1; i <= items.size(); i++) {
+            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
             if (data != null) {
-                final int select = items.length - i - 1; // 4:3 3:2
-                return select >= 0 ? usedBonus[select] : null;
+                final int select = items.size() - i - 1; // 4:3 3:2
+                return select >= 0 ? usedBonus.get(select) : new ArrayList<>(0);
             }
         }
-        return null;
+        return new ArrayList<>(0);
     }
 
     public final List<ItemStack> getItemStacks() {
@@ -167,15 +168,14 @@ public class KettleBox {
     }
 
     public final Map<Integer, Integer> getSlots() {
-        return items[items.length - 1].getRight().getRSlots();
+        return items.get(items.size() - 1).getRight().getRSlots();
     }
 
     public final int getCSize() {
-        return items.length;
+        return items.size();
     }
 
     /**
-     *
      * @return <slot, itemStack>, value
      */
     public final Map<DoubleData<Integer, BonusItem>, Integer> getResultCS() {
@@ -184,9 +184,9 @@ public class KettleBox {
         // 配置
         // <layer, itemStack>, <slot, value>
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
-        overlap.keySet().forEach((layer) -> {
+        overlap.keySet().forEach(layer -> {
             final Map<Integer, Integer> datas = overlap.get(layer);
-            datas.keySet().forEach((slot) -> result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot)));
+            datas.keySet().forEach(slot -> result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot)));
         });
 
         return result;
@@ -199,7 +199,7 @@ public class KettleBox {
         // 配置
         // <layer, itemStack>, <slot, value>
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
-        overlap.keySet().forEach((layer) -> result.add(layer.getRight()));
+        overlap.keySet().forEach(layer -> result.add(layer.getRight()));
 
         return result;
     }
@@ -207,8 +207,8 @@ public class KettleBox {
     private Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
 
-        for (int i = 0; i < items.length; i++) {
-            final DoubleData<BonusItem, KettleBoxData> dd = items[i];
+        for (int i = 0; i < items.size(); i++) {
+            final DoubleData<BonusItem, KettleBoxData> dd = items.get(i);
 
             if (dd != null) {
                 final Map<Integer, Integer> rslots = dd.getRight().getRSlots();
@@ -216,12 +216,12 @@ public class KettleBox {
                 for (final DoubleData<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
                     boolean checkOver = false;
 
-                    loop_checkOver:
+                    loopCheckOver:
                     for (final int slot : overlap.get(layer).keySet()) {
                         for (final int ddslot : rslots.keySet()) {
                             if (slot == ddslot) {
                                 checkOver = true;
-                                break loop_checkOver;
+                                break loopCheckOver;
                             }
                         }
                     }

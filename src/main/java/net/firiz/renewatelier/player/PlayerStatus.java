@@ -27,7 +27,7 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.nodification.Nodification;
+import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
@@ -48,48 +48,53 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class PlayerStatus {
 
+    private static final String COLUMN_RECIPE_LEVELS = "recipe_levels";
+    private static final String COLUMN_USER_ID = "user_id";
+    private static final String COLUMN_RECIPE_ID = "recipe_id";
+    private static final String COLUMN_LEVEL = "level";
+
     private final int id;
-    private final int alchemy_level;
-    private final int alchemy_exp;
-    private final List<RecipeStatus> recipe_statuses;
-    private final List<QuestStatus> quest_statuses;
+    private final int alchemyLevel;
+    private final int alchemyExp;
+    private final List<RecipeStatus> recipeStatuses;
+    private final List<QuestStatus> questStatuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
     private ScriptEngine jsEngine;
     private ScriptEngine py3Engine;
 
-    public PlayerStatus(final int id, final int alchemy_level, final int alchemy_exp, final List<RecipeStatus> recipe_statuses, final List<QuestStatus> quest_statuses, final List<MinecraftRecipeSaveType> saveTypes) {
+    public PlayerStatus(final int id, final int alchemyLevel, final int alchemyExp, final List<RecipeStatus> recipeStatuses, final List<QuestStatus> questStatuses, final List<MinecraftRecipeSaveType> saveTypes) {
         this.id = id;
-        this.alchemy_level = alchemy_level;
-        this.alchemy_exp = alchemy_exp;
-        this.recipe_statuses = recipe_statuses;
-        this.quest_statuses = quest_statuses;
+        this.alchemyLevel = alchemyLevel;
+        this.alchemyExp = alchemyExp;
+        this.recipeStatuses = recipeStatuses;
+        this.questStatuses = questStatuses;
         this.saveTypes = saveTypes;
     }
 
     public int getAlchemyLevel() {
-        return alchemy_level;
+        return alchemyLevel;
     }
 
     public int getAlchemyExp() {
-        return alchemy_exp;
+        return alchemyExp;
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
-    private void addRecipe(final RecipeStatus recipe_status) {
-        recipe_statuses.add(recipe_status);
+    private void addRecipe(final RecipeStatus recipeStatus) {
+        recipeStatuses.add(recipeStatus);
         SQLManager.INSTANCE.insert(
-                "recipe_levels",
-                new String[]{"user_id", "recipe_id", "level", "exp"},
-                new Object[]{id, recipe_status.getId(), recipe_status.getLevel(), recipe_status.getExp()}
+                COLUMN_RECIPE_LEVELS,
+                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
+                new Object[]{id, recipeStatus.getId(), recipeStatus.getLevel(), recipeStatus.getExp()}
         );
     }
 
     public List<RecipeStatus> getRecipeStatusList() {
-        return new ArrayList<>(recipe_statuses);
+        return new ArrayList<>(recipeStatuses);
     }
 
     public RecipeStatus getRecipeStatus(final String id) {
-        for (final RecipeStatus rs : recipe_statuses) {
+        for (final RecipeStatus rs : recipeStatuses) {
             if (rs.getId().equals(id)) {
                 return rs;
             }
@@ -101,18 +106,18 @@ public final class PlayerStatus {
         RecipeStatus rs = getRecipeStatus(status.getId());
         if(rs == null) {
             rs = status;
-            recipe_statuses.add(rs);
+            recipeStatuses.add(rs);
         }
         SQLManager.INSTANCE.insert(
-                "recipe_levels",
-                new String[]{"user_id", "recipe_id", "level", "exp"},
+                COLUMN_RECIPE_LEVELS,
+                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
                 new Object[]{id, rs.getId(), rs.getLevel(), rs.getExp()}
         );
     }
 
     public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
         if (addRecipeExp(recipe.getId(), exp) && view) {
-            Nodification.recipeNodification(player, Material.CAULDRON);
+            Notification.recipeNotification(player, Material.CAULDRON);
             player.sendMessage("レシピ【" + ChatColor.GREEN + recipe.getResult() + ChatColor.RESET + "】を開放しました。");
         }
     }
@@ -149,8 +154,8 @@ public final class PlayerStatus {
             break;
         }
         SQLManager.INSTANCE.insert(
-                "recipe_levels",
-                new String[]{"user_id", "recipe_id", "level", "exp"},
+                COLUMN_RECIPE_LEVELS,
+                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
                 new Object[]{id, status.getId(), status.getLevel(), status.getExp()}
         );
         return first;
@@ -158,12 +163,12 @@ public final class PlayerStatus {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="quest">
-    public void addQuest(final QuestStatus quest_status) {
-        quest_statuses.add(quest_status);
+    public void addQuest(final QuestStatus questStatus) {
+        questStatuses.add(questStatus);
         SQLManager.INSTANCE.insert(
                 "questDatas",
-                new String[]{"user_id", "quest_id", "clear"},
-                new Object[]{id, quest_status.getId(), quest_status.isClear() ? 1 : 0}
+                new String[]{COLUMN_USER_ID, "quest_id", "clear"},
+                new Object[]{id, questStatus.getId(), questStatus.isClear() ? 1 : 0}
         );
     }
 
@@ -173,12 +178,12 @@ public final class PlayerStatus {
     }
 
     public List<QuestStatus> getQuestStatusList() {
-        return new ArrayList<>(quest_statuses);
+        return new ArrayList<>(questStatuses);
     }
 
     @NotNull
     public QuestStatus getQuestStatus(final String id) {
-        for (final QuestStatus rs : quest_statuses) {
+        for (final QuestStatus rs : questStatuses) {
             if (rs.getId().equals(id)) {
                 return rs;
             }
@@ -190,14 +195,14 @@ public final class PlayerStatus {
         questClear(player, getQuestStatus(id), view);
     }
 
-    public void questClear(final Player player, final QuestStatus quest_status, final boolean view) {
+    public void questClear(final Player player, final QuestStatus questStatus, final boolean view) {
         SQLManager.INSTANCE.insert(
                 "questDatas",
-                new String[]{"user_id", "quest_id", "clear"},
-                new Object[]{id, quest_status.getId(), 1}
+                new String[]{COLUMN_USER_ID, "quest_id", "clear"},
+                new Object[]{id, questStatus.getId(), 1}
         );
-        quest_status.clear();
-        final Quest quest = Quest.getQuest(quest_status.getId());
+        questStatus.clear();
+        final Quest quest = Quest.getQuest(questStatus.getId());
         if (view) {
             player.sendMessage("クエスト「" + ChatColor.GREEN + quest.getName() + ChatColor.RESET + "」を完了しました。");
         }
@@ -205,7 +210,7 @@ public final class PlayerStatus {
             addQuest(player, quest.getNextQuestId());
         }
         if (quest.getResults() != null) {
-            quest.getResults().forEach((result) -> {
+            quest.getResults().forEach(result -> {
                 if (result instanceof ItemQuestResult) {
                     final QuestItem item = ((ItemQuestResult) result).getResult();
                     Chore.addItem(player, item.getItem());
@@ -232,7 +237,7 @@ public final class PlayerStatus {
             saveTypes.add(type);
             SQLManager.INSTANCE.insert(
                     "discoveredRecipes",
-                    new String[]{"user_id", "item_id"},
+                    new String[]{COLUMN_USER_ID, "item_id"},
                     new Object[]{id, item_id}
             );
         }
@@ -249,7 +254,7 @@ public final class PlayerStatus {
             saveTypes.remove(type);
             SQLManager.INSTANCE.delete(
                     "discoveredRecipes",
-                    new String[]{"user_id", "item_id"},
+                    new String[]{COLUMN_USER_ID, "item_id"},
                     new Object[]{id, item_id}
             );
         }

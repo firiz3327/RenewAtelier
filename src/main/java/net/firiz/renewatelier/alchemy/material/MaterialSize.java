@@ -24,12 +24,15 @@ import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.Strings;
+import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author firiz
@@ -153,30 +156,37 @@ public enum MaterialSize {
     MaterialSize(int... ss) {
         this.ss = new int[16][9];
         if (ss.length < 9) {
-            for (int i = 0; i < ss.length; i++) {
-                this.ss[0][i] = ss.length <= i ? 0 : ss[i];
-            }
+            System.arraycopy(ss, 0, this.ss[0], 0, ss.length);
         } else {
             this.ss[0] = ss;
         }
 
         // 通常回転・左右反転回転・上下反転回転・上下左右反転回転
         for (int i = 0; i < 4; i++) {
-            for (int j = (i == 0 ? 1 : 0); j < 4; j++) {
-                int[] ssj = Arrays.copyOf(this.ss[j - (i == 0 ? 1 : 0)], 9);
+            final int start = (i == 0 ? 1 : 0);
+            for (int j = start; j < 4; j++) {
+                int[] ssj = Arrays.copyOf(this.ss[j - start], 9);
                 switch (i) {
                     case 1:
-                        ssj = right_left_turn(ssj);
+                        ssj = rightLeftTurn(ssj);
                         break;
                     case 2:
-                        ssj = up_down_turn(ssj);
+                        ssj = upDownTurn(ssj);
                         break;
                     case 3:
-                        ssj = right_left_turn(ssj);
-                        ssj = up_down_turn(ssj);
+                        ssj = rightLeftTurn(ssj);
+                        ssj = upDownTurn(ssj);
+                        break;
+                    default:
                         break;
                 }
-                this.ss[i * 4 + j] = j == 0 ? ssj : i == 0 ? right_rotation(ssj) : ssj;
+                if (j == 0) {
+                    this.ss[i * 4 + j] = ssj;
+                } else if (i == 0) {
+                    this.ss[i * 4 + j] = rightRotation(ssj);
+                } else {
+                    this.ss[i * 4 + j] = ssj;
+                }
             }
         }
     }
@@ -185,7 +195,7 @@ public enum MaterialSize {
         return ss[i];
     }
 
-    public static int[] up_down_turn(int[] r) {
+    public static int[] upDownTurn(int[] r) {
         final int[] turn = new int[]{6, 7, 8, 3, 4, 5, 0, 1, 2};
         int[] a = new int[9];
         for (int k = 0; k < 9; k++) {
@@ -194,7 +204,7 @@ public enum MaterialSize {
         return a;
     }
 
-    public static int[] right_left_turn(int[] r) {
+    public static int[] rightLeftTurn(int[] r) {
         final int[] turn = new int[]{2, 1, 0, 5, 4, 3, 8, 7, 6};
         int[] a = new int[9];
         for (int k = 0; k < 9; k++) {
@@ -203,17 +213,17 @@ public enum MaterialSize {
         return a;
     }
 
-    public static int[] right_rotation(int[] r) {
-        final int[] right_rotation = new int[]{6, 3, 0, 7, 4, 1, 8, 5, 2};
+    public static int[] rightRotation(int[] r) {
+        final int[] rightRotation = new int[]{6, 3, 0, 7, 4, 1, 8, 5, 2};
         int[] a = new int[9];
         for (int k = 0; k < 9; k++) {
-            a[k] = r[right_rotation[k]];
+            a[k] = r[rightRotation[k]];
         }
         return a;
     }
 
-    public static int[] left_rotation(int[] r) {
-        return right_rotation(right_rotation(right_rotation(r)));
+    public static int[] leftRotation(int[] r) {
+        return rightRotation(rightRotation(rightRotation(r)));
     }
 
     public static int[] plusSize(int[] size) {
@@ -228,12 +238,13 @@ public enum MaterialSize {
         return size;
     }
 
+    @NotNull
     public static int[] getSize(final ItemStack item) {
         if (item != null && item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
+            final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
             if (meta.hasLore()) {
                 final List<Integer> size = new ArrayList<>();
-                for (final String lore : meta.getLore()) {
+                for (final String lore : Objects.requireNonNull(meta.getLore())) {
                     if (lore.contains("§7触媒:")) {
                         break;
                     }
@@ -254,11 +265,11 @@ public enum MaterialSize {
                     }
                 }
                 if (size.size() == 9) {
-                    return Chore.parseInts(size);
+                    return CollectionUtils.parseInts(size);
                 }
             }
         }
-        return null;
+        return new int[0];
     }
 
     public static int getSizeCount(final ItemStack item) {
@@ -273,13 +284,14 @@ public enum MaterialSize {
     }
 
     public static ItemMeta setSize(final ItemStack item, final int[] size) {
-        final ItemMeta meta = item.getItemMeta();
-        final List<String> lores = meta.getLore();
+        final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
+        final List<String> lores = Objects.requireNonNull(meta.getLore());
         int sc = -1;
-        for (int l = 0; l < lores.size(); l++) {
+        int l = 0;
+        while (l < lores.size()) {
             if (sc >= 0) {
                 StringBuilder str = new StringBuilder();
-                int c_size = 0;
+                int cSize = 0;
                 int c = 0;
                 for (final int k : size) {
                     if (k == 0) {
@@ -287,20 +299,22 @@ public enum MaterialSize {
                     } else {
                         str.append(Chore.intCcolor(k)).append(Strings.W_B);
                     }
-                    if (c_size >= 2) {
+                    if (cSize >= 2) {
                         lores.set(l + c, str.toString());
-                        c_size = 0;
+                        cSize = 0;
                         c++;
                         str = new StringBuilder();
                     } else {
-                        c_size++;
+                        cSize++;
                     }
                 }
                 break;
             } else if (lores.get(l).startsWith(AlchemyItemStatus.SIZE.getCheck())) {
                 sc = 0;
+                l++;
                 continue;
             }
+            l++;
         }
         meta.setLore(lores);
         return meta;

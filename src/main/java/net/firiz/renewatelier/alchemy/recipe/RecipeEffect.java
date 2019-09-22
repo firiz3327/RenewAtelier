@@ -1,20 +1,20 @@
 /*
  * RecipeEffect.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,21 +22,21 @@ package net.firiz.renewatelier.alchemy.recipe;
 
 import java.util.List;
 import java.util.UUID;
+
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
-import net.firiz.renewatelier.alchemy.kettle.KettleBonusManager;
+import net.firiz.renewatelier.alchemy.kettle.bonus.KettleBonusManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
 import net.md_5.bungee.api.ChatColor;
 
 /**
- *
  * @author firiz
  */
 public class RecipeEffect {
 
-    private final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private final KettleBonusManager abm = KettleBonusManager.INSTANCE;
+    private static final KettleItemManager KETTLE_ITEM_MANAGER = KettleItemManager.INSTANCE;
+    private static final KettleBonusManager KETTLE_BONUS_MANAGER = KettleBonusManager.INSTANCE;
     private final AlchemyAttribute attribute;
     private final List<Integer> star;
     private final List<StarEffect> starEffects;
@@ -63,17 +63,15 @@ public class RecipeEffect {
 
     private double getUpCount(final UUID uuid) {
         double upcount = 0;
-        final List<AlchemyAttribute[]> ups = abm.getLevelUps(uuid);
-        if (ups != null) {
-            for (final AlchemyAttribute[] aas : ups) {
-                for (final AlchemyAttribute aa : aas) {
-                    if (aa == attribute) {
-                        upcount++;
-                    }
+        final List<AlchemyAttribute[]> ups = KETTLE_BONUS_MANAGER.getLevelUps(uuid);
+        for (final AlchemyAttribute[] aas : ups) {
+            for (final AlchemyAttribute aa : aas) {
+                if (aa == attribute) {
+                    upcount++;
                 }
             }
         }
-        final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
+        final List<CatalystBonus> bonusDatas = KETTLE_ITEM_MANAGER.getCatalystBonusList(uuid);
         if (bonusDatas != null) {
             for (final CatalystBonus cb : bonusDatas) {
                 if (cb.getData().getType() == CatalystBonusData.BonusType.STARLEVEL && attribute == cb.getData().getY()) {
@@ -81,7 +79,7 @@ public class RecipeEffect {
                 }
             }
         }
-        upcount += abm.getLevel(uuid) * 0.5;
+        upcount += KETTLE_BONUS_MANAGER.getLevel(uuid) * 0.5;
         return upcount;
     }
 
@@ -89,11 +87,8 @@ public class RecipeEffect {
         final double upcount = getUpCount(uuid);
         int bigstar = 0;
         for (int i = 0; i < star.size(); i++) {
-            int _star = star.get(i);
-            if (i < (int) upcount) {
-                if (_star != 0) {
-                    bigstar++;
-                }
+            if (i < (int) upcount && star.get(i) != 0) {
+                bigstar++;
             }
         }
         return bigstar;

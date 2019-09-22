@@ -38,6 +38,9 @@ import java.lang.reflect.Method;
  */
 public class VersionUtils {
 
+    private VersionUtils() {
+    }
+
     public static Object createNBTTagCompound() {
         return new NBTTagCompound();
     }

@@ -33,7 +33,7 @@ import org.graalvm.polyglot.Value;
  */
 public class GraalBindings extends HashMap<String, Object> implements Bindings {
 
-    private final Value bindings;
+    private final transient Value bindings;
 
     public GraalBindings(Context c) {
         this.bindings = c.getPolyglotBindings();
@@ -48,7 +48,7 @@ public class GraalBindings extends HashMap<String, Object> implements Bindings {
 
     @Override
     public void putAll(Map<? extends String, ?> m) {
-        m.keySet().forEach((key) -> put(key, m.get(key)));
+        m.keySet().forEach(key -> put(key, m.get(key)));
     }
 
     @Override
@@ -77,6 +77,16 @@ public class GraalBindings extends HashMap<String, Object> implements Bindings {
         if (!isEmpty()) {
             new HashSet<>(keySet()).forEach(this::remove);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException("equals is not supported.");
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException("hashCode is not supported.");
     }
 
 }

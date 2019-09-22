@@ -1,5 +1,5 @@
 /*
- * QuestStatusLoader.java
+ * RecipeStatusLoader.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -18,32 +18,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.player.loadSQLs;
+package net.firiz.renewatelier.player.loadsqls;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.firiz.renewatelier.quest.QuestStatus;
+import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 
 /**
  *
  * @author firiz
  */
-public class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
+public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
 
     @Override
-    public List<QuestStatus> load(int id) {
-        final List<List<Object>> quest_statuses_obj = SQLManager.INSTANCE.select(
-                "questDatas",
-                new String[]{"user_id", "quest_id", "clear"},
+    public List<RecipeStatus> load(int id) {
+        final List<List<Object>> recipeStatusesObj = SQLManager.INSTANCE.select(
+                "recipe_levels",
+                new String[]{"user_id", "recipe_id", "level", "exp"},
                 new Object[]{id}
         );
-        final List<QuestStatus> quest_statuses = new ArrayList<>();
-        quest_statuses_obj.forEach((datas) -> quest_statuses.add(new QuestStatus(
-                (String) datas.get(1), // quest_id
-                (int) datas.get(2) != 0 // clear
+        final List<RecipeStatus> recipeStatuses = new ArrayList<>();
+        recipeStatusesObj.forEach(datas -> recipeStatuses.add(new RecipeStatus(
+                (String) datas.get(1), // recipe_id
+                (int) datas.get(2), // level
+                (int) datas.get(3) // exp
         )));
-        return quest_statuses;
+        return recipeStatuses;
     }
 
 }

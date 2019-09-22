@@ -31,18 +31,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Cauldron;
 
 /**
  * @author firiz
  */
 public enum AlchemyInventoryType {
-    KETTLE_MAIN_MENU("KETTLE_MAIN_MENU"/*"§k§e§f§f§l§e"*/),
-    KETTLE_SELECT_RECIPE("KETTLE_SELECT_RECIPE"/*"§f§e§c§l§b§e"*/, new CheckRunnable() {
+    KETTLE_MAIN_MENU("KETTLE_MAIN_MENU"),
+    KETTLE_SELECT_RECIPE("KETTLE_SELECT_RECIPE", new CheckRunnable() {
         @Override
         public boolean check(Action action, ItemStack item, Block block, Player player) {
             final BlockData blockData = block.getBlockData();
-            if(blockData instanceof Levelled) {
+            if (blockData instanceof Levelled) {
                 final Levelled cauldron = (Levelled) blockData;
                 boolean typeCheck;
                 switch (block.getRelative(BlockFace.DOWN).getType()) {
@@ -69,8 +68,8 @@ public enum AlchemyInventoryType {
             return true;
         }
     }),
-    KETTLE_SELECT_ITEM("KETTLE_SELECT_ITEM"/*"§l§f§e§3§c§e§l§l§e§c§f"*/),
-    KETTLE_SELECT_CATALYST("KETTLE_SELECT_CATALYST"/*"§c§1§1§a§l§2§2§1"*/);
+    KETTLE_SELECT_ITEM("KETTLE_SELECT_ITEM"),
+    KETTLE_SELECT_CATALYST("KETTLE_SELECT_CATALYST");
     private final String check;
     private final CheckRunnable cr;
 
@@ -107,6 +106,9 @@ public enum AlchemyInventoryType {
     }
 
     public final boolean run(final Action action, final ItemStack item, final Block block, final Player player) {
+        if (cr == null) {
+            throw new IllegalStateException("click runnable is not found.");
+        }
         return cr.run(action, item, block, player);
     }
 
