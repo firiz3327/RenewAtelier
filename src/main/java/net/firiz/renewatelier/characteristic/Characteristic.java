@@ -48,6 +48,14 @@ public class Characteristic {
         return reqIds;
     }
 
+    public CharacteristicCategory[] getCategorys() {
+        return categorys;
+    }
+
+    public Object getData(CharacteristicType type) {
+        return datas.get(type);
+    }
+
     @NotNull
     public static Characteristic getCharacteristic(@NotNull final String id) {
         for (final Characteristic characteristic : CONFIG_MANAGER.getList(CharacteristicLoader.class, Characteristic.class)) {
@@ -65,7 +73,7 @@ public class Characteristic {
                 return characteristic;
             }
         }
-        throw new IllegalArgumentException(name.concat(" not found."));
+        return getCharacteristic(name);
     }
 
     /*
@@ -80,7 +88,6 @@ public class Characteristic {
         QUALITY, // 品質％
         DAMAGE, // 攻撃アイテム効果％
         DAMAGE_FIXED, //威力固定強化 <最低値, 最大値>
-        DAMAGE_ADD, // 追加ダメージ％
         HEAL, // 回復力増加％
         HEAL_FIXED, // 回復固定強化 <最低値, 最大値>
         POWER, // 威力値をx％増減
@@ -98,21 +105,14 @@ public class Characteristic {
         STATS_ATK_FIXED, // 攻撃力強化
         STATS_DEF_FIXED, // 防御力強化
         STATS_SPD_FIXED, // 素早さ強化
+        STATS_HP_QUALITY, // HP強化 品質で上下
+        STATS_MP_QUALITY, // MP強化 品質で上下
+        STATS_ATK_QUALITY, // 攻撃力強化 品質で上下
+        STATS_DEF_QUALITY, // 防御力強化 品質で上下
+        STATS_SPD_QUALITY, // 素早さ強化 品質で上下
         RESISTANCE, // 耐性（用途不明）
         CONSUME_MP, // 消費MP％
         SKILL_DAMAGE, // スキル威力％
-        LEVEL, // レベル
-        BUFF_ATK_FIXED, // バフ用 攻撃力強化
-        BUFF_DEF_FIXED, // バフ用 防御力強化
-        BUFF_SPD_FIXED, // バフ用 素早さ強化
-        DEBUFF_SLEEP, // 眠り付与 <確率, 時間, レベル>
-        DEBUFF_POISON, // 毒付与 <確率, 時間, ダメージ>
-        DEBUFF_SLOW, // スロウ付与 <確率, 時間, レベル>
-        DEBUFF_CURSE, // 呪い付与 <確率, 時間, ダメージ>
-        DEBUFF_DARKNESS, // 暗闇付与 <確率, 時間, 攻撃可能確率>
-        DEBUFF_WEAKNESS, // 弱体化付与 <確率, 時間, 値>
-        DEBUFF_DISABLE_HEAL, // 回復無効付与 <確率, 時間>
-        DAMAGE_REDUCTION, // ダメージ還元 <値％, (0=スキル以外 1=ノーマルのみ)>
         CRITICAL_RACE, // クリティカル率％<確率, 種族(Race class)>
         CHASING, // 追い打ち強化
         CHARACTERISTIC_POWER, // 特性強化 威力値が[(付与されている特性レベル合計値の0.7乗)+x]％上昇
@@ -127,30 +127,43 @@ public class Characteristic {
         SIZE_POWER, // サイズで強化 威力値が[アイテムのサイズ*x]％上昇
         STATS_ACC, // 命中率強化％
         STATS_ACC_FIXED, // 命中率強化
-        DEBUFF_SLOW_SKILL, // 敵のスキルループ待機時間増加％
-        DEBUFF_BREAK_DAMAGE, // ブレイク耐性にxダメージ貫通効果
+        BREAK_DAMAGE, // ブレイク耐性にxダメージ貫通効果
+        TAKEN_DAMAGE_REDUCTION, // 被ダメージのx％分回復
+        CLEAR_DEBUFF, // 使用：状態異常を解除、武具：状態異常を無効化 <Debuff名>
+        SKILL_SPEED, // スキル待機時間 スキル使用のクールタイムx％増減
+        ACTION_SPEED, // 待機時間軽減 <確率, 行動時間軽減％>
+        CONSUME_MP_REDUCTION, // 消費MPのx％分回復
+        DAMAGE_MITIGATION, // ダメージ軽減
+        RESISTANCE_ATTRIBUTE, // 属性耐性 レベル段階上昇 <AttackAttribute, レベル>
+        SWAP_HP_MP, // HPとMPを入れ替え
+        STATS_AVO, // 回避強化％
+        STATS_AVO_FIXED, // 回避強化
+        STATS_AVO_QUALITY, // 回避強化 品質で上下
+        SUPPORT_ATTACK, // サポートアタック効果％
+        SUPPORT_GUARD, // サポートガード効果％
+        ACTION_HEAL_MP, // 行動時MP回復％
+        SKILL_POWER_FIXED, // スキル威力値強化
+        ADD_ATTACK, // 追加攻撃 <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
+        BUFF, // バフ・デバフ <BuffType, 確率, 時間, 値>
+        ADD_WAIT_TIME, // 待機時間％
+        LEVEL_STATS_UP, // 期待の新星用 レベル*x分攻撃力、防御力、素早さ上昇
+        RESPAWN, // 復活 <確率, 復活後残りHP％>
+        AWAKENING_OF_COURAGE, // 勇気の覚醒用 未実装
+        BURST_MODE, // バーストモード補正％ 未実装
+        GAGE, // ゲージ補正％ 未実装
+        RESISTANCE_BREAK, // ブレイク耐性
+        HEAL_SPEED_BREAK, // ブレイク耐性回復速度
+        ;
+
+    }
+
+    public class CharacteristicValue<T> {
     }
 
     protected static final CharacteristicType[] alchemyKettleBonusTypes = {
             CharacteristicType.QUALITY,
             CharacteristicType.USECOUNT,
             CharacteristicType.SIZE
-    };
-
-    protected static final CharacteristicType[] buffTypes = {
-            CharacteristicType.LEVEL,
-            CharacteristicType.BUFF_ATK_FIXED,
-            CharacteristicType.BUFF_DEF_FIXED,
-            CharacteristicType.BUFF_SPD_FIXED,
-            CharacteristicType.DEBUFF_SLEEP,
-            CharacteristicType.DEBUFF_POISON,
-            CharacteristicType.DEBUFF_SLOW,
-            CharacteristicType.DEBUFF_CURSE,
-            CharacteristicType.DEBUFF_DARKNESS,
-            CharacteristicType.DEBUFF_WEAKNESS,
-            CharacteristicType.DEBUFF_DISABLE_HEAL,
-            CharacteristicType.DEBUFF_SLOW_SKILL,
-            CharacteristicType.DEBUFF_BREAK_DAMAGE
     };
 
     public enum Race {
@@ -174,6 +187,19 @@ public class Characteristic {
         public int getId() {
             return id;
         }
+    }
+
+    public enum Debuff {
+        ALL,
+        SLEEP,
+        POISON,
+        SLOW,
+        CURSE,
+        DARKNESS,
+        WEAKNESS,
+        DISABLE_HEAL,
+        SLOW_SKILL,
+        BREAK_DAMAGE
     }
 
 }

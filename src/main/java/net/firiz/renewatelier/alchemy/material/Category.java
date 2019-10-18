@@ -65,7 +65,9 @@ public enum Category {
     OBJECT("オブジェ", Material.CAULDRON),
     IMPORTANT("重要", Material.FILLED_MAP),
     CATALYST("触媒", new DoubleData<>(Material.DIAMOND_AXE, 0)), // 触媒画像
-    COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE);
+    COLLECTION_TOOL("採取道具", Material.IRON_PICKAXE),
+    BOOK("本", Material.BOOK), // custom
+    ;
 
     private static final Map<String, Category> BY_NAME = Maps.newHashMap();
     private final String name;

@@ -14,7 +14,7 @@ public class FinalDoubleData<L, R> extends DoubleData<L, R> {
     @Override
     @NotNull
     public L getLeft() {
-        return Objects.requireNonNull(getLeft());
+        return Objects.requireNonNull(super.getLeft());
     }
 
     @Override
@@ -26,7 +26,7 @@ public class FinalDoubleData<L, R> extends DoubleData<L, R> {
     @Override
     @NotNull
     public R getRight() {
-        return Objects.requireNonNull(getRight());
+        return Objects.requireNonNull(super.getRight());
     }
 
     @Override

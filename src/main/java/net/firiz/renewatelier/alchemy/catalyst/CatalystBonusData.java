@@ -1,20 +1,20 @@
 /*
  * CatalystBonusData.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -22,13 +22,13 @@ package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.utils.ReturnObjectRunnable;
 import net.md_5.bungee.api.ChatColor;
 
 /**
- *
  * @author firiz
  */
 public class CatalystBonusData {
@@ -63,7 +63,7 @@ public class CatalystBonusData {
                 .replace("$z", type.descRepletion != null ? type.descRepletion.run(x).toString() : ERROR_NAME)
                 .split("\n");
         final List<String> result = new ArrayList<>();
-        for(final String str : desc) {
+        for (final String str : desc) {
             result.add(ChatColor.GRAY + str);
         }
         return result;
@@ -101,7 +101,7 @@ public class CatalystBonusData {
                 "できあがるアイテムの\n最終的な品質が\n$x%$zします",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
+                (Object... objs) -> ((int) objs[0]) >= 0 ? "％増加" : "％減少"
         ), // ok
         AMOUNT(
                 "作成数$x",
@@ -145,7 +145,14 @@ public class CatalystBonusData {
         ), // ok
         CHARACTERISTIC("$y付与", "できあがるアイテムに\n「$y」の特性が\n追加されます", false, (Object... objs) -> { // ok type: CHARACTERISTIC, y: Characteristic_ID
             if (!(boolean) objs[1]) {
-                return Characteristic.getCharacteristic((String) objs[0]);
+                final String id = (String) objs[0];
+                Characteristic c;
+                try {
+                    c = Characteristic.getCharacteristic(id);
+                } catch (IllegalArgumentException e) {
+                    c = Characteristic.search(id);
+                }
+                return c;
             }
             return ((Characteristic) objs[0]).getName();
         }); // ok
@@ -179,7 +186,7 @@ public class CatalystBonusData {
             this.yParse = yParse;
             this.descRepletion = descRepletion;
         }
-        
+
         public boolean isOnce() {
             return once;
         }

@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
@@ -48,7 +49,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
-    private static final String ERROR_PREFIX = "MaterialLoader: ";
+    private static final String PREFIX = "MaterialLoader: ";
     private static final String KEY_MATERIAL = "material";
     private static final String KEY_QUALITY_MIN = "quality_min";
     private static final String KEY_QUALITY_MAX = "quality_max";
@@ -61,7 +62,9 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @Override
     protected void loadConfig(final FileConfiguration config) {
-        config.getKeys(false).forEach(key -> {
+        int errorCount = 0;
+        final Set<String> keys = config.getKeys(false);
+        for (final String key : keys) {
             final List<String> notFounds = new ArrayList<>();
             try {
                 final ConfigurationSection item = config.getConfigurationSection(key);
@@ -75,7 +78,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final FinalDoubleData<Material, Integer> mat;
                 if (!mat_str.contains(",")) {
                     if (mat_str.equalsIgnoreCase("XXX")) {
-                        Chore.logWhiteWarning(ERROR_PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
+                        Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                     }
                     mat = new FinalDoubleData<>(Chore.getMaterial(mat_str), 0);
                 } else {
@@ -131,7 +134,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 if (!item.contains("size")) {
                     notFounds.add("size");
                 }
-                final MaterialSizeTemplate sizeTemplate = MaterialSizeTemplate.valueOf(item.getString("size"));
+                final MaterialSizeTemplate sizeTemplate = MaterialSizeTemplate.valueOf("TYPE" + item.getInt("size"));
                 // 特性取得
                 final List<String> charasStr = CollectionUtils.castList(item.getList("characteristics"));
                 final List<Object> charas = new ArrayList<>();
@@ -139,10 +142,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     charasStr.forEach(cStr -> {
                         if (cStr.contains(",")) {
                             final String[] strs = cStr.split(",");
-                            charas.add(new DoubleData<>(
-                                    Characteristic.getCharacteristic(strs[0].trim().toUpperCase()),
-                                    Integer.parseInt(strs[1].trim())
-                            ));
+                            final String id = strs[0].trim().toUpperCase();
+                            Characteristic c;
+                            try {
+                                c = Characteristic.getCharacteristic(id);
+                            } catch (IllegalArgumentException e) {
+                                c = Characteristic.search(id);
+                            }
+                            charas.add(new DoubleData<>(c, Integer.parseInt(strs[1].trim())));
                         } else {
                             charas.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
                         }
@@ -182,36 +189,44 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final boolean hidePotionEffect = item.contains("hidePotionEffect") && item.getBoolean("hidePotionEffect");
                 final boolean hideUnbreaking = item.contains("hideUnbreaking") && item.getBoolean("hideUnbreaking");
                 // リストへ追加
-                add(new AlchemyMaterial(
-                        key,
-                        name,
-                        default_name,
-                        mat,
-                        quality_min,
-                        quality_max,
-                        price,
-                        categorys,
-                        ingredients,
-                        sizeTemplate,
-                        charas,
-                        catalyst,
-                        script,
-                        unbreaking,
-                        hideAttribute,
-                        hideDestroy,
-                        hideEnchant,
-                        hidePlacedOn,
-                        hidePotionEffect,
-                        hideUnbreaking
-                ));
+                if (notFounds.isEmpty()) {
+                    add(new AlchemyMaterial(
+                            key,
+                            name,
+                            default_name,
+                            mat,
+                            quality_min,
+                            quality_max,
+                            price,
+                            categorys,
+                            ingredients,
+                            sizeTemplate,
+                            charas,
+                            catalyst,
+                            script,
+                            unbreaking,
+                            hideAttribute,
+                            hideDestroy,
+                            hideEnchant,
+                            hidePlacedOn,
+                            hidePotionEffect,
+                            hideUnbreaking
+                    ));
+                }
             } catch (Exception ex) {
-                Chore.logWarning(ERROR_PREFIX.concat(key).concat(" -> "), ex);
+                Chore.logWarning(PREFIX.concat(key).concat(" -> "), ex);
+                errorCount++;
             } finally {
                 if (!notFounds.isEmpty()) {
-                    Chore.logWarning(ERROR_PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
+                    Chore.logWarning(PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
+                    errorCount++;
                 }
             }
-        });
+        }
+        if (errorCount != 0) {
+            Chore.logWhiteWarning("error founded.");
+        }
+        Chore.log(PREFIX + getList().size() + " loaded and " + errorCount + " errors found.");
     }
 
 }

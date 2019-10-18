@@ -125,6 +125,18 @@ public class Catalyst {
         return null;
     }
 
+    /**
+     *
+     * 1: White
+     * 2: Red
+     * 3: Blue
+     * 4: Green
+     * 5: Yellow
+     * 6: Purple
+     *
+     * @param d
+     * @return
+     */
     public static short getCustomModelData(int d) {
         switch (d) {
             case 1:

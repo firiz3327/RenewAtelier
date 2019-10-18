@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.listener;
 
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
@@ -60,9 +61,12 @@ public class PlayerListener implements Listener {
             if (item != null && item.getType() == Material.WRITTEN_BOOK) {
                 final ItemMeta meta = item.getItemMeta();
                 if (meta != null && meta.isUnbreakable()) {
-                    e.setCancelled(true);
-                    QuestBook.openQuestBook(player, item, e.getHand());
-                    return;
+                    final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
+                    if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
+                        e.setCancelled(true);
+                        QuestBook.openQuestBook(player, item, e.getHand());
+                        return;
+                    }
                 }
             }
 

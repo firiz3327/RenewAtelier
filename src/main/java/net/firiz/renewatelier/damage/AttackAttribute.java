@@ -12,7 +12,8 @@ public enum AttackAttribute {
     FIRE("炎", ChatColor.RED),
     ICE("氷", ChatColor.BLUE),
     LIGHTNING("雷", ChatColor.YELLOW),
-    WIND("風", ChatColor.GREEN);
+    WIND("風", ChatColor.GREEN),
+    PHYSICS("物理");
 
     private final String name;
     private final ChatColor color;

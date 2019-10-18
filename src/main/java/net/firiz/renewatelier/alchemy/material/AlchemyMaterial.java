@@ -32,6 +32,7 @@ import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  *
@@ -105,6 +106,7 @@ public class AlchemyMaterial {
         this.hideUnbreaking = hideUnbreaking;
     }
 
+    @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final String id) {
         for (final AlchemyMaterial am : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class, AlchemyMaterial.class)) {
             if (am.getId().equalsIgnoreCase(id)) {
@@ -114,7 +116,17 @@ public class AlchemyMaterial {
         throw new IllegalArgumentException(id.concat(" not found."));
     }
 
-    public static AlchemyMaterial getMaterial(final ItemStack item) {
+    @Nullable
+    public static AlchemyMaterial getMaterialOrNull(@NotNull final ItemStack item) {
+        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
+        if (!lores.isEmpty()) {
+            return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
+        }
+        return null;
+    }
+
+    @NotNull
+    public static AlchemyMaterial getMaterial(@NotNull final ItemStack item) {
         final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
         if (!lores.isEmpty()) {
             return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
