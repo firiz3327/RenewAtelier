@@ -244,11 +244,10 @@ public enum MaterialSize {
             final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
             if (meta.hasLore()) {
                 final List<Integer> size = new ArrayList<>();
+                boolean start = false;
                 for (final String lore : Objects.requireNonNull(meta.getLore())) {
-                    if (lore.contains("§7触媒:")) {
-                        break;
-                    }
                     if (lore.contains(Strings.W_W) || lore.contains(Strings.W_B)) {
+                        start = true;
                         String b = null;
                         for (char l : lore.toCharArray()) {
                             String j = String.valueOf(l);
@@ -262,6 +261,8 @@ public enum MaterialSize {
                                     break;
                             }
                         }
+                    } else if (start) {
+                        break;
                     }
                 }
                 if (size.size() == 9) {
@@ -309,7 +310,7 @@ public enum MaterialSize {
                     }
                 }
                 break;
-            } else if (lores.get(l).startsWith(AlchemyItemStatus.SIZE.getCheck())) {
+            } else if (lores.get(l).startsWith(AlchemyItemStatus.Type.SIZE.getCheck())) {
                 sc = 0;
                 l++;
                 continue;

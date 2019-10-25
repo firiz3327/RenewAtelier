@@ -24,7 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
+
+import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyRecipeLoader;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +42,7 @@ public class AlchemyRecipe {
     private final int amount;
     private final List<String> reqMaterial;
     private final int reqAlchemylevel;
-    private final List<Ingredients> defaultIngredients;
+    private final List<AlchemyIngredients> defaultIngredients;
     private final int reqBar;
     private final List<RecipeEffect> effects;
     private final Map<Integer, List<RecipeLevelEffect>> levels;
@@ -53,7 +54,7 @@ public class AlchemyRecipe {
             final int amount,
             final List<String> reqMaterial,
             final int reqAlchemylevel,
-            final List<Ingredients> defaultIngredients,
+            final List<AlchemyIngredients> defaultIngredients,
             final int reqBar,
             final List<RecipeEffect> effects,
             final Map<Integer, List<RecipeLevelEffect>> levels,
@@ -100,7 +101,7 @@ public class AlchemyRecipe {
         return reqAlchemylevel;
     }
 
-    public List<Ingredients> getDefaultIngredients() {
+    public List<AlchemyIngredients> getDefaultIngredients() {
         return new ArrayList<>(defaultIngredients);
     }
 

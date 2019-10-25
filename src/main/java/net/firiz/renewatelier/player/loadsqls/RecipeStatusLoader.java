@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -31,6 +32,7 @@ import net.firiz.renewatelier.sql.SQLManager;
  */
 public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
 
+    @NotNull
     @Override
     public List<RecipeStatus> load(int id) {
         final List<List<Object>> recipeStatusesObj = SQLManager.INSTANCE.select(

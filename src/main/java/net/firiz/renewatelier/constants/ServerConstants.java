@@ -30,6 +30,6 @@ public class ServerConstants {
     }
     
     public static final boolean NASHORN = false;
-    public static final boolean PYTHON = true;
+    public static final boolean PYTHON = false;
     
 }

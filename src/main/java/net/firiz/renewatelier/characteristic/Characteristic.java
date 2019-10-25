@@ -52,6 +52,10 @@ public class Characteristic {
         return categorys;
     }
 
+    public boolean hasData(CharacteristicType type) {
+        return datas.containsKey(type);
+    }
+
     public Object getData(CharacteristicType type) {
         return datas.get(type);
     }

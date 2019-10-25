@@ -36,7 +36,6 @@ import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeEffect;
@@ -49,7 +48,7 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.utils.Strings;
@@ -106,9 +105,9 @@ public class AlchemyKettle {
                     itemPos = 3;
                 }
                 for (final ItemStack item : pageItems) {
-                    final List<String> clores = AlchemyItemStatus.getLores(AlchemyItemStatus.CHARACTERISTIC, item);
+                    final List<String> clores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.CHARACTERISTIC, item);
                     for (int j = 1; j < clores.size(); j++) {
-                        final String clore = clores.get(j).substring(AlchemyItemStatus.CHARACTERISTIC.getCheck().length() + 4);
+                        final String clore = clores.get(j).substring(AlchemyItemStatus.Type.CHARACTERISTIC.getCheck().length() + 4);
                         final Characteristic c = Characteristic.search(clore);
                         KETTLE.addCharacteristic(uuid, c, false);
                     }
@@ -166,7 +165,7 @@ public class AlchemyKettle {
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
+        final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 
         setKettleItems(inv, player, recipe);
@@ -311,7 +310,7 @@ public class AlchemyKettle {
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
             final List<Category> categorys = new ArrayList<>(result.getCategorys());
             // 錬金成分 評価
-            final List<Ingredients> ings = recipe.getDefaultIngredients();
+            final List<AlchemyIngredients> ings = recipe.getDefaultIngredients();
             for (final RecipeEffect effect : recipe.getEffects()) {
                 final StarEffect activeEffect = effect.getActiveEffect(uuid);
                 if (activeEffect != null) {
@@ -618,7 +617,7 @@ public class AlchemyKettle {
                                 final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
                                 final List<Characteristic> characteristics = KETTLE.getSelectCharacteristics(uuid);
-                                final List<Ingredients> ings = AlchemyItemStatus.getIngredients(resultSlotItem);
+                                final List<AlchemyIngredients> ings = AlchemyItemStatus.getIngredients(resultSlotItem);
                                 final List<Category> categorys = AlchemyItemStatus.getCategorys(resultSlotItem);
 
                                 final List<String> activeEffects = new ArrayList<>();
@@ -653,7 +652,7 @@ public class AlchemyKettle {
                             if (resultItem != null) {
                                 KETTLE.reset(player);
                                 player.closeInventory();
-                                final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
+                                final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
                                 status.addRecipeExp(player, false, recipe, status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
                                 new AlchemyResultDrop(loc, resultItem).start();
                             }
@@ -838,7 +837,7 @@ public class AlchemyKettle {
                                     Chore.log("特性 追加・削除");
                                     final ItemMeta setting = inv.getItem(1).getItemMeta();
                                     final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
-                                    final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
+                                    final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
                                     final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                                     final List<RecipeLevelEffect> effects = recipe.getLevels().get(recipeStatus.getLevel());
                                     if (effects != null) {

@@ -334,7 +334,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "プレイヤーの錬金レシピ情報を書き換えます。"
     )
     fun recipeExp(sender: Player, args: ArrayList<Any>) {
-        val status = PlayerSaveManager.INSTANCE.getStatus((args[0] as Player).uniqueId)
+        val status = PlayerSaveManager.INSTANCE.getChar((args[0] as Player).uniqueId)
         status.setRecipeStatus(RecipeStatus(
                 (args[1] as AlchemyRecipe).id,
                 (args[2] as String).toInt(),

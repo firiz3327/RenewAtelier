@@ -29,7 +29,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -85,9 +85,9 @@ public final class RecipeSelect {
     }
 
     private static void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
+        final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         lore.add(Chore.createStridColor(recipe.getId()));
-        lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
+        lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getCharStats().getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
 
         int addAmount = 0;
         final int level = rs.getLevel();
@@ -95,7 +95,7 @@ public final class RecipeSelect {
             lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RANK_RECIPE[level]));
             final StringBuilder sb = new StringBuilder();
             if (level != 4) {
-                int expPer = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQLEVELS[level]));
+                int expPer = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQ_EXPS[level]));
                 for (int j = 0; j < 100; j++) {
                     sb.append(expPer > j ? ChatColor.GREEN : ChatColor.WHITE).append("|");
                 }
@@ -126,16 +126,16 @@ public final class RecipeSelect {
         for (final String req : recipe.getReqMaterial()) {
             final String[] data = req.split(",");
             if (data[0].startsWith("category:")) {
-                lore.add(AlchemyItemStatus.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
+                lore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
             } else if (data[0].startsWith(STRING_MATERIAL)) {
-                lore.add(AlchemyItemStatus.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+                lore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
             }
         }
     }
 
     private static void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
         final List<DoubleData<RecipeStatus, DoubleData<Material, Integer>>> ritem = new ArrayList<>();
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(uuid);
+        final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         status.getRecipeStatusList().forEach(rs -> {
             final String result_str = AlchemyRecipe.search(rs.getId()).getResult();
             final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
@@ -268,7 +268,7 @@ public final class RecipeSelect {
                             || raw >= 36 && raw <= 41) {
                         if (item != null && item.getType() != Material.AIR && item.hasItemMeta()) {
                             final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(item.getItemMeta().getLore().get(0)));
-                            final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+                            final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
                             if (!Chore.hasMaterial(player.getInventory(), recipe.getReqMaterial())) {
                                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                                 break;

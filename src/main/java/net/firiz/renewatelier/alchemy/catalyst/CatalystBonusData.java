@@ -25,7 +25,8 @@ import java.util.List;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.ReturnObjectRunnable;
+import net.firiz.renewatelier.utils.TRunnable;
+import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.md_5.bungee.api.ChatColor;
 
 /**
@@ -47,20 +48,20 @@ public class CatalystBonusData {
     public CatalystBonusData(BonusType type, int x, String y) {
         this.type = type;
         this.x = x;
-        this.y = type.yParse(y);
+        this.y = type.yConversionToObject(y);
     }
 
     public String getName() {
         return type.name
                 .replace("$x", (x >= 0 ? "+" : "-") + x)
-                .replace("$y", y != null ? (String) type.yParse(y, true) : ERROR_NAME);
+                .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME);
     }
 
     public List<String> getDesc() {
         final String[] desc = type.desc
                 .replace("$x", String.valueOf(x))
-                .replace("$y", y != null ? (String) type.yParse(y, true) : ERROR_NAME)
-                .replace("$z", type.descRepletion != null ? type.descRepletion.run(x).toString() : ERROR_NAME)
+                .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME)
+                .replace("$z", type.descRepletion != null ? type.descRepletion.run(x) : ERROR_NAME)
                 .split("\n");
         final List<String> result = new ArrayList<>();
         for (final String str : desc) {
@@ -87,91 +88,84 @@ public class CatalystBonusData {
                 "調合終了時に引き\n継がれる特性の数が\n$xつ$zます",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "増え" : "減り"
+                o -> o >= 0 ? "増え" : "減り"
         ), // ok
         QUALITY(
                 "品質$x",
                 "できあがるアイテムの\n最終的な品質が\n$z$xされます",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "+" : "-"
+                o -> o >= 0 ? "+" : "-"
         ), // ok
         QUALITY_PERCENT(
                 "品質$x%",
                 "できあがるアイテムの\n最終的な品質が\n$x%$zします",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "％増加" : "％減少"
+                o -> o >= 0 ? "％増加" : "％減少"
         ), // ok
         AMOUNT(
                 "作成数$x",
                 "",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
+                o -> o >= 0 ? "増加" : "減少"
         ), // ok
         USECOUNT(
                 "使用回数$x",
                 "できあがるアイテムが\n使用できる場合、使用\n回数が$x回$zます",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "増え" : "減り"
+                o -> o >= 0 ? "増え" : "減り"
         ), // 使用回数ありのアイテムを作っていない
         STARLEVEL(
                 "効果レベル$x・$y",
                 "$y色で示されている\n効果のレベルを全て\n$x段階$zさせます",
                 false,
-                (Object... objs) -> { // ok type: STARLEVEL, x: level, y: AlchemyAttribute_ID
-                    if (!(boolean) objs[1]) {
-                        return AlchemyAttribute.valueOf((String) objs[0]);
-                    }
-                    return ((AlchemyAttribute) objs[0]).getName();
-                },
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "アップ" : "ダウン"
+                new FinalDoubleData<>(
+                        AlchemyAttribute::valueOf,
+                        o -> ((AlchemyAttribute) o).getName()
+                ),
+                o -> o >= 0 ? "アップ" : "ダウン"
         ), // ok
         SIZE(
                 "サイズ$x",
                 "できあがるアイテムの\n最終的なサイズが\n$x段階$zなります",
                 false,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "大きく" : "小さく"
+                o -> o >= 0 ? "大きく" : "小さく"
         ),
         INGREDIENT_AMOUNT_PERCENT(
                 "錬金成分量$x%",
                 "次に投入する材料の\n錬金成分量が通常より\n$x%$zします",
                 true,
                 null,
-                (Object... objs) -> ((int) objs[0]) >= 0 ? "増加" : "減少"
+                o -> o >= 0 ? "増加" : "減少"
         ), // ok
-        CHARACTERISTIC("$y付与", "できあがるアイテムに\n「$y」の特性が\n追加されます", false, (Object... objs) -> { // ok type: CHARACTERISTIC, y: Characteristic_ID
-            if (!(boolean) objs[1]) {
-                final String id = (String) objs[0];
-                Characteristic c;
-                try {
-                    c = Characteristic.getCharacteristic(id);
-                } catch (IllegalArgumentException e) {
-                    c = Characteristic.search(id);
-                }
-                return c;
-            }
-            return ((Characteristic) objs[0]).getName();
-        }); // ok
+        CHARACTERISTIC("$y付与",
+                "できあがるアイテムに\n「$y」の特性が\n追加されます",
+                false,
+                new FinalDoubleData<>(
+                        id -> {
+                            Characteristic c;
+                            try {
+                                c = Characteristic.getCharacteristic(id);
+                            } catch (IllegalArgumentException e) {
+                                c = Characteristic.search(id);
+                            }
+                            return c;
+                        },
+                        o -> ((Characteristic) o).getName()
+                )
+        ); // ok
 
         private final String name;
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
-        private final ReturnObjectRunnable yParse;
-        private final ReturnObjectRunnable descRepletion;
+        private final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
+        private final TRunnable<Integer, String> descRepletion;
 
-        BonusType(final String name, final String desc, final boolean once) {
-            this.name = name;
-            this.desc = desc;
-            this.yParse = null;
-            this.once = once;
-            this.descRepletion = null;
-        }
-
-        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable yParse) {
+        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse) {
             this.name = name;
             this.desc = desc;
             this.once = once;
@@ -179,7 +173,7 @@ public class CatalystBonusData {
             this.descRepletion = null;
         }
 
-        BonusType(final String name, final String desc, final boolean once, final ReturnObjectRunnable yParse, final ReturnObjectRunnable descRepletion) {
+        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse, final TRunnable<Integer, String> descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;
@@ -191,13 +185,28 @@ public class CatalystBonusData {
             return once;
         }
 
-        private Object yParse(final String y_str) {
-            return yParse(y_str, false);
+        /**
+         * 文字列から特定のオブジェクトに変換します
+         *
+         * @param y
+         * @return
+         */
+        private Object yConversionToObject(final String y) {
+            if (yParse != null) {
+                return yParse.getLeft().run(y);
+            }
+            return y;
         }
 
-        private Object yParse(final Object y, final boolean visible) {
+        /**
+         * 特定のオブジェクトから特定の文字列に変換します
+         *
+         * @param y
+         * @return
+         */
+        private Object yConversionToString(final Object y) {
             if (yParse != null) {
-                return yParse.run(y, visible);
+                return yParse.getRight().run(y);
             }
             return y;
         }

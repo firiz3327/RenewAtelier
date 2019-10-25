@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.sql.SQLManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -31,6 +32,7 @@ import net.firiz.renewatelier.sql.SQLManager;
  */
 public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
 
+    @NotNull
     @Override
     public List<MinecraftRecipeSaveType> load(int id) {
         final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(

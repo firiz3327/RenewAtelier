@@ -33,7 +33,7 @@ import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.inventory.shop.ShopItem;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.utils.Chore;
@@ -44,6 +44,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.graalvm.polyglot.HostAccess.Export;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author firiz
@@ -86,13 +88,13 @@ public class ScriptConversation {
     }
 
     @Export
-    public PlayerStatus getStatus() {
+    public Char getStatus() {
         return getStatus(player.getUniqueId());
     }
 
     @Export
-    public PlayerStatus getStatus(final UUID uuid) {
-        return PlayerSaveManager.INSTANCE.getStatus(uuid);
+    public Char getStatus(final UUID uuid) {
+        return PlayerSaveManager.INSTANCE.getChar(uuid);
     }
 
     @Export
@@ -243,14 +245,28 @@ public class ScriptConversation {
         ShopInventory.openInventory(player, title, shopItems);
     }
 
+    @NotNull
     @Export
     public AlchemyMaterial getAlchemyMaterial(final String material_id) {
         return AlchemyMaterial.getMaterial(material_id);
     }
 
+    @NotNull
     @Export
     public AlchemyMaterial getAlchemyMaterial(final ItemStack item) {
         return AlchemyMaterial.getMaterial(item);
+    }
+
+    @Nullable
+    @Export
+    public AlchemyMaterial getAlchemyMaterialOrNull(final String material_id) {
+        return AlchemyMaterial.getMaterialOrNull(material_id);
+    }
+
+    @Nullable
+    @Export
+    public AlchemyMaterial getAlchemyMaterialOrNull(final ItemStack item) {
+        return AlchemyMaterial.getMaterialOrNull(item);
     }
 
     @Export
@@ -274,12 +290,12 @@ public class ScriptConversation {
     }
 
     @Export
-    public Ingredients getIngredients(final String id) {
+    public AlchemyIngredients getIngredients(final String id) {
         return AlchemyIngredients.valueOf(id);
     }
 
     @Export
-    public Ingredients getIngredientsForName(final String name) {
+    public AlchemyIngredients getIngredientsForName(final String name) {
         return AlchemyIngredients.searchName(name);
     }
 
@@ -314,7 +330,7 @@ public class ScriptConversation {
     public ItemStack alchemyMaterial(
             final AlchemyMaterial material,
             final int over_quality,
-            final List<Ingredients> overIngs,
+            final List<AlchemyIngredients> overIngs,
             int[] overSize,
             final List<String> activeEffects,
             final List<Characteristic> overCharacteristics,
@@ -338,7 +354,7 @@ public class ScriptConversation {
     public void applyAlchemyMaterial(
             final ItemStack item,
             final AlchemyMaterial material,
-            final List<Ingredients> overIngs,
+            final List<AlchemyIngredients> overIngs,
             final int overQuality,
             final int[] overSize,
             final List<String> activeEffects,

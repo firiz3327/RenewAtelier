@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.sql.SQLManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
@@ -31,6 +32,7 @@ import net.firiz.renewatelier.sql.SQLManager;
  */
 public class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
 
+    @NotNull
     @Override
     public List<QuestStatus> load(int id) {
         final List<List<Object>> questStatusesObj = SQLManager.INSTANCE.select(

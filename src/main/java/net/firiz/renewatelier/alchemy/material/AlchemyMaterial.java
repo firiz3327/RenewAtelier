@@ -49,7 +49,7 @@ public class AlchemyMaterial {
     private final int qualityMax;
     private final int price;
     private final List<Category> categorys;
-    private final List<FinalDoubleData<Ingredients, Integer>> ingredients;
+    private final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients;
     private final MaterialSizeTemplate sizeTemplate;
     private final List<Object> charas;
     private final Catalyst catalyst;
@@ -71,7 +71,7 @@ public class AlchemyMaterial {
             int qualityMax,
             int price,
             List<Category> categorys,
-            List<FinalDoubleData<Ingredients, Integer>> ingredients,
+            List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients,
             MaterialSizeTemplate sizeTemplate,
             List<Object> charas,
             Catalyst catalyst,
@@ -106,6 +106,16 @@ public class AlchemyMaterial {
         this.hideUnbreaking = hideUnbreaking;
     }
 
+    @Nullable
+    public static AlchemyMaterial getMaterialOrNull(@NotNull final String id) {
+        for (final AlchemyMaterial am : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class, AlchemyMaterial.class)) {
+            if (am.getId().equalsIgnoreCase(id)) {
+                return am;
+            }
+        }
+        return null;
+    }
+
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final String id) {
         for (final AlchemyMaterial am : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class, AlchemyMaterial.class)) {
@@ -118,7 +128,7 @@ public class AlchemyMaterial {
 
     @Nullable
     public static AlchemyMaterial getMaterialOrNull(@NotNull final ItemStack item) {
-        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
+        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.ID, item);
         if (!lores.isEmpty()) {
             return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
         }
@@ -127,7 +137,7 @@ public class AlchemyMaterial {
 
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final ItemStack item) {
-        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ID, item);
+        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.ID, item);
         if (!lores.isEmpty()) {
             return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
         }
@@ -166,7 +176,7 @@ public class AlchemyMaterial {
         return categorys;
     }
 
-    public List<FinalDoubleData<Ingredients, Integer>> getIngredients() {
+    public List<FinalDoubleData<AlchemyIngredients, Integer>> getIngredients() {
         return ingredients;
     }
 

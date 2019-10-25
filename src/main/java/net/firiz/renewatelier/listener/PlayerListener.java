@@ -27,7 +27,7 @@ import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
 import net.firiz.renewatelier.utils.Chore;
@@ -109,7 +109,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void join(final PlayerJoinEvent e) {
-        PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer().getUniqueId());
+        PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer());
         NPCManager.INSTANCE.packet(e.getPlayer());
         Notification.loginNotification(e.getPlayer());
     }
@@ -131,7 +131,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(e.getPlayer().getUniqueId());
+        final Char status = PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId());
         status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
     }
 

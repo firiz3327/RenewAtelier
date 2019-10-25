@@ -79,7 +79,7 @@ public final class ShopInventory {
                 ));
                 final String v = str.substring(str.lastIndexOf(": ") + 2);
                 final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
-                final AlchemyMaterial am = AlchemyMaterial.getMaterial(id);
+                final AlchemyMaterial am = AlchemyMaterial.getMaterialOrNull(id);
                 final int check = id.equals("$null")
                         ? Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1
                         : Chore.hasMaterial(player.getInventory(), am, price) ? 2 : -1;
@@ -87,16 +87,18 @@ public final class ShopInventory {
                     player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
                     if (check == 1) {
                         Chore.reduceItem(player.getInventory(), EMERALD, price);
-                    } else {
+                    } else if(am != null) {
                         Chore.reduceItem(player.getInventory(), am, price);
+                    } else {
+                        throw new IllegalStateException("AlchemyMaterial null trade");
                     }
                     final ItemStack clone = item.clone();
                     final ItemMeta meta = clone.getItemMeta();
-                    final List<String> clore = meta.getLore();
+                    final List<String> cLore = meta.getLore();
                     for (int i = 0; i < 2; i++) {
-                        clore.remove(clore.size() - 1);
+                        cLore.remove(cLore.size() - 1);
                     }
-                    meta.setLore(clore);
+                    meta.setLore(cLore);
                     clone.setItemMeta(meta);
                     Chore.addItem(player, clone);
                 }

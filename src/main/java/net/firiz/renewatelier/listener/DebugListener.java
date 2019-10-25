@@ -29,7 +29,7 @@ import net.firiz.renewatelier.debug.DebugManager;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.megaphone.Megaphone;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -126,7 +126,7 @@ public class DebugListener implements Listener {
             }
             case "addrecipe": {
                 final Player player = Bukkit.getServer().getPlayer(UUID.fromString(strs[1]));
-                final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+                final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
                 final AlchemyRecipe search = AlchemyRecipe.search(strs[2]);
                 if (search != null) {
                     final RecipeStatus rs = status.getRecipeStatus(strs[3]);

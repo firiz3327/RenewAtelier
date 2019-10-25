@@ -148,12 +148,12 @@ public final class ItemSelect {
                 ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);
-        if (material != null && pageItems != null) {
+        if (material != null && !pageItems.isEmpty()) {
             final int req_amount = Integer.parseInt(data[1]);
             Chore.log(pageItems.size() + " " + (pageItems.size() >= req_amount) + " " + Arrays.toString(data));
-            return pageItems.size() >= req_amount;
+            return pageItems.size() < req_amount;
         }
-        return false;
+        return true;
     }
 
     public static void click(InventoryClickEvent e) {
@@ -171,7 +171,7 @@ public final class ItemSelect {
         if ((e.getSlotType() == InventoryType.SlotType.CONTAINER || e.getSlotType() == InventoryType.SlotType.QUICKBAR) && raw >= inv.getSize() && e.isShiftClick()) {
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();
-            if (current != null && current.getType() != Material.AIR && !checkMaxSlot(uuid, recipe, page)) {
+            if (current != null && current.getType() != Material.AIR && checkMaxSlot(uuid, recipe, page)) {
                 final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
                 if (Chore.checkMaterial(current, data[0])) {
                     final ItemStack cloneItem = current.clone();
@@ -199,7 +199,7 @@ public final class ItemSelect {
                             Chore.addItem(player, item);
                             KETTLE.removePageItem(uuid, slot, page);
                         }
-                    } else if (!checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
+                    } else if (checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
                         final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
                         if (Chore.checkMaterial(cursor, data[0])) {
                             final ItemStack cloneItem = cursor.clone();
@@ -216,7 +216,7 @@ public final class ItemSelect {
             } else if (raw == 40) { // 決定
                 int check = 0;
                 for (int i = 0; i < recipe.getReqMaterial().size(); i++) {
-                    if (!checkMaxSlot(uuid, recipe, i)) {
+                    if (checkMaxSlot(uuid, recipe, i)) {
                         check = 0;
                         break;
                     }

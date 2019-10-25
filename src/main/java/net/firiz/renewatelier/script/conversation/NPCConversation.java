@@ -67,7 +67,7 @@ public final class NPCConversation extends ScriptConversation {
         this.npcPlayer = npcPlayer;
     }
 
-    @NotNull
+    @Nullable
     @Export
     public Invocable getIv() {
         return iv;

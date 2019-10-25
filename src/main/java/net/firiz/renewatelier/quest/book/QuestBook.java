@@ -30,7 +30,7 @@ import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.PlayerStatus;
+import net.firiz.renewatelier.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.quest.result.ItemQuestResult;
@@ -62,7 +62,7 @@ public class QuestBook {
     }
 
     public static void openQuestBook(final Player player, final ItemStack book, final EquipmentSlot hand) {
-        final PlayerStatus status = PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId());
+        final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ArrayList<>();
         final List<Quest> clearQuests = new ArrayList<>();
         final List<Quest> importantQuests = Quest.getImportantQuests();
@@ -179,9 +179,9 @@ public class QuestBook {
                 for (final String req : recipe.getReqMaterial()) {
                     final String[] data = req.split(",");
                     if (data[0].startsWith("category:")) {
-                        viewLore.add(AlchemyItemStatus.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
+                        viewLore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
                     } else if (data[0].startsWith("material:")) {
-                        viewLore.add(AlchemyItemStatus.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+                        viewLore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
                     }
                 }
                 viewMeta.setLore(viewLore);

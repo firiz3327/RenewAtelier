@@ -20,10 +20,7 @@
  */
 package net.firiz.renewatelier.script.execution;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -43,7 +40,7 @@ final class ScriptRunner {
 
     protected void start(final ScriptEngine engine, final String name, final Player player, final String functionName, final ScriptConversation conversation, final Object... args) {
         if (engine == null) {
-            throw new NullPointerException("This engine is unsupport language file.");
+            throw new NullPointerException("This engine is unsupported language file or null.");
         }
         try {
             final Bindings bindings = engine.createBindings();
@@ -84,9 +81,11 @@ final class ScriptRunner {
         }
 
         try (final FileInputStream fis = new FileInputStream(file);
-                final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
+             final InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
             engine.eval(reader);
             return true;
+        } catch(FileNotFoundException ex) {
+            return false;
         } catch (ScriptException | IOException ex) {
             Chore.logWarning(ex);
         }

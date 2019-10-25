@@ -81,7 +81,7 @@ public class CustomConfig {
         try {
             final InputStreamReader reader = new InputStreamReader(new FileInputStream(configFile), StandardCharsets.UTF_8);
             Validate.notNull(reader, "Stream cannot be null");
-            config = new CConfiguration();
+            config = new CConfiguration(configFile);
             try {
                 config.load(reader);
             } catch (IOException var3) {
@@ -117,18 +117,24 @@ public class CustomConfig {
         }
     }
 
-    private class CConfiguration extends YamlConfiguration {
+    public class CConfiguration extends YamlConfiguration {
 
+        private final File configFile;
         private final DumperOptions yamlOptions = new DumperOptions();
         private final Representer yamlRepresenter = new YamlRepresenter();
         private final Yaml overYaml;
 
-        CConfiguration() {
+        CConfiguration(File configFile) {
+            this.configFile = configFile;
             final YamlConstructor a = new YamlConstructor();
             a.setAllowDuplicateKeys(false);
             final LoaderOptions b = new LoaderOptions();
             b.setAllowDuplicateKeys(false);
             overYaml = new Yaml(a, this.yamlRepresenter, this.yamlOptions, b);
+        }
+
+        public File getConfigFile() {
+            return configFile;
         }
 
         @Override

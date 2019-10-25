@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.quest.Quest;
@@ -84,7 +83,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
 
                     // 錬金成分
                     final List<String> ingredientStrs = isec.contains("ingredients") ? isec.getStringList("ingredients") : null;
-                    List<Ingredients> ingredients = null;
+                    List<AlchemyIngredients> ingredients = null;
                     if (ingredientStrs != null) {
                         ingredients = new ArrayList<>();
                         for (final String iid : ingredientStrs) {

@@ -204,7 +204,7 @@ public final class Chore {
         if (item.hasItemMeta()) {
             final ItemMeta meta = item.getItemMeta();
             if (meta.hasLore()) {
-                AlchemyItemStatus.getLores(AlchemyItemStatus.CATEGORY, item).stream()
+                AlchemyItemStatus.getLores(AlchemyItemStatus.Type.CATEGORY, item).stream()
                         .filter(cateStr -> (!cateStr.contains("カテゴリ"))).forEachOrdered(cateStr -> result.add(Category.valueOf(Chore.getStridColor(cateStr.substring(cateStr.indexOf("§0") + 2)))));
             }
         }

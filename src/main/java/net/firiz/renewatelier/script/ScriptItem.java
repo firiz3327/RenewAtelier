@@ -41,8 +41,8 @@ public class ScriptItem {
         final ItemStack item = e.getItem();
 
         if (item != null && player.getCooldown(item.getType()) == 0 && item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final AlchemyMaterial material = AlchemyMaterial.getMaterial(item);
-            if (material.getScript() != null) {
+            final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
+            if (material != null && material.getScript() != null) {
                 final String scriptName = "item/".concat(material.getScript());
                 ScriptManager.INSTANCE.start(scriptName, player, new ItemConversation(
                         scriptName,

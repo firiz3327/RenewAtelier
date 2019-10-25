@@ -33,37 +33,122 @@ import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
  * @author firiz
  */
-public enum AlchemyItemStatus {
-    ID("§l§d"),
-    CATALYST_SIZE("§c§a§f§2§1§d§e"), // 触媒・サイズ
-    CATEGORY("§c§a§f§e§d§o§r§d"), // 錬金アイテム・カテゴリ
-    SIZE("§2§1§d§e"), // 錬金アイテム・サイズ
-    QUALITY("§c§d§a§1§1§f§f"), // 品質
-    ALCHEMY_INGREDIENTS("§a§1§c§1§n§4§r§e§d§1§e§n§f§b"), // 錬金成分
-    CHARACTERISTIC("§c§f§a§r§a§c§f§e§r§1§b§f§1§c"), // 特性
-    MATERIAL("§l§a§f§e§r§l§a§l"), // マテリアル-レシピ用
-    EFFECT("§e§t§t§e§c§t"),
-    BAG("§b§a§e"), // バッグ用
-    BAG_ITEMS("§b§a§e§l§f§e§m§r"), // バッグ-アイテム用
-    LORE_END("§e§e§b§e§e§b");
+public class AlchemyItemStatus {
 
-    private final String check;
+    public enum Type {
+        ID("§l§d"),
+        CATALYST_SIZE("§c§a§f§2§1§d§e"), // 触媒・サイズ
+        CATEGORY("§c§a§f§e§d§o§r§d"), // 錬金アイテム・カテゴリ
+        SIZE("§2§1§d§e"), // 錬金アイテム・サイズ
+        QUALITY("§c§d§a§1§1§f§f"), // 品質
+        ALCHEMY_INGREDIENTS("§a§1§c§1§n§4§r§e§d§1§e§n§f§b"), // 錬金成分
+        CHARACTERISTIC("§c§f§a§r§a§c§f§e§r§1§b§f§1§c"), // 特性
+        MATERIAL("§l§a§f§e§r§l§a§l"), // マテリアル-レシピ用
+        EFFECT("§e§t§t§e§c§t"), // 効果
+        BAG("§b§a§e"), // バッグ用
+        BAG_ITEMS("§b§a§e§l§f§e§m§r"), // バッグ-アイテム用
+        LORE_END("§e§e§b§e§e§b");
 
-    AlchemyItemStatus(final String check) {
-        this.check = check;
+        private final String check;
+
+        Type(final String check) {
+            this.check = check;
+        }
+
+        public String getCheck() {
+            return check;
+        }
     }
 
-    public String getCheck() {
-        return check;
+    private final AlchemyMaterial alchemyMaterial;
+    private int[] size;
+    private final List<Category> categories;
+    private int quality;
+    private final List<AlchemyIngredients> ingredients;
+    private final List<Characteristic> characteristics;
+    private final List<String> activeEffects;
+
+    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects) {
+        this.alchemyMaterial = alchemyMaterial;
+        this.size = size;
+        this.categories = categories;
+        this.quality = quality;
+        this.ingredients = ingredients;
+        this.characteristics = characteristics;
+        this.activeEffects = activeEffects;
     }
 
-    public static List<String> getLores(final AlchemyItemStatus type, final ItemStack item) {
+    public AlchemyMaterial getAlchemyMaterial() {
+        return alchemyMaterial;
+    }
+
+    public int[] getSize() {
+        return size;
+    }
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public List<AlchemyIngredients> getIngredients() {
+        return ingredients;
+    }
+
+    public List<Characteristic> getCharacteristics() {
+        return characteristics;
+    }
+
+    public List<String> getActiveEffects() {
+        return activeEffects;
+    }
+
+    public void setSize(int[] size) {
+        this.size = size;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
+    }
+
+    @NotNull
+    public ItemStack create() {
+        return AlchemyItemStatus.getItem(alchemyMaterial, ingredients, null, quality, size, activeEffects, characteristics, categories, false);
+    }
+
+    @Nullable
+    public static AlchemyItemStatus load(ItemStack item) {
+        if (item != null) {
+            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterialOrNull(item);
+            if (alchemyMaterial != null) {
+                final ItemMeta meta = item.getItemMeta();
+                assert meta != null;
+                return new AlchemyItemStatus(
+                        alchemyMaterial,
+                        MaterialSize.getSize(item),
+                        AlchemyItemStatus.getCategorys(item),
+                        AlchemyItemStatus.getQuality(item),
+                        AlchemyItemStatus.getIngredients(item),
+                        AlchemyItemStatus.getCharacteristics(item),
+                        AlchemyItemStatus.getActiveEffects(item)
+                );
+            }
+        }
+        return null;
+    }
+
+    public static List<String> getLores(final AlchemyItemStatus.Type type, final ItemStack item) {
         return getLores(type.check, item);
     }
 
@@ -81,27 +166,38 @@ public enum AlchemyItemStatus {
     }
 
     public static String getId(final ItemStack item) {
-        final List<String> lores = getLores(ID, item);
+        final List<String> lores = getLores(Type.ID, item);
         if (!lores.isEmpty()) {
-            return Chore.getStridColor(lores.get(0).substring(ID.check.length()));
+            return Chore.getStridColor(lores.get(0).substring(Type.ID.check.length()));
         }
         return null;
     }
 
     public static int getQuality(final ItemStack item) {
-        final List<String> lores = getLores(QUALITY, item);
+        final List<String> lores = getLores(Type.QUALITY, item);
         if (!lores.isEmpty()) {
-            return Integer.parseInt(lores.get(0).substring(QUALITY.check.length() + 8));  // (QUALITY.check + "§7品質: §r").length
+            return Integer.parseInt(lores.get(0).substring(Type.QUALITY.check.length() + 8));  // (QUALITY.check + "§7品質: §r").length
         }
         return -1;
     }
 
-    public static List<Ingredients> getIngredients(final ItemStack item) {
-        final List<Ingredients> result = new ArrayList<>();
-        final List<String> lores = getLores(ALCHEMY_INGREDIENTS, item);
+    public static List<String> getActiveEffects(final ItemStack item) {
+        final List<String> result = new ArrayList<>();
+        final List<String> lores = getLores(Type.ALCHEMY_INGREDIENTS, item);
         for (int i = 1; i < lores.size(); i++) {
             final String lore = lores.get(i);
-            final String name = lore.substring(ALCHEMY_INGREDIENTS.check.length() + 4, lore.indexOf(" : "));
+            final String name = lore.substring(Type.EFFECT.check.length() + 4);
+            result.add(name);
+        }
+        return result;
+    }
+
+    public static List<AlchemyIngredients> getIngredients(final ItemStack item) {
+        final List<AlchemyIngredients> result = new ArrayList<>();
+        final List<String> lores = getLores(Type.ALCHEMY_INGREDIENTS, item);
+        for (int i = 1; i < lores.size(); i++) {
+            final String lore = lores.get(i);
+            final String name = lore.substring(Type.ALCHEMY_INGREDIENTS.check.length() + 4, lore.indexOf(" : "));
             final AlchemyIngredients ing = AlchemyIngredients.searchName(name);
             result.add(ing);
         }
@@ -110,9 +206,9 @@ public enum AlchemyItemStatus {
 
     public static List<Characteristic> getCharacteristics(final ItemStack item) {
         final List<Characteristic> result = new ArrayList<>();
-        final List<String> lores = AlchemyItemStatus.getLores(CHARACTERISTIC, item);
+        final List<String> lores = AlchemyItemStatus.getLores(Type.CHARACTERISTIC, item);
         for (int i = 1; i < lores.size(); i++) {
-            final String lore = lores.get(i).substring(CHARACTERISTIC.check.length() + 4);
+            final String lore = lores.get(i).substring(Type.CHARACTERISTIC.check.length() + 4);
             final Characteristic c = Characteristic.search(lore);
             result.add(c);
         }
@@ -121,7 +217,7 @@ public enum AlchemyItemStatus {
 
     public static List<Category> getCategorys(final ItemStack item) {
         final List<Category> result = new ArrayList<>();
-        final List<String> lores = getLores(CATEGORY, item);
+        final List<String> lores = getLores(Type.CATEGORY, item);
         for (int i = 1; i < lores.size(); i++) {
             final String lore = lores.get(i);
             final Category category = Category.valueOf(Chore.getStridColor(lore.substring(lore.indexOf("§0") + 2)));
@@ -134,7 +230,7 @@ public enum AlchemyItemStatus {
         return getItem(id, null, null, -1, null, null);
     }
 
-    public static ItemStack getItem(final String id, final List<Ingredients> ings) {
+    public static ItemStack getItem(final String id, final List<AlchemyIngredients> ings) {
         return getItem(id, ings, null, -1, null, null);
     }
 
@@ -146,7 +242,7 @@ public enum AlchemyItemStatus {
         return getItem(am, null, null, -1, null, null, null);
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> ings) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> ings) {
         return getItem(am, ings, null, -1, null, null, null);
     }
 
@@ -154,24 +250,25 @@ public enum AlchemyItemStatus {
         return getItem(am, null, item, -1, null, null, null);
     }
 
-    public static ItemStack getItem(final String id, final List<Ingredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics) {
+    public static ItemStack getItem(final String id, final List<AlchemyIngredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics) {
         return getItem(AlchemyMaterial.getMaterial(id), overIngs, item, over_quality, overSize, overCharacteristics, null);
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics, final List<Category> overCategory) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics, final List<Category> overCategory) {
         return getItem(am, overIngs, item, over_quality, overSize, overCharacteristics, overCategory, false);
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int over_quality, final int[] overSize, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
         return getItem(am, overIngs, item, over_quality, overSize, null, overCharacteristics, overCategory, notVisibleCatalyst);
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
         return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, new boolean[]{false, false, false, false, notVisibleCatalyst, false, false});
     }
 
     /**
      * notVisibles {id, quality, ings, size, catalyst, category, end}
+     *
      * @param am
      * @param overIngs
      * @param item
@@ -183,7 +280,7 @@ public enum AlchemyItemStatus {
      * @param notVisibles
      * @return
      */
-    public static ItemStack getItem(final AlchemyMaterial am, final List<Ingredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean[] notVisibles) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean[] notVisibles) {
         if (am == null || (am.getIngredients().isEmpty() && (overIngs == null || overIngs.isEmpty()))) {
             return null;
         }
@@ -198,34 +295,34 @@ public enum AlchemyItemStatus {
 
         final List<String> lore = new ArrayList<>();
         if (!notVisibles[0]) {
-            lore.add(ID.check + Chore.createStridColor(am.getId()));
+            lore.add(Type.ID.check + Chore.createStridColor(am.getId()));
         }
         if (!notVisibles[1]) {
-            lore.add(QUALITY.check + "§7品質: §r" + (overQuality != -1 ? overQuality : Randomizer.nextInt(am.getQualityMax() - am.getQualityMin()) + am.getQualityMin()));
+            lore.add(Type.QUALITY.check + "§7品質: §r" + (overQuality != -1 ? overQuality : Randomizer.nextInt(am.getQualityMax() - am.getQualityMin()) + am.getQualityMin()));
         }
 
         // 錬金成分
         if (!notVisibles[2]) {
             int allLevel = 0;
-            final Map<AlchemyAttribute, Integer> levels = new HashMap<>();
-            final List<Ingredients> acls = new ArrayList<>();
+            final Map<AlchemyAttribute, Integer> levels = new EnumMap<>(AlchemyAttribute.class);
+            final List<AlchemyIngredients> acls = new ArrayList<>();
             // 錬金成分・確定取得
             if (overIngs != null) {
-                for (final Ingredients ingredients : overIngs) {
+                for (final AlchemyIngredients ingredients : overIngs) {
                     allLevel += getLevel(levels, acls, ingredients);
                 }
             } else {
-                for (final FinalDoubleData<Ingredients, Integer> dd : am.getIngredients()) {
+                for (final FinalDoubleData<AlchemyIngredients, Integer> dd : am.getIngredients()) {
                     if (dd.getRight() == 100) {
-                        final Ingredients ingredients = dd.getLeft();
+                        final AlchemyIngredients ingredients = dd.getLeft();
                         allLevel += getLevel(levels, acls, ingredients);
                     }
                 }
                 // 錬金成分・ランダム取得
                 for (int i = 0; i < Math.min(6, Randomizer.nextInt(am.getIngredients().size()) + 1); i++) {
-                    final FinalDoubleData<Ingredients, Integer> dd = am.getIngredients().get(Randomizer.nextInt(am.getIngredients().size()));
+                    final FinalDoubleData<AlchemyIngredients, Integer> dd = am.getIngredients().get(Randomizer.nextInt(am.getIngredients().size()));
                     if (Randomizer.nextInt(100) <= dd.getRight()) {
-                        final Ingredients ingredients = dd.getLeft();
+                        final AlchemyIngredients ingredients = dd.getLeft();
                         if (!acls.contains(ingredients)) {
                             acls.add(ingredients);
                             int level = ingredients.getLevel();
@@ -240,12 +337,12 @@ public enum AlchemyItemStatus {
                     }
                 }
                 // 錬金成分・非マイナス化
-                final List<Ingredients> ingacls = new ArrayList<>();
+                final List<AlchemyIngredients> ingacls = new ArrayList<>();
                 am.getIngredients().forEach(dd -> ingacls.add(dd.getLeft()));
                 while (allLevel <= 0) {
-                    final List<Ingredients> list = new ArrayList<>(ingacls);
+                    final List<AlchemyIngredients> list = new ArrayList<>(ingacls);
                     Collections.shuffle(list);
-                    for (final Ingredients ingredients : list) {
+                    for (final AlchemyIngredients ingredients : list) {
                         if (ingredients.getLevel() > 0) {
                             allLevel += getLevel(levels, acls, ingredients);
                             break;
@@ -268,14 +365,14 @@ public enum AlchemyItemStatus {
             }
             // 錬金成分・設定
             final StringBuilder ingsb = new StringBuilder();
-            ingsb.append(ALCHEMY_INGREDIENTS.check).append("§7錬金成分: §r").append(allLevel).append(" ");
+            ingsb.append(Type.ALCHEMY_INGREDIENTS.check).append("§7錬金成分: §r").append(allLevel).append(" ");
             maxtype.forEach(type -> ingsb.append(type.getColor()).append("●"));
             lore.add(ingsb.toString());
-            acls.forEach(i -> lore.add(ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
+            acls.forEach(i -> lore.add(Type.ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
         }
         // サイズ
         if (!notVisibles[3]) {
-            lore.add(SIZE.check + "§7サイズ:");
+            lore.add(Type.SIZE.check + "§7サイズ:");
             StringBuilder str = new StringBuilder();
             int cSize = 0;
             final int[] ss = overSize == null ? am.getSizeTemplate().getSize(Randomizer.nextInt(9)) : overSize;
@@ -329,15 +426,15 @@ public enum AlchemyItemStatus {
                         }
                         count++;
                     }
-                    lore.add(CATALYST_SIZE.check + sb.toString());
+                    lore.add(Type.CATALYST_SIZE.check + sb.toString());
                     sb.delete(0, sb.length());
                 }
             }
         }
         // 効果
         if (activeEffects != null && !activeEffects.isEmpty()) {
-            lore.add(EFFECT.check + "§7効果: ");
-            activeEffects.forEach(effect -> lore.add(EFFECT.check + "§r- " + effect));
+            lore.add(Type.EFFECT.check + "§7効果: ");
+            activeEffects.forEach(effect -> lore.add(Type.EFFECT.check + "§r- " + effect));
         }
         // 特性
         final List<Characteristic> characteristics = new ArrayList<>();
@@ -366,21 +463,21 @@ public enum AlchemyItemStatus {
             characteristics.addAll(overCharacteristics);
         }
         if (!characteristics.isEmpty()) {
-            lore.add(CHARACTERISTIC.check + "§7特性:");
-            characteristics.forEach(c -> lore.add(CHARACTERISTIC.check + "§r- " + c.getName()));
+            lore.add(Type.CHARACTERISTIC.check + "§7特性:");
+            characteristics.forEach(c -> lore.add(Type.CHARACTERISTIC.check + "§r- " + c.getName()));
         }
         // カテゴリ
         if (!notVisibles[5]) {
             final List<Category> categorys = overCategory == null ? am.getCategorys() : overCategory;
             if (!categorys.isEmpty()) {
-                lore.add(CATEGORY.check + "§7カテゴリ:");
-                categorys.forEach(category -> lore.add(CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
+                lore.add(Type.CATEGORY.check + "§7カテゴリ:");
+                categorys.forEach(category -> lore.add(Type.CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
             }
         }
 
         // Lore終了
         if (!notVisibles[6]) {
-            lore.add(LORE_END.check);
+            lore.add(Type.LORE_END.check);
         }
         meta.setLore(lore);
 
@@ -392,7 +489,7 @@ public enum AlchemyItemStatus {
         return item;
     }
 
-    private static int getLevel(Map<AlchemyAttribute, Integer> levels, List<Ingredients> acls, Ingredients i) {
+    private static int getLevel(Map<AlchemyAttribute, Integer> levels, List<AlchemyIngredients> acls, AlchemyIngredients i) {
         acls.add(i);
         final int level = i.getLevel();
         final AlchemyAttribute type = i.getType();

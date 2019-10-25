@@ -21,10 +21,9 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+
+import java.util.*;
+
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
@@ -74,12 +73,12 @@ public class CatalystSelect {
             inv.setItem(i, null);
         }
 
-        final ItemStack citem = KETTLE.getCatalyst(player.getUniqueId());
+        final ItemStack cItem = KETTLE.getCatalyst(player.getUniqueId());
         Catalyst catalyst;
-        if (citem == null) {
+        if (cItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
         } else {
-            catalyst = AlchemyMaterial.getMaterial(citem).getCatalyst();
+            catalyst = AlchemyMaterial.getMaterial(cItem).getCatalyst();
         }
         catalyst.setInv(inv, recipe, false);
         final List<String> lore = new ArrayList<>();
@@ -98,9 +97,9 @@ public class CatalystSelect {
             }
         });
         inv.setItem(37, Chore.ci(
-                citem == null ? Material.BARRIER : citem.getType(),
+                cItem == null ? Material.BARRIER : cItem.getType(),
                 0,
-                ChatColor.GRAY + "現在の触媒： " + ChatColor.RESET + (citem == null ? "触媒を指定せずに作成" : citem.getItemMeta().getDisplayName()),
+                ChatColor.GRAY + "現在の触媒： " + ChatColor.RESET + (cItem == null ? "触媒を指定せずに作成" : Objects.requireNonNull(cItem.getItemMeta()).getDisplayName()),
                 lore
         ));
     }
@@ -122,14 +121,7 @@ public class CatalystSelect {
                 Chore.addItem(player, KETTLE.getCatalyst(uuid));
             }
             final ItemStack current = e.getCurrentItem();
-            final AlchemyMaterial am = AlchemyMaterial.getMaterial(current);
-            if (am.hasUsefulCatalyst(recipe)) {
-                final ItemStack cloneItem = current.clone();
-                cloneItem.setAmount(1);
-                current.setAmount(current.getAmount() - 1);
-                KETTLE.setCatalyst(uuid, cloneItem);
-                setCatalystSlot(player, inv, recipe);
-            }
+            setCatalystItem(inv, player, uuid, recipe, current);
             return;
         }
         if (e.getSlotType() == InventoryType.SlotType.CONTAINER && raw < inv.getSize()) {
@@ -138,14 +130,7 @@ public class CatalystSelect {
                 case 37: {
                     if (e.getCurrentItem().getType() == Material.BARRIER) {
                         final ItemStack cursor = e.getCursor();
-                        final AlchemyMaterial am = AlchemyMaterial.getMaterial(cursor);
-                        if (am != null && am.hasUsefulCatalyst(recipe)) {
-                            final ItemStack cloneItem = cursor.clone();
-                            cloneItem.setAmount(1);
-                            cursor.setAmount(cursor.getAmount() - 1);
-                            KETTLE.setCatalyst(uuid, cloneItem);
-                            setCatalystSlot(player, inv, recipe);
-                        }
+                        setCatalystItem(inv, player, uuid, recipe, cursor);
                     } else {
                         Chore.addItem(player, KETTLE.getCatalyst(uuid));
                         KETTLE.removeCatalyst(uuid);
@@ -167,6 +152,17 @@ public class CatalystSelect {
                     // 想定外スロット
                     break;
             }
+        }
+    }
+
+    private static void setCatalystItem(Inventory inv, Player player, UUID uuid, AlchemyRecipe recipe, ItemStack item) {
+        final AlchemyMaterial am = AlchemyMaterial.getMaterialOrNull(item);
+        if (am != null && am.hasUsefulCatalyst(recipe)) {
+            final ItemStack cloneItem = item.clone();
+            cloneItem.setAmount(1);
+            item.setAmount(item.getAmount() - 1);
+            KETTLE.setCatalyst(uuid, cloneItem);
+            setCatalystSlot(player, inv, recipe);
         }
     }
 

@@ -1,6 +1,6 @@
-package net.firiz.renewatelier.damage;
+package net.firiz.renewatelier.buff;
 
-public enum BuffType {
+public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
     STATS_LEVEL, // レベル％
     STATS_HP, // HP％
     STATS_MP, // MP％
@@ -22,4 +22,10 @@ public enum BuffType {
     SEALED, // 封印付与 <確率, 時間, レベル>
     DISABLE_HEAL, // 回復無効付与 <確率, 時間, レベル>
     DEBUFF_SLOW_SKILL, // 敵のスキルループ待機時間増加％
+    EXP_UP, // 経験値量増加％
+    ALCHEMY_EXP_UP, // 錬金経験値量増加％
+    RECIPE_EXP_UP, // レシピ経験値量増加％
+    ;
+
+
 }

@@ -20,12 +20,15 @@
  */
 package net.firiz.renewatelier.player.loadsqls;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  *
  * @author firiz
  */
 public interface StatusLoader<T> {
-   
+
+    @NotNull
     T load(int id);
     
 }

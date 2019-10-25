@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class FinalDoubleData<L, R> extends DoubleData<L, R> {
 
-    public FinalDoubleData(L left, R right) {
+    public FinalDoubleData(@NotNull L left, @NotNull R right) {
         super(left, right);
     }
 

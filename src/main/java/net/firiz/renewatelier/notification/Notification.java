@@ -93,7 +93,7 @@ public class Notification {
         所持しているレシピを取得する方法がまったくわからないので、所持確認はSQLで管理する
         もしくは、そもそもパケットでレシピを得ても気にしない
          */
-        if (!PlayerSaveManager.INSTANCE.getStatus(player.getUniqueId()).discoveredRecipe(
+        if (!PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).discoveredRecipe(
                 MinecraftRecipeSaveType.search(itemId)
         )) {
             Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> NotificationPacket.sendRecipe(player, itemId, true), 2); // 0.1 sec

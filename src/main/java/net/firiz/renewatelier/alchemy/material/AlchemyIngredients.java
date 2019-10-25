@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * @author firiz
  */
-public enum AlchemyIngredients implements Ingredients {
+public enum AlchemyIngredients {
     I0P_5("しなびてる", AlchemyAttribute.PURPLE, -5),
     I1P10("ずっしり", AlchemyAttribute.PURPLE, 10),
     I2P15("とても硬い", AlchemyAttribute.PURPLE, 15),
@@ -299,17 +299,14 @@ public enum AlchemyIngredients implements Ingredients {
         this.level = level;
     }
 
-    @Override
     public AlchemyAttribute getType() {
         return type;
     }
 
-    @Override
     public int getLevel() {
         return level;
     }
 
-    @Override
     public String getName() {
         return name;
     }
@@ -329,8 +326,8 @@ public enum AlchemyIngredients implements Ingredients {
 
     public static DoubleData<Integer, AlchemyAttribute[]> getAllLevel(final ItemStack item) {
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.ALCHEMY_INGREDIENTS, item);
-            final String values = lores.get(0).substring(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
+            final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS, item);
+            final String values = lores.get(0).substring(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
             final int level = Integer.parseInt(values.substring(0, values.indexOf(' ')));
             final String[] types = values.substring(values.indexOf(' ') + 1).split("●");
             final List<AlchemyAttribute> list = new ArrayList<>();
@@ -358,7 +355,7 @@ public enum AlchemyIngredients implements Ingredients {
                     } else {
                         break;
                     }
-                } else if (lore.startsWith(AlchemyItemStatus.ALCHEMY_INGREDIENTS.getCheck())) {
+                } else if (lore.startsWith(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS.getCheck())) {
                     loreArea = true;
                 }
             }

@@ -21,8 +21,9 @@
 package net.firiz.renewatelier.quest;
 
 import java.util.List;
+
+import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import org.bukkit.inventory.ItemStack;
@@ -39,10 +40,10 @@ public class QuestItem {
     private final int amount;
     private final int quality;
     private final int usecount;
-    private final List<Ingredients> ingredients;
+    private final List<AlchemyIngredients> ingredients;
     private final List<Characteristic> characteristics;
 
-    public QuestItem(String material, String name, int amount, int quality, int usecount, List<Ingredients> ingredients, List<Characteristic> characteristics) {
+    public QuestItem(String material, String name, int amount, int quality, int usecount, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics) {
         this.material = material;
         this.name = name;
         this.amount = amount;
@@ -113,7 +114,7 @@ public class QuestItem {
         return usecount;
     }
 
-    public List<Ingredients> getIngredients() {
+    public List<AlchemyIngredients> getIngredients() {
         return ingredients;
     }
 

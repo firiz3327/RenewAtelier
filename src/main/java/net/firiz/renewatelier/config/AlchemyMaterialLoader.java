@@ -34,6 +34,7 @@ import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
@@ -120,7 +121,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     notFounds.add(KEY_INGREDIENTS);
                 }
                 final List<String> ingsStr = CollectionUtils.castList(item.getList(KEY_INGREDIENTS));
-                final List<FinalDoubleData<Ingredients, Integer>> ingredients = new ArrayList<>();
+                final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
                 if (ingsStr != null) {
                     ingsStr.forEach(ing -> {
                         final String[] ingData = ing.split(",");
@@ -226,7 +227,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
         if (errorCount != 0) {
             Chore.logWhiteWarning("error founded.");
         }
-        Chore.log(PREFIX + getList().size() + " loaded and " + errorCount + " errors found.");
+        final String fileName = ((CustomConfig.CConfiguration) config).getConfigFile().getName();
+        Chore.log(PREFIX + fileName + " - " + getList().size() + " loaded and " + errorCount + " errors found.");
     }
 
 }

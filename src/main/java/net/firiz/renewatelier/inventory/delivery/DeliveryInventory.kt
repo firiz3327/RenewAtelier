@@ -117,7 +117,7 @@ object DeliveryInventory {
         for (i in 0..inv.size - 10) {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
-                valuations[item] = checkItem(title, item, true, AlchemyMaterial.getMaterial(item)).second
+                valuations[item] = checkItem(title, item, true, AlchemyMaterial.getMaterialOrNull(item)).second
             }
         }
 
@@ -185,7 +185,7 @@ object DeliveryInventory {
         for (i in 0..inv.size - 10) {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
-                val checkItemData = checkItem(view, item, true, AlchemyMaterial.getMaterial(item))
+                val checkItemData = checkItem(view, item, true, AlchemyMaterial.getMaterialOrNull(item))
                 if (checkItemData.first) {
                     valuation.add(checkItemData.second)
                 } else {
@@ -296,9 +296,9 @@ object DeliveryInventory {
         val conv = NPCManager.INSTANCE.getNPCConversation(uuid) ?: return
         try {
             if (value == null) {
-                conv.iv.invokeFunction(method)
+                conv.iv!!.invokeFunction(method)
             } else {
-                conv.iv.invokeFunction(method, value)
+                conv.iv!!.invokeFunction(method, value)
             }
         } catch (ex: ScriptException) {
             Chore.logWarning(ex)

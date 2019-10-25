@@ -27,7 +27,6 @@ import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.alchemy.material.Ingredients;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
@@ -58,7 +57,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             final int req_alchemylevel = item.contains("req_alchemylevel") ? item.getInt("req_alchemylevel") : 1;
             // 初期錬金属性
             final List<String> defaultIngredientsStr = item.getStringList("default_ingredients");
-            final List<Ingredients> defaultIngredients = new ArrayList<>();
+            final List<AlchemyIngredients> defaultIngredients = new ArrayList<>();
             defaultIngredientsStr.forEach(str -> defaultIngredients.add(AlchemyIngredients.searchName(str)));
             // 効果-必要ゲージ数
             final int req_bar = item.getInt("req_bar");
