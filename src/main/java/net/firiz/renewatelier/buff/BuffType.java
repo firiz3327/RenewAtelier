@@ -26,6 +26,4 @@ public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
     ALCHEMY_EXP_UP, // 錬金経験値量増加％
     RECIPE_EXP_UP, // レシピ経験値量増加％
     ;
-
-
 }

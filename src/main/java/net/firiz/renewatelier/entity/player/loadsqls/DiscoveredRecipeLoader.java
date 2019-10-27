@@ -1,5 +1,5 @@
 /*
- * MinecraftRecipe.java
+ * DiscoveredRecipeLoader.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -18,31 +18,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.player.minecraft;
+package net.firiz.renewatelier.entity.player.loadsqls;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.sql.SQLManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  *
  * @author firiz
  */
-public enum MinecraftRecipeSaveType {
-    CAULDRON("minecraft:cauldron");
+public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
 
-    private final String id;
-
-    MinecraftRecipeSaveType(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public static MinecraftRecipeSaveType search(final String id) {
-        for (MinecraftRecipeSaveType type : values()) {
-            if (type.id.equals(id)) {
-                return type;
+    @NotNull
+    @Override
+    public List<MinecraftRecipeSaveType> load(int id) {
+        final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
+                "discoveredRecipes",
+                new String[]{"user_id", "item_id"},
+                new Object[]{id}
+        );
+        final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
+        saveTypesObj.forEach(datas -> {
+            final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
+            if (type != null) {
+                saveTypes.add(type);
             }
-        }
-        return null;
+        });
+        return saveTypes;
     }
+
 }

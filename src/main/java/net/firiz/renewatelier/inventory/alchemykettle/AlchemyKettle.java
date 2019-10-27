@@ -23,6 +23,7 @@ package net.firiz.renewatelier.inventory.alchemykettle;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
@@ -47,8 +48,8 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
-import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.Char;
+import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.utils.Strings;
@@ -105,12 +106,7 @@ public class AlchemyKettle {
                     itemPos = 3;
                 }
                 for (final ItemStack item : pageItems) {
-                    final List<String> clores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.CHARACTERISTIC, item);
-                    for (int j = 1; j < clores.size(); j++) {
-                        final String clore = clores.get(j).substring(AlchemyItemStatus.Type.CHARACTERISTIC.getCheck().length() + 4);
-                        final Characteristic c = Characteristic.search(clore);
-                        KETTLE.addCharacteristic(uuid, c, false);
-                    }
+                    AlchemyItemStatus.getCharacteristics(item).forEach(c -> KETTLE.addCharacteristic(uuid, c, false));
                     playerInv.setItem(itemPos, item.clone());
                     itemPos++;
                 }
@@ -290,7 +286,7 @@ public class AlchemyKettle {
         int itemSize = 0;
         for (int i = 0; i < recipe.getReqMaterial().size(); i++) {
             for (final ItemStack item : KETTLE.getPageItems(uuid, i)) {
-                itemSize += MaterialSize.getSizeCount(item);
+                itemSize += AlchemyItemStatus.getSizeCount(item);
                 itemCount++;
             }
         }
@@ -633,7 +629,7 @@ public class AlchemyKettle {
                                                 result.getMaterial().getRight()
                                         ),
                                         quality, // 品質 書き換え
-                                        MaterialSize.getSize(resultSlotItem), // サイズ 書き換え
+                                        AlchemyItemStatus.getSize(resultSlotItem), // サイズ 書き換え
                                         activeEffects, // 発現効果
                                         characteristics == null ? new ArrayList<>() : characteristics, // 特性 書き換え
                                         categorys.isEmpty() ? null : categorys, // カテゴリ 書き換え
@@ -702,14 +698,14 @@ public class AlchemyKettle {
                                     final int[] size;
                                     if (e.isShiftClick()) {
                                         size = e.isRightClick()
-                                                ? MaterialSize.rightLeftTurn(MaterialSize.getSize(item))
-                                                : MaterialSize.upDownTurn(MaterialSize.getSize(item));
+                                                ? MaterialSize.rightLeftTurn(AlchemyItemStatus.getSize(item))
+                                                : MaterialSize.upDownTurn(AlchemyItemStatus.getSize(item));
                                     } else {
                                         size = e.isRightClick()
-                                                ? MaterialSize.rightRotation(MaterialSize.getSize(item))
-                                                : MaterialSize.leftRotation(MaterialSize.getSize(item));
+                                                ? MaterialSize.rightRotation(AlchemyItemStatus.getSize(item))
+                                                : MaterialSize.leftRotation(AlchemyItemStatus.getSize(item));
                                     }
-                                    item.setItemMeta(MaterialSize.setSize(item, size));
+                                    item.setItemMeta(AlchemyItemStatus.setSize(item, size));
                                 }
                             }
                         }
@@ -773,25 +769,23 @@ public class AlchemyKettle {
                             final int rludsl = AlchemyChore.getSetting(setting, 4);
                             final DoubleData<BonusItem, KettleBoxData> backData = kettleBox.backData(sl, rludsl);
                             if (backData != null) {
-                                final PlayerInventory pinv = player.getInventory();
+                                final PlayerInventory playerInventory = player.getInventory();
                                 boolean check = false;
-                                int slot = 12;
-                                setItemLoop:
-                                for (int i = 0; i < 3; i++) {
-                                    for (int j = 0; j < 6; j++) {
-                                        if (pinv.getItem(slot) == null) {
-                                            pinv.setItem(slot, backData.getLeft().getItem());
-                                            check = true;
-                                            break setItemLoop;
-                                        }
-                                        slot++;
+                                final AtomicInteger slot = new AtomicInteger(12);
+                                for (int i = 0; i < 3; i++) { // sonarQubeに怒られた為、ラベル未使用に変更
+                                    final boolean checkInv = checkInv(slot, playerInventory);
+                                    if (checkInv) {
+                                        assert backData.getLeft() != null;
+                                        playerInventory.setItem(slot.intValue(), backData.getLeft().getItem());
+                                        check = true;
+                                        break;
                                     }
-                                    slot += 4;
+                                    slot.addAndGet(4);
                                 }
                                 if (!check) {
                                     for (int i = 3; i < 9; i++) { // 3~8 slots
-                                        if (pinv.getItem(i) == null) {
-                                            pinv.setItem(i, backData.getLeft().getItem());
+                                        if (playerInventory.getItem(i) == null) {
+                                            playerInventory.setItem(i, backData.getLeft().getItem());
                                             break;
                                         }
                                     }
@@ -875,7 +869,7 @@ public class AlchemyKettle {
                                 //<editor-fold defaultstate="collapsed" desc="アイテムを錬金釜に投入">
                                 e.setCancelled(true);
                                 final ItemStack cursor = e.getCursor();
-                                final int[] size = MaterialSize.getSize(cursor);
+                                final int[] size = AlchemyItemStatus.getSize(cursor);
                                 if (size.length != 0) {
                                     final int center = AlchemyChore.getSetting(inv.getItem(1), 0);
                                     final int[] sets = {
@@ -974,6 +968,16 @@ public class AlchemyKettle {
                 // 想定されていないスロットタイプ
                 break;
         }
+    }
+
+    private static boolean checkInv(AtomicInteger slot, PlayerInventory playerInventory) {
+        for (int j = 0; j < 6; j++) {
+            if (playerInventory.getItem(slot.intValue()) == null) {
+                return true;
+            }
+            slot.incrementAndGet();
+        }
+        return false;
     }
 
     public static void drag(final InventoryDragEvent e) {

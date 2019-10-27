@@ -1,27 +1,26 @@
 /*
  * AlchemyMaterial.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
 package net.firiz.renewatelier.alchemy.material;
 
 import java.util.List;
-import java.util.Objects;
 
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -35,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- *
  * @author firiz
  */
 public class AlchemyMaterial {
@@ -128,20 +126,20 @@ public class AlchemyMaterial {
 
     @Nullable
     public static AlchemyMaterial getMaterialOrNull(@NotNull final ItemStack item) {
-        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.ID, item);
-        if (!lores.isEmpty()) {
-            return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
+        final String id = AlchemyItemStatus.getId(item);
+        if (id == null) {
+            return null;
         }
-        return null;
+        return getMaterial(id);
     }
 
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final ItemStack item) {
-        final List<String> lores = AlchemyItemStatus.getLores(AlchemyItemStatus.Type.ID, item);
-        if (!lores.isEmpty()) {
-            return getMaterial(Objects.requireNonNull(AlchemyItemStatus.getId(item)));
+        final String id = AlchemyItemStatus.getId(item);
+        if (id == null) {
+            throw new IllegalArgumentException("item is not AlchemyMaterial.");
         }
-        throw new IllegalArgumentException("item is not AlchemyMaterial.");
+        return getMaterial(id);
     }
 
     public String getId() {
@@ -203,8 +201,8 @@ public class AlchemyMaterial {
                 if (str.equals("material:".concat(id))) {
                     return true;
                 }
-                for(final Category c : categorys) {
-                    if(str.equals("category:".concat(c.name()))) {
+                for (final Category c : categorys) {
+                    if (str.equals("category:".concat(c.name()))) {
                         return true;
                     }
                 }

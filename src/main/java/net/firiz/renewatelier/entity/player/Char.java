@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.player;
+package net.firiz.renewatelier.entity.player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +27,11 @@ import javax.script.ScriptEngine;
 
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.notification.Notification;
-import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.quest.QuestStatus;
@@ -38,7 +39,6 @@ import net.firiz.renewatelier.quest.result.ItemQuestResult;
 import net.firiz.renewatelier.quest.result.MoneyQuestResult;
 import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import net.firiz.renewatelier.utils.Chore;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

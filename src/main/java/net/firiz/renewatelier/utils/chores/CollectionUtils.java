@@ -9,7 +9,7 @@ public class CollectionUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends List<?>> T castList(Object obj) {
+    public static <T> T castList(Object obj) {
         return (T) obj;
     }
 

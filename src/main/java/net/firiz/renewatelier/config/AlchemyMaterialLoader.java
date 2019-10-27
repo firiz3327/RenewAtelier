@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
@@ -44,12 +45,15 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author firiz
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
+    private static final List<String> notFounds = new ArrayList<>();
     private static final String PREFIX = "MaterialLoader: ";
     private static final String KEY_MATERIAL = "material";
     private static final String KEY_QUALITY_MIN = "quality_min";
@@ -63,138 +67,32 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @Override
     protected void loadConfig(final FileConfiguration config) {
-        int errorCount = 0;
+        notFounds.clear();
+        final AtomicInteger errorCount = new AtomicInteger(0);
         final Set<String> keys = config.getKeys(false);
-        for (final String key : keys) {
-            final List<String> notFounds = new ArrayList<>();
+        keys.forEach(key -> {
             try {
                 final ConfigurationSection item = config.getConfigurationSection(key);
                 assert item != null;
 
-                // *アイテムのマテリアルを取得
-                if (!item.contains(KEY_MATERIAL)) {
-                    notFounds.add(KEY_MATERIAL);
-                }
-                final String mat_str = item.getString(KEY_MATERIAL);
-                final FinalDoubleData<Material, Integer> mat;
-                if (!mat_str.contains(",")) {
-                    if (mat_str.equalsIgnoreCase("XXX")) {
-                        Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
-                    }
-                    mat = new FinalDoubleData<>(Chore.getMaterial(mat_str), 0);
-                } else {
-                    final String[] matSplit = mat_str.split(",");
-                    mat = new FinalDoubleData<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
-                }
-                // デフォルト名優先
-                final boolean default_name = item.contains("default_name") && item.getBoolean("default_name");
-                // *名前取得
-                final String name;
-                if (default_name) {
-                    name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getLeft())); // クエストブック用に名前を設定しておく
-                } else {
-                    if (!item.contains("name")) {
-                        notFounds.add("name");
-                    }
-                    name = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(item.getString("name")));
-                }
-                // *品質<最大・最小>
-                if (!item.contains(KEY_QUALITY_MIN)) {
-                    notFounds.add(KEY_QUALITY_MIN);
-                }
-                if (!item.contains(KEY_QUALITY_MAX)) {
-                    notFounds.add(KEY_QUALITY_MAX);
-                }
-                final int quality_min = item.getInt(KEY_QUALITY_MIN);
-                final int quality_max = item.getInt(KEY_QUALITY_MAX);
-                // 売価
+                final FinalDoubleData<Material, Integer> mat = getMaterial(item, key); // *
+                final boolean defaultName = getBoolean(item, "default_name");
+                final String name = getName(item, defaultName, mat); // *
+                final int quality_min = getQualityMin(item); // *
+                final int quality_max = getQualityMax(item); // *
                 final int price = item.contains("price") ? item.getInt("price") : 1;
-                // *カテゴリ取得
-                if (!item.contains(KEY_CATEGORYS)) {
-                    notFounds.add(KEY_CATEGORYS);
-                }
-                final List<String> categorysStr = CollectionUtils.castList(item.getList(KEY_CATEGORYS));
-                final List<Category> categorys = new ArrayList<>();
-                categorysStr.forEach(cStr -> categorys.add(Category.searchName(cStr)));
-                // *錬金成分取得
-                if (!item.contains(KEY_INGREDIENTS)) {
-                    notFounds.add(KEY_INGREDIENTS);
-                }
-                final List<String> ingsStr = CollectionUtils.castList(item.getList(KEY_INGREDIENTS));
-                final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
-                if (ingsStr != null) {
-                    ingsStr.forEach(ing -> {
-                        final String[] ingData = ing.split(",");
-                        ingredients.add(new FinalDoubleData<>(
-                                AlchemyIngredients.searchName(ingData[0].trim()),
-                                Integer.parseInt(ingData[1].trim())
-                        ));
-                    });
-                }
-                // サイズ取得
-                if (!item.contains("size")) {
-                    notFounds.add("size");
-                }
-                final MaterialSizeTemplate sizeTemplate = MaterialSizeTemplate.valueOf("TYPE" + item.getInt("size"));
-                // 特性取得
-                final List<String> charasStr = CollectionUtils.castList(item.getList("characteristics"));
-                final List<Object> charas = new ArrayList<>();
-                if (charasStr != null) {
-                    charasStr.forEach(cStr -> {
-                        if (cStr.contains(",")) {
-                            final String[] strs = cStr.split(",");
-                            final String id = strs[0].trim().toUpperCase();
-                            Characteristic c;
-                            try {
-                                c = Characteristic.getCharacteristic(id);
-                            } catch (IllegalArgumentException e) {
-                                c = Characteristic.search(id);
-                            }
-                            charas.add(new DoubleData<>(c, Integer.parseInt(strs[1].trim())));
-                        } else {
-                            charas.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
-                        }
-                    });
-                }
-                // 触媒取得
-                Catalyst catalyst = null;
-                if (item.contains("catalyst")) {
-                    final ConfigurationSection catalystConfig = item.getConfigurationSection("catalyst");
-                    final List<CatalystBonus> bonus = new ArrayList<>();
-                    assert catalystConfig != null;
-                    catalystConfig.getKeys(false).stream()
-                            .filter(cKey -> (cKey.startsWith("bonus")))
-                            .map(catalystConfig::getConfigurationSection)
-                            .filter(Objects::nonNull)
-                            .forEachOrdered(sec -> {
-                                final List<Integer> size = sec.getIntegerList("size");
-                                bonus.add(new CatalystBonus(
-                                        CollectionUtils.parseInts(size),
-                                        new CatalystBonusData(
-                                                CatalystBonusData.BonusType.valueOf(sec.getString("type")),
-                                                sec.contains("x") ? sec.getInt("x") : 0,
-                                                sec.contains("y") ? sec.getString("y") : null
-                                        )
-                                ));
-                            });
-                    catalyst = new Catalyst(bonus);
-                }
-                // スクリプト取得
+                final List<Category> categorys = getCategories(item); // *
+                final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = getIngredients(item); // *
+                final MaterialSizeTemplate sizeTemplate = getSize(item);
+                final List<Object> characteristics = getCharacteristics(item);
+                final Catalyst catalyst = getCatalyst(item);
                 final String script = item.getString("script");
-                //unbreaking & hide系取得
-                final boolean unbreaking = item.contains("unbreaking") && item.getBoolean("unbreaking");
-                final boolean hideAttribute = item.contains("hideAttribute") && item.getBoolean("hideAttribute");
-                final boolean hideDestroy = item.contains("hideDestroy") && item.getBoolean("hideDestroy");
-                final boolean hideEnchant = item.contains("hideEnchant") && item.getBoolean("hideEnchant");
-                final boolean hidePlacedOn = item.contains("hidePlacedOn") && item.getBoolean("hidePlacedOn");
-                final boolean hidePotionEffect = item.contains("hidePotionEffect") && item.getBoolean("hidePotionEffect");
-                final boolean hideUnbreaking = item.contains("hideUnbreaking") && item.getBoolean("hideUnbreaking");
-                // リストへ追加
+
                 if (notFounds.isEmpty()) {
                     add(new AlchemyMaterial(
                             key,
                             name,
-                            default_name,
+                            defaultName,
                             mat,
                             quality_min,
                             quality_max,
@@ -202,33 +100,188 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             categorys,
                             ingredients,
                             sizeTemplate,
-                            charas,
+                            characteristics,
                             catalyst,
                             script,
-                            unbreaking,
-                            hideAttribute,
-                            hideDestroy,
-                            hideEnchant,
-                            hidePlacedOn,
-                            hidePotionEffect,
-                            hideUnbreaking
+                            getBoolean(item, "unbreaking"),
+                            getBoolean(item, "hideAttribute"),
+                            getBoolean(item, "hideDestroy"),
+                            getBoolean(item, "hideEnchant"),
+                            getBoolean(item, "hidePlacedOn"),
+                            getBoolean(item, "hidePotionEffect"),
+                            getBoolean(item, "hideUnbreaking")
                     ));
                 }
             } catch (Exception ex) {
                 Chore.logWarning(PREFIX.concat(key).concat(" -> "), ex);
-                errorCount++;
+                errorCount.incrementAndGet();
             } finally {
                 if (!notFounds.isEmpty()) {
                     Chore.logWarning(PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
-                    errorCount++;
+                    errorCount.incrementAndGet();
                 }
             }
-        }
-        if (errorCount != 0) {
+        });
+        if (errorCount.intValue() != 0) {
             Chore.logWhiteWarning("error founded.");
         }
         final String fileName = ((CustomConfig.CConfiguration) config).getConfigFile().getName();
         Chore.log(PREFIX + fileName + " - " + getList().size() + " loaded and " + errorCount + " errors found.");
     }
+
+    @Nullable
+    private FinalDoubleData<Material, Integer> getMaterial(ConfigurationSection item, String key) {
+        final FinalDoubleData<Material, Integer> result;
+        if (item.contains(KEY_MATERIAL)) {
+            final String mat_str = item.getString(KEY_MATERIAL);
+            assert mat_str != null;
+            if (!mat_str.contains(",")) {
+                if (mat_str.equalsIgnoreCase("XXX")) {
+                    Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
+                }
+                result = new FinalDoubleData<>(Chore.getMaterial(mat_str), 0);
+            } else {
+                final String[] matSplit = mat_str.split(",");
+                result = new FinalDoubleData<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+            }
+        } else {
+            result = null;
+            notFounds.add(KEY_MATERIAL);
+        }
+        return result;
+    }
+
+    @Nullable
+    private String getName(ConfigurationSection item, boolean defaultName, final FinalDoubleData<Material, Integer> mat) {
+        String name = null;
+        if (defaultName && mat != null) {
+            name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getLeft())); // クエストブック用に名前を設定しておく
+        } else {
+            if (item.contains("name")) {
+                name = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(item.getString("name")));
+            } else {
+                notFounds.add("name");
+            }
+        }
+        return name;
+    }
+
+    private int getQualityMin(ConfigurationSection item) {
+        final int quality;
+        if (item.contains(KEY_QUALITY_MIN)) {
+            quality = item.getInt(KEY_QUALITY_MIN);
+        } else {
+            quality = 0;
+            notFounds.add(KEY_QUALITY_MIN);
+        }
+        return quality;
+    }
+
+    private int getQualityMax(ConfigurationSection item) {
+        final int quality;
+        if (item.contains(KEY_QUALITY_MAX)) {
+            quality = item.getInt(KEY_QUALITY_MAX);
+        } else {
+            quality = 0;
+            notFounds.add(KEY_QUALITY_MAX);
+        }
+        return quality;
+    }
+
+    @NotNull
+    private List<Category> getCategories(ConfigurationSection item) {
+        final List<Category> categories = new ArrayList<>();
+        if (item.contains(KEY_CATEGORYS)) {
+            final List<String> categorysStr = CollectionUtils.castList(item.getList(KEY_CATEGORYS));
+            categorysStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
+        } else {
+            notFounds.add(KEY_CATEGORYS);
+        }
+        return categories;
+    }
+
+    @NotNull
+    private List<FinalDoubleData<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
+        final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
+        if (item.contains(KEY_INGREDIENTS)) {
+            final List<String> ingsStr = CollectionUtils.castList(item.getList(KEY_INGREDIENTS));
+            if (ingsStr != null) {
+                ingsStr.forEach(ing -> {
+                    final String[] ingData = ing.split(",");
+                    ingredients.add(new FinalDoubleData<>(
+                            AlchemyIngredients.searchName(ingData[0].trim()),
+                            Integer.parseInt(ingData[1].trim())
+                    ));
+                });
+            }
+        } else {
+            notFounds.add(KEY_INGREDIENTS);
+        }
+        return ingredients;
+    }
+
+    @Nullable
+    private MaterialSizeTemplate getSize(ConfigurationSection item) {
+        if (item.contains("size")) {
+            return MaterialSizeTemplate.valueOf("TYPE" + item.getInt("size"));
+        }
+        notFounds.add("size");
+        return null;
+    }
+
+    @NotNull
+    private List<Object> getCharacteristics(ConfigurationSection item) {
+        final List<Object> characteristics = new ArrayList<>();
+        if (item.contains("characteristics")) {
+            final List<String> stringList = CollectionUtils.castList(item.getList("characteristics"));
+            stringList.forEach(cStr -> {
+                if (cStr.contains(",")) {
+                    final String[] strs = cStr.split(",");
+                    final String id = strs[0].trim().toUpperCase();
+                    Characteristic c;
+                    try {
+                        c = Characteristic.getCharacteristic(id);
+                    } catch (IllegalArgumentException e) {
+                        c = Characteristic.search(id);
+                    }
+                    characteristics.add(new DoubleData<>(c, Integer.parseInt(strs[1].trim())));
+                } else {
+                    characteristics.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
+                }
+            });
+        }
+        return characteristics;
+    }
+
+    @Nullable
+    private Catalyst getCatalyst(ConfigurationSection item) {
+        if (item.contains("catalyst")) {
+            final ConfigurationSection catalystConfig = item.getConfigurationSection("catalyst");
+            final List<CatalystBonus> bonus = new ArrayList<>();
+            assert catalystConfig != null;
+            catalystConfig.getKeys(false).stream()
+                    .filter(cKey -> (cKey.startsWith("bonus")))
+                    .map(catalystConfig::getConfigurationSection)
+                    .filter(Objects::nonNull)
+                    .forEachOrdered(sec -> {
+                        final List<Integer> size = sec.getIntegerList("size");
+                        bonus.add(new CatalystBonus(
+                                CollectionUtils.parseInts(size),
+                                new CatalystBonusData(
+                                        CatalystBonusData.BonusType.valueOf(sec.getString("type")),
+                                        sec.contains("x") ? sec.getInt("x") : 0,
+                                        sec.contains("y") ? sec.getString("y") : null
+                                )
+                        ));
+                    });
+            return new Catalyst(bonus);
+        }
+        return null;
+    }
+
+    private boolean getBoolean(ConfigurationSection item, String name) {
+        return item.contains(name) && item.getBoolean(name);
+    }
+
 
 }

@@ -1,23 +1,25 @@
 package net.firiz.renewatelier.utils.doubledata;
 
-import org.jetbrains.annotations.NotNull;
-
-public class FinalDoubleData<L, R> {
+public class Triple<L, M, R> {
 
     private final L left;
+    private final M middle;
     private final R right;
 
-    public FinalDoubleData(@NotNull L left, @NotNull R right) {
+    public Triple(L left, M middle, R right) {
         this.left = left;
+        this.middle = middle;
         this.right = right;
     }
 
-    @NotNull
     public L getLeft() {
         return left;
     }
 
-    @NotNull
+    public M getMiddle() {
+        return middle;
+    }
+
     public R getRight() {
         return right;
     }

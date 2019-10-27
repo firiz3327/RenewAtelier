@@ -24,7 +24,7 @@ import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;

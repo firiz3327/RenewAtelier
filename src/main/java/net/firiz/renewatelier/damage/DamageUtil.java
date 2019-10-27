@@ -1,14 +1,16 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +50,16 @@ public class DamageUtil {
         return (int) Math.floor(baseDamage * powerValue * itemPowerEnhancement * criticalRate * attributeValue * finalDamageRate * cooperationRate / 100);
     }
 
-    public static void damage(Damageable damageable, double damage) {
+    public static void damageEntity(CharStats charStats, Entity entity) {
+
+    }
+
+    public static void damagePlayer(CharStats charStats, double damage, EntityDamageEvent.DamageCause damageCause) {
+        double resultDamage = damage;
+        charStats.damageHp(resultDamage);
+    }
+
+    private static void damage(Damageable damageable, double damage) {
         damageable.damage(damage);
         damageable.setLastDamageCause(new EntityDamageEvent(
                 damageable,
@@ -58,7 +69,7 @@ public class DamageUtil {
     }
 
     @SafeVarargs
-    public static void holoDamage(@NotNull Location loc, DoubleData<Double, AttackAttribute>... damages) {
+    private static void holoDamage(@NotNull Location loc, FinalDoubleData<Double, AttackAttribute>... damages) {
         final Location l = loc.clone();
         l.setY(l.getY() + 1.6);
         for (int i = 0; i < damages.length; i++) {

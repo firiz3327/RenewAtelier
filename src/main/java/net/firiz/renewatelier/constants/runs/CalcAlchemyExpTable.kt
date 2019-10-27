@@ -11,6 +11,5 @@ fun main() {
         }
         v += (i * 0.1).toLong()
         sb.append("$v, ")
-//        println(v)
     }
 }

@@ -17,7 +17,6 @@ fun main() {
                 up += 0.004
             }
         }
-        //            System.out.println(v); // excel用
         sb.append("$v, ")
         v = v.times(up).toLong()
         v += (i * 5).toLong()

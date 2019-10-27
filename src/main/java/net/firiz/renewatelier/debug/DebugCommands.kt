@@ -6,13 +6,11 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
-import net.firiz.renewatelier.inventory.shop.ShopInventory
-import net.firiz.renewatelier.inventory.shop.ShopItem
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
-import net.firiz.renewatelier.player.PlayerSaveManager
+import net.firiz.renewatelier.entity.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
@@ -371,17 +369,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "・・・"
     )
     fun test(sender: Player, args: ArrayList<Any>) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin()) {
-            ShopInventory.openInventory(sender, "Shop", arrayListOf(ShopItem(
-                    AlchemyItemStatus.getItem(
-                            AlchemyMaterial.getMaterial("flam"),
-                            Chore.ci(Material.DIAMOND_AXE, 1, "", null)
-                    ),
-                    1,
-                    10,
-                    null
-            )))
-        }
+        PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.damageMp(args[0].toString().toDouble())
     }
 
 }

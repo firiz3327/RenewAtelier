@@ -3,6 +3,7 @@ package net.firiz.renewatelier.config;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicCategory;
+import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import org.bukkit.configuration.ConfigurationSection;
@@ -35,13 +36,13 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             }
             final List<List<String>> reqs = getReqs(item);
             final List<String> datasStr = item.getStringList("datas");
-            final Map<Characteristic.CharacteristicType, Object> datas = new EnumMap<>(Characteristic.CharacteristicType.class);
+            final Map<CharacteristicType, Object> datas = new EnumMap<>(CharacteristicType.class);
             datasStr.forEach(str -> {
                 final int i = str.indexOf(',');
                 final String type = str.substring(0, i);
                 final String dataStr = str.substring(i + 1);
                 final Object data = Chore.isNumMatch(dataStr) ? Integer.parseInt(dataStr) : dataStr;
-                datas.put(Characteristic.CharacteristicType.valueOf(type), data);
+                datas.put(CharacteristicType.valueOf(type), data);
             });
             add(new Characteristic(key, lv, name, desc, categorys, reqs, datas));
         });

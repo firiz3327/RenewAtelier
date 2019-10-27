@@ -156,7 +156,8 @@ public class CatalystBonusData {
                             return c;
                         },
                         o -> ((Characteristic) o).getName()
-                )
+                ),
+                null
         ); // ok
 
         private final String name;
@@ -164,14 +165,6 @@ public class CatalystBonusData {
         private final boolean once; // 使い切りであるかどうか
         private final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
         private final TRunnable<Integer, String> descRepletion;
-
-        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse) {
-            this.name = name;
-            this.desc = desc;
-            this.once = once;
-            this.yParse = yParse;
-            this.descRepletion = null;
-        }
 
         BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse, final TRunnable<Integer, String> descRepletion) {
             this.name = name;

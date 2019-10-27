@@ -1,5 +1,5 @@
 /*
- * DiscoveredRecipeLoader.java
+ * RecipeStatusLoader.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -18,11 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.player.loadsqls;
+package net.firiz.renewatelier.entity.player.loadsqls;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,24 +30,23 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author firiz
  */
-public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
+public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
 
     @NotNull
     @Override
-    public List<MinecraftRecipeSaveType> load(int id) {
-        final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
-                "discoveredRecipes",
-                new String[]{"user_id", "item_id"},
+    public List<RecipeStatus> load(int id) {
+        final List<List<Object>> recipeStatusesObj = SQLManager.INSTANCE.select(
+                "recipe_levels",
+                new String[]{"user_id", "recipe_id", "level", "exp"},
                 new Object[]{id}
         );
-        final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();
-        saveTypesObj.forEach(datas -> {
-            final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search((String) datas.get(1));
-            if (type != null) {
-                saveTypes.add(type);
-            }
-        });
-        return saveTypes;
+        final List<RecipeStatus> recipeStatuses = new ArrayList<>();
+        recipeStatusesObj.forEach(datas -> recipeStatuses.add(new RecipeStatus(
+                (String) datas.get(1), // recipe_id
+                (int) datas.get(2), // level
+                (int) datas.get(3) // exp
+        )));
+        return recipeStatuses;
     }
 
 }

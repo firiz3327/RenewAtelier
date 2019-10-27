@@ -2,6 +2,7 @@ package net.firiz.renewatelier.inventory.shop;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.doubledata.Triple;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,15 +33,9 @@ public final class ShopInventory {
     public static void openInventory(final Player player, final String title, final List<ShopItem> shopItems) {
         final UUID uuid = player.getUniqueId();
         final Inventory inv = Bukkit.createInventory(null, 54, uuid.toString().concat(TITLE));
-        for (int i = 0; i < 54; i++) {
-            if (i < 9) {
-                inv.setItem(i, GLASS_PANE);
-            } else if (i >= 45) {
-                inv.setItem(i, GLASS_PANE);
-            } else {
-                inv.setItem(i, GLASS_PANE);
-                i += 8;
-                inv.setItem(i, GLASS_PANE);
+        for (int slot = 0; slot < 54; slot++) {
+            if (slot < 9 || slot >= 45 || slot % 9 == 0 || slot % 9 == 8) {
+                inv.setItem(slot, GLASS_PANE);
             }
         }
         if (shopItems != null) {
@@ -63,47 +58,54 @@ public final class ShopInventory {
         final int raw = e.getRawSlot();
         if (raw >= 0 && raw < inv.getSize()) {
             e.setCancelled(true);
-            if (player.hasCooldown(Material.GRAY_STAINED_GLASS_PANE)) {
-                return;
-            }
-            final ItemStack item = inv.getItem(e.getRawSlot());
-            if (item != null && !GLASS_PANE.isSimilar(item)) {
-                final List<String> lore = item.getItemMeta().getLore();
-                final String str = lore.get(lore.size() - 1);
-                final String id = Chore.getStridColor(str.substring(0, str.indexOf(
-                        new StringBuilder()
-                                .append(ChatColor.ITALIC)
-                                .append(ChatColor.RESET)
-                                .append(ChatColor.GREEN)
-                                .toString())
-                ));
-                final String v = str.substring(str.lastIndexOf(": ") + 2);
-                final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
-                final AlchemyMaterial am = AlchemyMaterial.getMaterialOrNull(id);
-                final int check = id.equals("$null")
-                        ? Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1
-                        : Chore.hasMaterial(player.getInventory(), am, price) ? 2 : -1;
-                if (check != -1) {
-                    player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
-                    if (check == 1) {
-                        Chore.reduceItem(player.getInventory(), EMERALD, price);
-                    } else if(am != null) {
-                        Chore.reduceItem(player.getInventory(), am, price);
-                    } else {
-                        throw new IllegalStateException("AlchemyMaterial null trade");
+            if (!player.hasCooldown(Material.GRAY_STAINED_GLASS_PANE)) {
+                final ItemStack item = inv.getItem(e.getRawSlot());
+                if (item != null && !GLASS_PANE.isSimilar(item)) {
+                    final Triple<Integer, AlchemyMaterial, Integer> priceMode = getPriceMode(item.getItemMeta().getLore(), player);
+                    if (priceMode.getLeft() != -1) {
+                        player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
+                        reduceItem(priceMode, player);
+                        addItem(item.clone(), player);
                     }
-                    final ItemStack clone = item.clone();
-                    final ItemMeta meta = clone.getItemMeta();
-                    final List<String> cLore = meta.getLore();
-                    for (int i = 0; i < 2; i++) {
-                        cLore.remove(cLore.size() - 1);
-                    }
-                    meta.setLore(cLore);
-                    clone.setItemMeta(meta);
-                    Chore.addItem(player, clone);
                 }
             }
         }
+    }
+
+    private static Triple<Integer, AlchemyMaterial, Integer> getPriceMode(List<String> lore, Player player) {
+        final String str = lore.get(lore.size() - 1);
+        final String id = Chore.getStridColor(str.substring(0, str.indexOf(String.valueOf(ChatColor.ITALIC) + ChatColor.RESET + ChatColor.GREEN)));
+        final String v = str.substring(str.lastIndexOf(": ") + 2);
+        final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
+        final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterialOrNull(id);
+        final int mode;
+        if (id.equals("$null")) {
+            mode = Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1;
+        } else {
+            mode = Chore.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
+        }
+        return new Triple<>(mode, alchemyMaterial, price);
+    }
+
+    private static void reduceItem(Triple<Integer, AlchemyMaterial, Integer> priceMode, Player player) {
+        if (priceMode.getLeft() == 1) {
+            Chore.reduceItem(player.getInventory(), EMERALD, priceMode.getRight());
+        } else if (priceMode.getMiddle() != null) {
+            Chore.reduceItem(player.getInventory(), priceMode.getMiddle(), priceMode.getRight());
+        } else {
+            throw new IllegalStateException("AlchemyMaterial null trade");
+        }
+    }
+
+    private static void addItem(ItemStack item, Player player) {
+        final ItemMeta meta = item.getItemMeta();
+        final List<String> cLore = meta.getLore();
+        for (int i = 0; i < 2; i++) {
+            cLore.remove(cLore.size() - 1);
+        }
+        meta.setLore(cLore);
+        item.setItemMeta(meta);
+        Chore.addItem(player, item);
     }
 
     public static void drag(final InventoryDragEvent e) {

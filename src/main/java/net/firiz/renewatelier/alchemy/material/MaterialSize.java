@@ -20,19 +20,7 @@
  */
 package net.firiz.renewatelier.alchemy.material;
 
-import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.Strings;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author firiz
@@ -236,88 +224,5 @@ public enum MaterialSize {
             }
         }
         return size;
-    }
-
-    @NotNull
-    public static int[] getSize(final ItemStack item) {
-        if (item != null && item.hasItemMeta()) {
-            final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-            if (meta.hasLore()) {
-                final List<Integer> size = new ArrayList<>();
-                boolean start = false;
-                for (final String lore : Objects.requireNonNull(meta.getLore())) {
-                    if (lore.contains(Strings.W_W) || lore.contains(Strings.W_B)) {
-                        start = true;
-                        String b = null;
-                        for (char l : lore.toCharArray()) {
-                            String j = String.valueOf(l);
-                            switch (j) {
-                                case Strings.W_W:
-                                case Strings.W_B:
-                                    size.add(AlchemyCircle.colorCint(b));
-                                    break;
-                                default:
-                                    b = j;
-                                    break;
-                            }
-                        }
-                    } else if (start) {
-                        break;
-                    }
-                }
-                if (size.size() == 9) {
-                    return CollectionUtils.parseInts(size);
-                }
-            }
-        }
-        return new int[0];
-    }
-
-    public static int getSizeCount(final ItemStack item) {
-        final int[] size = getSize(item);
-        int i = 0;
-        for (int j : size) {
-            if (j != 0) {
-                i++;
-            }
-        }
-        return i;
-    }
-
-    public static ItemMeta setSize(final ItemStack item, final int[] size) {
-        final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-        final List<String> lores = Objects.requireNonNull(meta.getLore());
-        int sc = -1;
-        int l = 0;
-        while (l < lores.size()) {
-            if (sc >= 0) {
-                StringBuilder str = new StringBuilder();
-                int cSize = 0;
-                int c = 0;
-                for (final int k : size) {
-                    if (k == 0) {
-                        str.append(Chore.intCcolor(k)).append(Strings.W_W);
-                    } else {
-                        str.append(Chore.intCcolor(k)).append(Strings.W_B);
-                    }
-                    if (cSize >= 2) {
-                        lores.set(l + c, str.toString());
-                        cSize = 0;
-                        c++;
-                        str = new StringBuilder();
-                    } else {
-                        cSize++;
-                    }
-                }
-                break;
-            } else if (lores.get(l).startsWith(AlchemyItemStatus.Type.SIZE.getCheck())) {
-                sc = 0;
-                l++;
-                continue;
-            }
-            l++;
-        }
-        meta.setLore(lores);
-        return meta;
     }
 }

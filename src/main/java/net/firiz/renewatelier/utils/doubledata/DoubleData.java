@@ -35,8 +35,4 @@ public class DoubleData<L, R> {
         this.right = right;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends DoubleData<?, ?>> T castList(Object obj) {
-        return (T) obj;
-    }
 }

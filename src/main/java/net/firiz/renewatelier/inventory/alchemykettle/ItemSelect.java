@@ -33,6 +33,7 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -97,7 +98,7 @@ public final class ItemSelect {
 
         final String[] data = reqs.get(new_page).split(",");
         String name = null;
-        DoubleData<Material, Integer> material = null;
+        FinalDoubleData<Material, Integer> material = null;
         if (data[0].startsWith("material:")) {
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(data[0].substring(9));
             if (!am.isDefaultName()) {
@@ -128,7 +129,7 @@ public final class ItemSelect {
             for (int i = 1; i <= 3; i++) { //12,13,14 - 21,22,23 - 30,31,32
                 for (int j = 0; j < 3; j++) {
                     final int new_slot = i * 12 - ((i - 1) * 3) + j;
-                    if (useItems == null || count >= useItems.size()) {
+                    if (count >= useItems.size()) {
                         inv.setItem(new_slot, null);
                     } else {
                         inv.setItem(new_slot, useItems.get(count));
@@ -144,7 +145,7 @@ public final class ItemSelect {
         final List<String> reqs = recipe.getReqMaterial();
         final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
         final String[] data = reqs.get(page).split(",");
-        final DoubleData<Material, Integer> material = data[0].startsWith("material:")
+        final FinalDoubleData<Material, Integer> material = data[0].startsWith("material:")
                 ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);

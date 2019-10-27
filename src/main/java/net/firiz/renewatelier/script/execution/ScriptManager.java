@@ -26,8 +26,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import net.firiz.renewatelier.constants.ServerConstants;
-import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.Char;
+import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.script.engine.GraalEngine;
 import net.firiz.renewatelier.script.engine.GraalEngine.Type;

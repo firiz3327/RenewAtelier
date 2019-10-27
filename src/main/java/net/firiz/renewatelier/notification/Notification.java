@@ -21,8 +21,8 @@
 package net.firiz.renewatelier.notification;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.player.PlayerSaveManager;
-import net.firiz.renewatelier.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.PayloadPacket;

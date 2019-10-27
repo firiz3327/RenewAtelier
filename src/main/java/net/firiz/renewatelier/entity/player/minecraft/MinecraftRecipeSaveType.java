@@ -1,5 +1,5 @@
 /*
- * StatusLoader.java
+ * MinecraftRecipe.java
  * 
  * Copyright (c) 2019 firiz.
  * 
@@ -18,17 +18,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.player.loadsqls;
-
-import org.jetbrains.annotations.NotNull;
+package net.firiz.renewatelier.entity.player.minecraft;
 
 /**
  *
  * @author firiz
  */
-public interface StatusLoader<T> {
+public enum MinecraftRecipeSaveType {
+    CAULDRON("minecraft:cauldron");
 
-    @NotNull
-    T load(int id);
-    
+    private final String id;
+
+    MinecraftRecipeSaveType(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public static MinecraftRecipeSaveType search(final String id) {
+        for (MinecraftRecipeSaveType type : values()) {
+            if (type.id.equals(id)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

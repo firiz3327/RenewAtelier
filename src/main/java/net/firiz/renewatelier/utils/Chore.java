@@ -198,26 +198,13 @@ public final class Chore {
         return result;
     }
 
-    @NotNull
-    public static List<Category> getCategory(final ItemStack item) {
-        final List<Category> result = new ArrayList<>();
-        if (item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta.hasLore()) {
-                AlchemyItemStatus.getLores(AlchemyItemStatus.Type.CATEGORY, item).stream()
-                        .filter(cateStr -> (!cateStr.contains("カテゴリ"))).forEachOrdered(cateStr -> result.add(Category.valueOf(Chore.getStridColor(cateStr.substring(cateStr.indexOf("§0") + 2)))));
-            }
-        }
-        return result;
-    }
-
     public static boolean checkMaterial(final ItemStack content, String material) {
         if (material.startsWith("material:")) {
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(material.substring(9));
             return am.equals(AlchemyMaterial.getMaterial(content));
         } else if (material.startsWith("category:")) {
             final Category category = Category.valueOf(material.substring(9));
-            return Chore.getCategory(content).contains(category);
+            return AlchemyItemStatus.getCategorys(content).contains(category);
         }
         return false;
     }
@@ -247,7 +234,7 @@ public final class Chore {
                 } else if (material.startsWith("category:")) {
                     final Category category = Category.valueOf(material.substring(9));
                     for (final ItemStack item : contents) {
-                        if (item != null && Chore.getCategory(item).contains(category)) {
+                        if (item != null && AlchemyItemStatus.getCategorys(item).contains(category)) {
                             final DoubleData<Integer, Integer> dd = check.get(material);
                             dd.setLeft(dd.getLeft() + item.getAmount());
                         }

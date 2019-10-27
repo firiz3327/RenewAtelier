@@ -29,6 +29,7 @@ import java.util.Map;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
+import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,7 @@ public class KettleBox {
                 }
                 final KettleBoxData kbd = data.getRight();
                 final ItemStack item = data.getLeft().getItem();
-                int[] size = MaterialSize.getSize(item);
+                int[] size = AlchemyItemStatus.getSize(item);
                 if (kbd.getRotate() != 0) {
                     for (int j = 0; j < 4 - kbd.getRotate(); j++) {
                         size = MaterialSize.rightRotation(size);
@@ -76,7 +77,7 @@ public class KettleBox {
                     size = MaterialSize.rightRotation(size);
                 }
                 size = getRLUDTypeSize(rlud, size);
-                item.setItemMeta(MaterialSize.setSize(item, size));
+                item.setItemMeta(AlchemyItemStatus.setSize(item, size));
                 return data;
             }
         }

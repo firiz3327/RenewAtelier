@@ -21,13 +21,14 @@
 package net.firiz.renewatelier.alchemy.kettle.bonus;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
-import net.firiz.renewatelier.alchemy.material.MaterialSize;
+import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -51,22 +52,20 @@ public enum KettleBonusManager {
     }
 
     public int getBonus(UUID uuid, AlchemyAttribute type) {
-        int sizes = 0;
+        final AtomicInteger sizes = new AtomicInteger();
         final KettleBox kettleBox = kettleItemManager.getKettleData(uuid);
         if (kettleBox != null) {
             final List<BonusItem> kettleSelects = kettleBox.getResultItems();
-            for (final BonusItem itemData : kettleSelects) {
-                final ItemStack item = itemData.getItem();
-                if (item != null) {
-                    for (final AlchemyAttribute aa : AlchemyIngredients.getAllLevel(item).getRight()) {
-                        if (aa == type && AlchemyIngredients.getLevel(item, type) != 0) {
-                            sizes += MaterialSize.getSizeCount(item);
-                        }
+            kettleSelects.stream().filter(bonusItem -> bonusItem.getItem() != null).forEach(bonusItem -> {
+                final ItemStack item = bonusItem.getItem();
+                for (final AlchemyAttribute aa : Objects.requireNonNull(AlchemyIngredients.getAllLevel(item).getRight())) {
+                    if (aa == type && AlchemyIngredients.getLevel(item, type) != 0) {
+                        sizes.addAndGet(AlchemyItemStatus.getSizeCount(item));
                     }
                 }
-            }
+            });
         }
-        return (int) Math.pow(sizes, 2);
+        return (int) Math.pow(sizes.intValue(), 2);
     }
 
     public String getBar(final UUID uuid, final int req) {
@@ -78,11 +77,11 @@ public enum KettleBonusManager {
                 if (i < bar) {
                     final AlchemyAttribute[] aas = bpd.getUp();
                     final int color = 6 / aas.length; //錬金成分３つまで想定
-                    for (final AlchemyAttribute aa : aas) {
+                    Arrays.stream(aas).forEach(aa -> {
                         for (int j = 0; j < color; j++) {
                             sb.append(aa.getColor()).append("|");
                         }
-                    }
+                    });
                 } else {
                     sb.append(ChatColor.RESET).append("||||||");
                 }
@@ -108,17 +107,16 @@ public enum KettleBonusManager {
             final List<BonusItem> kettleSelects = kettleBox.getItems();
             plus += plus * ((double) bonus * 0.01 + (kettleSelects.isEmpty() ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));
 
+            final AtomicInteger nextPlus = new AtomicInteger(plus);
             final List<CatalystBonus> bonusDatas = kettleItemManager.getCatalystBonusList(uuid);
             if (bonusDatas != null) {
-                for (final CatalystBonus cb : bonusDatas) {
-                    final List<CatalystBonus> usedBonus = kettleBox.getBonus();
-                    if (cb.getData().getType().isOnce() && (usedBonus.isEmpty() || !usedBonus.contains(cb))) {
-                        plus += Math.round(plus * (cb.getData().getX() * 0.01));
-                        kettleBox.addBonus(cb);
-                    }
-                }
+                final List<CatalystBonus> usedBonus = kettleBox.getBonus();
+                bonusDatas.stream().filter(cb -> cb.getData().getType().isOnce() && (usedBonus.isEmpty() || !usedBonus.contains(cb))).forEach(cb -> {
+                    nextPlus.addAndGet((int) Math.round(nextPlus.intValue() * (cb.getData().getX() * 0.01)));
+                    kettleBox.addBonus(cb);
+                });
             }
-            bpd.add(plus, aas);
+            bpd.add(nextPlus.intValue(), aas);
         }
     }
 
