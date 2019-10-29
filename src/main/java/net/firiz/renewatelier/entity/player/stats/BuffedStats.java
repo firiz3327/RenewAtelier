@@ -5,11 +5,6 @@ public class BuffedStats {
     private final CharStats charStats;
     private final CharacteristicStats equipStats;
     private int level;
-    private int maxHp;
-    private int maxMp;
-    private int atk;
-    private int def;
-    private int speed;
 
     // バフ増加値
     private int levelB;
@@ -40,23 +35,23 @@ public class BuffedStats {
     }
 
     public int getMaxHp() {
-        return maxHp + maxHpB;
+        return equipStats.getMaxHp() + maxHpB;
     }
 
     public int getMaxMp() {
-        return maxMp + maxMpB;
+        return equipStats.getMaxMp() + maxMpB;
     }
 
     public int getAtk() {
-        return atk + atkB;
+        return equipStats.getAtk() + atkB;
     }
 
     public int getDef() {
-        return def + defB;
+        return equipStats.getDef() + defB;
     }
 
     public int getSpeed() {
-        return speed + speedB;
+        return equipStats.getSpeed() + speedB;
     }
 
 }

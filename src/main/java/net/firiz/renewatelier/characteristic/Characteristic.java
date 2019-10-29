@@ -2,6 +2,7 @@ package net.firiz.renewatelier.characteristic;
 
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
+import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -111,6 +112,10 @@ public class Characteristic {
 
         public int getId() {
             return id;
+        }
+
+        public boolean hasType(LivingEntity entity) {
+            return false;
         }
     }
 

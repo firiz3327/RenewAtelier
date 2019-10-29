@@ -31,6 +31,7 @@ import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.Strings;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,6 +54,11 @@ public class AlchemyItemStatus {
         ALCHEMY_INGREDIENTS("§a§1§c§1§n§4§r§e§d§1§e§n§f§b"), // 錬金成分
         CHARACTERISTIC("§c§f§a§r§a§c§f§e§r§1§b§f§1§c"), // 特性
         MATERIAL("§l§a§f§e§r§l§a§l"), // マテリアル-レシピ用
+        HP("§1§d§l§d"), // 装備・武器用
+        MP("§2§d§l§d"), // 装備・武器用
+        ATK("§3§d§l§d"), // 装備・武器用
+        DEF("§4§d§l§d"), // 装備・武器用
+        SPEED("§5§d§l§d"), // 装備・武器用
         EFFECT("§e§t§t§e§c§t"), // 効果
         BAG("§b§a§e"), // バッグ用
         BAG_ITEMS("§b§a§e§l§f§e§m§r"), // バッグ-アイテム用
@@ -76,8 +82,13 @@ public class AlchemyItemStatus {
     private final List<AlchemyIngredients> ingredients;
     private final List<Characteristic> characteristics;
     private final List<String> activeEffects;
+    private int hp;
+    private int mp;
+    private int atk;
+    private int def;
+    private int speed;
 
-    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects) {
+    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
         this.alchemyMaterial = alchemyMaterial;
         this.size = size;
         this.categories = categories;
@@ -85,8 +96,14 @@ public class AlchemyItemStatus {
         this.ingredients = ingredients;
         this.characteristics = characteristics;
         this.activeEffects = activeEffects;
+        this.hp = hp;
+        this.mp = mp;
+        this.atk = atk;
+        this.def = def;
+        this.speed = speed;
     }
 
+    @NotNull
     public AlchemyMaterial getAlchemyMaterial() {
         return alchemyMaterial;
     }
@@ -123,9 +140,64 @@ public class AlchemyItemStatus {
         this.quality = quality;
     }
 
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getMp() {
+        return mp;
+    }
+
+    public void setMp(int mp) {
+        this.mp = mp;
+    }
+
+    public int getAtk() {
+        return atk;
+    }
+
+    public void setAtk(int atk) {
+        this.atk = atk;
+    }
+
+    public int getDef() {
+        return def;
+    }
+
+    public void setDef(int def) {
+        this.def = def;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
     @NotNull
     public ItemStack create() {
-        return AlchemyItemStatus.getItem(alchemyMaterial, ingredients, null, quality, size, activeEffects, characteristics, categories, false);
+        return AlchemyItemStatus.getItem(
+                alchemyMaterial,
+                ingredients,
+                null,
+                quality,
+                size,
+                activeEffects,
+                characteristics,
+                categories,
+                new VisibleFlags(true, true, true, true, true, true, true, true),
+                hp,
+                mp,
+                atk,
+                def,
+                speed
+        );
     }
 
     @Nullable
@@ -137,16 +209,40 @@ public class AlchemyItemStatus {
                 assert meta != null;
                 return new AlchemyItemStatus(
                         alchemyMaterial,
-                        AlchemyItemStatus.getSize(item),
-                        AlchemyItemStatus.getCategorys(item),
-                        AlchemyItemStatus.getQuality(item),
-                        AlchemyItemStatus.getIngredients(item),
-                        AlchemyItemStatus.getCharacteristics(item),
-                        AlchemyItemStatus.getActiveEffects(item)
+                        getSize(item),
+                        getCategorys(item),
+                        getQuality(item),
+                        getIngredients(item),
+                        getCharacteristics(item),
+                        getActiveEffects(item),
+                        getEquipStats(Type.HP, item),
+                        getEquipStats(Type.MP, item),
+                        getEquipStats(Type.ATK, item),
+                        getEquipStats(Type.DEF, item),
+                        getEquipStats(Type.SPEED, item)
                 );
             }
         }
         return null;
+    }
+
+    private static int getEquipStats(Type type, ItemStack item) {
+        switch (type) {
+            case HP:
+            case MP:
+            case ATK:
+            case DEF:
+            case SPEED:
+                final List<String> lores = getLores(type, item);
+                if (!lores.isEmpty()) {
+                    return Integer.parseInt(
+                            lores.get(0).substring(lores.get(0).indexOf(ChatColor.RESET.toString()) + 2)
+                    );
+                }
+                return 0;
+            default:
+                throw new IllegalArgumentException("not supported type.");
+        }
     }
 
     @NotNull
@@ -265,14 +361,6 @@ public class AlchemyItemStatus {
         return -1;
     }
 
-    public static int getAtk(final ItemStack item) {
-        final List<String> lores = getLores(Type.QUALITY, item);
-        if (!lores.isEmpty()) {
-            return Integer.parseInt(lores.get(0).substring(Type.QUALITY.check.length() + 8));  // (QUALITY.check + "§7品質: §r").length
-        }
-        return -1;
-    }
-
     public static List<String> getActiveEffects(final ItemStack item) {
         final List<String> result = new ArrayList<>();
         final List<String> lores = getLores(Type.ALCHEMY_INGREDIENTS, item);
@@ -355,24 +443,42 @@ public class AlchemyItemStatus {
     }
 
     public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
-        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, new boolean[]{false, false, false, false, notVisibleCatalyst, false, false});
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, new VisibleFlags(true, true, true, true, !notVisibleCatalyst, true, true, true));
     }
 
-    /**
-     * notVisibles {id, quality, ings, size, catalyst, category, end}
-     *
-     * @param am
-     * @param overIngs
-     * @param item
-     * @param overQuality
-     * @param overSize
-     * @param activeEffects
-     * @param overCharacteristics
-     * @param overCategory
-     * @param notVisibles
-     * @return
-     */
-    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean[] notVisibles) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibles) {
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibles, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed());
+    }
+
+    public static class VisibleFlags {
+        private final boolean id;
+        private final boolean quality;
+        private final boolean ingredients;
+        private final boolean size;
+        private final boolean catalyst;
+        private final boolean category;
+        private final boolean end;
+        private final boolean status;
+
+        public VisibleFlags(boolean id, boolean quality, boolean ingredients, boolean size, boolean catalyst, boolean category, boolean end, boolean status) {
+            this.id = id;
+            this.quality = quality;
+            this.ingredients = ingredients;
+            this.size = size;
+            this.catalyst = catalyst;
+            this.category = category;
+            this.end = end;
+            this.status = status;
+        }
+    }
+
+    private static void addLoreStatus(List<String> lore, Type type, String name, int value) {
+        if (value != 0) {
+            lore.add(type.check + ChatColor.GRAY + name + ": " + ChatColor.RESET + value);
+        }
+    }
+
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibles, final int hp, final int mp, final int atk, final int def, final int speed) {
         if (am == null || (am.getIngredients().isEmpty() && (overIngs == null || overIngs.isEmpty()))) {
             return null;
         }
@@ -386,15 +492,28 @@ public class AlchemyItemStatus {
         }
 
         final List<String> lore = new ArrayList<>();
-        if (!notVisibles[0]) {
+        if (visibles.id) {
             lore.add(Type.ID.check + Chore.createStridColor(am.getId()));
         }
-        if (!notVisibles[1]) {
+        if (visibles.quality) {
             lore.add(Type.QUALITY.check + "§7品質: §r" + (overQuality != -1 ? overQuality : Randomizer.nextInt(am.getQualityMax() - am.getQualityMin()) + am.getQualityMin()));
         }
 
+        final List<Category> categorys = overCategory == null ? am.getCategorys() : overCategory;
+        if (visibles.status) {
+            addLoreStatus(lore, Type.HP, "HP", hp);
+            addLoreStatus(lore, Type.MP, "MP", mp);
+            addLoreStatus(lore, Type.ATK, "攻撃力", atk);
+            addLoreStatus(lore, Type.DEF, "防御力", def);
+            addLoreStatus(lore, Type.SPEED, "素早さ", speed);
+
+            if (categorys.contains(Category.WEAPON)) {
+                lore.add(ChatColor.GRAY + "ダメージ: " + ChatColor.RESET + am.getBaseDamageMin() + " - " + am.getBaseDamageMax());
+            }
+        }
+
         // 錬金成分
-        if (!notVisibles[2]) {
+        if (visibles.ingredients) {
             int allLevel = 0;
             final Map<AlchemyAttribute, Integer> levels = new EnumMap<>(AlchemyAttribute.class);
             final List<AlchemyIngredients> acls = new ArrayList<>();
@@ -463,7 +582,7 @@ public class AlchemyItemStatus {
             acls.forEach(i -> lore.add(Type.ALCHEMY_INGREDIENTS.check + "§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
         }
         // サイズ
-        if (!notVisibles[3]) {
+        if (visibles.size) {
             lore.add(Type.SIZE.check + "§7サイズ:");
             StringBuilder str = new StringBuilder();
             int cSize = 0;
@@ -484,7 +603,7 @@ public class AlchemyItemStatus {
             }
         }
         // 触媒
-        if (!notVisibles[4]) {
+        if (visibles.catalyst) {
             final Catalyst catalyst = am.getCatalyst();
             if (catalyst != null) {
                 lore.add("§7触媒:");
@@ -559,8 +678,7 @@ public class AlchemyItemStatus {
             characteristics.forEach(c -> lore.add(Type.CHARACTERISTIC.check + "§r- " + c.getName()));
         }
         // カテゴリ
-        if (!notVisibles[5]) {
-            final List<Category> categorys = overCategory == null ? am.getCategorys() : overCategory;
+        if (visibles.category) {
             if (!categorys.isEmpty()) {
                 lore.add(Type.CATEGORY.check + "§7カテゴリ:");
                 categorys.forEach(category -> lore.add(Type.CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
@@ -568,7 +686,7 @@ public class AlchemyItemStatus {
         }
 
         // Lore終了
-        if (!notVisibles[6]) {
+        if (visibles.end) {
             lore.add(Type.LORE_END.check);
         }
         meta.setLore(lore);

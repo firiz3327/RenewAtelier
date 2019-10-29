@@ -46,6 +46,13 @@ public class AlchemyMaterial {
     private final int qualityMin;
     private final int qualityMax;
     private final int price;
+    private final int hp;
+    private final int mp;
+    private final int atk;
+    private final int def;
+    private final int speed;
+    private final int baseDamageMin;
+    private final int baseDamageMax;
     private final List<Category> categorys;
     private final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients;
     private final MaterialSizeTemplate sizeTemplate;
@@ -68,6 +75,13 @@ public class AlchemyMaterial {
             int qualityMin,
             int qualityMax,
             int price,
+            int hp,
+            int mp,
+            int atk,
+            int def,
+            int speed,
+            int baseDamageMin,
+            int baseDamageMax,
             List<Category> categorys,
             List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients,
             MaterialSizeTemplate sizeTemplate,
@@ -89,6 +103,13 @@ public class AlchemyMaterial {
         this.qualityMin = qualityMin;
         this.qualityMax = qualityMax;
         this.price = price;
+        this.hp = hp;
+        this.mp = mp;
+        this.atk = atk;
+        this.def = def;
+        this.speed = speed;
+        this.baseDamageMin = baseDamageMin;
+        this.baseDamageMax = baseDamageMax;
         this.categorys = categorys;
         this.ingredients = ingredients;
         this.sizeTemplate = sizeTemplate;
@@ -168,6 +189,34 @@ public class AlchemyMaterial {
 
     public int getPrice() {
         return price;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public int getMp() {
+        return mp;
+    }
+
+    public int getAtk() {
+        return atk;
+    }
+
+    public int getDef() {
+        return def;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getBaseDamageMin() {
+        return baseDamageMin;
+    }
+
+    public int getBaseDamageMax() {
+        return baseDamageMax;
     }
 
     public List<Category> getCategorys() {

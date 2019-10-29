@@ -73,7 +73,7 @@ public class QuestItem {
         return result;
     }
 
-    public ItemStack getItem(final boolean[] flags) {
+    public ItemStack getItem(AlchemyItemStatus.VisibleFlags flags) {
         final ItemStack result = AlchemyItemStatus.getItem(
                 AlchemyMaterial.getMaterial(material),
                 ingredients,

@@ -46,7 +46,16 @@ public final class Randomizer {
         return RAND2.nextUnif();
     }
 
-    public static int rand(final int lbound, final int ubound) {
-        return nextInt(ubound - lbound + 1) + lbound;
+    public static int rand(final int min, final int max) {
+        return nextInt(max - min + 1) + min;
     }
+
+    public static boolean percent(final int percent) {
+        return percent(percent, 100);
+    }
+
+    public static boolean percent(final int percent, final int max) {
+        return Randomizer.nextInt(max) < percent;
+    }
+
 }

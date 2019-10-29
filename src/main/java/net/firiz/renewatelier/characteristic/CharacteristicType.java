@@ -11,7 +11,7 @@ public enum CharacteristicType {
     SELL, // 売価％
     QUALITY, // 品質％
     DAMAGE, // 攻撃アイテム効果％
-    DAMAGE_FIXED, //威力固定強化 <最低値, 最大値>
+    DAMAGE_FIXED, //攻撃アイテム 威力固定強化 <最低値, 最大値>
     HEAL, // 回復力増加％
     HEAL_FIXED, // 回復固定強化 <最低値, 最大値>
     POWER, // 威力値をx％増減

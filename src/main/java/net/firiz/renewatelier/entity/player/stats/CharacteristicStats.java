@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.entity.player.stats;
 
+import org.bukkit.inventory.ItemStack;
+
 public class CharacteristicStats {
     private final CharStats charStats;
 
@@ -45,27 +47,33 @@ public class CharacteristicStats {
         this.acc = acc;
         this.avo = avo;
         this.updateEquip();
-        this.updateWeapon();
+        this.updateWeapon(-1);
     }
 
     void updateEquip() {
-        this.maxHpE = CharStatType.HP.getEquipStats(charStats, maxHp, false);
-        this.maxMpE = CharStatType.MP.getEquipStats(charStats, maxMp, false);
-        this.atkE = CharStatType.ATK.getEquipStats(charStats, atk, false);
-        this.defE = CharStatType.DEF.getEquipStats(charStats, def, false);
-        this.speedE = CharStatType.SPEED.getEquipStats(charStats, speed, false);
-        this.accE = CharStatType.ACC.getEquipStats(charStats, acc, false);
-        this.avoE = CharStatType.AVO.getEquipStats(charStats, avo, false);
+        this.maxHpE = CharStatType.HP.getEquipStats(charStats, null, maxHp, false);
+        this.maxMpE = CharStatType.MP.getEquipStats(charStats, null, maxMp, false);
+        this.atkE = CharStatType.ATK.getEquipStats(charStats, null, atk, false);
+        this.defE = CharStatType.DEF.getEquipStats(charStats, null, def, false);
+        this.speedE = CharStatType.SPEED.getEquipStats(charStats, null, speed, false);
+        this.accE = CharStatType.ACC.getEquipStats(charStats, null, acc, false);
+        this.avoE = CharStatType.AVO.getEquipStats(charStats, null, avo, false);
     }
 
-    void updateWeapon() {
-        this.maxHpW = CharStatType.HP.getEquipStats(charStats, maxHp, false);
-        this.maxMpW = CharStatType.MP.getEquipStats(charStats, maxMp, false);
-        this.atkW = CharStatType.ATK.getEquipStats(charStats, atk, false);
-        this.defW = CharStatType.DEF.getEquipStats(charStats, def, false);
-        this.speedW = CharStatType.SPEED.getEquipStats(charStats, speed, false);
-        this.accW = CharStatType.ACC.getEquipStats(charStats, acc, false);
-        this.avoW = CharStatType.AVO.getEquipStats(charStats, avo, false);
+    void updateWeapon(int slot) {
+        final ItemStack item;
+        if (slot == -1) {
+            item = charStats.getPlayer().getInventory().getItemInMainHand();
+        } else {
+            item = charStats.getPlayer().getInventory().getItem(slot);
+        }
+        this.maxHpW = CharStatType.HP.getEquipStats(charStats, item, maxHp, true);
+        this.maxMpW = CharStatType.MP.getEquipStats(charStats, item, maxMp, true);
+        this.atkW = CharStatType.ATK.getEquipStats(charStats, item, atk, true);
+        this.defW = CharStatType.DEF.getEquipStats(charStats, item, def, true);
+        this.speedW = CharStatType.SPEED.getEquipStats(charStats, item, speed, true);
+        this.accW = CharStatType.ACC.getEquipStats(charStats, item, acc, true);
+        this.avoW = CharStatType.AVO.getEquipStats(charStats, item, avo, true);
     }
 
     public int getMaxHp() {

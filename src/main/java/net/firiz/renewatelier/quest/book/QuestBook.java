@@ -192,15 +192,16 @@ public class QuestBook {
             } else if (qr instanceof ItemQuestResult) {
                 final ItemQuestResult result = (ItemQuestResult) qr;
                 final QuestItem questItem = result.getResult();
-                final ItemStack viewItem = questItem.getItem(new boolean[]{
-                        true, // id
-                        false, // quality - default min
-                        (questItem.getIngredients() == null), // ings
-                        true, // size
-                        true, // catalyst
-                        true, // category
-                        true // end
-                });
+                final ItemStack viewItem = questItem.getItem(new AlchemyItemStatus.VisibleFlags(
+                        false, // id
+                        true, // quality - default min
+                        (questItem.getIngredients() != null), // ings
+                        false, // size
+                        false, // catalyst
+                        false, // category
+                        false,
+                        true
+                ));
                 final String name = viewItem.hasItemMeta() && viewItem.getItemMeta().hasDisplayName()
                         ? viewItem.getItemMeta().getDisplayName()
                         : LanguageItemUtil.getLocalizeName(viewItem, player);

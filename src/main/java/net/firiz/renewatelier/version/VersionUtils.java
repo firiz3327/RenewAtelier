@@ -22,7 +22,6 @@ package net.firiz.renewatelier.version;
 
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.nms.VItemStack;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_14_R1.ChatMessage;
 import net.minecraft.server.v1_14_R1.NBTTagCompound;
@@ -62,6 +61,10 @@ public class VersionUtils {
     public static ItemStack asItem(final VItemStack item) {
         final net.minecraft.server.v1_14_R1.ItemStack nms = (net.minecraft.server.v1_14_R1.ItemStack) item.getNmsItem();
         return CraftItemStack.asBukkitCopy(nms);
+    }
+
+    public static ItemStack asItem(final net.minecraft.server.v1_14_R1.ItemStack item) {
+        return CraftItemStack.asBukkitCopy(item);
     }
 
     @NotNull

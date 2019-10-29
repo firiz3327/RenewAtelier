@@ -1,12 +1,49 @@
 package net.firiz.renewatelier.damage;
 
-public enum AddAttackType {
-    DAMAGE, // 追加ダメージ％
-    DAMAGE_FIXED, // 追加ダメージ
-    ATTRIBUTE_DAMAGE, // 属性追加ダメージ <属性, ダメージ％>
-    ATTRIBUTE_DAMAGE_FIXED, // 属性追加ダメージ <属性, ダメージ>
-    HEAL, // ダメージ還元HP％
-    TARGET, // ターゲット値を上昇させる
-    DAMAGE_HEAL, // 追加ダメージ％ かつ与えたダメージ分回復
-    ATTRIBUTE_DAMAGE_HEAL, // 属性追加ダメージ <属性, ダメージ％> かつ与えたダメージ分回復
+import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.utils.TRunnable;
+import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.Four;
+import org.bukkit.entity.LivingEntity;
+
+public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
+    DAMAGE(t -> new FinalDoubleData<>(t.getD().getLeft() * (Integer.parseInt(t.getA()[3]) * 0.01), t.getD().getRight())), // 追加ダメージ％
+    DAMAGE_FIXED(t -> new FinalDoubleData<>(Double.parseDouble(t.getA()[3]), t.getD().getRight())), // 追加ダメージ
+    ATTRIBUTE_DAMAGE(t -> new FinalDoubleData<>(t.getD().getLeft() * (Integer.parseInt(t.getA()[4]) * 0.01), AttackAttribute.valueOf(t.getA()[3]))), // 属性追加ダメージ <属性, ダメージ％>
+    ATTRIBUTE_DAMAGE_FIXED(t -> new FinalDoubleData<>(Double.parseDouble(t.getA()[4]), AttackAttribute.valueOf(t.getA()[3]))), // 属性追加ダメージ <属性, ダメージ>
+    HEAL(t -> { // ダメージ還元HP％
+        final double heal = t.getD().getLeft() * (Integer.parseInt(t.getA()[3]) * 0.01);
+        t.getB().damageHp(-heal);
+        return null;
+    }),
+    TARGET(t -> {
+        return null;
+    }), // ターゲット値を上昇させる
+    DAMAGE_HEAL(t -> { // 追加ダメージ％ かつ与えたダメージ分回復
+        final double percent = Integer.parseInt(t.getA()[3]) * 0.01;
+        final double heal = t.getD().getLeft() * percent;
+        t.getB().damageHp(-heal);
+        return new FinalDoubleData<>(t.getD().getLeft() * percent, t.getD().getRight());
+    }),
+    ATTRIBUTE_DAMAGE_HEAL(t -> { // 属性追加ダメージ <属性, ダメージ％> かつ与えたダメージ分回復 <属性, ダメージ>
+        final double percent = Integer.parseInt(t.getA()[4]) * 0.01;
+        final double heal = t.getD().getLeft() * percent;
+        t.getB().damageHp(-heal);
+        return new FinalDoubleData<>(t.getD().getLeft() * percent, AttackAttribute.valueOf(t.getA()[3]));
+    });
+
+    /**
+     * Four(Data, キャラステータス, 被害者エンティティ, ダメージ)
+     * return 追加ダメージ
+     */
+    private final TRunnable<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run;
+
+    AddAttackType(TRunnable<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run) {
+        this.run = run;
+    }
+
+    public FinalDoubleData<Double, AttackAttribute> runDamage(String[] data, CharStats charStats, LivingEntity entity, FinalDoubleData<Double, AttackAttribute> damage) {
+        return run.run(new Four<>(data, charStats, entity, damage));
+    }
+
 }

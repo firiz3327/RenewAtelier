@@ -2,11 +2,15 @@ package net.firiz.renewatelier.entity.player.stats;
 
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
+import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -58,10 +62,17 @@ public class CharStats {
 
     public void updateEquip() {
         equipStats.updateEquip();
+        buffedStats.update();
     }
 
     public void updateWeapon() {
-        equipStats.updateWeapon();
+        equipStats.updateWeapon(-1);
+        buffedStats.update();
+    }
+
+    public void updateWeapon(int slot) {
+        equipStats.updateWeapon(slot);
+        buffedStats.update();
     }
 
     public void updateBuffs() {
@@ -71,6 +82,23 @@ public class CharStats {
     public void updateStats() {
         equipStats.update(maxHp, maxMp, atk, def, speed, level, level);
         buffedStats.update();
+    }
+
+    @Nullable
+    public AlchemyItemStatus getWeapon() {
+        return AlchemyItemStatus.load(player.getInventory().getItemInMainHand());
+    }
+
+    @NotNull
+    public List<AlchemyItemStatus> getEquips() {
+        final List<AlchemyItemStatus> itemStatuses = new ArrayList<>();
+        for (final ItemStack armor : player.getInventory().getArmorContents()) {
+            final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(armor);
+            if (itemStatus != null) {
+                itemStatuses.add(itemStatus);
+            }
+        }
+        return itemStatuses;
     }
 
     public int getLevel() {

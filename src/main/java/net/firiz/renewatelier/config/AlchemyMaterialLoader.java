@@ -97,6 +97,13 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             quality_min,
                             quality_max,
                             price,
+                            getValueOrZero(item, "hp"),
+                            getValueOrZero(item, "mp"),
+                            getValueOrZero(item, "atk"),
+                            getValueOrZero(item, "def"),
+                            getValueOrZero(item, "speed"),
+                            getValueOrZero(item, "baseDamageMin"),
+                            getValueOrZero(item, "baseDamageMax"),
                             categorys,
                             ingredients,
                             sizeTemplate,
@@ -283,5 +290,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
         return item.contains(name) && item.getBoolean(name);
     }
 
+    private int getValueOrZero(ConfigurationSection item, String name) {
+        return item.contains(name) ? item.getInt(name) : 0;
+    }
 
 }

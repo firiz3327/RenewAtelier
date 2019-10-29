@@ -1,10 +1,12 @@
 package net.firiz.renewatelier.entity.player.stats;
 
+import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.TRunnable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
@@ -14,16 +16,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public enum CharStatType {
     LEVEL(true, false),
-    HP(true, true),
-    MP(true, true),
-    ATK(true, true),
-    DEF(true, true),
-    SPEED(true, true),
+    HP(true, true, AlchemyItemStatus::getHp),
+    MP(true, true, AlchemyItemStatus::getMp),
+    ATK(true, true, AlchemyItemStatus::getAtk),
+    DEF(true, true, AlchemyItemStatus::getDef),
+    SPEED(true, true, AlchemyItemStatus::getSpeed),
     ACC(false, true),
     AVO(false, true);
 
     private final boolean buff;
     private final boolean characteristic;
+    private final TRunnable<AlchemyItemStatus, Integer> runGetEquipStats;
 
     private static final Map<CharStatType, BuffType[]> buffTypes = new EnumMap<>(CharStatType.class);
     private static final Map<CharStatType, CharacteristicType[]> characteristicTypes = new EnumMap<>(CharStatType.class);
@@ -47,6 +50,13 @@ public enum CharStatType {
     CharStatType(boolean buff, boolean characteristic) {
         this.buff = buff;
         this.characteristic = characteristic;
+        this.runGetEquipStats = null;
+    }
+
+    CharStatType(boolean buff, boolean characteristic, TRunnable<AlchemyItemStatus, Integer> getEquipStats) {
+        this.buff = buff;
+        this.characteristic = characteristic;
+        this.runGetEquipStats = getEquipStats;
     }
 
     /**
@@ -84,30 +94,33 @@ public enum CharStatType {
      * @param weapon    boolean 装備または武器のステータスを参照
      * @return int 装備のステータス特性を含めたステータスの増加値
      */
-    protected int getEquipStats(CharStats charStats, int defStatus, boolean weapon) {
+    protected int getEquipStats(CharStats charStats, ItemStack item, int defStatus, boolean weapon) {
         final AtomicInteger status = new AtomicInteger(0);
 
         // 装備特性計算
         if (characteristic) {
             final PlayerInventory inv = charStats.getPlayer().getInventory();
-            final List<ItemStack> checkItems;
             if (weapon) {
-                checkItems = new ArrayList<>();
-                checkItems.add(inv.getItemInMainHand());
+                final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
+                if (itemStatus != null && itemStatus.getAlchemyMaterial().getCategorys().contains(Category.WEAPON)) {
+                    getStats(charStats, defStatus, status, item);
+                }
             } else {
-                checkItems = new ArrayList<>(Arrays.asList(inv.getArmorContents()));
+                getStats(charStats, defStatus, status, inv.getArmorContents());
             }
-            getCharacteristic(charStats, defStatus, status, checkItems);
         }
 
         return status.intValue();
     }
 
-    private void getCharacteristic(final CharStats charStats, final int defStatus, final AtomicInteger status, final List<ItemStack> checkItems) {
+    private void getStats(final CharStats charStats, final int defStatus, final AtomicInteger status, final ItemStack... checkItems) {
         final CharacteristicType[] characteristicType = characteristicTypes.get(this);
         for (final ItemStack item : checkItems) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
+                if (runGetEquipStats != null) {
+                    status.addAndGet(runGetEquipStats.run(itemStatus)); // getEquipItemStats
+                }
                 for (final Characteristic c : itemStatus.getCharacteristics()) {
                     if (c.hasData(characteristicType[0])) { // percent
                         status.addAndGet((int) (defStatus * (((int) c.getData(characteristicType[0])) * 0.01)));

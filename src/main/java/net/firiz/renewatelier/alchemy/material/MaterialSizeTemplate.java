@@ -181,17 +181,13 @@ public enum MaterialSizeTemplate {
     }
 
     private static int[][] css(int[][] sizes) {
-        int[][] result = new int[9][9];
+        final int[][] result = new int[9][9];
         result[0] = new int[]{1, 0, 0, 0, 0, 0, 0, 0, 0};
-        for (int i = 1; i < sizes.length; i++) {
-            result[i] = cs(sizes[i]);
+        for (int i = 0; i < sizes.length; i++) {
+            result[i + 1] = Arrays.copyOf(sizes[i], 9);
         }
         result[8] = new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1};
         return result;
-    }
-
-    private static int[] cs(int[] size) {
-        return Arrays.copyOf(size, size.length);
     }
 
 }

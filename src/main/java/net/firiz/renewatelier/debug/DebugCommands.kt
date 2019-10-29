@@ -369,7 +369,15 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "・・・"
     )
     fun test(sender: Player, args: ArrayList<Any>) {
-        PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.damageMp(args[0].toString().toDouble())
+        sender.sendMessage("")
+        sender.sendMessage("level ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.level}")
+        sender.sendMessage("maxHp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.maxHp}")
+        sender.sendMessage("hp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.hp}")
+        sender.sendMessage("maxMp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.maxMp}")
+        sender.sendMessage("mp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.mp}")
+        sender.sendMessage("atk ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.atk}")
+        sender.sendMessage("def ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.def}")
+        sender.sendMessage("speed ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.speed}")
     }
 
 }
