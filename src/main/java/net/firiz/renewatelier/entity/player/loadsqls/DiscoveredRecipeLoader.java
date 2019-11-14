@@ -37,7 +37,7 @@ public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipe
     public List<MinecraftRecipeSaveType> load(int id) {
         final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
                 "discoveredRecipes",
-                new String[]{"user_id", "item_id"},
+                new String[]{"userId", "itemId"},
                 new Object[]{id}
         );
         final List<MinecraftRecipeSaveType> saveTypes = new ArrayList<>();

@@ -2,7 +2,7 @@ package net.firiz.renewatelier.entity.player.stats;
 
 import org.bukkit.inventory.ItemStack;
 
-public class CharacteristicStats {
+public class EquipStats {
     private final CharStats charStats;
 
     // 基礎ステータス
@@ -33,7 +33,7 @@ public class CharacteristicStats {
     private int avoW; // 回避率
 
 
-    CharacteristicStats(CharStats charStats, int maxHp, int maxMp, int atk, int def, int speed, int acc, int avo) {
+    EquipStats(CharStats charStats, int maxHp, int maxMp, int atk, int def, int speed, int acc, int avo) {
         this.charStats = charStats;
         this.update(maxHp, maxMp, atk, def, speed, acc, avo);
     }

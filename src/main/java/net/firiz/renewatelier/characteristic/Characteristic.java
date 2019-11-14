@@ -2,8 +2,10 @@ package net.firiz.renewatelier.characteristic;
 
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
+import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -58,6 +60,7 @@ public class Characteristic {
         return datas.containsKey(type);
     }
 
+    @Nullable
     public Object getData(CharacteristicType type) {
         return datas.get(type);
     }

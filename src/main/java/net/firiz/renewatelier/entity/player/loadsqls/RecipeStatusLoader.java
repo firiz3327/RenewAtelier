@@ -36,8 +36,8 @@ public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
     @Override
     public List<RecipeStatus> load(int id) {
         final List<List<Object>> recipeStatusesObj = SQLManager.INSTANCE.select(
-                "recipe_levels",
-                new String[]{"user_id", "recipe_id", "level", "exp"},
+                "recipeLevels",
+                new String[]{"userId", "recipeId", "level", "exp"},
                 new Object[]{id}
         );
         final List<RecipeStatus> recipeStatuses = new ArrayList<>();

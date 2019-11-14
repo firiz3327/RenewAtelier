@@ -8,11 +8,6 @@ public class CollectionUtils {
     private CollectionUtils() {
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T castList(Object obj) {
-        return (T) obj;
-    }
-
     public static int[] parseInts(final List<Integer> list) {
         final int[] result = new int[list.size()];
         for (int i = 0; i < list.size(); i++) {

@@ -3,7 +3,7 @@ package net.firiz.renewatelier.entity.player.stats;
 public class BuffedStats {
 
     private final CharStats charStats;
-    private final CharacteristicStats equipStats;
+    private final EquipStats equipStats;
     private int level;
 
     // バフ増加値
@@ -14,7 +14,7 @@ public class BuffedStats {
     private int defB;
     private int speedB;
 
-    BuffedStats(CharStats charStats, CharacteristicStats equipStats, int level) {
+    BuffedStats(CharStats charStats, EquipStats equipStats, int level) {
         this.charStats = charStats;
         this.equipStats = equipStats;
         this.level = level;

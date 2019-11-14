@@ -3,6 +3,7 @@ package net.firiz.renewatelier.entity.player.stats;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -34,7 +35,7 @@ public class CharStats {
     private int acc; // 命中率
     private int avo; // 回避率
 
-    private final CharacteristicStats equipStats; // 装備・ハンド更新時、更新
+    private final EquipStats equipStats; // 装備・ハンド更新時、更新
     private final BuffedStats buffedStats; // バフ更新時、更新
 
     public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
@@ -53,11 +54,19 @@ public class CharStats {
         this.buffs = buffs;
         this.acc = 100;
         this.avo = 100;
-        this.equipStats = new CharacteristicStats(this, maxHp, maxMp, atk, def, speed, acc, avo);
+        this.equipStats = new EquipStats(this, maxHp, maxMp, atk, def, speed, acc, avo);
         this.buffedStats = new BuffedStats(this, equipStats, level);
         for (final Buff buff : buffs) {
             buff.startTimer();
         }
+    }
+
+    public void save(int id) {
+        SQLManager.INSTANCE.insert(
+                "accounts",
+                new String[]{"id", "uuid", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed"},
+                new Object[]{id, player.getUniqueId().toString(), level, exp, alchemyLevel, alchemyExp, maxHp, hp, maxMp, mp, atk, def, speed}
+        );
     }
 
     public void updateEquip() {
@@ -92,6 +101,7 @@ public class CharStats {
     @NotNull
     public List<AlchemyItemStatus> getEquips() {
         final List<AlchemyItemStatus> itemStatuses = new ArrayList<>();
+
         for (final ItemStack armor : player.getInventory().getArmorContents()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(armor);
             if (itemStatus != null) {

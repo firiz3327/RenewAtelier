@@ -656,7 +656,7 @@ public class AlchemyItemStatus {
                     if (obj instanceof CharacteristicTemplate) {
                         cs.addAll(((CharacteristicTemplate) obj).getCs());
                     } else {
-                        cs.add(CollectionUtils.castList(obj));
+                        cs.add(Chore.cast(obj));
                     }
                 });
                 Collections.shuffle(cs);

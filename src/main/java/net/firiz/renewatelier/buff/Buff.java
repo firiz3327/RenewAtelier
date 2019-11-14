@@ -7,6 +7,7 @@ public class Buff {
     private final BuffType type;
     private final int limitDuration;
     private final int x;
+    private Runnable timer;
 
     private static final LoopManager loopManager = LoopManager.INSTANCE;
     private int duration = 0;
@@ -15,6 +16,11 @@ public class Buff {
         this.type = type;
         this.limitDuration = limitDuration;
         this.x = x;
+        this.timer = () -> {
+            if (incrementTimer()) {
+                loopManager.removeSec(timer);
+            }
+        };
     }
 
     public BuffType getType() {
@@ -26,13 +32,7 @@ public class Buff {
     }
 
     public void startTimer() {
-        loopManager.addLoopEffect(this::timer);
-    }
-
-    private void timer() {
-        if (incrementTimer()) {
-            loopManager.removeLoopEffect(this::timer);
-        }
+        loopManager.addSec(timer);
     }
 
     private boolean incrementTimer() {

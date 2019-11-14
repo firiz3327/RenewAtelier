@@ -72,11 +72,12 @@ public class Notification {
 
         Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
             if (player.isOnline()) {
-                final PlayerInventory inv = player.getInventory();
-                final ItemStack offHand = inv.getItemInOffHand();
-                inv.setItemInOffHand(book);
-                PayloadPacket.openBook(player, EquipmentSlot.OFF_HAND);
-                inv.setItemInOffHand(offHand);
+//                final PlayerInventory inv = player.getInventory();
+//                final ItemStack offHand = inv.getItemInOffHand();
+//                inv.setItemInOffHand(book);
+//                PayloadPacket.openBook(player, EquipmentSlot.OFF_HAND);
+//                inv.setItemInOffHand(offHand);
+                player.openBook(book);
             }
         }, 20); // 1 sec
     }

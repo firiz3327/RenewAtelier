@@ -28,9 +28,11 @@ import java.util.UUID;
 
 import net.firiz.renewatelier.entity.player.loadsqls.*;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
+import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.version.inject.PlayerInjection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -47,7 +49,8 @@ public enum PlayerSaveManager {
             new RecipeStatusLoader(),
             new QuestStatusLoader(),
             new DiscoveredRecipeLoader(),
-            new BuffLoader()
+            new BuffLoader(),
+            new CharSettingLoader()
     };
 
     public void loadPlayers() {
@@ -56,6 +59,7 @@ public enum PlayerSaveManager {
                 player.spigot().respawn();
             }
             loadStatus(player);
+            PlayerInjection.injectArmorChangeEvent(player);
         }));
     }
 
@@ -70,7 +74,7 @@ public enum PlayerSaveManager {
     public void loadStatus(final Player player) {
         final UUID uuid = player.getUniqueId();
         final String tableName = "accounts";
-        final String[] columns = new String[]{"uuid", "id", "email", "password", "level", "exp", "alchemy_level", "alchemy_exp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed"};
+        final String[] columns = new String[]{"uuid", "id", "email", "password", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed"};
         final Object[] wheres = new Object[]{uuid.toString()};
         List<List<Object>> select = sql.select(tableName, columns, wheres);
         if (select.isEmpty()) {
@@ -83,8 +87,8 @@ public enum PlayerSaveManager {
         final String password = (String) datas.get(3);
         final int level = (int) datas.get(4);
         final long exp = (long) datas.get(5);
-        final int alchemy_level = (int) datas.get(6);
-        final int alchemy_exp = (int) datas.get(7);
+        final int alchemyLevel = (int) datas.get(6);
+        final int alchemyExp = (int) datas.get(7);
         final int maxHp = (int) datas.get(8);
         final int hp = (int) datas.get(9);
         final int maxMp = (int) datas.get(10);
@@ -105,8 +109,8 @@ public enum PlayerSaveManager {
                         player,
                         level,
                         exp,
-                        alchemy_level,
-                        alchemy_exp,
+                        alchemyLevel,
+                        alchemyExp,
                         maxHp,
                         hp,
                         maxMp,
@@ -114,11 +118,12 @@ public enum PlayerSaveManager {
                         atk,
                         def,
                         speed,
-                        CollectionUtils.castList(loaderValues.get(3)) // buffLoader
+                        Chore.cast(loaderValues.get(3)) // buffLoader
                 ),
-                CollectionUtils.castList(loaderValues.get(0)), // recipeStatusLoader
-                CollectionUtils.castList(loaderValues.get(1)), // questStatusLoader
-                CollectionUtils.castList(loaderValues.get(2)) // discoveredRecipeLoader
+                Chore.cast(loaderValues.get(0)), // recipeStatusLoader
+                Chore.cast(loaderValues.get(1)), // questStatusLoader
+                Chore.cast(loaderValues.get(2)), // discoveredRecipeLoader
+                Chore.cast(loaderValues.get(4)) // charSettingLoader
         );
         new Thread(() -> {
             status.setJsEngine(script.createJsEngine());
@@ -129,7 +134,10 @@ public enum PlayerSaveManager {
     }
 
     public void unloadStatus(final UUID uuid) {
-        statusList.remove(uuid);
+        final Char c = statusList.remove(uuid);
+        if (c != null) {
+            c.unload();
+        }
     }
 
 }

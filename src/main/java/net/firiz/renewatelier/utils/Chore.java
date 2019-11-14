@@ -61,6 +61,11 @@ public final class Chore {
         throw new IllegalStateException("Utility class");
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object obj) {
+        return (T) obj;
+    }
+
     public static void log(final Object obj) {
         if (obj instanceof Exception) {
             logWarning(obj);

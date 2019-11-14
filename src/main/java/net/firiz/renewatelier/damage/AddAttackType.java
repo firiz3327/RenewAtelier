@@ -16,9 +16,9 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
         t.getB().damageHp(-heal);
         return null;
     }),
-    TARGET(t -> {
-        return null;
-    }), // ターゲット値を上昇させる
+    TARGET(t -> { // ターゲット値を上昇させる
+        return null; //    未実装
+    }),
     DAMAGE_HEAL(t -> { // 追加ダメージ％ かつ与えたダメージ分回復
         final double percent = Integer.parseInt(t.getA()[3]) * 0.01;
         final double heal = t.getD().getLeft() * percent;

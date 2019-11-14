@@ -48,6 +48,7 @@ public enum LoopManager {
     private final List<Runnable> loopRuns;
     private final List<Runnable> loopHalfSecRuns;
     private final List<Runnable> loopMiriRuns;
+    private final List<Runnable> loopMinuteRuns;
     private boolean start;
     private int period = 0;
     private int secPeriod = 0;
@@ -59,6 +60,7 @@ public enum LoopManager {
         loopRuns = new ArrayList<>();
         loopHalfSecRuns = new ArrayList<>();
         loopMiriRuns = new ArrayList<>();
+        loopMinuteRuns = new ArrayList<>();
     }
 
     public void start() {
@@ -85,28 +87,28 @@ public enum LoopManager {
         animDrops.stream().filter(ad -> (!ad.isGet())).forEachOrdered(ad -> ad.getDrop().remove());
     }
 
-    public void addLoopEffect(final Runnable run) {
+    public void addSec(final Runnable run) {
         loopRuns.add(run);
     }
 
-    public void removeLoopEffect(final Runnable run) {
+    public void removeSec(final Runnable run) {
         loopRuns.remove(run);
     }
 
-    public void addLoopEffectHalfSec(final Runnable run) {
-        loopHalfSecRuns.add(run);
-    }
-
-    public void removeLoopEffectHalfSec(final Runnable run) {
-        loopHalfSecRuns.remove(run);
-    }
-
-    public void addLoopEffectMiri(final Runnable run) {
+    public void addMiri(final Runnable run) {
         loopMiriRuns.add(run);
     }
 
-    public void removeLoopEffectMiri(final Runnable run) {
+    public void removeMiri(final Runnable run) {
         loopMiriRuns.remove(run);
+    }
+
+    public void addMinutes(final Runnable run) {
+        loopMinuteRuns.add(run);
+    }
+
+    public void removeMinutes(final Runnable run) {
+        loopMinuteRuns.remove(run);
     }
 
     // 厳密さは求めていないので大分適当。あっているかはわからない
@@ -158,6 +160,15 @@ public enum LoopManager {
             sb.append(ChatColor.GREEN).append(PacketUtils.getPing(player));
             player.setPlayerListName(sb.toString());
         }
+
+        if (secPeriod % 60 == 0) {
+            secPeriod = 0;
+            minuteLoop();
+        }
+    }
+
+    private void minuteLoop() {
+        new ArrayList<>(loopMinuteRuns).forEach(Runnable::run);
     }
 
     private void cauldronDamage(final Entity entity) {

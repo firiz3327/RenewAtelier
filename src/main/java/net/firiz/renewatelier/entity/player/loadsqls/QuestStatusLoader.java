@@ -37,13 +37,13 @@ public class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
     public List<QuestStatus> load(int id) {
         final List<List<Object>> questStatusesObj = SQLManager.INSTANCE.select(
                 "questDatas",
-                new String[]{"user_id", "quest_id", "clear"},
+                new String[]{"userId", "questId", "clear"},
                 new Object[]{id}
         );
         final List<QuestStatus> questStatuses = new ArrayList<>();
         questStatusesObj.forEach(datas -> questStatuses.add(new QuestStatus(
-                (String) datas.get(1), // quest_id
-                (int) datas.get(2) != 0 // clear
+                (String) datas.get(1), // questId
+                (boolean) datas.get(2) // clear
         )));
         return questStatuses;
     }

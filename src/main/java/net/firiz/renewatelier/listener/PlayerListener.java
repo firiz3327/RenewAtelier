@@ -61,14 +61,11 @@ public class PlayerListener implements Listener {
 
         if (Chore.isRight(action)) {
             if (item != null && item.getType() == Material.WRITTEN_BOOK) {
-                final ItemMeta meta = item.getItemMeta();
-                if (meta != null && meta.isUnbreakable()) {
-                    final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
-                    if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
-                        e.setCancelled(true);
-                        QuestBook.openQuestBook(player, item, e.getHand());
-                        return;
-                    }
+                final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
+                if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
+                    e.setCancelled(true);
+                    QuestBook.openQuestBook(player, e.getHand());
+                    return;
                 }
             }
 

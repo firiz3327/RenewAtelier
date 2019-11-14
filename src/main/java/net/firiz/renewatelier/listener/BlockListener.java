@@ -21,12 +21,11 @@
 
 package net.firiz.renewatelier.listener;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPistonEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.*;
 
 import java.util.List;
 
@@ -64,4 +63,12 @@ public class BlockListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onVineSpread(BlockSpreadEvent e) {
+        if (e.getSource().getType() == Material.VINE) {
+            e.setCancelled(true);
+        }
+    }
+
 }

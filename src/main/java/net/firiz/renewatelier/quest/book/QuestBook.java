@@ -61,7 +61,7 @@ public class QuestBook {
     private QuestBook() {
     }
 
-    public static void openQuestBook(final Player player, final ItemStack book, final EquipmentSlot hand) {
+    public static void openQuestBook(final Player player, final EquipmentSlot hand) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ArrayList<>();
         final List<Quest> clearQuests = new ArrayList<>();
@@ -76,8 +76,6 @@ public class QuestBook {
                 progressQuests.add(quest);
             }
         });
-        // 本を開くパケット
-        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
 
         final List<BaseComponent[]> pages = new ArrayList<>();
         // 進行中クエスト
@@ -87,9 +85,14 @@ public class QuestBook {
         // クリア済みクエスト
         clearQuests.forEach(quest -> addSpigotPage(pages, quest, 1, player));
 
+        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
+
+        // 本を開くパケット
+        //Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
+        player.openBook(book);
     }
 
     private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type, final Player player) {

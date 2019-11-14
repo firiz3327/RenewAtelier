@@ -119,8 +119,8 @@ public enum NPCManager {
                 "x", // 5
                 "y", // 6
                 "z", // 7
-                "skin_uuid", // 8
-                "villager_type", // 9
+                "skinUUID", // 8
+                "villagerType", // 9
                 "profession" // 10
         }, null);
         for (final List<Object> objs : resultObjects) {
@@ -164,7 +164,7 @@ public enum NPCManager {
         // send player npcs
         Bukkit.getWorlds().forEach(world -> world.getPlayers().forEach(this::packet));
 
-        LoopManager.INSTANCE.addLoopEffect(() -> Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+        LoopManager.INSTANCE.addSec(() -> Bukkit.getServer().getOnlinePlayers().forEach(player -> {
             for (final VEntityPlayer npc : playerNpcs) {
                 final Location loc = npc.getLocation().clone();
                 if (Chore.distanceSq(loc, player.getLocation(), 15, 5)) {
@@ -356,7 +356,7 @@ public enum NPCManager {
                     "name", STRING_SCRIPT, STRING_ENTITY_TYPE,
                     STRING_WORLD,
                     "x", "y", "z",
-                    "skin_uuid"
+                    "skinUUID"
             }, new Object[]{
                     name, script, EntityType.PLAYER.toString(),
                     Objects.requireNonNull(location.getWorld()).getName(),

@@ -38,11 +38,24 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             final List<String> datasStr = item.getStringList("datas");
             final Map<CharacteristicType, Object> datas = new EnumMap<>(CharacteristicType.class);
             datasStr.forEach(str -> {
-                final int i = str.indexOf(',');
-                final String type = str.substring(0, i);
-                final String dataStr = str.substring(i + 1);
-                final Object data = Chore.isNumMatch(dataStr) ? Integer.parseInt(dataStr) : dataStr;
-                datas.put(CharacteristicType.valueOf(type), data);
+                if (str.contains(",")) {
+                    final int i = str.indexOf(',');
+                    final String type = str.substring(0, i);
+                    final String dataStr = str.substring(i + 1).trim();
+                    final Object data;
+                    if(Chore.isNumMatch(dataStr)) {
+                        data = Integer.parseInt(dataStr);
+                    } else {
+                        final String[] split = dataStr.split(",");
+                        for(int j = 0; j < split.length; j++) {
+                            split[j] = split[j].trim();
+                        }
+                        data = split;
+                    }
+                    datas.put(CharacteristicType.valueOf(type), data);
+                } else {
+                    datas.put(CharacteristicType.valueOf(str), null);
+                }
             });
             add(new Characteristic(key, lv, name, desc, categorys, reqs, datas));
         });
@@ -68,7 +81,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
 
         final List<List<String>> result = new ArrayList<>();
         if (list.get(0) instanceof ArrayList) {
-            list.stream().<List<String>>map(CollectionUtils::castList).forEach(result::add);
+            list.stream().<List<String>>map(Chore::cast).forEach(result::add);
         } else if (list.get(0) instanceof String) {
             result.add(convertStringList(list));
         }

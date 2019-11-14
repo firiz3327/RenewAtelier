@@ -1,16 +1,14 @@
-package net.firiz.renewatelier.version.entity.projectile;
+package net.firiz.renewatelier.version.entity.projectile.arrow;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-public interface AtelierProjectile {
+public interface IAtelierProjectile {
 
     void shoot(Vector velocity);
 
     LivingEntity getSource();
-
-    ItemStack getBow();
 
     ItemStack getItem();
 

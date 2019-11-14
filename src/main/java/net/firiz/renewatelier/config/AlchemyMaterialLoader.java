@@ -199,7 +199,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<Category> getCategories(ConfigurationSection item) {
         final List<Category> categories = new ArrayList<>();
         if (item.contains(KEY_CATEGORYS)) {
-            final List<String> categorysStr = CollectionUtils.castList(item.getList(KEY_CATEGORYS));
+            final List<String> categorysStr = Chore.cast(item.getList(KEY_CATEGORYS));
             categorysStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
         } else {
             notFounds.add(KEY_CATEGORYS);
@@ -211,7 +211,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<FinalDoubleData<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
         final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
         if (item.contains(KEY_INGREDIENTS)) {
-            final List<String> ingsStr = CollectionUtils.castList(item.getList(KEY_INGREDIENTS));
+            final List<String> ingsStr = Chore.cast(item.getList(KEY_INGREDIENTS));
             if (ingsStr != null) {
                 ingsStr.forEach(ing -> {
                     final String[] ingData = ing.split(",");
@@ -240,7 +240,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<Object> getCharacteristics(ConfigurationSection item) {
         final List<Object> characteristics = new ArrayList<>();
         if (item.contains("characteristics")) {
-            final List<String> stringList = CollectionUtils.castList(item.getList("characteristics"));
+            final List<String> stringList = Chore.cast(item.getList("characteristics"));
             stringList.forEach(cStr -> {
                 if (cStr.contains(",")) {
                     final String[] strs = cStr.split(",");

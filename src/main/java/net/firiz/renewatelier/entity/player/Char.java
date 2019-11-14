@@ -28,6 +28,7 @@ import javax.script.ScriptEngine;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.notification.Notification;
@@ -51,9 +52,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class Char {
 
-    private static final String COLUMN_RECIPE_LEVELS = "recipe_levels";
-    private static final String COLUMN_USER_ID = "user_id";
-    private static final String COLUMN_RECIPE_ID = "recipe_id";
+    private static final String COLUMN_RECIPE_LEVELS = "recipeLevels";
+    private static final String COLUMN_USER_ID = "userId";
+    private static final String COLUMN_RECIPE_ID = "recipeId";
     private static final String COLUMN_LEVEL = "level";
 
     private final UUID uuid;
@@ -64,11 +65,13 @@ public final class Char {
     private final List<RecipeStatus> recipeStatuses;
     private final List<QuestStatus> questStatuses;
     private final List<MinecraftRecipeSaveType> saveTypes;
+    private final CharSettings settings;
     private boolean isEnginesUsable;
     private ScriptEngine jsEngine;
     private ScriptEngine py3Engine;
+    private final Runnable autoSave;
 
-    public Char(@NotNull UUID uuid, final int id, @Nullable String email, @Nullable String password, @NotNull CharStats charStats, @NotNull final List<RecipeStatus> recipeStatuses, @NotNull final List<QuestStatus> questStatuses, @NotNull final List<MinecraftRecipeSaveType> saveTypes) {
+    public Char(@NotNull UUID uuid, final int id, @Nullable String email, @Nullable String password, @NotNull CharStats charStats, @NotNull final List<RecipeStatus> recipeStatuses, @NotNull final List<QuestStatus> questStatuses, @NotNull final List<MinecraftRecipeSaveType> saveTypes, CharSettings settings) {
         this.uuid = uuid;
         this.id = id;
         this.email = email;
@@ -77,6 +80,19 @@ public final class Char {
         this.recipeStatuses = recipeStatuses;
         this.questStatuses = questStatuses;
         this.saveTypes = saveTypes;
+        this.settings = settings;
+
+        this.autoSave = () -> {
+            Chore.log("save: " + this.id);
+            this.charStats.save(this.id);
+            this.settings.save(this.id);
+        };
+        LoopManager.INSTANCE.addMinutes(this.autoSave);
+    }
+
+    public void unload() {
+        LoopManager.INSTANCE.removeMinutes(this.autoSave);
+        autoSave.run();
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
@@ -124,10 +140,10 @@ public final class Char {
         }
     }
 
-    private boolean addRecipeExp(final String recipe_id, final int exp) {
+    private boolean addRecipeExp(final String recipeId, final int exp) {
         RecipeStatus status = null;
         for (final RecipeStatus rs : getRecipeStatusList()) {
-            if (rs.getId().equals(recipe_id)) {
+            if (rs.getId().equals(recipeId)) {
                 if (rs.getLevel() > 3) {
                     return false;
                 } else {
@@ -139,7 +155,7 @@ public final class Char {
 
         boolean first = false;
         if (status == null) {
-            status = new RecipeStatus(recipe_id);
+            status = new RecipeStatus(recipeId);
             addRecipe(status);
             first = true;
         }
@@ -148,12 +164,11 @@ public final class Char {
         while (true) {
             final int level = status.getLevel();
             final int req_exp = GameConstants.RECIPE_REQ_EXPS[Math.min(level, GameConstants.RECIPE_REQ_EXPS.length - 1)];
-            if (status.getExp() >= req_exp) {
-                status.setLevel(level + 1);
-                status.setExp(status.getExp() - req_exp);
-                continue;
+            if (status.getExp() < req_exp) {
+                break;
             }
-            break;
+            status.setLevel(level + 1);
+            status.setExp(status.getExp() - req_exp);
         }
         SQLManager.INSTANCE.insert(
                 COLUMN_RECIPE_LEVELS,
@@ -169,7 +184,7 @@ public final class Char {
         questStatuses.add(questStatus);
         SQLManager.INSTANCE.insert(
                 "questDatas",
-                new String[]{COLUMN_USER_ID, "quest_id", "clear"},
+                new String[]{COLUMN_USER_ID, "questId", "clear"},
                 new Object[]{id, questStatus.getId(), questStatus.isClear() ? 1 : 0}
         );
     }
@@ -200,7 +215,7 @@ public final class Char {
     public void questClear(final Player player, final QuestStatus questStatus, final boolean view) {
         SQLManager.INSTANCE.insert(
                 "questDatas",
-                new String[]{COLUMN_USER_ID, "quest_id", "clear"},
+                new String[]{COLUMN_USER_ID, "questId", "clear"},
                 new Object[]{id, questStatus.getId(), 1}
         );
         questStatus.clear();
@@ -233,14 +248,14 @@ public final class Char {
         return saveTypes.contains(type);
     }
 
-    public void discoverRecipe(final String item_id) {
-        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
+    public void discoverRecipe(final String itemId) {
+        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(itemId);
         if (type != null) {
             saveTypes.add(type);
             SQLManager.INSTANCE.insert(
                     "discoveredRecipes",
-                    new String[]{COLUMN_USER_ID, "item_id"},
-                    new Object[]{id, item_id}
+                    new String[]{COLUMN_USER_ID, "itemId"},
+                    new Object[]{id, itemId}
             );
         }
     }
@@ -248,16 +263,16 @@ public final class Char {
     /**
      * 基本レシピの喪失は起こりえないので、使用しない
      *
-     * @param item_id
+     * @param itemId
      */
-    public void undiscoverRecipe(final String item_id) {
-        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(item_id);
+    public void undiscoverRecipe(final String itemId) {
+        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(itemId);
         if (type != null) {
             saveTypes.remove(type);
             SQLManager.INSTANCE.delete(
                     "discoveredRecipes",
-                    new String[]{COLUMN_USER_ID, "item_id"},
-                    new Object[]{id, item_id}
+                    new String[]{COLUMN_USER_ID, "itemId"},
+                    new Object[]{id, itemId}
             );
         }
     }
@@ -265,6 +280,10 @@ public final class Char {
 
     public CharStats getCharStats() {
         return charStats;
+    }
+
+    public CharSettings getSettings() {
+        return settings;
     }
 
     public boolean isEnginesUsable() {

@@ -5,6 +5,8 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
+import net.firiz.renewatelier.entity.player.CharSettings;
+import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
@@ -14,8 +16,6 @@ import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -46,7 +46,7 @@ public class DamageUtil {
      * @param critical             クリティカルしているかどうか
      * @return 計算したダメージの値
      */
-    private static int calcDamage(
+    private static double calcDamage(
             double baseDamage,
             double powerValue,
             double itemPowerEnhancement,
@@ -56,13 +56,14 @@ public class DamageUtil {
             double cooperationRate,
             boolean critical
     ) {
-        return (int) Math.floor(baseDamage * powerValue * ((100 + itemPowerEnhancement) * 0.01) * (critical ? (125 + criticalValue) * 0.01 : 1) * attributeValue * ((100 + finalDamageRate) * 0.01) * cooperationRate);
+        return baseDamage * powerValue * ((100 + itemPowerEnhancement) * 0.01) * (critical ? (125 + criticalValue) * 0.01 : 1) * attributeValue * ((100 + finalDamageRate) * 0.01) * cooperationRate;
     }
 
-    public static void normalAttack(AttackAttribute attribute, CharStats charStats, LivingEntity entity, double normalDamage) {
+    public static void normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity entity, double normalDamage) {
         final AlchemyItemStatus weaponStats = charStats.getWeapon();
         if (weaponStats != null && weaponStats.getCategories().contains(Category.WEAPON)) {
-            final double normalAttackPower = 10;
+            double normalAttackPower = 1;
+
             final AlchemyMaterial alchemyMaterial = weaponStats.getAlchemyMaterial();
             final double baseDamage = Math.max(0D, Randomizer.rand(alchemyMaterial.getBaseDamageMin(), alchemyMaterial.getBaseDamageMax()));
             if (baseDamage == 0) {
@@ -74,7 +75,7 @@ public class DamageUtil {
             final List<String[]> addAttacks = new ArrayList<>(); // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
             int characteristicLevel = 0;
             int characteristicCPower = 0;
-            int characteristicPowers = 0;
+            double characteristicPowers = 0;
             for (final Characteristic c : weaponStats.getCharacteristics()) {
                 characteristicLevel += c.getLevel();
                 characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
@@ -82,7 +83,7 @@ public class DamageUtil {
                 criticalRate = calcCriticalRate(entity, criticalRate, c);
                 final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
                 if (addAttack != null) {
-                    final String[] data = addAttack.toString().split(",");
+                    final String[] data = (String[]) addAttack;
                     final int percent = Integer.parseInt(data[1]);
                     final int attackType = Integer.parseInt(data[2]);
                     if ((attackType == -1 || attackType == 0 || attackType == 2 || attackType == 3) && (percent >= 100 || Randomizer.percent(percent))) {
@@ -90,8 +91,8 @@ public class DamageUtil {
                     }
                 }
             }
-            characteristicPowers += characteristicCPower == 0 ? 0 : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
-            final double powerValue = normalAttackPower * calcQualityCorrection(weaponStats.getQuality()) * characteristicPowers == 0 ? 1 : ((100 + characteristicPowers) * 0.01);
+            characteristicPowers += characteristicCPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
+            final double powerValue = normalAttackPower * calcQualityCorrection(weaponStats.getQuality()) * (characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01));
 
             final List<AlchemyItemStatus> equips = charStats.getEquips();
             for (final AlchemyItemStatus equip : equips) {
@@ -99,6 +100,9 @@ public class DamageUtil {
                     criticalRate = calcCriticalRate(entity, criticalRate, c);
                 }
             }
+
+            final Player player = charStats.getPlayer();
+            final boolean isMinecraftCritical = !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784); // クリティカルハック及びフライハック対策
 
             final double damage = calcDamage(
                     baseDamage,
@@ -108,26 +112,25 @@ public class DamageUtil {
                     1,
                     0,
                     1,
-                    criticalRate >= 100 || Randomizer.percent(criticalRate)
+                    isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
             );
-            System.out.println(damage + " - " + baseDamage + " - " + powerValue);
             final FinalDoubleData<Double, AttackAttribute> baseDamageComponent = new FinalDoubleData<>(damage, attribute);
             final List<FinalDoubleData<Double, AttackAttribute>> damageComponents = new ArrayList<>();
             damageComponents.add(baseDamageComponent);
             for (final String[] addAttack : addAttacks) {
-                damageComponents.add(AddAttackType.valueOf(addAttack[0]).runDamage(addAttack, charStats, entity, baseDamageComponent));
+                final FinalDoubleData<Double, AttackAttribute> damageComponent = AddAttackType.valueOf(addAttack[0]).runDamage(addAttack, charStats, entity, baseDamageComponent);
+                damageComponents.add(damageComponent);
             }
-            holoDamage(entity.getLocation(), damageComponents);
+            holoDamage(entity, charStats.getPlayer(), damageComponents);
         } else {
-            damage(entity, normalDamage);
-            holoDamage(entity.getLocation(), new FinalDoubleData<>(normalDamage, attribute));
+            holoDamage(entity, charStats.getPlayer(), new FinalDoubleData<>(normalDamage, attribute));
         }
     }
 
     private static int calcCriticalRate(LivingEntity entity, int criticalRate, Characteristic c) {
         criticalRate += c.hasData(CharacteristicType.CRITICAL) ? (int) c.getData(CharacteristicType.CRITICAL) : 0;
         if (c.hasData(CharacteristicType.CRITICAL_RACE)) {
-            final String[] data = ((String) c.getData(CharacteristicType.CRITICAL_RACE)).split(",");
+            final String[] data = (String[]) c.getData(CharacteristicType.CRITICAL_RACE);
             final Characteristic.Race race = Characteristic.Race.valueOf(data[1]);
             if (race.hasType(entity)) {
                 criticalRate += Integer.parseInt(data[0]);
@@ -137,7 +140,7 @@ public class DamageUtil {
     }
 
     private static double calcQualityCorrection(final int quality) {
-        return quality <= 100 ? 1.25 + Math.sqrt((quality - 100) * 10) / 100 : 0.75 + quality / 200D;
+        return quality <= 100 ? 0.75 + quality / 200D : 1.25 + Math.sqrt((quality - 100) * 10D) / 100;
     }
 
     public static void damagePlayer(CharStats charStats, double damage, EntityDamageEvent.DamageCause damageCause) {
@@ -145,45 +148,50 @@ public class DamageUtil {
         charStats.damageHp(resultDamage);
     }
 
-    private static void damage(Damageable damageable, double damage) {
-        damageable.damage(damage);
-        damageable.setLastDamageCause(new EntityDamageEvent(
-                damageable,
-                EntityDamageEvent.DamageCause.CUSTOM,
-                damage
-        ));
-    }
-
     @SafeVarargs
-    private static void holoDamage(@NotNull Location loc, FinalDoubleData<Double, AttackAttribute>... damages) {
-        holoDamage(loc, Arrays.asList(damages));
+    private static void holoDamage(@NotNull LivingEntity entity, @NotNull LivingEntity damager, FinalDoubleData<Double, AttackAttribute>... damages) {
+        holoDamage(entity, damager, Arrays.asList(damages));
     }
 
-    private static void holoDamage(@NotNull Location loc, List<FinalDoubleData<Double, AttackAttribute>> damages) {
-        final Location l = loc.clone();
-        l.setY(l.getY() + 1.6);
+    private static void holoDamage(@NotNull LivingEntity entity, @NotNull LivingEntity damager, List<FinalDoubleData<Double, AttackAttribute>> damages) {
+        final Location location = entity.getEyeLocation();
+        location.setY(location.getY() + 0.2);
+        double allDamage = 0;
         for (int i = 0; i < damages.size(); i++) {
-            final String damage = damages.get(i).getRight().getColor().toString() + damages.get(i).getLeft();
+            final double damage = damages.get(i).getLeft();
+            allDamage += damage;
+            final AttackAttribute attribute = damages.get(i).getRight();
+            final String viewDamage = String.valueOf(attribute.getColor()) + (int) damage + ' ' + attribute.getIcon();
+            final FakeEntity fakeEntity = new FakeEntity(-Randomizer.nextInt(Integer.MAX_VALUE), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {
-                        final FakeEntity fakeEntity = new FakeEntity(Randomizer.nextInt(Integer.MAX_VALUE), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-                        final List<Player> players = new ArrayList<>();
-                        l.getWorld().getNearbyEntities(l, 20, 10, 20).stream().filter(e -> e instanceof Player).forEach(e -> players.add((Player) e));
-                        players.forEach(player -> {
-                            PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, l));
-                            PacketUtils.sendPacket(player, EntityPacket.getMessageSmallStandMeta(player, damage).compile(fakeEntity.getEntityId()));
-                            Bukkit.getScheduler().runTaskLater(
-                                    AtelierPlugin.getPlugin(),
-                                    () -> PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(fakeEntity.getEntityId())),
-                                    10
-                            );
+                        location.getWorld().getNearbyEntities(location, 20, 10, 20).stream().filter(e -> e instanceof Player).forEach(e -> {
+                            final Player player = (Player) e;
+                            final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getSettings();
+                            final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
+                            if (showDamage) {
+                                PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, location));
+                                PacketUtils.sendPacket(player, EntityPacket.getMessageSmallStandMeta(player, viewDamage).compile(fakeEntity.getEntityId()));
+                                Bukkit.getScheduler().runTaskLater(
+                                        AtelierPlugin.getPlugin(),
+                                        () -> PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(fakeEntity.getEntityId())),
+                                        10
+                                );
+                            }
                         });
-                        l.setY(l.getY() + 0.3);
+                        location.setY(location.getY() + 0.3);
                     },
                     2L * i
             );
         }
+        entity.setHealth(Math.max(0, entity.getHealth() - allDamage));
+        System.out.println(allDamage + " Damage - " + entity.getHealth());
+        entity.setLastDamageCause(new EntityDamageEvent(
+                damager,
+                EntityDamageEvent.DamageCause.CUSTOM,
+                allDamage
+        ));
     }
 
 }
