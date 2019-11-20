@@ -8,5 +8,7 @@ public interface AtelierArrow {
     LivingEntity getSource();
     ItemStack getBow();
     ItemStack getArrow();
+    boolean isCritical();
+    float getForce();
 
 }

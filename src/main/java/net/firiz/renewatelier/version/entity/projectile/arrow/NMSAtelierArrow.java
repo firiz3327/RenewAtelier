@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
 import com.google.common.base.Preconditions;
-import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.entity.arrow.AtelierTippedArrow;
+import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.minecraft.server.v1_14_R1.*;
 import org.apache.commons.lang.Validate;
@@ -30,8 +30,9 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     private CraftEntity bukkitEntity;
     private final Location location;
     private final VItemStack bow;
-    private final ItemStack arrow;
+    private final VItemStack arrow;
     private final LivingEntity source;
+    private final float force;
     private Vector velocity;
 
     /**
@@ -41,13 +42,15 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
      * @param bow      使用アイテム(弓)
      * @param arrow    使用アイテム(矢)
      * @param source   射撃者
+     * @param force    弓のチャージ
      */
-    public NMSAtelierArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source) {
+    public NMSAtelierArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
         this.bow = VersionUtils.asVItemCopy(bow);
-        this.arrow = arrow;
+        this.arrow = VersionUtils.asVItemCopy(arrow);
         this.source = source;
+        this.force = force;
     }
 
     @Override
@@ -61,15 +64,20 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     public void shoot(double x, double y, double z, float pitch, float yaw) {
         if (velocity == null) {
             super.shoot(x, y, z, pitch, yaw);
+        } else {
+            s(this, velocity);
         }
+    }
+
+    protected static void s(@NotNull EntityArrow arrow, @NotNull Vector velocity) {
         final Vec3D vec3d = CraftVector.toNMS(velocity);
-        this.setMot(vec3d);
+        arrow.setMot(vec3d);
         float f2 = MathHelper.sqrt(b(vec3d));
-        this.yaw = (float) (MathHelper.d(vec3d.x, vec3d.z) * 57.2957763671875D);
-        this.pitch = (float) (MathHelper.d(vec3d.y, f2) * 57.2957763671875D);
-        this.lastYaw = this.yaw;
-        this.lastPitch = this.pitch;
-        this.despawnCounter = 0;
+        arrow.yaw = (float) (MathHelper.d(vec3d.x, vec3d.z) * 57.2957763671875D);
+        arrow.pitch = (float) (MathHelper.d(vec3d.y, f2) * 57.2957763671875D);
+        arrow.lastYaw = arrow.yaw;
+        arrow.lastPitch = arrow.pitch;
+        arrow.despawnCounter = 0;
     }
 
     @Override
@@ -87,13 +95,13 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     @Override
     @NotNull
     public ItemStack getArrow() {
-        return arrow;
+        return arrow.getItem();
     }
 
     @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof org.bukkit.entity.Entity) {
-            super.setShooter(((CraftEntity)shooter).getHandle());
+            super.setShooter(((CraftEntity) shooter).getHandle());
         } else {
             super.setShooter(null);
         }
@@ -125,7 +133,7 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     @Override
     @NotNull
     public ItemStack getItem() {
-        return arrow;
+        return getArrow();
     }
 
     @Override
@@ -144,7 +152,7 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
         super.setColor(color.asRGB());
     }
 
-    public boolean addCustomEffect(PotionEffect effect, boolean override) {
+    public void addCustomEffect(PotionEffect effect, boolean override) {
         int effectId = effect.getType().getId();
         MobEffect existing = null;
         for (MobEffect mobEffect : effects) {
@@ -154,13 +162,12 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
         }
         if (existing != null) {
             if (!override) {
-                return false;
+                return;
             }
             effects.remove(existing);
         }
         addEffect(CraftPotionUtil.fromBukkit(effect));
         refreshEffects();
-        return true;
     }
 
     @Override
@@ -171,10 +178,16 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
                     this,
                     source,
                     bow.getItem(),
-                    arrow
+                    arrow.getItem(),
+                    force
             );
         }
 
         return bukkitEntity;
+    }
+
+    @Override
+    protected net.minecraft.server.v1_14_R1.ItemStack getItemStack() {
+        return (net.minecraft.server.v1_14_R1.ItemStack) arrow.getNmsItem();
     }
 }

@@ -43,7 +43,11 @@ public final class ArrowManager {
         }
     }
 
-    public void shootBow(@NotNull Player player, @Nullable ItemStack bow, @NotNull Arrow baseArrow) {
+    public void shootBow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
+        if (bow == null) {
+            baseArrow.remove();
+            return;
+        }
         final PlayerInventory playerInventory = player.getInventory();
         final List<ItemStack> items = new ArrayList<>();
         items.add(playerInventory.getItemInMainHand());
@@ -65,29 +69,36 @@ public final class ArrowManager {
         }
 
         if (consumeArrow != null) {
-            final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(bow);
-            final boolean hasItemStatus = itemStatus != null;
+            final AlchemyItemStatus bowItemStatus = AlchemyItemStatus.load(bow);
+            final boolean hasBowItemStatus = bowItemStatus != null;
 
             final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
             if (CustomArrow.isFound(meta)) {
-                shootNextArrow(hasItemStatus, player, bow, baseArrow, consumeArrow, nextConsumeArrow);
-            } else if(hasItemStatus) {
-                shootAtelierArrow(player, bow, baseArrow, consumeArrow);
+                cancelArrow(player, baseArrow);
+                shootNextArrow(hasBowItemStatus, player, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
+            } else if (hasBowItemStatus) {
+                cancelArrow(player, baseArrow);
+                shootAtelierArrow(player, bow, baseArrow, consumeArrow, force);
             }
         }
     }
 
-    private void shootAtelierArrow(final Player player, final ItemStack bow, final Arrow baseArrow, final ItemStack consumeArrow) {
+    private void cancelArrow(final Player source, final AbstractArrow arrow) {
+        arrow.remove();
+        source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
+    }
+
+    private void shootAtelierArrow(final Player player, final ItemStack bow, final AbstractArrow baseArrow, final ItemStack consumeArrow, final float force) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
         IAtelierArrow cloneArrow;
         switch (consumeArrow.getType()) {
             case ARROW:
-                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player);
+                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player, force);
                 break;
             case TIPPED_ARROW:
-                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player);
+                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player, force);
                 final PotionMeta potionMeta = (PotionMeta) consumeArrow.getItemMeta();
                 assert potionMeta != null;
 
@@ -99,14 +110,14 @@ public final class ArrowManager {
                 }
                 break;
             case SPECTRAL_ARROW:
-                cloneArrow = new NMSAtelierSpectralArrow(player.getEyeLocation(), bow, oneArrow, player);
+                cloneArrow = new NMSAtelierSpectralArrow(player.getEyeLocation(), bow, oneArrow, player, force);
                 break;
             default:
                 throw new IllegalStateException("consumeArrow is not arrow.");
         }
         cloneArrow.setShooter(baseArrow.getShooter());
         cloneArrow.setFireTicks(baseArrow.getFireTicks());
-        cloneArrow.setPierceLevel((byte) baseArrow.getPierceLevel());
+        cloneArrow.setPierceLevel(baseArrow.getPierceLevel());
         cloneArrow.setKnockbackStrength(baseArrow.getKnockbackStrength());
         cloneArrow.setDamage(baseArrow.getDamage());
         cloneArrow.setCritical(baseArrow.isCritical());
@@ -122,9 +133,7 @@ public final class ArrowManager {
         cloneArrow.shoot(baseArrow.getVelocity());
     }
 
-    private void shootNextArrow(boolean hasItemStatus, @NotNull Player player, @Nullable ItemStack bow, @NotNull Arrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow) {
-        baseArrow.remove();
-
+    private void shootNextArrow(boolean hasItemStatus, @NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
         if (nextConsumeArrow == null) {
             player.sendMessage("使用可能な矢がありません。");
             final int consumeArrowAmount = consumeArrow.getAmount();
@@ -136,12 +145,10 @@ public final class ArrowManager {
             return;
         }
 
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
-
         if (hasItemStatus && bow != null) {
-            shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow);
+            shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, force);
         } else {
-            final Arrow cloneArrow;
+            final AbstractArrow cloneArrow;
             switch (nextConsumeArrow.getType()) {
                 case ARROW:
                     cloneArrow = player.launchProjectile(Arrow.class);
@@ -150,14 +157,16 @@ public final class ArrowManager {
                     cloneArrow = player.launchProjectile(Arrow.class);
                     final PotionMeta potionMeta = (PotionMeta) nextConsumeArrow.getItemMeta();
                     assert potionMeta != null;
-                    cloneArrow.setBasePotionData(potionMeta.getBasePotionData());
-                    potionMeta.getCustomEffects().forEach(potionEffect -> cloneArrow.addCustomEffect(potionEffect, true));
+
+                    final Arrow arrow = (Arrow) cloneArrow;
+                    arrow.setBasePotionData(potionMeta.getBasePotionData());
+                    potionMeta.getCustomEffects().forEach(potionEffect -> arrow.addCustomEffect(potionEffect, true));
                     if (potionMeta.hasColor() && potionMeta.getColor() != null) {
-                        cloneArrow.setColor(potionMeta.getColor());
+                        arrow.setColor(potionMeta.getColor());
                     }
                     break;
                 case SPECTRAL_ARROW:
-                    cloneArrow = (Arrow) player.launchProjectile(SpectralArrow.class);
+                    cloneArrow = player.launchProjectile(SpectralArrow.class);
                     break;
                 default:
                     throw new IllegalStateException("nextConsumeArrow is not arrow.");

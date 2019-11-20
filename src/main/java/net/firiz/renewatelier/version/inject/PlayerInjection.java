@@ -20,16 +20,12 @@ public class PlayerInjection {
     public static void injectArmorChangeEvent(Player player) {
         final EntityHuman human = ((CraftPlayer) player).getHandle();
         try {
-            final Field f = EntityHuman.class.getDeclaredField("inventory");
-            f.setAccessible(true);
-
-            final PlayerInventory inventory = (PlayerInventory) f.get(human);
             final Field armorField = PlayerInventory.class.getDeclaredField("armor");
             armorField.setAccessible(true);
-
-            final NonNullList<ItemStack> armorList = (NonNullList<ItemStack>) armorField.get(inventory);
+            final NonNullList<ItemStack> armorList = (NonNullList<ItemStack>) armorField.get(human.inventory);
             final Field a = NonNullList.class.getDeclaredField("a");
             a.setAccessible(true);
+
             // reload時に更新処理が入らないためjoin時のみinjectすれば問題ない
             a.set(armorList, new ArrayList<ItemStack>((List<ItemStack>) a.get(armorList)) {
                 @Override
@@ -61,7 +57,7 @@ public class PlayerInjection {
             });
             Chore.log("inject successfully");
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            Chore.logWarning(e);
+            Chore.logWarning("It may have been changed by the version upgrade.", e);
         }
     }
 

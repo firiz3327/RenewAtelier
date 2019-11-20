@@ -21,11 +21,13 @@
 package net.firiz.renewatelier.constants;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author firiz
  */
-public class GameConstants {
+public final class GameConstants {
 
     private GameConstants() {
     }
@@ -96,5 +98,18 @@ public class GameConstants {
             {"左右反転： OFF", "上下反転： ON"},
             {"左右反転： ON", "上下反転： ON"}
     };
+
+    public static boolean isSword(@NotNull Material material) {
+        switch (material) {
+            case WOODEN_SWORD:
+            case STONE_SWORD:
+            case IRON_SWORD:
+            case GOLDEN_SWORD:
+            case DIAMOND_SWORD:
+                return true;
+            default:
+                return false;
+        }
+    }
 
 }

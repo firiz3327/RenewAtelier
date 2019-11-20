@@ -9,17 +9,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class AtelierTippedArrow extends CraftTippedArrow implements AtelierArrow {
 
-    public AtelierTippedArrow(CraftServer server, NMSAtelierArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow) {
-        super(server, entity);
-        this.source = source;
-        this.bow = bow;
-        this.arrow = arrow;
-    }
-
     private final Spigot spigot = new Spigot();
     private final LivingEntity source;
     private final ItemStack bow;
     private final ItemStack arrow;
+    private final float force;
+
+    public AtelierTippedArrow(CraftServer server, NMSAtelierArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow, float force) {
+        super(server, entity);
+        this.source = source;
+        this.bow = bow;
+        this.arrow = arrow;
+        this.force = force;
+    }
 
     @NotNull
     @Override
@@ -40,5 +42,10 @@ public class AtelierTippedArrow extends CraftTippedArrow implements AtelierArrow
     @Override
     public ItemStack getArrow() {
         return arrow;
+    }
+
+    @Override
+    public float getForce() {
+        return force;
     }
 }

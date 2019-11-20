@@ -76,6 +76,7 @@ public class AlchemyItemStatus {
     }
 
     private final AlchemyMaterial alchemyMaterial;
+    private final FinalDoubleData<Material, Integer> customModel;
     private int[] size;
     private final List<Category> categories;
     private int quality;
@@ -90,6 +91,23 @@ public class AlchemyItemStatus {
 
     public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
         this.alchemyMaterial = alchemyMaterial;
+        this.customModel = null;
+        this.size = size;
+        this.categories = categories;
+        this.quality = quality;
+        this.ingredients = ingredients;
+        this.characteristics = characteristics;
+        this.activeEffects = activeEffects;
+        this.hp = hp;
+        this.mp = mp;
+        this.atk = atk;
+        this.def = def;
+        this.speed = speed;
+    }
+
+    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, FinalDoubleData<Material, Integer> customModel, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
+        this.alchemyMaterial = alchemyMaterial;
+        this.customModel = customModel;
         this.size = size;
         this.categories = categories;
         this.quality = quality;
@@ -182,10 +200,21 @@ public class AlchemyItemStatus {
 
     @NotNull
     public ItemStack create() {
+        final ItemStack item;
+        if (customModel == null) {
+            item = null;
+        } else {
+            item = new ItemStack(customModel.getLeft());
+            if (customModel.getRight() != -1) {
+                final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
+                meta.setCustomModelData(customModel.getRight());
+                item.setItemMeta(meta);
+            }
+        }
         return AlchemyItemStatus.getItem(
                 alchemyMaterial,
                 ingredients,
-                null,
+                item,
                 quality,
                 size,
                 activeEffects,
@@ -201,14 +230,14 @@ public class AlchemyItemStatus {
     }
 
     @Nullable
-    public static AlchemyItemStatus load(ItemStack item) {
+    public static AlchemyItemStatus load(@Nullable ItemStack item) {
         if (item != null) {
             final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterialOrNull(item);
             if (alchemyMaterial != null) {
-                final ItemMeta meta = item.getItemMeta();
-                assert meta != null;
+                final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
                 return new AlchemyItemStatus(
                         alchemyMaterial,
+                        new FinalDoubleData<>(item.getType(), meta.hasCustomModelData() ? meta.getCustomModelData() : -1),
                         getSize(item),
                         getCategorys(item),
                         getQuality(item),
@@ -363,7 +392,7 @@ public class AlchemyItemStatus {
 
     public static List<String> getActiveEffects(final ItemStack item) {
         final List<String> result = new ArrayList<>();
-        final List<String> lores = getLores(Type.ALCHEMY_INGREDIENTS, item);
+        final List<String> lores = getLores(Type.EFFECT, item);
         for (int i = 1; i < lores.size(); i++) {
             final String lore = lores.get(i);
             final String name = lore.substring(Type.EFFECT.check.length() + 4);

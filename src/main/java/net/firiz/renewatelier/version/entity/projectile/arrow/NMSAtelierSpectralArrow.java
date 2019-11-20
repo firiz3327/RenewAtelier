@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
 import com.google.common.base.Preconditions;
-import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.entity.arrow.AtelierSpectralArrow;
+import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.Location;
@@ -25,8 +25,9 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     private CraftEntity bukkitEntity;
     private final Location location;
     private final VItemStack bow;
-    private final org.bukkit.inventory.ItemStack arrow;
+    private final VItemStack arrow;
     private final LivingEntity source;
+    private final float force;
     private Vector velocity;
 
     /**
@@ -36,13 +37,15 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
      * @param bow      使用アイテム(弓)
      * @param arrow    使用アイテム(矢)
      * @param source   射撃者
+     * @param force    弓のチャージ
      */
-    public NMSAtelierSpectralArrow(@NotNull Location location, @NotNull org.bukkit.inventory.ItemStack bow, @NotNull org.bukkit.inventory.ItemStack arrow, @NotNull LivingEntity source) {
+    public NMSAtelierSpectralArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
         this.bow = VersionUtils.asVItemCopy(bow);
-        this.arrow = arrow;
+        this.arrow = VersionUtils.asVItemCopy(arrow);
         this.source = source;
+        this.force = force;
     }
 
     @Override
@@ -56,15 +59,9 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     public void shoot(double x, double y, double z, float pitch, float yaw) {
         if (velocity == null) {
             super.shoot(x, y, z, pitch, yaw);
+        } else {
+            NMSAtelierArrow.s(this, velocity);
         }
-        final Vec3D vec3d = CraftVector.toNMS(velocity);
-        this.setMot(vec3d);
-        float f2 = MathHelper.sqrt(b(vec3d));
-        this.yaw = (float) (MathHelper.d(vec3d.x, vec3d.z) * 57.2957763671875D);
-        this.pitch = (float) (MathHelper.d(vec3d.y, f2) * 57.2957763671875D);
-        this.lastYaw = this.yaw;
-        this.lastPitch = this.pitch;
-        this.despawnCounter = 0;
     }
 
     @Override
@@ -82,13 +79,13 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     @Override
     @NotNull
     public org.bukkit.inventory.ItemStack getArrow() {
-        return arrow;
+        return arrow.getItem();
     }
 
     @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof org.bukkit.entity.Entity) {
-            super.setShooter(((CraftEntity)shooter).getHandle());
+            super.setShooter(((CraftEntity) shooter).getHandle());
         } else {
             super.setShooter(null);
         }
@@ -120,7 +117,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     @Override
     @NotNull
     public ItemStack getItem() {
-        return arrow;
+        return arrow.getItem();
     }
 
     @Override
@@ -138,10 +135,16 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
                     this,
                     source,
                     bow.getItem(),
-                    arrow
+                    arrow.getItem(),
+                    force
             );
         }
 
         return bukkitEntity;
+    }
+
+    @Override
+    protected net.minecraft.server.v1_14_R1.ItemStack getItemStack() {
+        return (net.minecraft.server.v1_14_R1.ItemStack) arrow.getNmsItem();
     }
 }

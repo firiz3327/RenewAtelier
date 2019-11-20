@@ -301,6 +301,20 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
+            desc = ["Integer"],
+            args = [Integer::class],
+            examples = ["quality 1", "quality 100"],
+            text = "錬金マテリアルに指定した品質を適用します。"
+    )
+    fun quality(sender: Player, args: ArrayList<Any>) {
+        val item = AlchemyItemStatus.load(sender.inventory.itemInMainHand)
+        if(item != null) {
+            item.quality = (args[0] as String).toInt()
+            sender.inventory.setItemInMainHand(item.create())
+        }
+    }
+
+    @Cmd(
             text = "ブロックの破壊をON・OFFします。"
     )
     fun cbreak(sender: Player, args: ArrayList<Any>): Boolean {

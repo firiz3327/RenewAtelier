@@ -15,15 +15,18 @@ import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class DamageUtil {
 
@@ -61,6 +64,8 @@ public class DamageUtil {
 
     public static void normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity entity, double normalDamage) {
         final AlchemyItemStatus weaponStats = charStats.getWeapon();
+        final Player player = charStats.getPlayer();
+        final boolean isMinecraftCritical = !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784); // クリティカルハック及びフライハック対策
         if (weaponStats != null && weaponStats.getCategories().contains(Category.WEAPON)) {
             double normalAttackPower = 1;
 
@@ -70,68 +75,92 @@ public class DamageUtil {
                 return;
             }
 
-            int criticalRate = 0;
-
-            final List<String[]> addAttacks = new ArrayList<>(); // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
-            int characteristicLevel = 0;
-            int characteristicCPower = 0;
-            double characteristicPowers = 0;
-            for (final Characteristic c : weaponStats.getCharacteristics()) {
-                characteristicLevel += c.getLevel();
-                characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
-                characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? (int) c.getData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
-                criticalRate = calcCriticalRate(entity, criticalRate, c);
-                final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
-                if (addAttack != null) {
-                    final String[] data = (String[]) addAttack;
-                    final int percent = Integer.parseInt(data[1]);
-                    final int attackType = Integer.parseInt(data[2]);
-                    if ((attackType == -1 || attackType == 0 || attackType == 2 || attackType == 3) && (percent >= 100 || Randomizer.percent(percent))) {
-                        addAttacks.add(data);
-                    }
-                }
-            }
-            characteristicPowers += characteristicCPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
-            final double powerValue = normalAttackPower * calcQualityCorrection(weaponStats.getQuality()) * (characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01));
-
-            final List<AlchemyItemStatus> equips = charStats.getEquips();
-            for (final AlchemyItemStatus equip : equips) {
-                for (final Characteristic c : equip.getCharacteristics()) {
-                    criticalRate = calcCriticalRate(entity, criticalRate, c);
-                }
-            }
-
-            final Player player = charStats.getPlayer();
-            final boolean isMinecraftCritical = !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784); // クリティカルハック及びフライハック対策
-
-            final double damage = calcDamage(
-                    baseDamage,
-                    powerValue,
-                    0,
-                    0,
-                    1,
-                    0,
-                    1,
-                    isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
-            );
-            final FinalDoubleData<Double, AttackAttribute> baseDamageComponent = new FinalDoubleData<>(damage, attribute);
-            final List<FinalDoubleData<Double, AttackAttribute>> damageComponents = new ArrayList<>();
-            damageComponents.add(baseDamageComponent);
-            for (final String[] addAttack : addAttacks) {
-                final FinalDoubleData<Double, AttackAttribute> damageComponent = AddAttackType.valueOf(addAttack[0]).runDamage(addAttack, charStats, entity, baseDamageComponent);
-                damageComponents.add(damageComponent);
-            }
-            holoDamage(entity, charStats.getPlayer(), damageComponents);
+            calcDamage(weaponStats, charStats, entity, normalAttackPower, baseDamage, attribute, isMinecraftCritical);
         } else {
             holoDamage(entity, charStats.getPlayer(), new FinalDoubleData<>(normalDamage, attribute));
         }
+    }
+
+    public static void arrowNormalDamage(@NotNull LivingEntity entity, @NotNull LivingEntity damager, double damage) {
+        DamageUtil.holoDamage(entity, damager, new FinalDoubleData<>(damage, AttackAttribute.PHYSICS));
+    }
+
+    public static void arrowDamage(@NotNull AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, CharStats charStats, LivingEntity entity, double normalDamage, boolean isMinecraftCritical, float force) {
+        double normalAttackPower = 0.8;
+
+        final AlchemyMaterial bowAlchemyMaterial = bow.getAlchemyMaterial();
+        double baseDamage = Math.max(0D, Randomizer.rand(bowAlchemyMaterial.getBaseDamageMin(), bowAlchemyMaterial.getBaseDamageMax()));
+        if (baseDamage == 0) {
+            arrowNormalDamage(entity, charStats.getPlayer(), normalDamage);
+            return;
+        }
+        if (arrow != null) {
+            final AlchemyMaterial arrowAlchemyMaterial = arrow.getAlchemyMaterial();
+            baseDamage += Math.max(0D, Randomizer.rand(arrowAlchemyMaterial.getBaseDamageMin(), arrowAlchemyMaterial.getBaseDamageMax())) * calcQualityCorrection(arrow.getQuality());
+        }
+
+        baseDamage *= force;
+        calcDamage(bow, charStats, entity, normalAttackPower, baseDamage, AttackAttribute.PHYSICS, isMinecraftCritical);
+    }
+
+    private static void calcDamage(@NotNull AlchemyItemStatus itemStatus, CharStats charStats, LivingEntity entity, double normalAttackPower, double baseDamage, AttackAttribute baseAttribute, boolean isMinecraftCritical) {
+        int criticalRate = 0;
+
+        final List<String[]> addAttacks = new ArrayList<>(); // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
+        int characteristicLevel = 0;
+        int characteristicCPower = 0;
+        double characteristicPowers = 0;
+        for (final Characteristic c : itemStatus.getCharacteristics()) {
+            characteristicLevel += c.getLevel();
+            characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
+            characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? (int) c.getData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
+            criticalRate = calcCriticalRate(entity, criticalRate, c);
+            final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
+            if (addAttack != null) {
+                final String[] data = (String[]) addAttack;
+                final int percent = Integer.parseInt(data[1]);
+                final int attackType = Integer.parseInt(data[2]);
+                if ((attackType == -1 || attackType == 0 || attackType == 2 || attackType == 3) && (percent >= 100 || Randomizer.percent(percent))) {
+                    addAttacks.add(data);
+                }
+            }
+        }
+        characteristicPowers += characteristicCPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
+        final double powerValue = normalAttackPower * calcQualityCorrection(itemStatus.getQuality()) * (characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01));
+
+        final List<AlchemyItemStatus> equips = charStats.getEquips();
+        for (final AlchemyItemStatus equip : equips) {
+            for (final Characteristic c : equip.getCharacteristics()) {
+                criticalRate = calcCriticalRate(entity, criticalRate, c);
+            }
+        }
+
+        final Player player = charStats.getPlayer();
+        final double damage = calcDamage(
+                baseDamage,
+                powerValue,
+                0,
+                0,
+                1,
+                0,
+                1,
+                isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
+        );
+        final FinalDoubleData<Double, AttackAttribute> baseDamageComponent = new FinalDoubleData<>(damage, baseAttribute);
+        final List<FinalDoubleData<Double, AttackAttribute>> damageComponents = new ArrayList<>();
+        damageComponents.add(baseDamageComponent);
+        for (final String[] addAttack : addAttacks) {
+            final FinalDoubleData<Double, AttackAttribute> damageComponent = AddAttackType.valueOf(addAttack[0]).runDamage(addAttack, charStats, entity, baseDamageComponent);
+            damageComponents.add(damageComponent);
+        }
+        holoDamage(entity, player, damageComponents);
     }
 
     private static int calcCriticalRate(LivingEntity entity, int criticalRate, Characteristic c) {
         criticalRate += c.hasData(CharacteristicType.CRITICAL) ? (int) c.getData(CharacteristicType.CRITICAL) : 0;
         if (c.hasData(CharacteristicType.CRITICAL_RACE)) {
             final String[] data = (String[]) c.getData(CharacteristicType.CRITICAL_RACE);
-            final Characteristic.Race race = Characteristic.Race.valueOf(data[1]);
+            final Characteristic.Race race = Characteristic.Race.valueOf(Objects.requireNonNull(data)[1]);
             if (race.hasType(entity)) {
                 criticalRate += Integer.parseInt(data[0]);
             }
@@ -145,6 +174,9 @@ public class DamageUtil {
 
     public static void damagePlayer(CharStats charStats, double damage, EntityDamageEvent.DamageCause damageCause) {
         double resultDamage = damage;
+
+        // ~~~
+
         charStats.damageHp(resultDamage);
     }
 
@@ -159,14 +191,20 @@ public class DamageUtil {
         double allDamage = 0;
         for (int i = 0; i < damages.size(); i++) {
             final double damage = damages.get(i).getLeft();
-            allDamage += damage;
             final AttackAttribute attribute = damages.get(i).getRight();
-            final String viewDamage = String.valueOf(attribute.getColor()) + (int) damage + ' ' + attribute.getIcon();
+            final int intDamage = (int) damage;
+            final String viewDamage;
+            if (intDamage <= 0) { // 1.0 ダメージ以上でないとダメージ換算なし
+                viewDamage = ChatColor.WHITE + "Miss";
+            } else {
+                viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
+                allDamage += damage;
+            }
             final FakeEntity fakeEntity = new FakeEntity(-Randomizer.nextInt(Integer.MAX_VALUE), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {
-                        location.getWorld().getNearbyEntities(location, 20, 10, 20).stream().filter(e -> e instanceof Player).forEach(e -> {
+                        Objects.requireNonNull(location.getWorld()).getNearbyEntities(location, 20, 10, 20).stream().filter(e -> e instanceof Player).forEach(e -> {
                             final Player player = (Player) e;
                             final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getSettings();
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
@@ -186,7 +224,6 @@ public class DamageUtil {
             );
         }
         entity.setHealth(Math.max(0, entity.getHealth() - allDamage));
-        System.out.println(allDamage + " Damage - " + entity.getHealth());
         entity.setLastDamageCause(new EntityDamageEvent(
                 damager,
                 EntityDamageEvent.DamageCause.CUSTOM,
