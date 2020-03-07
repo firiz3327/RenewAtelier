@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import net.firiz.renewatelier.entity.player.loadsqls.*;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.Chore;
@@ -59,7 +58,7 @@ public enum PlayerSaveManager {
                 player.spigot().respawn();
             }
             loadStatus(player);
-            PlayerInjection.injectArmorChangeEvent(player);
+            PlayerInjection.inject(player);
         }));
     }
 

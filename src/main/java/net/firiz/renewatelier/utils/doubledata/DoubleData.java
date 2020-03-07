@@ -22,7 +22,7 @@ public class DoubleData<L, R> {
         return left;
     }
 
-    public void setLeft(@Nullable L left) {
+    public void setLeft(L left) {
         this.left = left;
     }
 
@@ -31,7 +31,7 @@ public class DoubleData<L, R> {
         return right;
     }
 
-    public void setRight(@Nullable R right) {
+    public void setRight(R right) {
         this.right = right;
     }
 

@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.entity.player.stats;
 
+import net.firiz.renewatelier.entity.CalcStatType;
+
 public class BuffedStats {
 
     private final CharStats charStats;
@@ -22,12 +24,12 @@ public class BuffedStats {
     }
 
     public void update() {
-        this.levelB = CharStatType.LEVEL.getBuffStats(charStats, level);
-        this.maxHpB = CharStatType.HP.getBuffStats(charStats, equipStats.getMaxHp());
-        this.maxMpB = CharStatType.MP.getBuffStats(charStats, equipStats.getMaxMp());
-        this.atkB = CharStatType.ATK.getBuffStats(charStats, equipStats.getAtk());
-        this.defB = CharStatType.DEF.getBuffStats(charStats, equipStats.getDef());
-        this.speedB = CharStatType.SPEED.getBuffStats(charStats, equipStats.getSpeed());
+        this.levelB = CalcStatType.LEVEL.getCharBuffStats(charStats, level);
+        this.maxHpB = CalcStatType.HP.getCharBuffStats(charStats, equipStats.getMaxHp());
+        this.maxMpB = CalcStatType.MP.getCharBuffStats(charStats, equipStats.getMaxMp());
+        this.atkB = CalcStatType.ATK.getCharBuffStats(charStats, equipStats.getAtk());
+        this.defB = CalcStatType.DEF.getCharBuffStats(charStats, equipStats.getDef());
+        this.speedB = CalcStatType.SPEED.getCharBuffStats(charStats, equipStats.getSpeed());
     }
 
     public int getLevel() {

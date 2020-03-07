@@ -43,6 +43,14 @@ public final class ArrowManager {
         }
     }
 
+    public void shootCrossbow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow) {
+        final AlchemyItemStatus bowItemStatus = AlchemyItemStatus.load(bow);
+        if (bowItemStatus != null) {
+            cancelArrow(player, baseArrow);
+            shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
+        }
+    }
+
     public void shootBow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
         if (bow == null) {
             baseArrow.remove();
@@ -78,7 +86,7 @@ public final class ArrowManager {
                 shootNextArrow(hasBowItemStatus, player, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
             } else if (hasBowItemStatus) {
                 cancelArrow(player, baseArrow);
-                shootAtelierArrow(player, bow, baseArrow, consumeArrow, force);
+                shootAtelierArrow(player, bow, baseArrow, consumeArrow, true, force);
             }
         }
     }
@@ -88,7 +96,7 @@ public final class ArrowManager {
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
-    private void shootAtelierArrow(final Player player, final ItemStack bow, final AbstractArrow baseArrow, final ItemStack consumeArrow, final float force) {
+    private void shootAtelierArrow(final Player player, final ItemStack bow, final AbstractArrow baseArrow, final ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
@@ -125,7 +133,9 @@ public final class ArrowManager {
         if (player.getGameMode() == GameMode.CREATIVE) {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         } else if (!Objects.requireNonNull(bow.getItemMeta()).hasEnchant(Enchantment.ARROW_INFINITE)) {
-            consumeArrow.setAmount(consumeArrow.getAmount() - 1);
+            if (isConsumeArrow) {
+                consumeArrow.setAmount(consumeArrow.getAmount() - 1);
+            }
             cloneArrow.setPickupStatus(baseArrow.getPickupStatus());
         } else {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
@@ -146,7 +156,7 @@ public final class ArrowManager {
         }
 
         if (hasItemStatus && bow != null) {
-            shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, force);
+            shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, true, force);
         } else {
             final AbstractArrow cloneArrow;
             switch (nextConsumeArrow.getType()) {

@@ -83,7 +83,6 @@ public final class Char {
         this.settings = settings;
 
         this.autoSave = () -> {
-            Chore.log("save: " + this.id);
             this.charStats.save(this.id);
             this.settings.save(this.id);
         };

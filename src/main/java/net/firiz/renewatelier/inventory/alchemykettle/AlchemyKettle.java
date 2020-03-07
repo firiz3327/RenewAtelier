@@ -76,7 +76,7 @@ public class AlchemyKettle {
     }
 
     private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private static final KettleBonusManager BONUSMANAGER = KettleBonusManager.INSTANCE;
+    private static final KettleBonusManager BONUS_MANAGER = KettleBonusManager.INSTANCE;
 
     private static final String STR_CENTER = "アイテムを投入してください";
     private static final String STR_TURN = "投入すると、完成品プレビューが更新されます";
@@ -378,10 +378,10 @@ public class AlchemyKettle {
             // ボーナス項目
             final StringBuilder sbBonus = new StringBuilder();
             for (final AlchemyAttribute aa : AlchemyAttribute.values()) {
-                sbBonus.append(aa.getColor()).append(BONUSMANAGER.getBonus(player, aa)).append("% ");
+                sbBonus.append(aa.getColor()).append(BONUS_MANAGER.getBonus(player, aa)).append("% ");
             }
             lore.add(2, sbBonus.toString());
-            lore.add(3, BONUSMANAGER.getBar(player.getUniqueId(), recipe.getReqbar()));
+            lore.add(3, BONUS_MANAGER.getBar(player.getUniqueId(), recipe.getReqbar()));
 
             // 効果項目
             lore.add(4, ChatColor.GRAY + "効果:");
@@ -454,22 +454,24 @@ public class AlchemyKettle {
         final UUID uuid = player.getUniqueId();
         final KettleBox box = KETTLE.getKettleData(uuid);
         if (box != null) {
-            int j = (box.getCSize() == 36 || box.getCSize() == 25 ? 3 : 13);
+            int j = box.getCSize() == 36 || box.getCSize() == 25 ? 3 : 13;
 
             final List<CatalystBonus> bonusList = catalyst.getBonus();
             final List<CatalystBonus> ignores = new ArrayList<>();
-            for (final CatalystBonus cbonus : bonusList) {
-                if (cbonus.getData().getType().isOnce() && box.usedBonus(cbonus)) {
-                    ignores.add(cbonus);
+            for (final CatalystBonus catalystBonus : bonusList) {
+                if (catalystBonus.getData().getType().isOnce() && box.usedBonus(catalystBonus)) {
+                    ignores.add(catalystBonus);
                 }
             }
-            for (int i = 0; i < bonusList.get(0).getCS().length; i++) {
+
+            final int size = bonusList.get(0).getCS().length;
+            System.out.println(size);
+            final int defSlot = (size == 36 || size == 25 ? 3 : 13);
+            for (int i = 0; i < size; i++) {
                 ItemStack slotItem = null;
-                final int size = bonusList.get(0).getCS().length;
-                final int defslot = (size == 36 || size == 25 ? 3 : 13);
                 getSlotItem:
                 for (final CatalystBonus b : bonusList) {
-                    int slot = defslot;
+                    int slot = defSlot;
                     for (int c2 : b.getCS()) {
                         if (j == slot) {
                             short cmd = Catalyst.getCustomModelData(c2);
@@ -495,6 +497,7 @@ public class AlchemyKettle {
             resultCS.keySet().forEach(slotData -> {
                 final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
+                System.out.println(slotData.getLeft() + ": " + item);
                 inv.setItem(slotData.getLeft(), item);
             });
         }
@@ -790,7 +793,7 @@ public class AlchemyKettle {
                                         }
                                     }
                                 }
-                                BONUSMANAGER.back(uuid);
+                                BONUS_MANAGER.back(uuid);
                                 setResultSlot(inv, player);
                                 player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                                 break;
@@ -937,7 +940,7 @@ public class AlchemyKettle {
                                         final ItemStack clone = cursor.clone();
                                         clone.setAmount(1);
                                         final DoubleData<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getAllLevel(clone);
-                                        BONUSMANAGER.addBar(
+                                        BONUS_MANAGER.addBar(
                                                 uuid,
                                                 recipe.getReqbar(),
                                                 allLevel.getLeft(),

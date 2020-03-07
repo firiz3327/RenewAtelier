@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
-import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_14_R1.entity.CraftTippedArrow;
+import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftTippedArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

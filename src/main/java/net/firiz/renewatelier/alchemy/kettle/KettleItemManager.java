@@ -115,13 +115,9 @@ public enum KettleItemManager {
     @NotNull
     public List<ItemStack> getPageItems(final UUID uuid, final int page) {
         if (useItems.containsKey(uuid)) {
-            return useItems.get(uuid).get(page);
+            return Objects.requireNonNullElse(useItems.get(uuid).get(page), new ArrayList<>(0));
         }
         return new ArrayList<>(0);
-    }
-
-    public Map<Integer, List<ItemStack>> getPageItems(final UUID uuid) {
-        return useItems.get(uuid);
     }
     //</editor-fold>
 

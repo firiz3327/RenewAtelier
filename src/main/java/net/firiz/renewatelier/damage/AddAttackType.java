@@ -1,10 +1,11 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.utils.TRunnable;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.firiz.renewatelier.utils.doubledata.Four;
 import org.bukkit.entity.LivingEntity;
+
+import java.util.function.Function;
 
 public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
     DAMAGE(t -> new FinalDoubleData<>(t.getD().getLeft() * (Integer.parseInt(t.getA()[3]) * 0.01), t.getD().getRight())), // 追加ダメージ％
@@ -36,14 +37,14 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
      * Four(Data, キャラステータス, 被害者エンティティ, ダメージ)
      * return 追加ダメージ
      */
-    private final TRunnable<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run;
+    private final Function<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run;
 
-    AddAttackType(TRunnable<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run) {
+    AddAttackType(Function<Four<String[], CharStats, LivingEntity, FinalDoubleData<Double, AttackAttribute>>, FinalDoubleData<Double, AttackAttribute>> run) {
         this.run = run;
     }
 
     public FinalDoubleData<Double, AttackAttribute> runDamage(String[] data, CharStats charStats, LivingEntity entity, FinalDoubleData<Double, AttackAttribute> damage) {
-        return run.run(new Four<>(data, charStats, entity, damage));
+        return run.apply(new Four<>(data, charStats, entity, damage));
     }
 
 }

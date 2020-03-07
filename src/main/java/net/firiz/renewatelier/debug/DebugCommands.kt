@@ -12,6 +12,11 @@ import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.entity.player.PlayerSaveManager
 import net.firiz.renewatelier.utils.Chore
+import net.firiz.renewatelier.version.entity.living.monster.C
+import net.firiz.renewatelier.version.entity.living.horse.CaneHorse
+import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
+import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
+import net.firiz.renewatelier.version.entity.atelier.Puni
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -308,7 +313,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     )
     fun quality(sender: Player, args: ArrayList<Any>) {
         val item = AlchemyItemStatus.load(sender.inventory.itemInMainHand)
-        if(item != null) {
+        if (item != null) {
             item.quality = (args[0] as String).toInt()
             sender.inventory.setItemInMainHand(item.create())
         }
@@ -378,11 +383,11 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
-            desc = ["Test"],
-            examples = ["test"],
-            text = "・・・"
+            desc = ["Stats"],
+            examples = ["stats"],
+            text = "ステータスを表示"
     )
-    fun test(sender: Player, args: ArrayList<Any>) {
+    fun stats(sender: Player, args: ArrayList<Any>) {
         sender.sendMessage("")
         sender.sendMessage("level ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.level}")
         sender.sendMessage("maxHp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.maxHp}")
@@ -392,6 +397,24 @@ class DebugCommands(private val debugListener: DebugListener) {
         sender.sendMessage("atk ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.atk}")
         sender.sendMessage("def ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.def}")
         sender.sendMessage("speed ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.speed}")
+    }
+
+    @Cmd(
+            desc = ["Test"],
+            examples = ["test"],
+            text = "・・・"
+    )
+    fun test(sender: Player, args: ArrayList<Any>) {
+        if (args.size != 0) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin()) {
+                when (args[0]) {
+                    "c" -> C(sender.world, sender.player)
+                    "caneHorse" -> CaneHorse(sender.world, sender.player)
+                    "z" -> AtelierEntityUtils.INSTANCE.spawn(TargetEntityTypes.valueOf(args[1].toString().toUpperCase()), sender.location)
+                    "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world), sender.location)
+                }
+            }
+        }
     }
 
 }

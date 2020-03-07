@@ -7,6 +7,7 @@ import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.entity.arrow.AtelierArrow;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +15,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CrossbowMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Objects;
 
@@ -84,7 +87,14 @@ public class DamageListener implements Listener {
     @EventHandler
     private void shootBow(final EntityShootBowEvent e) {
         if (e.getEntity() instanceof Player && (e.getProjectile() instanceof AbstractArrow)) {
-            arrowManager.shootBow((Player) e.getEntity(), e.getBow(), (AbstractArrow) e.getProjectile(), e.getForce());
+            final ItemStack bow = e.getBow();
+            if (bow != null && bow.getType() == Material.CROSSBOW) {
+                final CrossbowMeta itemMeta = (CrossbowMeta) bow.getItemMeta();
+                assert itemMeta != null;
+                arrowManager.shootCrossbow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), itemMeta.getChargedProjectiles().get(0));
+            } else {
+                arrowManager.shootBow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
+            }
         }
     }
 

@@ -45,12 +45,17 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * @author firiz
  */
 public class PlayerListener implements Listener {
+
+    /*
+    // ドラガリのバーストアタック的な奴の試作
+    int task = -1;
+    int charge = -1;
+    */
 
     @EventHandler
     private void interact(final PlayerInteractEvent e) {
@@ -60,13 +65,34 @@ public class PlayerListener implements Listener {
         final Player player = e.getPlayer();
 
         if (Chore.isRight(action)) {
-            if (item != null && item.getType() == Material.WRITTEN_BOOK) {
-                final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
-                if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
-                    e.setCancelled(true);
-                    QuestBook.openQuestBook(player, e.getHand());
-                    return;
+            if (item != null) {
+                if (item.getType() == Material.WRITTEN_BOOK) {
+                    final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
+                    if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
+                        e.setCancelled(true);
+                        QuestBook.openQuestBook(player, e.getHand());
+                        return;
+                    }
                 }
+                /* else if (GameConstants.isSword(item.getType())) { // ドラガリのバーストアタック的な奴の試作
+                    final int nextCharge = Math.max(0, Math.min(4, charge + 1));
+                    if (task != -1) {
+                        Bukkit.getScheduler().cancelTask(task);
+                    }
+                    if (nextCharge != charge && charge % 2 == 0) {
+                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.2f, nextCharge * 0.4f);
+                    }
+                    charge = nextCharge;
+                    task = Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
+                        if(player.isOnGround()) {
+                            final Vector direction = player.getLocation().getDirection();
+                            final Vector unitVector = new Vector(direction.getX(), 0.1, direction.getZ()).normalize();
+                            player.setVelocity(player.getVelocity().add(unitVector.multiply(((int) (charge / 2f)) * 0.8)));
+                        }
+                        charge = 0;
+                    }, 5).getTaskId();
+                }
+                */
             }
 
             if (block != null) {
@@ -109,7 +135,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void join(final PlayerJoinEvent e) {
         PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer());
-        PlayerInjection.injectArmorChangeEvent(e.getPlayer());
+        PlayerInjection.inject(e.getPlayer());
         NPCManager.INSTANCE.packet(e.getPlayer());
         Notification.loginNotification(e.getPlayer());
     }

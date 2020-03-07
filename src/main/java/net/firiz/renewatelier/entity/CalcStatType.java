@@ -1,23 +1,25 @@
-package net.firiz.renewatelier.entity.player.stats;
+package net.firiz.renewatelier.entity;
 
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
+import net.firiz.renewatelier.entity.monster.MonsterStats;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.TRunnable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
-public enum CharStatType {
+public enum CalcStatType {
     LEVEL(true, false),
     HP(true, true, AlchemyItemStatus::getHp),
-    MP(true, true, AlchemyItemStatus::getMp),
+     MP(true, true, AlchemyItemStatus::getMp),
     ATK(true, true, AlchemyItemStatus::getAtk),
     DEF(true, true, AlchemyItemStatus::getDef),
     SPEED(true, true, AlchemyItemStatus::getSpeed),
@@ -26,34 +28,32 @@ public enum CharStatType {
 
     private final boolean buff;
     private final boolean characteristic;
-    private final TRunnable<AlchemyItemStatus, Integer> runGetEquipStats;
+    private final Function<AlchemyItemStatus, Integer> runGetEquipStats;
 
-    private static final Map<CharStatType, BuffType[]> buffTypes = new EnumMap<>(CharStatType.class);
-    private static final Map<CharStatType, CharacteristicType[]> characteristicTypes = new EnumMap<>(CharStatType.class);
+    private static final Map<CalcStatType, BuffType[]> buffTypes = new EnumMap<>(CalcStatType.class);
+    private static final Map<CalcStatType, CharacteristicType[]> characteristicTypes = new EnumMap<>(CalcStatType.class);
 
     static {
-        buffTypes.put(CharStatType.LEVEL, new BuffType[]{BuffType.STATS_LEVEL, BuffType.STATS_LEVEL_FIXED});
-        buffTypes.put(CharStatType.HP, new BuffType[]{BuffType.STATS_HP, BuffType.STATS_HP_FIXED});
-        buffTypes.put(CharStatType.MP, new BuffType[]{BuffType.STATS_MP, BuffType.STATS_MP_FIXED});
-        buffTypes.put(CharStatType.ATK, new BuffType[]{BuffType.STATS_ATK, BuffType.STATS_ATK_FIXED});
-        buffTypes.put(CharStatType.DEF, new BuffType[]{BuffType.STATS_DEF, BuffType.STATS_DEF_FIXED});
-        buffTypes.put(CharStatType.SPEED, new BuffType[]{BuffType.STATS_SPD, BuffType.STATS_SPD_FIXED});
-        characteristicTypes.put(CharStatType.HP, new CharacteristicType[]{CharacteristicType.STATS_HP, CharacteristicType.STATS_HP_FIXED, CharacteristicType.STATS_HP_QUALITY});
-        characteristicTypes.put(CharStatType.MP, new CharacteristicType[]{CharacteristicType.STATS_MP, CharacteristicType.STATS_MP_FIXED, CharacteristicType.STATS_MP_QUALITY});
-        characteristicTypes.put(CharStatType.ATK, new CharacteristicType[]{CharacteristicType.STATS_ATK, CharacteristicType.STATS_ATK_FIXED, CharacteristicType.STATS_ATK_QUALITY});
-        characteristicTypes.put(CharStatType.DEF, new CharacteristicType[]{CharacteristicType.STATS_DEF, CharacteristicType.STATS_DEF_FIXED, CharacteristicType.STATS_DEF_QUALITY});
-        characteristicTypes.put(CharStatType.SPEED, new CharacteristicType[]{CharacteristicType.STATS_SPD, CharacteristicType.STATS_SPD_FIXED, CharacteristicType.STATS_SPD_QUALITY});
-        characteristicTypes.put(CharStatType.ACC, new CharacteristicType[]{CharacteristicType.STATS_ACC, CharacteristicType.STATS_ACC_FIXED, CharacteristicType.STATS_ACC_QUALITY});
-        characteristicTypes.put(CharStatType.AVO, new CharacteristicType[]{CharacteristicType.STATS_AVO, CharacteristicType.STATS_AVO_FIXED, CharacteristicType.STATS_AVO_QUALITY});
+        buffTypes.put(CalcStatType.LEVEL, new BuffType[]{BuffType.STATS_LEVEL, BuffType.STATS_LEVEL_FIXED});
+        buffTypes.put(CalcStatType.HP, new BuffType[]{BuffType.STATS_HP, BuffType.STATS_HP_FIXED});
+        buffTypes.put(CalcStatType.MP, new BuffType[]{BuffType.STATS_MP, BuffType.STATS_MP_FIXED});
+        buffTypes.put(CalcStatType.ATK, new BuffType[]{BuffType.STATS_ATK, BuffType.STATS_ATK_FIXED});
+        buffTypes.put(CalcStatType.DEF, new BuffType[]{BuffType.STATS_DEF, BuffType.STATS_DEF_FIXED});
+        buffTypes.put(CalcStatType.SPEED, new BuffType[]{BuffType.STATS_SPD, BuffType.STATS_SPD_FIXED});
+        characteristicTypes.put(CalcStatType.HP, new CharacteristicType[]{CharacteristicType.STATS_HP, CharacteristicType.STATS_HP_FIXED, CharacteristicType.STATS_HP_QUALITY});
+        characteristicTypes.put(CalcStatType.MP, new CharacteristicType[]{CharacteristicType.STATS_MP, CharacteristicType.STATS_MP_FIXED, CharacteristicType.STATS_MP_QUALITY});
+        characteristicTypes.put(CalcStatType.ATK, new CharacteristicType[]{CharacteristicType.STATS_ATK, CharacteristicType.STATS_ATK_FIXED, CharacteristicType.STATS_ATK_QUALITY});
+        characteristicTypes.put(CalcStatType.DEF, new CharacteristicType[]{CharacteristicType.STATS_DEF, CharacteristicType.STATS_DEF_FIXED, CharacteristicType.STATS_DEF_QUALITY});
+        characteristicTypes.put(CalcStatType.SPEED, new CharacteristicType[]{CharacteristicType.STATS_SPD, CharacteristicType.STATS_SPD_FIXED, CharacteristicType.STATS_SPD_QUALITY});
+        characteristicTypes.put(CalcStatType.ACC, new CharacteristicType[]{CharacteristicType.STATS_ACC, CharacteristicType.STATS_ACC_FIXED, CharacteristicType.STATS_ACC_QUALITY});
+        characteristicTypes.put(CalcStatType.AVO, new CharacteristicType[]{CharacteristicType.STATS_AVO, CharacteristicType.STATS_AVO_FIXED, CharacteristicType.STATS_AVO_QUALITY});
     }
 
-    CharStatType(boolean buff, boolean characteristic) {
-        this.buff = buff;
-        this.characteristic = characteristic;
-        this.runGetEquipStats = null;
+    CalcStatType(boolean buff, boolean characteristic) {
+        this(buff, characteristic, null);
     }
 
-    CharStatType(boolean buff, boolean characteristic, TRunnable<AlchemyItemStatus, Integer> getEquipStats) {
+    CalcStatType(boolean buff, boolean characteristic, Function<AlchemyItemStatus, Integer> getEquipStats) {
         this.buff = buff;
         this.characteristic = characteristic;
         this.runGetEquipStats = getEquipStats;
@@ -65,20 +65,37 @@ public enum CharStatType {
      * @param charStats CharStats 取得したいキャラクターのステータス
      * @return int バフを含めたステータスの増加値
      */
-    protected int getBuffStats(@NotNull CharStats charStats, int defStatus) {
+    public int getCharBuffStats(@NotNull CharStats charStats, int defStatus) {
         final AtomicInteger status = new AtomicInteger(0);
 
         // バフ計算
         if (buff) {
-            getBuff(charStats, defStatus, status);
+            getBuff(charStats.getBuffs(), defStatus, status);
         }
 
         return status.intValue();
     }
 
-    private void getBuff(final CharStats charStats, final int defStatus, final AtomicInteger status) {
+    /**
+     * バフのステータス上昇を含めたステータスの増加分を返します
+     *
+     * @param monsterStats MonsterStats 取得したいモンスターのステータス
+     * @return int バフを含めたステータスの増加値
+     */
+    public int getMobBuffStats(@NotNull MonsterStats monsterStats, int defStatus) {
+        final AtomicInteger status = new AtomicInteger(0);
+
+        // バフ計算
+        if (buff && this != MP) {
+            getBuff(monsterStats.getBuffs(), defStatus, status);
+        }
+
+        return status.intValue();
+    }
+
+    private void getBuff(@NotNull final Collection<Buff> buffs, final int defStatus, @NotNull final AtomicInteger status) {
         final BuffType[] checkBuffTypes = buffTypes.get(this);
-        for (final Buff b : charStats.getBuffs()) {
+        for (final Buff b : buffs) {
             if (b.getType() == checkBuffTypes[0]) { // percent
                 status.addAndGet((int) (defStatus * (b.getX() * 0.01)));
             } else if (b.getType() == checkBuffTypes[1]) { // fixed
@@ -94,7 +111,7 @@ public enum CharStatType {
      * @param weapon    boolean 装備または武器のステータスを参照
      * @return int 装備のステータス特性を含めたステータスの増加値
      */
-    protected int getEquipStats(CharStats charStats, ItemStack item, int defStatus, boolean weapon) {
+    public int getEquipStats(@NotNull CharStats charStats, ItemStack item, int defStatus, boolean weapon) {
         final AtomicInteger status = new AtomicInteger(0);
 
         // 装備特性計算
@@ -113,13 +130,13 @@ public enum CharStatType {
         return status.intValue();
     }
 
-    private void getStats(final CharStats charStats, final int defStatus, final AtomicInteger status, final ItemStack... checkItems) {
+    private void getStats(@NotNull final CharStats charStats, final int defStatus, @NotNull final AtomicInteger status, @NotNull final ItemStack... checkItems) {
         final CharacteristicType[] characteristicType = characteristicTypes.get(this);
         for (final ItemStack item : checkItems) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
                 if (runGetEquipStats != null) {
-                    status.addAndGet(runGetEquipStats.run(itemStatus)); // getEquipItemStats
+                    status.addAndGet(runGetEquipStats.apply(itemStatus)); // getEquipItemStats
                 }
                 for (final Characteristic c : itemStatus.getCharacteristics()) {
                     if (c.hasData(characteristicType[0])) { // percent

@@ -81,7 +81,7 @@ public final class Chore {
     public static void logWarning(final Object obj) {
         if (obj instanceof Exception) {
             final Exception ex = ((Exception) obj);
-            log.log(Level.WARNING, S_WARNING.concat(ex.getMessage()), ex);
+            log.log(Level.WARNING, S_WARNING.concat(ex.getMessage() == null ? "null message" : ex.getMessage()), ex);
             log.log(Level.OFF, S_OFF);
         } else {
             log.log(Level.WARNING, "{0}", obj);

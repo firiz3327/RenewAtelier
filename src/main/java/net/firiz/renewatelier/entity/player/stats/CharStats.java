@@ -101,7 +101,6 @@ public class CharStats {
     @NotNull
     public List<AlchemyItemStatus> getEquips() {
         final List<AlchemyItemStatus> itemStatuses = new ArrayList<>();
-
         for (final ItemStack armor : player.getInventory().getArmorContents()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(armor);
             if (itemStatus != null) {

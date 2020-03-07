@@ -5,6 +5,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
+import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
@@ -160,7 +161,7 @@ public class DamageUtil {
         criticalRate += c.hasData(CharacteristicType.CRITICAL) ? (int) c.getData(CharacteristicType.CRITICAL) : 0;
         if (c.hasData(CharacteristicType.CRITICAL_RACE)) {
             final String[] data = (String[]) c.getData(CharacteristicType.CRITICAL_RACE);
-            final Characteristic.Race race = Characteristic.Race.valueOf(Objects.requireNonNull(data)[1]);
+            final Race race = Race.valueOf(Objects.requireNonNull(data)[1]);
             if (race.hasType(entity)) {
                 criticalRate += Integer.parseInt(data[0]);
             }

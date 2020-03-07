@@ -22,7 +22,7 @@ package net.firiz.renewatelier.version.packet;
 
 import java.util.UUID;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
-import net.minecraft.server.v1_14_R1.EntityTypes;
+import net.minecraft.server.v1_15_R1.EntityTypes;
 import org.bukkit.entity.EntityType;
 
 /**

@@ -207,7 +207,6 @@ public class KettleBox {
 
     private Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
-
         for (int i = 0; i < items.size(); i++) {
             final DoubleData<BonusItem, KettleBoxData> dd = items.get(i);
 

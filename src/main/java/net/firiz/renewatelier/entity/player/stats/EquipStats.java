@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.entity.player.stats;
 
+import net.firiz.renewatelier.entity.CalcStatType;
 import org.bukkit.inventory.ItemStack;
 
 public class EquipStats {
@@ -51,13 +52,13 @@ public class EquipStats {
     }
 
     void updateEquip() {
-        this.maxHpE = CharStatType.HP.getEquipStats(charStats, null, maxHp, false);
-        this.maxMpE = CharStatType.MP.getEquipStats(charStats, null, maxMp, false);
-        this.atkE = CharStatType.ATK.getEquipStats(charStats, null, atk, false);
-        this.defE = CharStatType.DEF.getEquipStats(charStats, null, def, false);
-        this.speedE = CharStatType.SPEED.getEquipStats(charStats, null, speed, false);
-        this.accE = CharStatType.ACC.getEquipStats(charStats, null, acc, false);
-        this.avoE = CharStatType.AVO.getEquipStats(charStats, null, avo, false);
+        this.maxHpE = CalcStatType.HP.getEquipStats(charStats, null, maxHp, false);
+        this.maxMpE = CalcStatType.MP.getEquipStats(charStats, null, maxMp, false);
+        this.atkE = CalcStatType.ATK.getEquipStats(charStats, null, atk, false);
+        this.defE = CalcStatType.DEF.getEquipStats(charStats, null, def, false);
+        this.speedE = CalcStatType.SPEED.getEquipStats(charStats, null, speed, false);
+        this.accE = CalcStatType.ACC.getEquipStats(charStats, null, acc, false);
+        this.avoE = CalcStatType.AVO.getEquipStats(charStats, null, avo, false);
     }
 
     void updateWeapon(int slot) {
@@ -67,13 +68,13 @@ public class EquipStats {
         } else {
             item = charStats.getPlayer().getInventory().getItem(slot);
         }
-        this.maxHpW = CharStatType.HP.getEquipStats(charStats, item, maxHp, true);
-        this.maxMpW = CharStatType.MP.getEquipStats(charStats, item, maxMp, true);
-        this.atkW = CharStatType.ATK.getEquipStats(charStats, item, atk, true);
-        this.defW = CharStatType.DEF.getEquipStats(charStats, item, def, true);
-        this.speedW = CharStatType.SPEED.getEquipStats(charStats, item, speed, true);
-        this.accW = CharStatType.ACC.getEquipStats(charStats, item, acc, true);
-        this.avoW = CharStatType.AVO.getEquipStats(charStats, item, avo, true);
+        this.maxHpW = CalcStatType.HP.getEquipStats(charStats, item, maxHp, true);
+        this.maxMpW = CalcStatType.MP.getEquipStats(charStats, item, maxMp, true);
+        this.atkW = CalcStatType.ATK.getEquipStats(charStats, item, atk, true);
+        this.defW = CalcStatType.DEF.getEquipStats(charStats, item, def, true);
+        this.speedW = CalcStatType.SPEED.getEquipStats(charStats, item, speed, true);
+        this.accW = CalcStatType.ACC.getEquipStats(charStats, item, acc, true);
+        this.avoW = CalcStatType.AVO.getEquipStats(charStats, item, avo, true);
     }
 
     public int getMaxHp() {

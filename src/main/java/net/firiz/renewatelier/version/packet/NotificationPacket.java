@@ -27,11 +27,11 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_14_R1.AdvancementProgress;
-import net.minecraft.server.v1_14_R1.CriterionProgress;
-import net.minecraft.server.v1_14_R1.MinecraftKey;
-import net.minecraft.server.v1_14_R1.PacketPlayOutAdvancements;
-import net.minecraft.server.v1_14_R1.PacketPlayOutRecipes;
+import net.minecraft.server.v1_15_R1.AdvancementProgress;
+import net.minecraft.server.v1_15_R1.CriterionProgress;
+import net.minecraft.server.v1_15_R1.MinecraftKey;
+import net.minecraft.server.v1_15_R1.PacketPlayOutAdvancements;
+import net.minecraft.server.v1_15_R1.PacketPlayOutRecipes;
 import org.bukkit.entity.Player;
 
 /**

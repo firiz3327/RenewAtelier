@@ -22,10 +22,10 @@ package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.TRunnable;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.md_5.bungee.api.ChatColor;
 
@@ -61,7 +61,7 @@ public class CatalystBonusData {
         final String[] desc = type.desc
                 .replace("$x", String.valueOf(x))
                 .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME)
-                .replace("$z", type.descRepletion != null ? type.descRepletion.run(x) : ERROR_NAME)
+                .replace("$z", type.descRepletion != null ? type.descRepletion.apply(x) : ERROR_NAME)
                 .split("\n");
         final List<String> result = new ArrayList<>();
         for (final String str : desc) {
@@ -163,10 +163,10 @@ public class CatalystBonusData {
         private final String name;
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
-        private final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
-        private final TRunnable<Integer, String> descRepletion;
+        private final FinalDoubleData<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
+        private final Function<Integer, String> descRepletion;
 
-        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<TRunnable<String, Object>, TRunnable<Object, String>> yParse, final TRunnable<Integer, String> descRepletion) {
+        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<Function<String, Object>, Function<Object, String>> yParse, final Function<Integer, String> descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;
@@ -186,7 +186,7 @@ public class CatalystBonusData {
          */
         private Object yConversionToObject(final String y) {
             if (yParse != null) {
-                return yParse.getLeft().run(y);
+                return yParse.getLeft().apply(y);
             }
             return y;
         }
@@ -199,7 +199,7 @@ public class CatalystBonusData {
          */
         private Object yConversionToString(final Object y) {
             if (yParse != null) {
-                return yParse.getRight().run(y);
+                return yParse.getRight().apply(y);
             }
             return y;
         }
