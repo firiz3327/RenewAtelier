@@ -12,16 +12,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public enum AtelierEntityUtils {
     INSTANCE;
 
     private final ClassPool pool = ClassPool.getDefault();
-    private final Map<TargetEntityTypes, Class<?>> entityMap = new HashMap<>();
+    private final Map<TargetEntityTypes, Class<?>> entityMap = new EnumMap<>(TargetEntityTypes.class);
     private final CtClass[] interfaces;
 
     AtelierEntityUtils() {
@@ -62,6 +61,7 @@ public enum AtelierEntityUtils {
         return (LivingData) ((Supplier<Object>) entity).get();
     }
 
+    // 名前の比較にする？
     public boolean hasLivingData(@NotNull final LivingEntity entity) {
         return ((CraftLivingEntity) entity).getHandle() instanceof Supplier;
     }
@@ -87,10 +87,11 @@ public enum AtelierEntityUtils {
             livingWrapper.setAccessible(true);
             livingWrapper.set(wrapEntity, livingData);
 
-            final BiFunction<Object, Object, Boolean> damageEntityFunction = livingData::damageEntity;
             final Field damageEntity = wrapClass.getDeclaredField("damageEntity");
             damageEntity.setAccessible(true);
-            damageEntity.set(wrapEntity, damageEntityFunction);
+            final Method method = LivingData.class.getDeclaredMethod("damageEntity", Object.class, Object.class);
+            method.setAccessible(true);
+            damageEntity.set(wrapEntity, method);
 
             return wrapEntity;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
@@ -116,57 +117,23 @@ public enum AtelierEntityUtils {
             final CtMethod getLivingData = CtNewMethod.make("public Object get() { return this.livingData; }", clasz);
             clasz.addMethod(getLivingData);
 
-            final CtField damageEntity = CtField.make("java.util.function.BiFunction<Object, Object, Boolean> damageEntity;", clasz);
+            final CtField damageEntity = CtField.make("java.lang.reflect.Method damageEntity;", clasz);
             clasz.addField(damageEntity);
 
-            final StringBuilder damageEntityBody = new StringBuilder();
-            damageEntityBody.append("public boolean damageEntity(net.minecraft.server.v1_15_R1.DamageSource ds, float f) {");
-            damageEntityBody.append("return damageEntity.apply(ds, f).booleanValue();");
-            damageEntityBody.append("}");
-            final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody.toString(), clasz);
+            // try-catchはなくていい
+            // javassistはvarargsに対応してないので、配列にして渡す
+            // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
+            // booleanを返すとBooleanになるので、booleanValue()でbooleanへ変換
+            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_15_R1.DamageSource damagesource, float f) {" +
+                    "return ((Boolean) damageEntity.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
+            final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody, clasz);
             clasz.addMethod(overrideDamageEntity);
-
-//            final StringBuilder methodBody = new StringBuilder();
-//            methodBody.append("public void entityBaseTick() {");
-//            methodBody.append("try {");
-//            methodBody.append("java.lang.reflect.Method method = livingData.getClass().getDeclaredMethod(\"entityBaseTick\");");
-//            methodBody.append("method.setAccessible(true);");
-//            methodBody.append("method.invoke(livingData);");
-//            methodBody.append("} catch (Exception ex) {");
-//            methodBody.append("ex.printStackTrace();");
-//            methodBody.append("}}");
-//            final CtMethod overrideEntityBaseTick = CtNewMethod.make(methodBody.toString(), clasz);
-//            clasz.addMethod(overrideEntityBaseTick);
 
             final CtClass[] params = new CtClass[]{pool.get(World.class.getCanonicalName())};
             final CtConstructor constructor = CtNewConstructor.make(params, null, CtNewConstructor.PASS_PARAMS, null, null, clasz);
             constructor.setBody(body);
             clasz.addConstructor(constructor);
             return (Class<? extends T>) clasz.toClass();
-        }
-    }
-
-    @NotNull
-    protected CtClass getInnerClass(@NotNull final String superClass, @NotNull final String name) throws NotFoundException {
-        final String search = superClass.concat("$").concat(name);
-        for (final CtClass clasz : pool.get(superClass).getNestedClasses()) {
-            if (clasz.getName().equals(search)) {
-                return clasz;
-            }
-        }
-        throw new IllegalArgumentException("not found classes");
-    }
-
-    @NotNull
-    protected Class<?> createExtendsClass(@NotNull final String name, @NotNull final CtClass superClass, @NotNull final Consumer<CtClass> consumer) throws ClassNotFoundException, NotFoundException, CannotCompileException {
-        try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException e) {
-            final CtClass clasz = pool.makeClass(name);
-            clasz.setSuperclass(superClass);
-            clasz.setModifiers(Modifier.PUBLIC);
-            consumer.accept(clasz);
-            return clasz.toClass();
         }
     }
 

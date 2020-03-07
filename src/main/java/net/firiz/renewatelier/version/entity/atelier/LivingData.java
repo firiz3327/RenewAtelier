@@ -67,7 +67,7 @@ public class LivingData {
      * @param f
      * @return entity.damageEntity
      */
-    protected Boolean damageEntity(final Object ds, final Object f) {
+    protected boolean damageEntity(final Object ds, final Object f) {
         final Map<Object, Class<?>> params = new LinkedHashMap<>();
         params.put(ds, DamageSource.class);
         params.put(f, float.class);
@@ -80,13 +80,6 @@ public class LivingData {
         ));
         wrapEntity.noDamageTicks = 0;
         return result;
-    }
-
-    /**
-     * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
-     */
-    private void entityBaseTick() {
-
     }
 
 }
