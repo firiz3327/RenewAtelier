@@ -53,7 +53,7 @@ public class InventoryPacket {
         ENCHANTMENT(Containers.ENCHANTMENT),
         BLAST_FURNACE(Containers.BLAST_FURNACE),
         BREWING_STAND(Containers.BREWING_STAND),
-        CARTOGRAPHY(Containers.CARTOGRAPHY),
+        CARTOGRAPHY_TABLE(Containers.CARTOGRAPHY_TABLE),
         GRIND_STONE(Containers.GRINDSTONE),
         LECTERN(Containers.LECTERN),
         LOOM(Containers.LOOM),

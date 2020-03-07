@@ -30,6 +30,7 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.GArray;
 import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,12 @@ import org.jetbrains.annotations.NotNull;
 public class KettleBox {
 
     // 設置されたアイテムとそのアイテムの配置とcircleValue
-    private final List<DoubleData<BonusItem, KettleBoxData>> items;
-    private final List<List<CatalystBonus>> usedBonus;
+    private final GArray<DoubleData<BonusItem, KettleBoxCircleData>> items;
+    private final GArray<List<CatalystBonus>> usedBonus;
 
     public KettleBox(int count) {
-        this.items = new ArrayList<>(count);
-        this.usedBonus = new ArrayList<>(count);
+        this.items = new GArray<>(count);
+        this.usedBonus = new GArray<>(count);
     }
 
     /**
@@ -53,16 +54,16 @@ public class KettleBox {
      *
      * @return 削除対象のデータ
      */
-    public final DoubleData<BonusItem, KettleBoxData> backData(final int rotate, final int rlud) {
-        for (int i = 1; i <= items.size(); i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
+    public final DoubleData<BonusItem, KettleBoxCircleData> backData(final int rotate, final int rlud) {
+        for (int i = 1; i <= items.length(); i++) {
+            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
-                items.set(items.size() - i, null);
-                final int sel = items.size() - i - 1;
+                items.set(items.length() - i, null);
+                final int sel = items.length() - i - 1;
                 if (sel >= 0) {
                     usedBonus.set(sel, null);
                 }
-                final KettleBoxData kbd = data.getRight();
+                final KettleBoxCircleData kbd = data.getRight();
                 final ItemStack item = data.getLeft().getItem();
                 int[] size = AlchemyItemStatus.getSize(item);
                 if (kbd.getRotate() != 0) {
@@ -98,9 +99,9 @@ public class KettleBox {
     }
 
     public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < items.length(); i++) {
             if (items.get(i) == null) {
-                items.set(i, new DoubleData<>(new BonusItem(item), new KettleBoxData(rslots, rotate, rlud)));
+                items.set(i, new DoubleData<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
                 break;
             }
         }
@@ -116,10 +117,10 @@ public class KettleBox {
     }
 
     public final void addBonus(final CatalystBonus cb) {
-        for (int i = 1; i <= items.size(); i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
+        for (int i = 1; i <= items.length(); i++) {
+            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
-                final int sel = items.size() - i;
+                final int sel = items.length() - i;
                 if (usedBonus.get(sel) == null) {
                     final List<CatalystBonus> cbs = new ArrayList<>();
                     cbs.add(cb);
@@ -134,10 +135,10 @@ public class KettleBox {
 
     @NotNull
     public final List<CatalystBonus> getBonus() {
-        for (int i = 1; i <= items.size(); i++) {
-            final DoubleData<BonusItem, KettleBoxData> data = items.get(items.size() - i);
+        for (int i = 1; i <= items.length(); i++) {
+            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
-                final int select = items.size() - i - 1; // 4:3 3:2
+                final int select = items.length() - i - 1; // 4:3 3:2
                 return select >= 0 ? usedBonus.get(select) : new ArrayList<>(0);
             }
         }
@@ -147,7 +148,7 @@ public class KettleBox {
     public final List<ItemStack> getItemStacks() {
         final List<ItemStack> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, KettleBoxData> data : items) {
+        for (final DoubleData<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
                 result.add(data.getLeft().getItem());
             }
@@ -159,7 +160,7 @@ public class KettleBox {
     public final List<BonusItem> getItems() {
         final List<BonusItem> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, KettleBoxData> data : items) {
+        for (final DoubleData<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
                 result.add(data.getLeft());
             }
@@ -169,11 +170,11 @@ public class KettleBox {
     }
 
     public final Map<Integer, Integer> getSlots() {
-        return items.get(items.size() - 1).getRight().getRSlots();
+        return items.get(items.length() - 1).getRight().getRSlots();
     }
 
     public final int getCSize() {
-        return items.size();
+        return items.length();
     }
 
     /**
@@ -207,8 +208,8 @@ public class KettleBox {
 
     private Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
         final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
-        for (int i = 0; i < items.size(); i++) {
-            final DoubleData<BonusItem, KettleBoxData> dd = items.get(i);
+        for (int i = 0; i < items.length(); i++) {
+            final DoubleData<BonusItem, KettleBoxCircleData> dd = items.get(i);
 
             if (dd != null) {
                 final Map<Integer, Integer> rslots = dd.getRight().getRSlots();

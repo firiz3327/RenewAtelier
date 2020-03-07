@@ -32,7 +32,7 @@ import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.kettle.bonus.KettleBonusManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
-import net.firiz.renewatelier.alchemy.kettle.box.KettleBoxData;
+import net.firiz.renewatelier.alchemy.kettle.box.KettleBoxCircleData;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -465,7 +465,6 @@ public class AlchemyKettle {
             }
 
             final int size = bonusList.get(0).getCS().length;
-            System.out.println(size);
             final int defSlot = (size == 36 || size == 25 ? 3 : 13);
             for (int i = 0; i < size; i++) {
                 ItemStack slotItem = null;
@@ -476,13 +475,12 @@ public class AlchemyKettle {
                         if (j == slot) {
                             short cmd = Catalyst.getCustomModelData(c2);
                             if (cmd != -1) {
-                                final ItemStack item = Chore.ci(
+                                slotItem = ignores.contains(b) ? null : Chore.ci(
                                         Material.DIAMOND_AXE,
                                         cmd,
                                         ChatColor.RESET + b.getData().getName(),
                                         b.getData().getDesc()
-                                );
-                                slotItem = ignores.contains(b) ? null : item;
+                                );;
                                 break getSlotItem;
                             }
                         }
@@ -497,7 +495,6 @@ public class AlchemyKettle {
             resultCS.keySet().forEach(slotData -> {
                 final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
-                System.out.println(slotData.getLeft() + ": " + item);
                 inv.setItem(slotData.getLeft(), item);
             });
         }
@@ -770,7 +767,7 @@ public class AlchemyKettle {
                             final ItemMeta setting = inv.getItem(1).getItemMeta();
                             final int sl = AlchemyChore.getSetting(setting, 1);
                             final int rludsl = AlchemyChore.getSetting(setting, 4);
-                            final DoubleData<BonusItem, KettleBoxData> backData = kettleBox.backData(sl, rludsl);
+                            final DoubleData<BonusItem, KettleBoxCircleData> backData = kettleBox.backData(sl, rludsl);
                             if (backData != null) {
                                 final PlayerInventory playerInventory = player.getInventory();
                                 boolean check = false;

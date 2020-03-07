@@ -24,6 +24,7 @@ import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import java.util.*
+import kotlin.collections.ArrayList
 
 class DebugCommands(private val debugListener: DebugListener) {
 
@@ -397,6 +398,24 @@ class DebugCommands(private val debugListener: DebugListener) {
         sender.sendMessage("atk ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.atk}")
         sender.sendMessage("def ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.def}")
         sender.sendMessage("speed ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.speed}")
+    }
+
+    @Cmd(
+            desc = ["Lore"],
+            examples = ["lore"],
+            text = "Loreを表示"
+    )
+    fun lore(sender: Player, args: ArrayList<Any>) {
+        val item = sender.inventory.itemInMainHand
+        if(item.hasItemMeta()) {
+            val meta = item.itemMeta!!
+            if(meta.hasLore()) {
+                for(str in meta.lore!!) {
+                    Chore.log(str)
+                    sender.sendMessage(str)
+                }
+            }
+        }
     }
 
     @Cmd(

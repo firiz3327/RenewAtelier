@@ -231,7 +231,7 @@ public final class Chore {
                 if (material.startsWith("material:")) {
                     final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(material.substring(9));
                     for (final ItemStack item : contents) {
-                        if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterial(item))) {
+                        if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
                             final DoubleData<Integer, Integer> dd = check.get(material);
                             dd.setLeft(dd.getLeft() + item.getAmount());
                         }

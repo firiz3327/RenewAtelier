@@ -334,7 +334,7 @@ public enum AlchemyIngredients {
             for (final String type : types) {
                 list.add(AlchemyAttribute.searchColor(type));
             }
-            return new DoubleData<>(level, list.toArray(new AlchemyAttribute[list.size()]));
+            return new DoubleData<>(level, list.toArray(new AlchemyAttribute[0]));
         }
         return null;
     }

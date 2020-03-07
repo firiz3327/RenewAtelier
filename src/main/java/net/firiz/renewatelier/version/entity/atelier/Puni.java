@@ -32,7 +32,7 @@ public class Puni extends EntitySlime implements Supplier<Object> {
         block = new EntityFallingBlock(((CraftWorld) world).getHandle(), 0D, 0D, 0D, Blocks.ICE.getBlockData()) {
             @Override
             public void tick() {
-                setLocation(Puni.this.locX, Puni.this.locY, Puni.this.locZ, 0, 0);
+//                setLocation(Puni.this.locX, Puni.this.locY, Puni.this.locZ, 0, 0);
                 ((WorldServer)this.world).getChunkProvider().broadcast(this, new PacketPlayOutEntityTeleport(this));
             }
 
@@ -59,7 +59,7 @@ public class Puni extends EntitySlime implements Supplier<Object> {
             isSpawnedBlock = true;
             this.world.addEntity(block);
         }
-        block.setLocation(locX, locY, locZ, 0, 0);
+//        block.setLocation(locX, locY, locZ, 0, 0);
         ((WorldServer)block.world).getChunkProvider().broadcast(this, new PacketPlayOutEntityTeleport(this));
     }
 

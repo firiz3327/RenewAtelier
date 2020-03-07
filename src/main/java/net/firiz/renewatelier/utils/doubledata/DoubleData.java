@@ -35,4 +35,9 @@ public class DoubleData<L, R> {
         this.right = right;
     }
 
+    @Override
+    public String toString() {
+        return "DoubleData[" + left.toString() + ", " + right.toString() + "]";
+    }
+
 }
