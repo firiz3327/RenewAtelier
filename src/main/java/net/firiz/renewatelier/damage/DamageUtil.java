@@ -6,12 +6,15 @@ import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.entity.Race;
+import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
+import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
@@ -60,7 +63,7 @@ public class DamageUtil {
             double cooperationRate,
             boolean critical
     ) {
-        return baseDamage * powerValue * ((100 + itemPowerEnhancement) * 0.01) * (critical ? (125 + criticalValue) * 0.01 : 1) * attributeValue * ((100 + finalDamageRate) * 0.01) * cooperationRate;
+        return (baseDamage * powerValue) * ((100 + itemPowerEnhancement) * 0.01) * (critical ? (125 + criticalValue) * 0.01 : 1) * attributeValue * ((100 + finalDamageRate) * 0.01) * cooperationRate;
     }
 
     public static void normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity entity, double normalDamage) {
@@ -179,6 +182,21 @@ public class DamageUtil {
         // ~~~
 
         charStats.damageHp(resultDamage);
+    }
+
+    private static List<FinalDoubleData<Double, AttackAttribute>> defDamage(@NotNull LivingEntity entity, @NotNull LivingEntity damager, List<FinalDoubleData<Double, AttackAttribute>> damages) {
+        if(AtelierEntityUtils.INSTANCE.hasLivingData(entity)) {
+            final LivingData livingData = AtelierEntityUtils.INSTANCE.getLivingData(entity);
+            final MonsterStats stats = livingData.getStats();
+            if(stats != null) {
+                final List<FinalDoubleData<Double, AttackAttribute>> resultDamages = new ArrayList<>(damages.size());
+                final int def = stats.getDef();
+                for (FinalDoubleData<Double, AttackAttribute> dd : damages) {
+                    resultDamages.add(new FinalDoubleData<>(dd.getLeft() - (def * 0.5), dd.getRight()));
+                }
+            }
+        }
+        return damages;
     }
 
     @SafeVarargs

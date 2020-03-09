@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import javassist.*;
+import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.utils.Chore;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
@@ -36,7 +37,7 @@ public enum AtelierEntityUtils {
                 );
                 entityMap.put(types, entityClass);
             } catch (NotFoundException | CannotCompileException e) {
-                e.printStackTrace();
+                Chore.logWarning(e);
             }
         }
     }
@@ -74,6 +75,11 @@ public enum AtelierEntityUtils {
     @NotNull
     public LivingData createLivingData(@NotNull final TargetEntityTypes types, @NotNull final EntityLiving wrapEntity) {
         return new LivingData(types, wrapEntity);
+    }
+
+    @NotNull
+    public LivingData createLivingData(@NotNull final EntityLiving wrapEntity, @NotNull final MonsterStats stats) {
+        return new LivingData(wrapEntity, stats);
     }
 
     @Nullable

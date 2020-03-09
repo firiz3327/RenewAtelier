@@ -46,6 +46,12 @@ public final class Randomizer {
         return RAND2.nextUnif();
     }
 
+    /**
+     * min以上、max以下の乱数を生成します。
+     * @param min 最低値
+     * @param max 最大値
+     * @return min以上、max以下の範囲で乱数を生成しそれを返します。
+     */
     public static int rand(final int min, final int max) {
         return nextInt(max - min + 1) + min;
     }
