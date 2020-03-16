@@ -26,6 +26,8 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.entity.Player;
 
+import java.util.Optional;
+
 /**
  * @author firiz
  */
@@ -81,8 +83,8 @@ public class EntityPacket {
         return new PEMeta(dataWatcher, false);
     }
 
-    public static PEMeta getMessageStandMeta(final Player player, final String name) {
-        final WorldServer worldServer = ((CraftWorld) player.getWorld()).getHandle();
+    public static PEMeta getMessageStandMeta(final org.bukkit.World world, final String name) {
+        final WorldServer worldServer = ((CraftWorld) world).getHandle();
         final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
@@ -93,8 +95,8 @@ public class EntityPacket {
         );
     }
 
-    public static PEMeta getMessageSmallStandMeta(final Player player, final String name) {
-        final WorldServer worldServer = ((CraftWorld) player.getWorld()).getHandle();
+    public static PEMeta getMessageSmallStandMeta(final org.bukkit.World world, final String name) {
+        final WorldServer worldServer = ((CraftWorld) world).getHandle();
         final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
@@ -104,6 +106,18 @@ public class EntityPacket {
                 armorStand.getDataWatcher(),
                 false
         );
+    }
+
+    public static PacketPlayOutEntityTeleport getTeleportPacket(final int entityId, final Location location, final boolean onGround) {
+        final PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport();
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "a"), packet, entityId);
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "b"), packet, location.getX());
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "c"), packet, location.getY());
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "d"), packet, location.getZ());
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "e"), packet, (byte) ((int) (location.getYaw() * 256.0F / 360.0F)));
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "f"), packet, (byte) ((int) (location.getPitch() * 256.0F / 360.0F)));
+        VersionUtils.setFieldValue(VersionUtils.getField(packet, "g"), packet, onGround);
+        return packet;
     }
 
 }

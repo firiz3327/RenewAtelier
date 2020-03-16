@@ -247,7 +247,7 @@ public final class NPCConversation extends ScriptConversation {
                             fakeEntity,
                             (Location) args[1]
                     ));
-                    PacketUtils.sendPacket(conversation.player, EntityPacket.getMessageStandMeta(conversation.player, (String) args[2]).compile(fakeEntity.getEntityId()));
+                    PacketUtils.sendPacket(conversation.player, EntityPacket.getMessageStandMeta(conversation.player.getWorld(), (String) args[2]).compile(fakeEntity.getEntityId()));
                 } catch (Exception e) {
                     Chore.logWarning(e);
                 }

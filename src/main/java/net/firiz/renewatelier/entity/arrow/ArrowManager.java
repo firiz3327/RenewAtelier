@@ -44,11 +44,8 @@ public final class ArrowManager {
     }
 
     public void shootCrossbow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow) {
-        final AlchemyItemStatus bowItemStatus = AlchemyItemStatus.load(bow);
-        if (bowItemStatus != null) {
-            cancelArrow(player, baseArrow);
-            shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
-        }
+        cancelArrow(player, baseArrow);
+        shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
     }
 
     public void shootBow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
@@ -78,13 +75,11 @@ public final class ArrowManager {
 
         if (consumeArrow != null) {
             final AlchemyItemStatus bowItemStatus = AlchemyItemStatus.load(bow);
-            final boolean hasBowItemStatus = bowItemStatus != null;
-
             final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
             if (CustomArrow.isFound(meta)) {
                 cancelArrow(player, baseArrow);
-                shootNextArrow(hasBowItemStatus, player, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
-            } else if (hasBowItemStatus) {
+                shootNextArrow(player, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
+            } else {
                 cancelArrow(player, baseArrow);
                 shootAtelierArrow(player, bow, baseArrow, consumeArrow, true, force);
             }
@@ -143,7 +138,7 @@ public final class ArrowManager {
         cloneArrow.shoot(baseArrow.getVelocity());
     }
 
-    private void shootNextArrow(boolean hasItemStatus, @NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
+    private void shootNextArrow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
         if (nextConsumeArrow == null) {
             player.sendMessage("使用可能な矢がありません。");
             final int consumeArrowAmount = consumeArrow.getAmount();
@@ -154,50 +149,7 @@ public final class ArrowManager {
             );
             return;
         }
-
-        if (hasItemStatus && bow != null) {
-            shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, true, force);
-        } else {
-            final AbstractArrow cloneArrow;
-            switch (nextConsumeArrow.getType()) {
-                case ARROW:
-                    cloneArrow = player.launchProjectile(Arrow.class);
-                    break;
-                case TIPPED_ARROW:
-                    cloneArrow = player.launchProjectile(Arrow.class);
-                    final PotionMeta potionMeta = (PotionMeta) nextConsumeArrow.getItemMeta();
-                    assert potionMeta != null;
-
-                    final Arrow arrow = (Arrow) cloneArrow;
-                    arrow.setBasePotionData(potionMeta.getBasePotionData());
-                    potionMeta.getCustomEffects().forEach(potionEffect -> arrow.addCustomEffect(potionEffect, true));
-                    if (potionMeta.hasColor() && potionMeta.getColor() != null) {
-                        arrow.setColor(potionMeta.getColor());
-                    }
-                    break;
-                case SPECTRAL_ARROW:
-                    cloneArrow = player.launchProjectile(SpectralArrow.class);
-                    break;
-                default:
-                    throw new IllegalStateException("nextConsumeArrow is not arrow.");
-            }
-            cloneArrow.setVelocity(baseArrow.getVelocity());
-            cloneArrow.setShooter(baseArrow.getShooter());
-            cloneArrow.setFireTicks(baseArrow.getFireTicks());
-            cloneArrow.setPierceLevel(baseArrow.getPierceLevel());
-            cloneArrow.setKnockbackStrength(baseArrow.getKnockbackStrength());
-            cloneArrow.setDamage(baseArrow.getDamage());
-            cloneArrow.setCritical(baseArrow.isCritical());
-
-            if (player.getGameMode() == GameMode.CREATIVE) {
-                cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
-            } else if (bow == null || !Objects.requireNonNull(bow.getItemMeta()).hasEnchant(Enchantment.ARROW_INFINITE)) {
-                nextConsumeArrow.setAmount(nextConsumeArrow.getAmount() - 1);
-                cloneArrow.setPickupStatus(baseArrow.getPickupStatus());
-            } else {
-                cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
-            }
-        }
+        shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, true, force);
         final int consumeArrowAmount = consumeArrow.getAmount();
         Bukkit.getScheduler().scheduleSyncDelayedTask(
                 AtelierPlugin.getPlugin(),

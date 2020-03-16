@@ -99,6 +99,11 @@ public class CharStats {
     }
 
     @NotNull
+    public ItemStack getWeaponItem() {
+        return player.getInventory().getItemInMainHand();
+    }
+
+    @NotNull
     public List<AlchemyItemStatus> getEquips() {
         final List<AlchemyItemStatus> itemStatuses = new ArrayList<>();
         for (final ItemStack armor : player.getInventory().getArmorContents()) {

@@ -14,7 +14,6 @@ import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,8 +30,10 @@ public class DamageUtilV2 {
         final AlchemyItemStatus weaponStats = charStats.getWeapon();
         final Player player = charStats.getPlayer();
         final boolean isMinecraftCritical = !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784); // クリティカルハック及びフライハック対策
+
+        double normalAttackPower = 100;
+
         if (weaponStats != null && weaponStats.getCategories().contains(Category.WEAPON)) {
-            double normalAttackPower = 100;
 
             final AlchemyMaterial alchemyMaterial = weaponStats.getAlchemyMaterial();
             final double baseDamage = Math.max(0D, Randomizer.rand(alchemyMaterial.getBaseDamageMin(), alchemyMaterial.getBaseDamageMax()));
@@ -40,60 +41,72 @@ public class DamageUtilV2 {
                 return;
             }
 
-            calcDamage(weaponStats, charStats, victim, normalAttackPower, baseDamage, 1, attribute, isMinecraftCritical);
+            calcDamage(weaponStats, charStats, victim, normalAttackPower, baseDamage, 1, attribute, isMinecraftCritical, false);
         } else {
-            holo.holoDamage(victim, charStats.getPlayer(), new FinalDoubleData<>(normalDamage, attribute));
+            calcDamage(weaponStats, charStats, victim, normalAttackPower, normalDamage, 1, attribute, isMinecraftCritical, false);
         }
     }
 
-    public void arrowNormalDamage(@NotNull LivingEntity victim, @NotNull LivingEntity damager, double damage) {
-        holo.holoDamage(victim, damager, new FinalDoubleData<>(damage, AttackAttribute.PHYSICS));
-    }
-
-    public void arrowDamage(@NotNull AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, CharStats charStats, LivingEntity victim, double normalDamage, boolean isMinecraftCritical, float force) {
+    public void arrowDamage(@Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, CharStats charStats, LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
         double normalAttackPower = Randomizer.rand(63, 70);
-
-        final AlchemyMaterial bowAlchemyMaterial = bow.getAlchemyMaterial();
-        double baseDamage = Math.max(0D, Randomizer.rand(bowAlchemyMaterial.getBaseDamageMin(), bowAlchemyMaterial.getBaseDamageMax()));
-        if (baseDamage == 0) {
-            arrowNormalDamage(victim, charStats.getPlayer(), normalDamage);
-            return;
+        double baseDamage = damage;
+        if (bow != null) {
+            final AlchemyMaterial bowAlchemyMaterial = bow.getAlchemyMaterial();
+            baseDamage = Math.max(0D, Randomizer.rand(bowAlchemyMaterial.getBaseDamageMin(), bowAlchemyMaterial.getBaseDamageMax()));
         }
         if (arrow != null) {
             final AlchemyMaterial arrowAlchemyMaterial = arrow.getAlchemyMaterial();
             baseDamage += Math.max(0D, Randomizer.rand(arrowAlchemyMaterial.getBaseDamageMin(), arrowAlchemyMaterial.getBaseDamageMax())) * calcQualityCorrection(arrow.getQuality());
         }
-
-        calcDamage(bow, charStats, victim, normalAttackPower, baseDamage, force, AttackAttribute.PHYSICS, isMinecraftCritical);
+        calcDamage(bow, charStats, victim, normalAttackPower, baseDamage, force, AttackAttribute.PHYSICS, isMinecraftCritical, true);
     }
 
-    private void calcDamage(@NotNull AlchemyItemStatus itemStatus, CharStats charStats, LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical) {
+    private void calcDamage(@Nullable AlchemyItemStatus itemStatus, CharStats charStats, LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
+        final boolean hasItemStatus = itemStatus != null;
+
         int criticalRate = 0;
 
         final List<String[]> addAttacks = new ArrayList<>(); // <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
         int characteristicLevel = 0;
         int characteristicCPower = 0;
         double characteristicPowers = 0;
-        for (final Characteristic c : itemStatus.getCharacteristics()) {
-            characteristicLevel += c.getLevel();
-            characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
-            characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? (int) c.getData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
-            criticalRate = calcCriticalRate(victim, criticalRate, c);
-            final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
-            if (addAttack != null) {
-                final String[] data = (String[]) addAttack;
-                final int percent = Integer.parseInt(data[1]);
-                final int attackType = Integer.parseInt(data[2]);
-                if ((attackType == -1 || attackType == 0 || attackType == 2 || attackType == 3) && (percent >= 100 || Randomizer.percent(percent))) {
-                    addAttacks.add(data);
+        if (hasItemStatus) {
+            for (final Characteristic c : itemStatus.getCharacteristics()) {
+                characteristicLevel += c.getLevel();
+                characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
+                characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? (int) c.getData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
+                criticalRate = calcCriticalRate(victim, criticalRate, c);
+                final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
+                if (addAttack != null) {
+                    final String[] data = (String[]) addAttack;
+                    final int percent = Integer.parseInt(data[1]);
+                    final int attackType = Integer.parseInt(data[2]);
+                    if ((attackType == -1 || attackType == 0 || attackType == 2 || attackType == 3) && (percent >= 100 || Randomizer.percent(percent))) {
+                        addAttacks.add(data);
+                    }
                 }
             }
         }
         characteristicPowers += characteristicCPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
 
         // 威力値
-        // forceが0でも最低威力値２割が保証される
-        final double powerValue = ((power * 0.2) + (power * 0.8 + baseDamage / 2) * force) * calcQualityCorrection(itemStatus.getQuality()) * (characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01));
+        double powerValue = (power * 0.2) + (power * 0.8 + baseDamage / 2) * force; // forceが0でも最低威力値２割が保証される
+        if (hasItemStatus) {
+            powerValue *= calcQualityCorrection(itemStatus.getQuality()); // 品質による威力値上昇
+        }
+        powerValue *= characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01); // 特性による威力値上昇
+        switch (charStats.getWeaponItem().getType()) {
+            case BOW:
+            case ARROW:
+            case SPECTRAL_ARROW:
+            case TIPPED_ARROW:
+                if (!arrow) {
+                    powerValue /= 6; // 弓の時、威力値減少
+                }
+                break;
+            default:
+                break;
+        }
 
         final List<AlchemyItemStatus> equips = charStats.getEquips();
         for (final AlchemyItemStatus equip : equips) {
@@ -109,7 +122,7 @@ public class DamageUtilV2 {
             if (livingData.hasStats()) {
                 final MonsterStats stats = livingData.getStats();
                 victimDef = stats.getDef();
-//            victimPhysicsDef = 0;
+//            victimPhysicsDef = 0; 敵の物理防御率という概念がまだ実装されてないっす
             }
         }
 

@@ -43,11 +43,21 @@ public enum AtelierEntityUtils {
     }
 
     @NotNull
+    public LivingData spawn(@NotNull Object wrapEntity) {
+        if (wrapEntity instanceof EntityLiving && wrapEntity instanceof Supplier) {
+            final EntityLiving entity = (EntityLiving) wrapEntity;
+            ((EntityLiving) wrapEntity).getWorld().addEntity(entity);
+            return (LivingData) ((Supplier<Object>) entity).get();
+        }
+        throw new IllegalArgumentException("not support class.");
+    }
+
+    @NotNull
     public LivingData spawn(@NotNull Object wrapEntity, @NotNull final Location location) {
         if (wrapEntity instanceof EntityLiving && wrapEntity instanceof Supplier) {
             final EntityLiving entity = (EntityLiving) wrapEntity;
             entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-            ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle().addEntity(entity);
+            ((EntityLiving) wrapEntity).getWorld().addEntity(entity);
             return (LivingData) ((Supplier<Object>) entity).get();
         }
         throw new IllegalArgumentException("not support class.");
@@ -56,39 +66,37 @@ public enum AtelierEntityUtils {
     @NotNull
     public LivingData spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location) {
         final World world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
-        final EntityLiving entity = (EntityLiving) createWrapEntity(types, world);
-        entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        final EntityLiving entity = (EntityLiving) createWrapEntity(types, world, location);
         world.addEntity(entity);
         return (LivingData) ((Supplier<Object>) entity).get();
     }
 
     // 名前の比較にする？
+    public boolean hasLivingData(@NotNull final EntityLiving entity) {
+        return entity instanceof Supplier;
+    }
+
     public boolean hasLivingData(@NotNull final LivingEntity entity) {
-        return ((CraftLivingEntity) entity).getHandle() instanceof Supplier;
+        return hasLivingData(((CraftLivingEntity) entity).getHandle());
+    }
+
+    @NotNull
+    public LivingData getLivingData(@NotNull final EntityLiving entity) {
+        return (LivingData) ((Supplier<Object>) entity).get();
     }
 
     @NotNull
     public LivingData getLivingData(@NotNull final LivingEntity entity) {
-        return (LivingData) ((Supplier<Object>) ((CraftLivingEntity) entity).getHandle()).get();
-    }
-
-    @NotNull
-    public LivingData createLivingData(@NotNull final TargetEntityTypes types, @NotNull final EntityLiving wrapEntity) {
-        return new LivingData(types, wrapEntity);
-    }
-
-    @NotNull
-    public LivingData createLivingData(@NotNull final EntityLiving wrapEntity, @NotNull final MonsterStats stats) {
-        return new LivingData(wrapEntity, stats);
+        return getLivingData(((CraftLivingEntity) entity).getHandle());
     }
 
     @Nullable
-    private Object createWrapEntity(final TargetEntityTypes types, final World world) {
+    private Object createWrapEntity(final TargetEntityTypes types, final World world, final Location location) {
         try {
             final Class<?> wrapClass = entityMap.get(types);
             final Object wrapEntity = wrapClass.getConstructor(new Class[]{World.class}).newInstance(world);
 
-            final LivingData livingData = createLivingData(types, (EntityLiving) wrapEntity);
+            final LivingData livingData = new LivingData(types, (EntityLiving) wrapEntity, location);
             final Field livingWrapper = wrapClass.getDeclaredField("livingData");
             livingWrapper.setAccessible(true);
             livingWrapper.set(wrapEntity, livingData);

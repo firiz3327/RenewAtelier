@@ -2,6 +2,7 @@ package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftSlime;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
@@ -17,9 +18,9 @@ public class Puni extends EntitySlime implements Supplier<Object> {
     private boolean isSpawnedBlock = false;
     private boolean isDead = false;
 
-    public Puni(org.bukkit.World world) {
+    public Puni(org.bukkit.World world, Location location) {
         super(EntityTypes.SLIME, ((CraftWorld) world).getHandle());
-        this.livingData = AtelierEntityUtils.INSTANCE.createLivingData(TargetEntityTypes.SLIME, this);
+        this.livingData = new LivingData(TargetEntityTypes.SLIME, this, location, "プニ");
         setSize(2, false);
         addEffect(new MobEffect(
                 MobEffectList.fromId(PotionEffectType.INVISIBILITY.getId()),

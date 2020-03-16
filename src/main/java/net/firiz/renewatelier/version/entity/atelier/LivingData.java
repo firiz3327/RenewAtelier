@@ -3,8 +3,8 @@ package net.firiz.renewatelier.version.entity.atelier;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_15_R1.DamageSource;
-import net.minecraft.server.v1_15_R1.EntityLiving;
+import net.minecraft.server.v1_15_R1.*;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -22,12 +22,21 @@ public class LivingData {
 
     private final EntityLiving wrapEntity;
     private final MonsterStats stats;
+    private final String name;
 
-    LivingData(TargetEntityTypes types, EntityLiving wrapEntity) {
+    private HoloHealth holoHealth;
+
+    public LivingData(TargetEntityTypes types, EntityLiving wrapEntity, Location location) {
+        this(types, wrapEntity, location, null);
+    }
+
+    public LivingData(TargetEntityTypes types, EntityLiving wrapEntity, Location location, String name) {
         Objects.requireNonNull(types);
         Objects.requireNonNull(wrapEntity);
         this.wrapEntity = wrapEntity;
-        final double distance = getBukkitEntity().getLocation().distance(getBukkitEntity().getWorld().getSpawnLocation());
+        this.wrapEntity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        this.name = name == null && wrapEntity.hasCustomName() ? getBukkitEntity().getCustomName() : types.name;
+        final double distance = location.distance(getBukkitEntity().getWorld().getSpawnLocation());
         final int mapLevel = (int) (Math.floor(distance) / 50);
         final int level = Math.max(1, mapLevel - 5 + Randomizer.nextInt(11));
         final int levelRate = level - 50; // 50lvあたりが一気に強くなる (atan)
@@ -40,22 +49,28 @@ public class LivingData {
         init();
     }
 
-    LivingData(Object wrapEntity, MonsterStats stats) {
+    public LivingData(TargetEntityTypes types, Object wrapEntity, MonsterStats stats) {
+        this(types, wrapEntity, stats, null);
+    }
+
+    public LivingData(TargetEntityTypes types, Object wrapEntity, MonsterStats stats, String name) {
         Objects.requireNonNull(wrapEntity);
         this.wrapEntity = (EntityLiving) wrapEntity;
         this.stats = stats;
+        this.name = name == null && this.wrapEntity.hasCustomName() ? getBukkitEntity().getCustomName() : types.name;
         init();
     }
 
     private void init() {
         final LivingEntity bukkit = getBukkitEntity();
-        final StringBuilder name = new StringBuilder(bukkit.getCustomName() == null ? bukkit.getName() : bukkit.getCustomName());
+        final StringBuilder displayName = new StringBuilder(this.name);
         if (hasStats()) {
-            name.append(" Lv.").append(stats.getLevel());
+            displayName.append(" Lv.").append(stats.getLevel());
             bukkit.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(100);
             bukkit.setHealth(100);
         }
-        bukkit.setCustomName(name.toString());
+        wrapEntity.setCustomNameVisible(false);
+        holoHealth = new HoloHealth(wrapEntity, displayName.toString());
     }
 
     @NotNull
@@ -95,11 +110,11 @@ public class LivingData {
     /**
      * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
      *
-     * @param ds
-     * @param f
+     * @param ds DamageSource
+     * @param f  float ダメージ
      * @return entity.damageEntity
      */
-    private boolean damageEntity(final Object ds, final Object f) {
+    public boolean damageEntity(final Object ds, final Object f) {
         final Map<Object, Class<?>> params = new LinkedHashMap<>();
         params.put(ds, DamageSource.class);
         params.put(f, float.class);
@@ -110,7 +125,10 @@ public class LivingData {
                 boolean.class,
                 params
         ));
-        wrapEntity.noDamageTicks = 0;
+        if (wrapEntity.getHealth() > 0 && (!hasStats() || stats.getHp() > 0)) {
+            wrapEntity.noDamageTicks = 0;
+            holoHealth.holo();
+        }
         return result;
     }
 

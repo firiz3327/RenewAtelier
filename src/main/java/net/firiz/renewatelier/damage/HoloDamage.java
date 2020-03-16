@@ -1,7 +1,6 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.utils.Randomizer;
@@ -57,7 +56,7 @@ final class HoloDamage {
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
                             if (showDamage) {
                                 PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, location));
-                                PacketUtils.sendPacket(player, EntityPacket.getMessageSmallStandMeta(player, viewDamage).compile(fakeEntity.getEntityId()));
+                                PacketUtils.sendPacket(player, EntityPacket.getMessageSmallStandMeta(player.getWorld(), viewDamage).compile(fakeEntity.getEntityId()));
                                 Bukkit.getScheduler().runTaskLater(
                                         AtelierPlugin.getPlugin(),
                                         () -> PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(fakeEntity.getEntityId())),
@@ -70,16 +69,18 @@ final class HoloDamage {
                     2L * i
             );
         }
-        if (aEntityUtils.hasLivingData(victim)) {
-            final LivingData livingData = aEntityUtils.getLivingData(victim);
-            livingData.damage(damager, allDamage);
-        } else {
-            victim.setHealth(Math.max(0, victim.getHealth() - allDamage));
-            victim.setLastDamageCause(new EntityDamageEvent(
-                    damager,
-                    EntityDamageEvent.DamageCause.CUSTOM,
-                    allDamage
-            ));
+        if (allDamage > 0) {
+            if (aEntityUtils.hasLivingData(victim)) {
+                final LivingData livingData = aEntityUtils.getLivingData(victim);
+                livingData.damage(damager, allDamage);
+            } else {
+                victim.setHealth(Math.max(0, victim.getHealth() - allDamage));
+                victim.setLastDamageCause(new EntityDamageEvent(
+                        damager,
+                        EntityDamageEvent.DamageCause.CUSTOM,
+                        allDamage
+                ));
+            }
         }
     }
 }

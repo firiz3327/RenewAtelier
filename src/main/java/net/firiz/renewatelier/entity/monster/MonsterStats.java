@@ -25,6 +25,8 @@ public class MonsterStats {
     private int buffSpeed;
     private final Set<Buff> buffs = Collections.synchronizedSet(new HashSet<>());
 
+    private final boolean isBoss;
+
     public MonsterStats(Race race, int level, int maxHp, double hp, int atk, int def, int speed) {
         this.race = race;
         this.level = level;
@@ -33,6 +35,18 @@ public class MonsterStats {
         this.atk = atk;
         this.def = def;
         this.speed = speed;
+        this.isBoss = false;
+    }
+
+    public MonsterStats(Race race, int level, int maxHp, double hp, int atk, int def, int speed, boolean isBoss) {
+        this.race = race;
+        this.level = level;
+        this.maxHp = maxHp;
+        this.hp = hp;
+        this.atk = atk;
+        this.def = def;
+        this.speed = speed;
+        this.isBoss = isBoss;
     }
 
     synchronized public boolean addBuff(@NotNull Buff buff) {
@@ -101,5 +115,9 @@ public class MonsterStats {
 
     public int getSpeed() {
         return speed + buffSpeed;
+    }
+
+    public boolean isBoss() {
+        return isBoss;
     }
 }

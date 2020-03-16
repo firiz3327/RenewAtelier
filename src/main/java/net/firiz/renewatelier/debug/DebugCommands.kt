@@ -431,7 +431,7 @@ class DebugCommands(private val debugListener: DebugListener) {
                     "c" -> C(sender.world, sender.player)
                     "caneHorse" -> CaneHorse(sender.world, sender.player)
                     "z" -> AtelierEntityUtils.INSTANCE.spawn(TargetEntityTypes.valueOf(args[1].toString().toUpperCase()), sender.location)
-                    "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world), sender.location)
+                    "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world, sender.location), sender.location)
                     "sss" -> AtelierEntityUtils.INSTANCE.spawn(SSSkeleton(sender.world), sender.location)
                 }
             }

@@ -19,12 +19,13 @@ public class ChannelHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//        System.out.println(msg.getClass().getSimpleName());
+//        System.out.println("[READ] " + msg.getClass().getSimpleName());
         super.channelRead(ctx, msg);
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+//        System.out.println("[WRITE] " + msg.getClass().getSimpleName());
         if (msg instanceof PacketPlayOutEntity) {
             final Field entityIdField = VersionUtils.getField(PacketPlayOutEntity.class, "a");
             final Entity entity = player.world.getEntity((Integer) VersionUtils.getFieldValue(entityIdField, msg));
