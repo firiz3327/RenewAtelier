@@ -112,4 +112,55 @@ public final class GameConstants {
         }
     }
 
+    public static boolean isAxe(@NotNull Material material) {
+        switch (material) {
+            case WOODEN_AXE:
+            case STONE_AXE:
+            case IRON_AXE:
+            case GOLDEN_AXE:
+            case DIAMOND_AXE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static double getVanillaItemDamage(Material material) {
+        switch (material) {
+            case WOODEN_PICKAXE:
+            case GOLDEN_PICKAXE:
+                return 2;
+            case WOODEN_SHOVEL:
+            case GOLDEN_SHOVEL:
+                return 2.5;
+            case STONE_PICKAXE:
+                return 3;
+            case STONE_SHOVEL:
+                return 3.5;
+            case WOODEN_SWORD:
+            case GOLDEN_SWORD:
+            case IRON_PICKAXE:
+                return 4;
+            case IRON_SHOVEL:
+                return 4.5;
+            case STONE_SWORD:
+            case DIAMOND_PICKAXE:
+                return 5;
+            case DIAMOND_SHOVEL:
+                return 5.5;
+            case IRON_SWORD:
+                return 6;
+            case DIAMOND_SWORD:
+            case WOODEN_AXE:
+            case GOLDEN_AXE:
+                return 7;
+            case STONE_AXE:
+            case IRON_AXE:
+            case DIAMOND_AXE:
+                return 9;
+            default:
+                return 1;
+        }
+    }
+
 }

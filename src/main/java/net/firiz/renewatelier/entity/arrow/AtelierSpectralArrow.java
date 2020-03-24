@@ -1,11 +1,15 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftSpectralArrow;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierArrow {
 
@@ -27,6 +31,29 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     @Override
     public Spigot spigot() {
         return spigot;
+    }
+
+    @Nullable
+    @Override
+    public Location getOrigin() {
+        return null;
+    }
+
+    @Override
+    public boolean fromMobSpawner() {
+        return false;
+    }
+
+    @NotNull
+    @Override
+    public Chunk getChunk() {
+        return ((NMSAtelierSpectralArrow) entity).getLocation().getChunk();
+    }
+
+    @NotNull
+    @Override
+    public CreatureSpawnEvent.SpawnReason getEntitySpawnReason() {
+        return CreatureSpawnEvent.SpawnReason.CUSTOM;
     }
 
     @Override

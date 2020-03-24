@@ -21,6 +21,7 @@
 package net.firiz.renewatelier.listener;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
@@ -42,8 +43,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -163,12 +166,18 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void respawn(final PlayerRespawnEvent e) {
         NPCManager.INSTANCE.packet(e.getPlayer());
+        PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId()).respawn();
     }
 
     @EventHandler
     private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId());
         status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
+    }
+
+    @EventHandler
+    private void death(final PlayerDeathEvent e) {
+        e.setDeathMessage(null);
     }
 
 }

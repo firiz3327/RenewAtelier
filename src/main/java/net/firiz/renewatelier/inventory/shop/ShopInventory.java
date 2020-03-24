@@ -89,9 +89,9 @@ public final class ShopInventory {
 
     private static void reduceItem(Triple<Integer, AlchemyMaterial, Integer> priceMode, Player player) {
         if (priceMode.getLeft() == 1) {
-            Chore.reduceItem(player.getInventory(), EMERALD, priceMode.getRight());
+            Chore.gainItem(player.getInventory(), EMERALD, priceMode.getRight());
         } else if (priceMode.getMiddle() != null) {
-            Chore.reduceItem(player.getInventory(), priceMode.getMiddle(), priceMode.getRight());
+            Chore.gainItem(player.getInventory(), priceMode.getMiddle(), priceMode.getRight());
         } else {
             throw new IllegalStateException("AlchemyMaterial null trade");
         }

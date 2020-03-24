@@ -3,6 +3,7 @@ package net.firiz.renewatelier.damage;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
@@ -13,10 +14,13 @@ import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,15 +29,16 @@ import java.util.Objects;
 final class HoloDamage {
 
     private final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+    private final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
     @SafeVarargs
-    final void holoDamage(@NotNull LivingEntity victim, @NotNull LivingEntity damager, FinalDoubleData<Double, AttackAttribute>... damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, FinalDoubleData<Double, AttackAttribute>... damages) {
         holoDamage(victim, damager, Arrays.asList(damages));
     }
 
-    final void holoDamage(@NotNull LivingEntity victim, @NotNull LivingEntity damager, List<FinalDoubleData<Double, AttackAttribute>> damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<FinalDoubleData<Double, AttackAttribute>> damages) {
         final Location location = victim.getEyeLocation();
-        location.setY(location.getY() + 0.2);
+        location.setY(location.getY() + 1.2);
         double allDamage = 0;
         for (int i = 0; i < damages.size(); i++) {
             final double damage = damages.get(i).getLeft();
@@ -56,7 +61,7 @@ final class HoloDamage {
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
                             if (showDamage) {
                                 PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, location));
-                                PacketUtils.sendPacket(player, EntityPacket.getMessageSmallStandMeta(player.getWorld(), viewDamage).compile(fakeEntity.getEntityId()));
+                                PacketUtils.sendPacket(player, EntityPacket.getMessageStandMeta(player.getWorld(), viewDamage, true).compile(fakeEntity.getEntityId()));
                                 Bukkit.getScheduler().runTaskLater(
                                         AtelierPlugin.getPlugin(),
                                         () -> PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(fakeEntity.getEntityId())),
@@ -73,9 +78,17 @@ final class HoloDamage {
             if (aEntityUtils.hasLivingData(victim)) {
                 final LivingData livingData = aEntityUtils.getLivingData(victim);
                 livingData.damage(damager, allDamage);
+            } else if(victim instanceof Player) {
+                final CharStats charStats = psm.getChar(victim.getUniqueId()).getCharStats();
+                charStats.damageHp(allDamage);
             } else {
                 victim.setHealth(Math.max(0, victim.getHealth() - allDamage));
-                victim.setLastDamageCause(new EntityDamageEvent(
+                victim.setLastDamageCause(damager == null ? new EntityDamageEvent(
+                        victim,
+                        EntityDamageEvent.DamageCause.CUSTOM,
+                        allDamage
+                ) : new EntityDamageByEntityEvent(
+                        victim,
                         damager,
                         EntityDamageEvent.DamageCause.CUSTOM,
                         allDamage

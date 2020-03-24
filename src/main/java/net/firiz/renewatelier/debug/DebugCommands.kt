@@ -18,6 +18,7 @@ import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.Puni
 import net.firiz.renewatelier.version.entity.living.monster.SSSkeleton
+import net.firiz.renewatelier.version.entity.living.monster.TestZombie
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -433,6 +434,7 @@ class DebugCommands(private val debugListener: DebugListener) {
                     "z" -> AtelierEntityUtils.INSTANCE.spawn(TargetEntityTypes.valueOf(args[1].toString().toUpperCase()), sender.location)
                     "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world, sender.location), sender.location)
                     "sss" -> AtelierEntityUtils.INSTANCE.spawn(SSSkeleton(sender.world), sender.location)
+                    "t" -> AtelierEntityUtils.INSTANCE.spawn(TestZombie(sender.location), sender.location)
                 }
             }
         }

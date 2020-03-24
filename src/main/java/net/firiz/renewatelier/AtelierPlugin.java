@@ -26,12 +26,15 @@ import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.sql.SQLManager;
+import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -48,6 +51,7 @@ public final class AtelierPlugin extends JavaPlugin {
         final PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new DebugListener(), this);
         pluginManager.registerEvents(new BlockListener(), this);
+        pluginManager.registerEvents(new EntityListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new DamageListener(), this);
         pluginManager.registerEvents(new InventoryListener(), this);
@@ -78,7 +82,21 @@ public final class AtelierPlugin extends JavaPlugin {
         LoopManager.INSTANCE.stopLoop();
         SQLManager.INSTANCE.close();
         NPCManager.INSTANCE.stop();
+        resetEntities();
         removePlayerNPCStands();
+    }
+
+    private void resetEntities() {
+        final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+        for (World world : getServer().getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof Player) {
+                    ((Player) entity).kickPlayer("server reloading.");
+                } else if (entity instanceof LivingEntity && aEntityUtils.hasLivingData((LivingEntity) entity)) {
+                    entity.remove();
+                }
+            }
+        }
     }
 
     private void removePlayerNPCStands() {

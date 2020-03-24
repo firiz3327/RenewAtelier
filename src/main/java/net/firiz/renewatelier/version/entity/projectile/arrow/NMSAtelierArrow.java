@@ -98,6 +98,11 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
         return arrow.getItem();
     }
 
+    @NotNull
+    public Location getLocation() {
+        return location;
+    }
+
     @Override
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof org.bukkit.entity.Entity) {

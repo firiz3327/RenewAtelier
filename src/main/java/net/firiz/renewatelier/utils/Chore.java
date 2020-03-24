@@ -409,8 +409,7 @@ public final class Chore {
         int amount = item.getAmount();
 
         final ItemStack[] contents = inv.getStorageContents();
-        for (int i = 0; i < contents.length; i++) {
-            final ItemStack v = contents[i];
+        for (final ItemStack v : contents) {
             amount = getAmount(item, amount, v);
         }
         inv.setStorageContents(contents);
@@ -427,36 +426,43 @@ public final class Chore {
         return null;
     }
 
-    public static void reduceItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull int reduceAmount) {
-        final ItemStack[] contents = inv.getStorageContents();
-        int amount = reduceAmount;
-        for (final ItemStack i : contents) {
-            if (i != null && item.isSimilar(i)) {
-                int v = Math.max(i.getAmount() - amount, 0);
-                amount = -(i.getAmount() - amount);
+    public static void gainItem(@NotNull Inventory inv, @NotNull Material material, @NotNull int reduceAmount) {
+        for (final ItemStack i : inv.getStorageContents()) {
+            if (i != null && i.getType() == material) {
+                int v = Math.max(i.getAmount() - reduceAmount, 0);
+                reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);
-                if (amount <= 0) {
+                if (reduceAmount <= 0) {
                     break;
                 }
             }
         }
-        inv.setStorageContents(contents);
     }
 
-    public static void reduceItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, @NotNull int reduceAmount) {
-        final ItemStack[] contents = inv.getStorageContents();
-        int amount = reduceAmount;
-        for (final ItemStack i : contents) {
-            if (i != null && material.equals(AlchemyMaterial.getMaterial(i))) {
-                int v = Math.max(i.getAmount() - amount, 0);
-                amount = -(i.getAmount() - amount);
+    public static void gainItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull int reduceAmount) {
+        for (final ItemStack i : inv.getStorageContents()) {
+            if (i != null && item.isSimilar(i)) {
+                int v = Math.max(i.getAmount() - reduceAmount, 0);
+                reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);
-                if (amount <= 0) {
+                if (reduceAmount <= 0) {
                     break;
                 }
             }
         }
-        inv.setStorageContents(contents);
+    }
+
+    public static void gainItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, @NotNull int reduceAmount) {
+        for (final ItemStack i : inv.getStorageContents()) {
+            if (i != null && material.equals(AlchemyMaterial.getMaterial(i))) {
+                int v = Math.max(i.getAmount() - reduceAmount, 0);
+                reduceAmount = -(i.getAmount() - reduceAmount);
+                i.setAmount(v);
+                if (reduceAmount <= 0) {
+                    break;
+                }
+            }
+        }
     }
 
     public static boolean isFuncBlock(Block block) {

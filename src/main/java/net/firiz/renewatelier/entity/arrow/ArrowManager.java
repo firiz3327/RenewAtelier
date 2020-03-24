@@ -74,7 +74,6 @@ public final class ArrowManager {
         }
 
         if (consumeArrow != null) {
-            final AlchemyItemStatus bowItemStatus = AlchemyItemStatus.load(bow);
             final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
             if (CustomArrow.isFound(meta)) {
                 cancelArrow(player, baseArrow);
@@ -83,6 +82,9 @@ public final class ArrowManager {
                 cancelArrow(player, baseArrow);
                 shootAtelierArrow(player, bow, baseArrow, consumeArrow, true, force);
             }
+        } else if(player.getGameMode() == GameMode.CREATIVE) {
+            cancelArrow(player, baseArrow);
+            shootAtelierArrow(player, bow, baseArrow, new ItemStack(Material.ARROW), true, force);
         }
     }
 
@@ -91,7 +93,7 @@ public final class ArrowManager {
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
-    private void shootAtelierArrow(final Player player, final ItemStack bow, final AbstractArrow baseArrow, final ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
+    private void shootAtelierArrow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
@@ -149,7 +151,7 @@ public final class ArrowManager {
             );
             return;
         }
-        shootAtelierArrow(player, bow, baseArrow, nextConsumeArrow, true, force);
+        shootAtelierArrow(player, bow == null ? new ItemStack(Material.BOW) : bow, baseArrow, nextConsumeArrow, true, force);
         final int consumeArrowAmount = consumeArrow.getAmount();
         Bukkit.getScheduler().scheduleSyncDelayedTask(
                 AtelierPlugin.getPlugin(),

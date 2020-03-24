@@ -84,24 +84,17 @@ public class EntityPacket {
     }
 
     public static PEMeta getMessageStandMeta(final org.bukkit.World world, final String name) {
-        final WorldServer worldServer = ((CraftWorld) world).getHandle();
-        final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
-        armorStand.setCustomName(new ChatComponentText(name));
-        armorStand.setCustomNameVisible(true);
-        armorStand.setInvisible(true);
-        return new PEMeta(
-                armorStand.getDataWatcher(),
-                false
-        );
+        return getMessageStandMeta(world, name, false);
     }
 
-    public static PEMeta getMessageSmallStandMeta(final org.bukkit.World world, final String name) {
+    public static PEMeta getMessageStandMeta(final org.bukkit.World world, final String name, final boolean small) {
         final WorldServer worldServer = ((CraftWorld) world).getHandle();
         final EntityArmorStand armorStand = new EntityArmorStand(worldServer.getMinecraftWorld(), 0, 0, 0);
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
         armorStand.setInvisible(true);
-        armorStand.setSmall(true);
+        armorStand.setSmall(small);
+        armorStand.setMarker(true); // 当たり判定がなくなる
         return new PEMeta(
                 armorStand.getDataWatcher(),
                 false

@@ -7,6 +7,7 @@ import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +46,7 @@ public class LivingData {
         final int def = BigDecimal.valueOf(((Math.PI / 2 - 0.77) + Math.atan(levelRate * 0.02)) * (200 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int speed = BigDecimal.valueOf(((Math.PI / 2 - 0.4) + Math.atan(levelRate * 0.02)) * (260 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final double hp = maxHp - (maxHp * (new Random().nextDouble() * 0.05));
-        this.stats = new MonsterStats(types.race, level, maxHp, hp, atk, def, speed);
+        this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed);
         init();
     }
 
@@ -92,7 +93,7 @@ public class LivingData {
         return stats;
     }
 
-    public void damage(LivingEntity damager, double damage) {
+    public void damage(org.bukkit.entity.Entity damager, double damage) {
         final LivingEntity bukkit = getBukkitEntity();
         if (hasStats()) {
             stats.setHp(Math.max(0, stats.getHp() - damage));
@@ -100,7 +101,12 @@ public class LivingData {
         } else {
             bukkit.setHealth(Math.max(0, bukkit.getHealth() - damage));
         }
-        bukkit.setLastDamageCause(new EntityDamageEvent(
+        bukkit.setLastDamageCause(damager == null ? new EntityDamageEvent(
+                wrapEntity.getBukkitEntity(),
+                EntityDamageEvent.DamageCause.CUSTOM,
+                damage
+        ) : new EntityDamageByEntityEvent(
+                wrapEntity.getBukkitEntity(),
                 damager,
                 EntityDamageEvent.DamageCause.CUSTOM,
                 damage

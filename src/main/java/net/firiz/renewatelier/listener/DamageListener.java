@@ -8,14 +8,17 @@ import net.firiz.renewatelier.entity.arrow.AtelierArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
+import org.bukkit.EntityEffect;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
@@ -27,17 +30,33 @@ public class DamageListener implements Listener {
     private final DamageUtilV2 damageUtilV2 = new DamageUtilV2();
 
     @EventHandler
-    private void damage(final EntityDamageEvent e) {
-        if (e.getDamage() == 0) {
-            return;
+    private void regainHealth(final EntityRegainHealthEvent e) {
+        final Entity entity = e.getEntity();
+        if (entity instanceof Player) {
+            e.setCancelled(true);
+            psm.getChar(entity.getUniqueId()).getCharStats().damageHp(-e.getAmount());
+        } else if (entity instanceof EnderDragon && e.getRegainReason() == EntityRegainHealthEvent.RegainReason.ENDER_CRYSTAL) {
+            // enderdragon crystal heal
         }
+    }
+
+    @EventHandler
+    private void damage(final EntityDamageEvent e) {
         if (e.getEntity() instanceof Player) {
-//            DamageUtil.damagePlayer(
-//                    psm.getChar(e.getEntity().getUniqueId()).getCharStats(),
-//                    e.getDamage(),
-//                    e.getCause()
-//            );
-            e.setDamage(0);
+            causeFilter(e.getCause(), () -> {
+                e.setCancelled(true);
+                damageUtilV2.playerDamage(psm.getChar(e.getEntity().getUniqueId()).getCharStats(), e.getDamage());
+            });
+        } else if (e.getEntity() instanceof LivingEntity) {
+            causeFilter(e.getCause(), () -> {
+                damageUtilV2.mobDamage((LivingEntity) e.getEntity(), e.getDamage());
+                if (Randomizer.percent(30)) {
+                    e.setDamage(0);
+                } else {
+                    e.getEntity().playEffect(EntityEffect.HURT);
+                    e.setCancelled(true);
+                }
+            });
         }
     }
 
@@ -48,42 +67,37 @@ public class DamageListener implements Listener {
         }
         final Entity damager = e.getDamager();
         if (e.getCause() != EntityDamageEvent.DamageCause.CUSTOM && e.getEntity() instanceof LivingEntity) {
+            final LivingEntity victim = (LivingEntity) e.getEntity();
             if (damager instanceof Player) {
                 if (damager.isOp() && ((Player) damager).isSneaking() && ((Player) damager).getInventory().getItemInMainHand().getType() == Material.AIR) {
-                    final LivingEntity victim = (LivingEntity) e.getEntity();
-                    final boolean hasLivingData = AtelierEntityUtils.INSTANCE.hasLivingData(victim);
-                    damager.sendMessage("hasLivingData: " + hasLivingData);
-                    if (hasLivingData) {
-                        final LivingData livingData = AtelierEntityUtils.INSTANCE.getLivingData(victim);
-                        final boolean hasStats = livingData.hasStats();
-                        damager.sendMessage("hasStats: " + hasStats);
-                        if (hasStats) {
-                            final MonsterStats stats = livingData.getStats();
-                            damager.sendMessage(victim.getCustomName());
-                            damager.sendMessage("LV: " + stats.getLevel());
-                            damager.sendMessage("HP: " + stats.getHp() + " / " + stats.getMaxHp());
-                            damager.sendMessage("ATK: " + stats.getAtk() + " DEF: " + stats.getDef() + " SPD: " + stats.getSpeed());
-                            damager.sendMessage("Buffs: " + stats.getBuffs());
-                        }
-                    }
+                    debugStats(damager, victim);
                     e.setCancelled(true);
                     return;
                 }
                 final ItemStack weapon = ((Player) damager).getInventory().getItemInMainHand();
+                double weaponDamage = GameConstants.getVanillaItemDamage(weapon.getType());
+                if (GameConstants.isAxe(weapon.getType())) {
+                    weaponDamage = Randomizer.rand((int) weaponDamage - 4, (int) weaponDamage); // 斧のダメージは整数なので問題ない
+                }
                 damageUtilV2.normalDamage(
                         GameConstants.isSword(weapon.getType()) ? AttackAttribute.SLASH : AttackAttribute.BLOW,
-                        PlayerSaveManager.INSTANCE.getChar(damager.getUniqueId()).getCharStats(),
+                        psm.getChar(damager.getUniqueId()).getCharStats(),
                         (LivingEntity) e.getEntity(),
-                        e.getDamage()
+                        weaponDamage
                 );
-                e.setDamage(0);
+                if (Randomizer.percent(30)) {
+                    e.setDamage(0);
+                } else {
+                    victim.playEffect(EntityEffect.HURT);
+                    e.setCancelled(true);
+                }
             } else if (damager instanceof AtelierArrow) {
                 final AtelierArrow arrow = (AtelierArrow) damager;
                 if (arrow.getSource() instanceof Player) {
                     damageUtilV2.arrowDamage(
                             AlchemyItemStatus.load(arrow.getBow()),
                             AlchemyItemStatus.load(arrow.getArrow()),
-                            PlayerSaveManager.INSTANCE.getChar(arrow.getSource().getUniqueId()).getCharStats(),
+                            psm.getChar(arrow.getSource().getUniqueId()).getCharStats(),
                             (LivingEntity) e.getEntity(),
                             e.getDamage(),
                             arrow.isCritical(),
@@ -91,6 +105,13 @@ public class DamageListener implements Listener {
                     );
                     e.setDamage(0);
                 }
+            } else if (victim instanceof Player) {
+                damageUtilV2.playerDamage(
+                        psm.getChar(e.getEntity().getUniqueId()).getCharStats(),
+                        e.getDamager(),
+                        e.getDamage()
+                );
+                e.setDamage(0);
             }
         }
     }
@@ -106,6 +127,55 @@ public class DamageListener implements Listener {
             } else {
                 arrowManager.shootBow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
             }
+        }
+    }
+
+    private void debugStats(Entity damager, LivingEntity victim) {
+        final boolean hasLivingData = AtelierEntityUtils.INSTANCE.hasLivingData(victim);
+        damager.sendMessage("hasLivingData: " + hasLivingData);
+        if (hasLivingData) {
+            final LivingData livingData = AtelierEntityUtils.INSTANCE.getLivingData(victim);
+            final boolean hasStats = livingData.hasStats();
+            damager.sendMessage("hasStats: " + hasStats);
+            if (hasStats) {
+                final MonsterStats stats = livingData.getStats();
+                damager.sendMessage(victim.getCustomName());
+                damager.sendMessage("LV: " + stats.getLevel());
+                damager.sendMessage("HP: " + stats.getHp() + " / " + stats.getMaxHp());
+                damager.sendMessage("ATK: " + stats.getAtk() + " DEF: " + stats.getDef() + " SPD: " + stats.getSpeed());
+                damager.sendMessage("Buffs: " + stats.getBuffs());
+            }
+        }
+    }
+
+    private void causeFilter(EntityDamageEvent.DamageCause cause, Runnable runnable) {
+        switch (cause) {
+            case CONTACT:
+            case BLOCK_EXPLOSION:
+            case CRAMMING:
+            case DRAGON_BREATH:
+            case DROWNING:
+            case FALL:
+            case FALLING_BLOCK:
+            case FIRE:
+            case FIRE_TICK:
+            case FLY_INTO_WALL:
+            case HOT_FLOOR:
+            case LAVA:
+            case LIGHTNING:
+            case MAGIC:
+            case POISON:
+            case STARVATION:
+            case SUFFOCATION:
+            case SUICIDE:
+            case THORNS:
+            case VOID:
+            case WITHER:
+                runnable.run();
+                break;
+            default:
+                // 想定しない
+                break;
         }
     }
 

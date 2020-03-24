@@ -94,6 +94,11 @@ public final class Char {
         autoSave.run();
     }
 
+    public void respawn() {
+        charStats.clearBuffs();
+        charStats.damageHp(-charStats.getMaxHp());
+    }
+
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
     private void addRecipe(final RecipeStatus recipeStatus) {
         recipeStatuses.add(recipeStatus);

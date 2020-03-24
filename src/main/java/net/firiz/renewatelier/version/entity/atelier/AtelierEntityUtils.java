@@ -68,6 +68,9 @@ public enum AtelierEntityUtils {
         final World world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
         final EntityLiving entity = (EntityLiving) createWrapEntity(types, world, location);
         world.addEntity(entity);
+        if (types.initConsumer != null) {
+            types.initConsumer.accept(entity.getBukkitEntity());
+        }
         return (LivingData) ((Supplier<Object>) entity).get();
     }
 

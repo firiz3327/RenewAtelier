@@ -1,24 +1,25 @@
 package net.firiz.renewatelier.version.entity.living.monster;
 
-import net.firiz.renewatelier.entity.Race;
-import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_15_R1.DamageSource;
+import net.minecraft.server.v1_15_R1.EntityTypes;
+import net.minecraft.server.v1_15_R1.EntityZombie;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 
 import java.util.function.Supplier;
 
-public class SSSkeleton extends EntitySkeleton implements Supplier<Object> {
+public class TestZombie extends EntityZombie implements Supplier<Object> {
 
     private final LivingData livingData;
 
-    public SSSkeleton(org.bukkit.World world) {
-        super(EntityTypes.SKELETON, ((CraftWorld) world).getHandle());
+    public TestZombie(Location location) {
+        super(EntityTypes.ZOMBIE, ((CraftWorld) location.getWorld()).getHandle());
         this.livingData = new LivingData(
-                TargetEntityTypes.SKELETON,
+                TargetEntityTypes.ZOMBIE,
                 this,
-                new MonsterStats(getBukkitEntity(), Race.UNDEAD, 24, 1966, 1966, 287, 150, 130, true)
+                location
         );
     }
 

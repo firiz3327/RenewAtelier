@@ -81,8 +81,8 @@ public class HoloHealth {
         }
         ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
         ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageSmallStandMeta(bukkit.getWorld(), displayHp.toString()).compile(holoHp.getEntityId()));
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageSmallStandMeta(bukkit.getWorld(), customName).compile(holoCustomName.getEntityId()));
+        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
+        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), customName, true).compile(holoCustomName.getEntityId()));
         holoDeleteTaskId = scheduler.scheduleSyncDelayedTask(
                 AtelierPlugin.getPlugin(),
                 () -> {
@@ -115,7 +115,7 @@ public class HoloHealth {
     private Location getLoc(int y) {
         final LivingEntity bukkit = (LivingEntity) entity.getBukkitEntity();
         final Location nextLoc = bukkit.getEyeLocation().clone();
-        nextLoc.setY(nextLoc.getY() - 0.8 + (0.3 * y));
+        nextLoc.setY(nextLoc.getY() + 0.2 + (0.3 * y));
         return nextLoc;
     }
 
