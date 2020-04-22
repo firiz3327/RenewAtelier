@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.version.packet;
 
 import java.util.UUID;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.Pair;
 import net.minecraft.server.v1_15_R1.EntityTypes;
 import org.bukkit.entity.EntityType;
 
@@ -46,7 +46,7 @@ public class FakeEntity {
         this.type = type;
         this.objectData = objectData;
 
-        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type.type);
+        final Pair<Boolean, Integer> check = ObjectChecker.check(type.type);
         this.typeId = check.getRight();
         this.object = check.getLeft();
     }
@@ -58,7 +58,7 @@ public class FakeEntity {
         this.type = type;
         this.objectData = objectData;
 
-        final DoubleData<Boolean, Integer> check = ObjectChecker.check(type.type);
+        final Pair<Boolean, Integer> check = ObjectChecker.check(type.type);
         this.typeId = check.getRight();
         this.object = check.getLeft();
     }
@@ -150,13 +150,13 @@ public class FakeEntity {
             this.value = value;
         }
 
-        public static DoubleData<Boolean, Integer> check(final EntityType type) {
+        public static Pair<Boolean, Integer> check(final EntityType type) {
             for (final ObjectChecker c : values()) {
                 if (c.type == type) {
-                    return new DoubleData<>(true, c.value);
+                    return new Pair<>(true, c.value);
                 }
             }
-            return new DoubleData<>(false, type.ordinal());
+            return new Pair<>(false, type.ordinal());
         }
 
     }

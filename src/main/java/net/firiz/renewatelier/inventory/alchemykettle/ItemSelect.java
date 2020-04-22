@@ -21,6 +21,7 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +32,10 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
+import net.firiz.renewatelier.inventory.manager.BiParamInventory;
+import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -49,23 +51,28 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author firiz
  */
-public final class ItemSelect {
+public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
 
-    private ItemSelect() {
+    private final InventoryManager manager;
+    private final KettleItemManager kettle = KettleItemManager.INSTANCE;
+    private final List<UUID> openUsers = new ArrayList<>();
+
+    public ItemSelect(final InventoryManager manager) {
+        this.manager = manager;
     }
 
-    private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private static final List<UUID> OPEN_USERS = new ArrayList<>();
-
-    public static boolean isItemSelect(final InventoryView view) {
+    @Override
+    public boolean check(@NotNull final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
     }
 
-    protected static void openItemSelect(Player player, AlchemyRecipe recipe, Inventory recipeInv) {
+    @Override
+    public void open(@NotNull Player player, @NotNull AlchemyRecipe recipe, @NotNull Inventory recipeInv) {
         final Inventory inv = Bukkit.createInventory(player, 45, AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
         final ItemStack settingItem = Chore.ci(Material.BARRIER, 0, "", null);
         final ItemMeta setting = settingItem.getItemMeta();
@@ -88,7 +95,7 @@ public final class ItemSelect {
         InventoryPacket.update(player, "", InventoryPacketType.CHEST);
     }
 
-    private static void setItemSelectNumber(final Player player, final Inventory inv, final AlchemyRecipe recipe, final int add_page) {
+    private void setItemSelectNumber(final Player player, final Inventory inv, final AlchemyRecipe recipe, final int add_page) {
         final List<String> reqs = recipe.getReqMaterial();
         final ItemStack settingItem = inv.getItem(1);
         final ItemMeta setting = settingItem.getItemMeta();
@@ -98,7 +105,7 @@ public final class ItemSelect {
 
         final String[] data = reqs.get(new_page).split(",");
         String name = null;
-        FinalDoubleData<Material, Integer> material = null;
+        ImmutablePair<Material, Integer> material = null;
         if (data[0].startsWith("material:")) {
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(data[0].substring(9));
             if (!am.isDefaultName()) {
@@ -124,7 +131,7 @@ public final class ItemSelect {
             item.setItemMeta(meta);
             inv.setItem(4, item);
 
-            final List<ItemStack> useItems = KETTLE.getPageItems(player.getUniqueId(), new_page);
+            final List<ItemStack> useItems = kettle.getPageItems(player.getUniqueId(), new_page);
             int count = 0;
             for (int i = 1; i <= 3; i++) { //12,13,14 - 21,22,23 - 30,31,32
                 for (int j = 0; j < 3; j++) {
@@ -141,11 +148,11 @@ public final class ItemSelect {
 
     }
 
-    private static boolean checkMaxSlot(final UUID uuid, final AlchemyRecipe recipe, final int page) {
+    private boolean checkMaxSlot(final UUID uuid, final AlchemyRecipe recipe, final int page) {
         final List<String> reqs = recipe.getReqMaterial();
-        final List<ItemStack> pageItems = KETTLE.getPageItems(uuid, page);
+        final List<ItemStack> pageItems = kettle.getPageItems(uuid, page);
         final String[] data = reqs.get(page).split(",");
-        final FinalDoubleData<Material, Integer> material = data[0].startsWith("material:")
+        final ImmutablePair<Material, Integer> material = data[0].startsWith("material:")
                 ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
                 : (data[0].startsWith("category:")
                 ? Category.valueOf(data[0].substring(9)).getMaterial() : null);
@@ -157,7 +164,8 @@ public final class ItemSelect {
         return true;
     }
 
-    public static void click(InventoryClickEvent e) {
+    @Override
+    public void onClick(@NotNull InventoryClickEvent e) {
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { // 増殖防止
             e.setCancelled(true);
             return;
@@ -177,7 +185,7 @@ public final class ItemSelect {
                 if (Chore.checkMaterial(current, data[0])) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
-                    KETTLE.addPageItem(uuid, cloneItem, page);
+                    kettle.addPageItem(uuid, cloneItem, page);
                     e.getCurrentItem().setAmount(e.getCurrentItem().getAmount() - 1);
                     setItemSelectNumber(player, inv, recipe, 0); // reflesh page
                 }
@@ -193,12 +201,12 @@ public final class ItemSelect {
                 if (current != null) {
                     final ItemStack cursor = e.getCursor();
                     if (current.getType() != Material.AIR) { // アイテムをスロットから外す
-                        final List<ItemStack> items = KETTLE.getPageItems(uuid, page);
+                        final List<ItemStack> items = kettle.getPageItems(uuid, page);
                         if (items != null && !items.isEmpty()) {
                             final int slot = raw >= 21 ? (raw >= 30 ? raw - 24 : raw - 18) : raw - 12;
                             final ItemStack item = items.get(slot);
                             Chore.addItem(player, item);
-                            KETTLE.removePageItem(uuid, slot, page);
+                            kettle.removePageItem(uuid, slot, page);
                         }
                     } else if (checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
                         final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
@@ -206,7 +214,7 @@ public final class ItemSelect {
                             final ItemStack cloneItem = cursor.clone();
                             cloneItem.setAmount(1);
                             cursor.setAmount(cursor.getAmount() - 1);
-                            KETTLE.addPageItem(uuid, cloneItem, page);
+                            kettle.addPageItem(uuid, cloneItem, page);
                         }
                     }
                     setItemSelectNumber(player, inv, recipe, 0); // reflesh page
@@ -227,23 +235,25 @@ public final class ItemSelect {
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
                     return;
                 }
-                OPEN_USERS.add(uuid);
+                openUsers.add(uuid);
                 player.closeInventory();
-                CatalystSelect.openCatalyst(player, recipe, inv);
-                OPEN_USERS.remove(uuid);
+                manager.getInventory(CatalystSelect.class).open(player, recipe, inv);
+                openUsers.remove(uuid);
             }
         }
     }
 
-    public static void drag(InventoryDragEvent e) {
+    @Override
+    public void onDrag(@NotNull InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
         raws.stream().filter(raw -> (raw >= 0 && raw < inv.getSize())).forEach(itemValue -> e.setCancelled(true));
     }
 
-    public static void close(InventoryCloseEvent e) {
-        if (!OPEN_USERS.contains(e.getPlayer().getUniqueId())) {
-            KETTLE.allBack((Player) e.getPlayer());
+    @Override
+    public void onClose(@NotNull InventoryCloseEvent e) {
+        if (!openUsers.contains(e.getPlayer().getUniqueId())) {
+            kettle.allBack((Player) e.getPlayer());
         }
     }
 }

@@ -29,10 +29,10 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             final int lv = item.getInt("lv");
             final String name = item.getString("name");
             final String desc = item.getString("desc");
-            final List<String> categorysStr = item.getStringList("categorys");
-            final CharacteristicCategory[] categorys = new CharacteristicCategory[categorysStr.size()];
-            for (int i = 0; i < categorysStr.size(); i++) {
-                categorys[i] = CharacteristicCategory.valueOf(categorysStr.get(i));
+            final List<String> categoriesStr = item.getStringList("categories");
+            final CharacteristicCategory[] categories = new CharacteristicCategory[categoriesStr.size()];
+            for (int i = 0; i < categoriesStr.size(); i++) {
+                categories[i] = CharacteristicCategory.valueOf(categoriesStr.get(i));
             }
             final List<List<String>> reqs = getReqs(item);
             final List<String> datasStr = item.getStringList("datas");
@@ -57,7 +57,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                     datas.put(CharacteristicType.valueOf(str), null);
                 }
             });
-            add(new Characteristic(key, lv, name, desc, categorys, reqs, datas));
+            add(new Characteristic(key, lv, name, desc, categories, reqs, datas));
         });
     }
 

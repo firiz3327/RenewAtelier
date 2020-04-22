@@ -11,6 +11,7 @@ import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.entity.player.PlayerSaveManager
+import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.Chore
 import net.firiz.renewatelier.version.entity.living.monster.C
 import net.firiz.renewatelier.version.entity.living.horse.CaneHorse
@@ -435,6 +436,7 @@ class DebugCommands(private val debugListener: DebugListener) {
                     "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world, sender.location), sender.location)
                     "sss" -> AtelierEntityUtils.INSTANCE.spawn(SSSkeleton(sender.world), sender.location)
                     "t" -> AtelierEntityUtils.INSTANCE.spawn(TestZombie(sender.location), sender.location)
+                    "quest" -> QuestBook.openQuestBook(sender, sender.inventory.itemInMainHand)
                 }
             }
         }

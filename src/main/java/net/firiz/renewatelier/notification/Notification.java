@@ -22,10 +22,9 @@ package net.firiz.renewatelier.notification;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
-import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.packet.PayloadPacket;
 import net.firiz.renewatelier.version.packet.NotificationPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -34,9 +33,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.Objects;
@@ -52,6 +49,9 @@ public class Notification {
     public static void loginNotification(final Player player) {
         final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
+        meta.setTitle("notification");
+        meta.setAuthor("atelier");
+        meta.setGeneration(BookMeta.Generation.ORIGINAL);
 
         final ComponentBuilder builder = new ComponentBuilder("");
         builder.append("アップデート\n").color(ChatColor.GREEN);

@@ -21,10 +21,7 @@
 package net.firiz.renewatelier.config;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.firiz.renewatelier.AtelierPlugin;
@@ -36,9 +33,8 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.CustomConfig;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
@@ -53,12 +49,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
+    private static final Map<Material, AlchemyMaterial> vanillaReplaceItems = new EnumMap<>(Material.class);
     private static final List<String> notFounds = new ArrayList<>();
     private static final String PREFIX = "MaterialLoader: ";
     private static final String KEY_MATERIAL = "material";
     private static final String KEY_QUALITY_MIN = "quality_min";
     private static final String KEY_QUALITY_MAX = "quality_max";
-    private static final String KEY_CATEGORYS = "categorys";
+    private static final String KEY_CATEGORIES = "categories";
     private static final String KEY_INGREDIENTS = "ingredients";
 
     AlchemyMaterialLoader() {
@@ -75,21 +72,21 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final ConfigurationSection item = config.getConfigurationSection(key);
                 assert item != null;
 
-                final FinalDoubleData<Material, Integer> mat = getMaterial(item, key); // *
+                final ImmutablePair<Material, Integer> mat = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
                 final String name = getName(item, defaultName, mat); // *
                 final int quality_min = getQualityMin(item); // *
                 final int quality_max = getQualityMax(item); // *
                 final int price = item.contains("price") ? item.getInt("price") : 1;
-                final List<Category> categorys = getCategories(item); // *
-                final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = getIngredients(item); // *
+                final List<Category> categories = getCategories(item); // *
+                final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = getIngredients(item); // *
                 final MaterialSizeTemplate sizeTemplate = getSize(item);
                 final List<Object> characteristics = getCharacteristics(item);
                 final Catalyst catalyst = getCatalyst(item);
                 final String script = item.getString("script");
 
                 if (notFounds.isEmpty()) {
-                    add(new AlchemyMaterial(
+                    final AlchemyMaterial material = new AlchemyMaterial(
                             key,
                             name,
                             defaultName,
@@ -104,7 +101,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             getValueOrZero(item, "speed"),
                             getValueOrZero(item, "baseDamageMin"),
                             getValueOrZero(item, "baseDamageMax"),
-                            categorys,
+                            categories,
                             ingredients,
                             sizeTemplate,
                             characteristics,
@@ -117,7 +114,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             getBoolean(item, "hidePlacedOn"),
                             getBoolean(item, "hidePotionEffect"),
                             getBoolean(item, "hideUnbreaking")
-                    ));
+                    );
+                    if (material.isDefaultName()) {
+                        if (material.getMaterial().getRight() == 0) {
+                            vanillaReplaceItems.put(material.getMaterial().getLeft(), material);
+                        } else {
+                            throw new IllegalStateException("default name items cannot be assigned a custom model.");
+                        }
+                    }
+                    add(material);
                 }
             } catch (Exception ex) {
                 Chore.logWarning(PREFIX.concat(key).concat(" -> "), ex);
@@ -136,9 +141,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
         Chore.log(PREFIX + fileName + " - " + getList().size() + " loaded and " + errorCount + " errors found.");
     }
 
+    @NotNull
+    public Map<Material, AlchemyMaterial> getVanillaReplaceItems() {
+        return Collections.unmodifiableMap(vanillaReplaceItems);
+    }
+
     @Nullable
-    private FinalDoubleData<Material, Integer> getMaterial(ConfigurationSection item, String key) {
-        final FinalDoubleData<Material, Integer> result;
+    private ImmutablePair<Material, Integer> getMaterial(ConfigurationSection item, String key) {
+        final ImmutablePair<Material, Integer> result;
         if (item.contains(KEY_MATERIAL)) {
             final String mat_str = item.getString(KEY_MATERIAL);
             assert mat_str != null;
@@ -146,10 +156,10 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 if (mat_str.equalsIgnoreCase("XXX")) {
                     Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                 }
-                result = new FinalDoubleData<>(Chore.getMaterial(mat_str), 0);
+                result = new ImmutablePair<>(Chore.getMaterial(mat_str), 0);
             } else {
                 final String[] matSplit = mat_str.split(",");
-                result = new FinalDoubleData<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+                result = new ImmutablePair<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
             }
         } else {
             result = null;
@@ -159,7 +169,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @Nullable
-    private String getName(ConfigurationSection item, boolean defaultName, final FinalDoubleData<Material, Integer> mat) {
+    private String getName(ConfigurationSection item, boolean defaultName, final ImmutablePair<Material, Integer> mat) {
         String name = null;
         if (defaultName && mat != null) {
             name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getLeft())); // クエストブック用に名前を設定しておく
@@ -198,24 +208,24 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     @NotNull
     private List<Category> getCategories(ConfigurationSection item) {
         final List<Category> categories = new ArrayList<>();
-        if (item.contains(KEY_CATEGORYS)) {
-            final List<String> categorysStr = Chore.cast(item.getList(KEY_CATEGORYS));
-            categorysStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
+        if (item.contains(KEY_CATEGORIES)) {
+            final List<String> categoriesStr = Chore.cast(item.getList(KEY_CATEGORIES));
+            categoriesStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
         } else {
-            notFounds.add(KEY_CATEGORYS);
+            notFounds.add(KEY_CATEGORIES);
         }
         return categories;
     }
 
     @NotNull
-    private List<FinalDoubleData<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
-        final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
+    private List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
+        final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
         if (item.contains(KEY_INGREDIENTS)) {
             final List<String> ingsStr = Chore.cast(item.getList(KEY_INGREDIENTS));
             if (ingsStr != null) {
                 ingsStr.forEach(ing -> {
                     final String[] ingData = ing.split(",");
-                    ingredients.add(new FinalDoubleData<>(
+                    ingredients.add(new ImmutablePair<>(
                             AlchemyIngredients.searchName(ingData[0].trim()),
                             Integer.parseInt(ingData[1].trim())
                     ));
@@ -251,7 +261,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     } catch (IllegalArgumentException e) {
                         c = Characteristic.search(id);
                     }
-                    characteristics.add(new DoubleData<>(c, Integer.parseInt(strs[1].trim())));
+                    characteristics.add(new ImmutablePair<>(c, Integer.parseInt(strs[1].trim())));
                 } else {
                     characteristics.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
                 }

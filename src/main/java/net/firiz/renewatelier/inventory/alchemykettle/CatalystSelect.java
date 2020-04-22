@@ -1,20 +1,20 @@
 /*
  * CatalystSelect.java
- * 
+ *
  * Copyright (c) 2018 firiz.
- * 
+ *
  * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
+ *
  * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
@@ -29,6 +29,8 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
+import net.firiz.renewatelier.inventory.manager.BiParamInventory;
+import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.utils.Chore;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -43,24 +45,28 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
- *
  * @author firiz
  */
-public class CatalystSelect {
+public final class CatalystSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
 
-    private CatalystSelect() {
+    private final InventoryManager manager;
+    private final KettleItemManager kettle = KettleItemManager.INSTANCE;
+    private final List<UUID> openUsers = new ArrayList<>();
+
+    public CatalystSelect(final InventoryManager manager) {
+        this.manager = manager;
     }
 
-    private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
-    private static final List<UUID> OPEN_USERS = new ArrayList<>();
-
-    public static boolean isCatalystSelect(final InventoryView view) {
+    @Override
+    public boolean check(@NotNull final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
     }
 
-    public static void openCatalyst(final Player player, final AlchemyRecipe recipe, final Inventory itemInv) {
+    @Override
+    public void open(@NotNull final Player player, @NotNull final AlchemyRecipe recipe, @NotNull final Inventory itemInv) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
         inv.setItem(1, itemInv.getItem(1).clone());
         inv.setItem(2, itemInv.getItem(2).clone());
@@ -68,12 +74,12 @@ public class CatalystSelect {
         player.openInventory(inv);
     }
 
-    private static void setCatalystSlot(final Player player, final Inventory inv, final AlchemyRecipe recipe) {
+    private void setCatalystSlot(final Player player, final Inventory inv, final AlchemyRecipe recipe) {
         for (int i = 3; i < inv.getSize(); i++) {
             inv.setItem(i, null);
         }
 
-        final ItemStack cItem = KETTLE.getCatalyst(player.getUniqueId());
+        final ItemStack cItem = kettle.getCatalyst(player.getUniqueId());
         Catalyst catalyst;
         if (cItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
@@ -84,7 +90,7 @@ public class CatalystSelect {
         final List<String> lore = new ArrayList<>();
         lore.add("");
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
-        recipe.getCatalystCategorys().forEach(ct -> {
+        recipe.getCatalystCategories().forEach(ct -> {
             if (ct.startsWith("material:")) {
                 lore.add(ChatColor.RESET + "- "
                         + AlchemyMaterial.getMaterial(ct.substring(9)).getName()
@@ -92,7 +98,7 @@ public class CatalystSelect {
             } else if (ct.startsWith("category:")) {
                 lore.add(
                         ChatColor.RESET + "- "
-                        + Category.valueOf(ct.substring(9)).getName()
+                                + Category.valueOf(ct.substring(9)).getName()
                 );
             }
         });
@@ -104,7 +110,8 @@ public class CatalystSelect {
         ));
     }
 
-    public static void click(final InventoryClickEvent e) {
+    @Override
+    public void onClick(@NotNull final InventoryClickEvent e) {
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) { // 増殖防止 - チェスト内のアイテムにフラッグを付与すれば対処可能
             e.setCancelled(true);
             return;
@@ -118,7 +125,7 @@ public class CatalystSelect {
         if (raw >= inv.getSize() && e.isShiftClick()) {
             e.setCancelled(true);
             if (inv.getItem(37).getType() != Material.BARRIER) {
-                Chore.addItem(player, KETTLE.getCatalyst(uuid));
+                Chore.addItem(player, kettle.getCatalyst(uuid));
             }
             final ItemStack current = e.getCurrentItem();
             setCatalystItem(inv, player, uuid, recipe, current);
@@ -132,20 +139,20 @@ public class CatalystSelect {
                         final ItemStack cursor = e.getCursor();
                         setCatalystItem(inv, player, uuid, recipe, cursor);
                     } else {
-                        Chore.addItem(player, KETTLE.getCatalyst(uuid));
-                        KETTLE.removeCatalyst(uuid);
+                        Chore.addItem(player, kettle.getCatalyst(uuid));
+                        kettle.removeCatalyst(uuid);
                         setCatalystSlot(player, inv, recipe);
                     }
                     break;
                 }
                 case 19: {
-                    if (KETTLE.getCatalyst(uuid) == null) {
-                        KETTLE.setCatalyst(uuid, null);
+                    if (kettle.getCatalyst(uuid) == null) {
+                        kettle.setCatalyst(uuid, null);
                     }
-                    OPEN_USERS.add(player.getUniqueId());
+                    openUsers.add(player.getUniqueId());
                     player.closeInventory();
-                    AlchemyKettle.openKettle(player, recipe, inv);
-                    OPEN_USERS.remove(uuid);
+                    manager.getInventory(AlchemyKettle.class).open(player, recipe, inv);
+                    openUsers.remove(uuid);
                     break;
                 }
                 default:
@@ -155,26 +162,28 @@ public class CatalystSelect {
         }
     }
 
-    private static void setCatalystItem(Inventory inv, Player player, UUID uuid, AlchemyRecipe recipe, ItemStack item) {
+    private void setCatalystItem(Inventory inv, Player player, UUID uuid, AlchemyRecipe recipe, ItemStack item) {
         final AlchemyMaterial am = AlchemyMaterial.getMaterialOrNull(item);
         if (am != null && am.hasUsefulCatalyst(recipe)) {
             final ItemStack cloneItem = item.clone();
             cloneItem.setAmount(1);
             item.setAmount(item.getAmount() - 1);
-            KETTLE.setCatalyst(uuid, cloneItem);
+            kettle.setCatalyst(uuid, cloneItem);
             setCatalystSlot(player, inv, recipe);
         }
     }
 
-    public static void drag(final InventoryDragEvent e) {
+    @Override
+    public void onDrag(@NotNull final InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
         raws.stream().filter(raw -> (raw >= 0 && raw < inv.getSize())).forEach(itemValue -> e.setCancelled(true));
     }
 
-    public static void close(final InventoryCloseEvent e) {
-        if (!OPEN_USERS.contains(e.getPlayer().getUniqueId())) {
-            KETTLE.allBack((Player) e.getPlayer());
+    @Override
+    public void onClose(@NotNull final InventoryCloseEvent e) {
+        if (!openUsers.contains(e.getPlayer().getUniqueId())) {
+            kettle.allBack((Player) e.getPlayer());
         }
     }
 }

@@ -26,7 +26,7 @@ import java.util.function.Function;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import net.md_5.bungee.api.ChatColor;
 
 /**
@@ -122,7 +122,7 @@ public class CatalystBonusData {
                 "効果レベル$x・$y",
                 "$y色で示されている\n効果のレベルを全て\n$x段階$zさせます",
                 false,
-                new FinalDoubleData<>(
+                new ImmutablePair<>(
                         AlchemyAttribute::valueOf,
                         o -> ((AlchemyAttribute) o).getName()
                 ),
@@ -145,7 +145,7 @@ public class CatalystBonusData {
         CHARACTERISTIC("$y付与",
                 "できあがるアイテムに\n「$y」の特性が\n追加されます",
                 false,
-                new FinalDoubleData<>(
+                new ImmutablePair<>(
                         id -> {
                             Characteristic c;
                             try {
@@ -163,10 +163,10 @@ public class CatalystBonusData {
         private final String name;
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
-        private final FinalDoubleData<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
+        private final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
         private final Function<Integer, String> descRepletion;
 
-        BonusType(final String name, final String desc, final boolean once, final FinalDoubleData<Function<String, Object>, Function<Object, String>> yParse, final Function<Integer, String> descRepletion) {
+        BonusType(final String name, final String desc, final boolean once, final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse, final Function<Integer, String> descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;

@@ -2,8 +2,6 @@ package net.firiz.renewatelier.characteristic;
 
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
-import net.firiz.renewatelier.utils.Chore;
-import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,16 +16,16 @@ public class Characteristic {
     private final int lv;
     private final String name;
     private final String desc;
-    private final CharacteristicCategory[] categorys;
+    private final CharacteristicCategory[] categories;
     private final List<List<String>> reqIds;
     private final Map<CharacteristicType, Object> datas;
 
-    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categorys, List<List<String>> reqIds, Map<CharacteristicType, Object> datas) {
+    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categories, List<List<String>> reqIds, Map<CharacteristicType, Object> datas) {
         this.id = id;
         this.lv = lv;
         this.name = name;
         this.desc = desc;
-        this.categorys = categorys;
+        this.categories = categories;
         this.reqIds = reqIds;
         this.datas = datas;
     }
@@ -52,8 +50,8 @@ public class Characteristic {
         return reqIds;
     }
 
-    public CharacteristicCategory[] getCategorys() {
-        return categorys;
+    public CharacteristicCategory[] getCategories() {
+        return categories;
     }
 
     public boolean hasData(CharacteristicType type) {

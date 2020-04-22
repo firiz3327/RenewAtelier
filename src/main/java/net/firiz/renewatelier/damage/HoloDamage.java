@@ -5,7 +5,7 @@ import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -32,11 +32,11 @@ final class HoloDamage {
     private final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
     @SafeVarargs
-    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, FinalDoubleData<Double, AttackAttribute>... damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, ImmutablePair<Double, AttackAttribute>... damages) {
         holoDamage(victim, damager, Arrays.asList(damages));
     }
 
-    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<FinalDoubleData<Double, AttackAttribute>> damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<ImmutablePair<Double, AttackAttribute>> damages) {
         final Location location = victim.getEyeLocation();
         location.setY(location.getY() + 1.2);
         double allDamage = 0;

@@ -38,8 +38,8 @@ public class LivingData {
         this.wrapEntity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         this.name = name == null && wrapEntity.hasCustomName() ? getBukkitEntity().getCustomName() : types.name;
         final double distance = location.distance(getBukkitEntity().getWorld().getSpawnLocation());
-        final int mapLevel = (int) (Math.floor(distance) / 50);
-        final int level = Math.max(1, mapLevel - 5 + Randomizer.nextInt(11));
+        final int mapLevel = (int) (Math.floor(distance) / 100);
+        final int level = Math.max(1, Randomizer.rand(mapLevel - 5, mapLevel + 5));
         final int levelRate = level - 50; // 50lvあたりが一気に強くなる (atan)
         final int maxHp = BigDecimal.valueOf(((Math.PI / 2 - 0.375) + Math.atan(levelRate * 0.05)) * (7000 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int atk = BigDecimal.valueOf(((Math.PI / 2 - 0.5) + Math.atan(levelRate * 0.03)) * (360 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
@@ -93,6 +93,14 @@ public class LivingData {
         return stats;
     }
 
+    public HoloHealth getHoloHealth() {
+        return holoHealth;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public void damage(org.bukkit.entity.Entity damager, double damage) {
         final LivingEntity bukkit = getBukkitEntity();
         if (hasStats()) {
@@ -116,14 +124,14 @@ public class LivingData {
     /**
      * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
      *
-     * @param ds DamageSource
-     * @param f  float ダメージ
+     * @param damageSource DamageSource 原因
+     * @param damage  float ダメージ
      * @return entity.damageEntity
      */
-    public boolean damageEntity(final Object ds, final Object f) {
+    public boolean onDamageEntity(final Object damageSource, final Object damage) {
         final Map<Object, Class<?>> params = new LinkedHashMap<>();
-        params.put(ds, DamageSource.class);
-        params.put(f, float.class);
+        params.put(damageSource, DamageSource.class);
+        params.put(damage, float.class);
         final boolean result = Objects.requireNonNull(VersionUtils.superInvoke(
                 "damageEntity",
                 wrapEntity,
@@ -136,6 +144,25 @@ public class LivingData {
             holoHealth.holo();
         }
         return result;
+    }
+
+    /**
+     * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
+     *
+     * @param damageSource DamageSource 原因
+     * @return entity.die
+     */
+    public void onDie(Object damageSource) {
+        final Map<Object, Class<?>> params = new LinkedHashMap<>();
+        params.put(damageSource, DamageSource.class);
+        VersionUtils.superInvoke(
+                "die",
+                wrapEntity,
+                wrapEntity.getClass().getSuperclass(),
+                void.class,
+                params
+        );
+        holoHealth.die();
     }
 
 }

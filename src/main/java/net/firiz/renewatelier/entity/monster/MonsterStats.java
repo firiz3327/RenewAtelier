@@ -1,15 +1,9 @@
 package net.firiz.renewatelier.entity.monster;
 
-import net.firiz.renewatelier.buff.Buff;
-import net.firiz.renewatelier.buff.BuffValueType;
-import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.entity.CalcStatType;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 public class MonsterStats extends EntityStatus {
 

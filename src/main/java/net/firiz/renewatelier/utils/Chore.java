@@ -32,7 +32,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -172,7 +172,7 @@ public final class Chore {
     @NotNull
     public static Material getMaterial(final String str) {
         if (str.equalsIgnoreCase("XXX")) {
-            return Material.DIAMOND_AXE;
+            return Material.IRON_NUGGET;
         }
 
         Material result = Material.getMaterial(str.toUpperCase());
@@ -209,7 +209,7 @@ public final class Chore {
             return am.equals(AlchemyMaterial.getMaterial(content));
         } else if (material.startsWith("category:")) {
             final Category category = Category.valueOf(material.substring(9));
-            return AlchemyItemStatus.getCategorys(content).contains(category);
+            return AlchemyItemStatus.getCategories(content).contains(category);
         }
         return false;
     }
@@ -220,27 +220,27 @@ public final class Chore {
 
     public static boolean hasMaterial(final ItemStack[] contents, final List<String> materials) {
         if (contents.length != 0) {
-            final Map<String, DoubleData<Integer, Integer>> check = new HashMap<>();
+            final Map<String, Pair<Integer, Integer>> check = new HashMap<>();
             for (final String data : materials) {
                 final String[] vals = data.split(",");
                 final String material = vals[0];
                 if (!check.containsKey(material)) {
                     final int req_amount = Integer.parseInt(vals[1]);
-                    check.put(material, new DoubleData<>(0, req_amount));
+                    check.put(material, new Pair<>(0, req_amount));
                 }
                 if (material.startsWith("material:")) {
                     final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(material.substring(9));
                     for (final ItemStack item : contents) {
                         if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
-                            final DoubleData<Integer, Integer> dd = check.get(material);
+                            final Pair<Integer, Integer> dd = check.get(material);
                             dd.setLeft(dd.getLeft() + item.getAmount());
                         }
                     }
                 } else if (material.startsWith("category:")) {
                     final Category category = Category.valueOf(material.substring(9));
                     for (final ItemStack item : contents) {
-                        if (item != null && AlchemyItemStatus.getCategorys(item).contains(category)) {
-                            final DoubleData<Integer, Integer> dd = check.get(material);
+                        if (item != null && AlchemyItemStatus.getCategories(item).contains(category)) {
+                            final Pair<Integer, Integer> dd = check.get(material);
                             dd.setLeft(dd.getLeft() + item.getAmount());
                         }
                     }
@@ -536,6 +536,17 @@ public final class Chore {
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    @NotNull
+    public static ItemStack loreItem(Material m, List<String> lore) {
+        final ItemStack item = new ItemStack(m, 1);
+        final ItemMeta meta = item.getItemMeta();
+        if (lore != null && !lore.isEmpty()) {
+            meta.setLore(lore);
+        }
         item.setItemMeta(meta);
         return item;
     }

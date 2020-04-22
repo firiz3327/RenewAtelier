@@ -3,7 +3,7 @@ package net.firiz.renewatelier.listener;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.DamageUtilV2;
-import net.firiz.renewatelier.entity.arrow.ArrowManager;
+import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.arrow.AtelierArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
@@ -19,14 +19,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.CrossbowMeta;
 
 public class DamageListener implements Listener {
 
+    private final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
-    private final ArrowManager arrowManager = new ArrowManager();
     private final DamageUtilV2 damageUtilV2 = new DamageUtilV2();
 
     @EventHandler
@@ -93,18 +91,24 @@ public class DamageListener implements Listener {
                 }
             } else if (damager instanceof AtelierArrow) {
                 final AtelierArrow arrow = (AtelierArrow) damager;
+                EntityStatus status = null;
+                float force = arrow.getForce();
                 if (arrow.getSource() instanceof Player) {
-                    damageUtilV2.arrowDamage(
-                            AlchemyItemStatus.load(arrow.getBow()),
-                            AlchemyItemStatus.load(arrow.getArrow()),
-                            psm.getChar(arrow.getSource().getUniqueId()).getCharStats(),
-                            (LivingEntity) e.getEntity(),
-                            e.getDamage(),
-                            arrow.isCritical(),
-                            arrow.getForce()
-                    );
-                    e.setDamage(0);
+                    status = psm.getChar(arrow.getSource().getUniqueId()).getCharStats();
+                } else if (aEntityUtils.hasLivingData(arrow.getSource())) {
+                    status = aEntityUtils.getLivingData(arrow.getSource()).getStats();
+                    force = 1f;
                 }
+                damageUtilV2.arrowDamage(
+                        AlchemyItemStatus.load(arrow.getBow()),
+                        AlchemyItemStatus.load(arrow.getArrow()),
+                        status,
+                        (LivingEntity) e.getEntity(),
+                        e.getDamage(),
+                        force >= 1 && arrow.isCritical(),
+                        force
+                );
+                e.setDamage(0);
             } else if (victim instanceof Player) {
                 damageUtilV2.playerDamage(
                         psm.getChar(e.getEntity().getUniqueId()).getCharStats(),
@@ -112,20 +116,6 @@ public class DamageListener implements Listener {
                         e.getDamage()
                 );
                 e.setDamage(0);
-            }
-        }
-    }
-
-    @EventHandler
-    private void shootBow(final EntityShootBowEvent e) {
-        if (e.getEntity() instanceof Player && (e.getProjectile() instanceof AbstractArrow)) {
-            final ItemStack bow = e.getBow();
-            if (bow != null && bow.getType() == Material.CROSSBOW) {
-                final CrossbowMeta itemMeta = (CrossbowMeta) bow.getItemMeta();
-                assert itemMeta != null;
-                arrowManager.shootCrossbow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), itemMeta.getChargedProjectiles().get(0));
-            } else {
-                arrowManager.shootBow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
             }
         }
     }

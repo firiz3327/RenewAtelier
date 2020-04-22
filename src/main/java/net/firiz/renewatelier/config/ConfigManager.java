@@ -45,6 +45,16 @@ public enum ConfigManager {
     }
 
     @NotNull
+    public <T> ConfigLoader<T> getLoader(@NotNull final Class<?> clasz, @NotNull final Class<T> tClass) {
+        for (final ConfigLoader<?> loader : loaders) {
+            if (loader.getClass() == clasz) {
+                return Chore.cast(loader);
+            }
+        }
+        throw new IllegalStateException(clasz.getName().concat(" not found."));
+    }
+
+    @NotNull
     public <T> List<T> getList(@NotNull final Class<?> clasz, @NotNull final Class<T> tClass) {
         for (final ConfigLoader<?> loader : loaders) {
             if (loader.getClass() == clasz) {

@@ -21,13 +21,14 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import java.util.List;
+import java.util.Map;
 
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -38,11 +39,16 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AlchemyMaterial {
 
-    private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
+    private static final AlchemyMaterialLoader LOADER;
+
+    static {
+        LOADER = (AlchemyMaterialLoader) ConfigManager.INSTANCE.getLoader(AlchemyMaterialLoader.class, AlchemyMaterial.class);
+    }
+
     private final String id;
     private final String name;
     private final boolean defaultName;
-    private final FinalDoubleData<Material, Integer> material;
+    private final ImmutablePair<Material, Integer> material;
     private final int qualityMin;
     private final int qualityMax;
     private final int price;
@@ -53,8 +59,8 @@ public class AlchemyMaterial {
     private final int speed;
     private final int baseDamageMin;
     private final int baseDamageMax;
-    private final List<Category> categorys;
-    private final List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients;
+    private final List<Category> categories;
+    private final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients;
     private final MaterialSizeTemplate sizeTemplate;
     private final List<Object> charas;
     private final Catalyst catalyst;
@@ -71,7 +77,7 @@ public class AlchemyMaterial {
             String id,
             String name,
             boolean defaultName,
-            FinalDoubleData<Material, Integer> material,
+            ImmutablePair<Material, Integer> material,
             int qualityMin,
             int qualityMax,
             int price,
@@ -82,8 +88,8 @@ public class AlchemyMaterial {
             int speed,
             int baseDamageMin,
             int baseDamageMax,
-            List<Category> categorys,
-            List<FinalDoubleData<AlchemyIngredients, Integer>> ingredients,
+            List<Category> categories,
+            List<ImmutablePair<AlchemyIngredients, Integer>> ingredients,
             MaterialSizeTemplate sizeTemplate,
             List<Object> charas,
             Catalyst catalyst,
@@ -110,7 +116,7 @@ public class AlchemyMaterial {
         this.speed = speed;
         this.baseDamageMin = baseDamageMin;
         this.baseDamageMax = baseDamageMax;
-        this.categorys = categorys;
+        this.categories = categories;
         this.ingredients = ingredients;
         this.sizeTemplate = sizeTemplate;
         this.charas = charas;
@@ -126,8 +132,14 @@ public class AlchemyMaterial {
     }
 
     @Nullable
+    public static AlchemyMaterial getVanillaReplaceItem(@NotNull final Material material) {
+        final Map<Material, AlchemyMaterial> vanillaReplaceItems = LOADER.getVanillaReplaceItems();
+        return vanillaReplaceItems.get(material);
+    }
+
+    @Nullable
     public static AlchemyMaterial getMaterialOrNull(@NotNull final String id) {
-        for (final AlchemyMaterial am : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class, AlchemyMaterial.class)) {
+        for (final AlchemyMaterial am : LOADER.getList()) {
             if (am.getId().equalsIgnoreCase(id)) {
                 return am;
             }
@@ -137,7 +149,7 @@ public class AlchemyMaterial {
 
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final String id) {
-        for (final AlchemyMaterial am : CONFIG_MANAGER.getList(AlchemyMaterialLoader.class, AlchemyMaterial.class)) {
+        for (final AlchemyMaterial am : LOADER.getList()) {
             if (am.getId().equalsIgnoreCase(id)) {
                 return am;
             }
@@ -175,7 +187,7 @@ public class AlchemyMaterial {
         return defaultName;
     }
 
-    public FinalDoubleData<Material, Integer> getMaterial() {
+    public ImmutablePair<Material, Integer> getMaterial() {
         return material;
     }
 
@@ -219,11 +231,11 @@ public class AlchemyMaterial {
         return baseDamageMax;
     }
 
-    public List<Category> getCategorys() {
-        return categorys;
+    public List<Category> getCategories() {
+        return categories;
     }
 
-    public List<FinalDoubleData<AlchemyIngredients, Integer>> getIngredients() {
+    public List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients() {
         return ingredients;
     }
 
@@ -244,13 +256,13 @@ public class AlchemyMaterial {
     }
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {
-        final List<String> catalystCategorys = recipe.getCatalystCategorys();
-        if (catalystCategorys != null && catalyst != null) {
-            for (final String str : catalystCategorys) {
+        final List<String> catalystCategories = recipe.getCatalystCategories();
+        if (catalystCategories != null && catalyst != null) {
+            for (final String str : catalystCategories) {
                 if (str.equals("material:".concat(id))) {
                     return true;
                 }
-                for (final Category c : categorys) {
+                for (final Category c : categories) {
                     if (str.equals("category:".concat(c.name()))) {
                         return true;
                     }

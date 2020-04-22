@@ -41,35 +41,35 @@ public class AlchemyRecipe {
     private final String result;
     private final int amount;
     private final List<String> reqMaterial;
-    private final int reqAlchemylevel;
+    private final int reqAlchemyLevel;
     private final List<AlchemyIngredients> defaultIngredients;
     private final int reqBar;
     private final List<RecipeEffect> effects;
     private final Map<Integer, List<RecipeLevelEffect>> levels;
-    private final List<String> catalystCategorys;
+    private final List<String> catalystCategories;
 
     public AlchemyRecipe(
             final String id,
             final String result,
             final int amount,
             final List<String> reqMaterial,
-            final int reqAlchemylevel,
+            final int reqAlchemyLevel,
             final List<AlchemyIngredients> defaultIngredients,
             final int reqBar,
             final List<RecipeEffect> effects,
             final Map<Integer, List<RecipeLevelEffect>> levels,
-            final List<String> catalystCategorys
+            final List<String> catalystCategories
     ) {
         this.id = id;
         this.result = result;
         this.amount = amount;
         this.reqMaterial = reqMaterial;
-        this.reqAlchemylevel = reqAlchemylevel;
+        this.reqAlchemyLevel = reqAlchemyLevel;
         this.defaultIngredients = defaultIngredients;
         this.reqBar = reqBar;
         this.effects = effects;
         this.levels = levels;
-        this.catalystCategorys = catalystCategorys;
+        this.catalystCategories = catalystCategories;
     }
 
     public static AlchemyRecipe search(@NotNull final String id) {
@@ -98,14 +98,14 @@ public class AlchemyRecipe {
     }
 
     public int getReqAlchemyLevel() {
-        return reqAlchemylevel;
+        return reqAlchemyLevel;
     }
 
     public List<AlchemyIngredients> getDefaultIngredients() {
         return new ArrayList<>(defaultIngredients);
     }
 
-    public int getReqbar() {
+    public int getReqBar() {
         return reqBar;
     }
 
@@ -117,8 +117,8 @@ public class AlchemyRecipe {
         return new HashMap<>(levels);
     }
 
-    public List<String> getCatalystCategorys() {
-        return new ArrayList<>(catalystCategorys);
+    public List<String> getCatalystCategories() {
+        return new ArrayList<>(catalystCategories);
     }
 
 }

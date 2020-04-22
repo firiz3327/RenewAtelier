@@ -1,7 +1,6 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import javassist.*;
-import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.utils.Chore;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
@@ -24,20 +23,34 @@ public enum AtelierEntityUtils {
     private final Map<TargetEntityTypes, Class<?>> entityMap = new EnumMap<>(TargetEntityTypes.class);
     private final CtClass[] interfaces;
 
+    private Method livingDamageEntity;
+    private Method livingDie;
+
     AtelierEntityUtils() {
+        try {
+            livingDamageEntity = LivingData.class.getDeclaredMethod("onDamageEntity", Object.class, Object.class);
+            livingDamageEntity.setAccessible(true);
+            livingDie = LivingData.class.getDeclaredMethod("onDie", Object.class);
+            livingDie.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            Chore.logWarning(e);
+        }
+
         final CtClass supplier = pool.getOrNull(Supplier.class.getCanonicalName());
         supplier.setGenericSignature(Object.class.getCanonicalName());
         interfaces = new CtClass[]{supplier};
         for (final TargetEntityTypes types : TargetEntityTypes.values()) {
-            try {
-                final Class<?> entityClass = createWrapClass(
-                        "net.firiz.renewatelier.version.entity.wrapper.AWrap".concat(types.clasz.getSimpleName()),
-                        types.clasz,
-                        types.body
-                );
-                entityMap.put(types, entityClass);
-            } catch (NotFoundException | CannotCompileException e) {
-                Chore.logWarning(e);
+            if (types.customClass == null) {
+                try {
+                    final Class<?> entityClass = createWrapClass(
+                            "net.firiz.renewatelier.version.entity.wrapper.AWrap".concat(types.clasz.getSimpleName()),
+                            types.clasz,
+                            types.body
+                    );
+                    entityMap.put(types, entityClass);
+                } catch (NotFoundException | CannotCompileException e) {
+                    Chore.logWarning(e);
+                }
             }
         }
     }
@@ -66,7 +79,12 @@ public enum AtelierEntityUtils {
     @NotNull
     public LivingData spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location) {
         final World world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
-        final EntityLiving entity = (EntityLiving) createWrapEntity(types, world, location);
+        final EntityLiving entity;
+        if (types.customClass == null) {
+            entity = (EntityLiving) createWrapEntity(types, world, location);
+        } else {
+            entity = (EntityLiving) createCustomClassEntity(types, world, location);
+        }
         world.addEntity(entity);
         if (types.initConsumer != null) {
             types.initConsumer.accept(entity.getBukkitEntity());
@@ -93,28 +111,47 @@ public enum AtelierEntityUtils {
         return getLivingData(((CraftLivingEntity) entity).getHandle());
     }
 
-    @Nullable
+    @NotNull
+    private Object createCustomClassEntity(final TargetEntityTypes types, final World world, final Location location) {
+        try {
+            final Object wrapEntity = types.customClass.getConstructor(World.class).newInstance(world);
+
+            final LivingData livingData = new LivingData(types, (EntityLiving) wrapEntity, location);
+            final Field livingWrapper = types.customClass.getDeclaredField("livingData");
+            livingWrapper.setAccessible(true);
+            livingWrapper.set(wrapEntity, livingData);
+
+            return wrapEntity;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchFieldException | NoSuchMethodException e) {
+            Chore.logWarning(e);
+            throw new IllegalStateException("error createCustomClassEntity. " + types.name());
+        }
+    }
+
+    @NotNull
     private Object createWrapEntity(final TargetEntityTypes types, final World world, final Location location) {
         try {
             final Class<?> wrapClass = entityMap.get(types);
-            final Object wrapEntity = wrapClass.getConstructor(new Class[]{World.class}).newInstance(world);
+            final Object wrapEntity = wrapClass.getConstructor(World.class).newInstance(world);
 
             final LivingData livingData = new LivingData(types, (EntityLiving) wrapEntity, location);
             final Field livingWrapper = wrapClass.getDeclaredField("livingData");
             livingWrapper.setAccessible(true);
             livingWrapper.set(wrapEntity, livingData);
 
-            final Field damageEntity = wrapClass.getDeclaredField("damageEntity");
+            final Field damageEntity = wrapClass.getDeclaredField("damageEntity0001");
             damageEntity.setAccessible(true);
-            final Method method = LivingData.class.getDeclaredMethod("damageEntity", Object.class, Object.class);
-            method.setAccessible(true);
-            damageEntity.set(wrapEntity, method);
+            damageEntity.set(wrapEntity, livingDamageEntity);
+
+            final Field die = wrapClass.getDeclaredField("die0001");
+            die.setAccessible(true);
+            die.set(wrapEntity, livingDie);
 
             return wrapEntity;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
             Chore.logWarning(e);
+            throw new IllegalStateException("error createWrapEntity. " + types.name());
         }
-        return null;
     }
 
     @Nullable
@@ -134,17 +171,25 @@ public enum AtelierEntityUtils {
             final CtMethod getLivingData = CtNewMethod.make("public Object get() { return this.livingData; }", clasz);
             clasz.addMethod(getLivingData);
 
-            final CtField damageEntity = CtField.make("java.lang.reflect.Method damageEntity;", clasz);
+            final CtField damageEntity = CtField.make("java.lang.reflect.Method damageEntity0001;", clasz);
             clasz.addField(damageEntity);
+
+            final CtField die = CtField.make("java.lang.reflect.Method die0001;", clasz);
+            clasz.addField(die);
 
             // try-catchはなくていい
             // javassistはvarargsに対応してないので、配列にして渡す
             // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
             // booleanを返すとBooleanになるので、booleanValue()でbooleanへ変換
             final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_15_R1.DamageSource damagesource, float f) {" +
-                    "return ((Boolean) damageEntity.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
+                    "return ((Boolean) damageEntity0001.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
             final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody, clasz);
             clasz.addMethod(overrideDamageEntity);
+
+            final String dieBody = "public void die(net.minecraft.server.v1_15_R1.DamageSource damagesource) {" +
+                    "die0001.invoke(livingData, new Object[]{damagesource});}";
+            final CtMethod overrideDie = CtNewMethod.make(dieBody, clasz);
+            clasz.addMethod(overrideDie);
 
             final CtClass[] params = new CtClass[]{pool.get(World.class.getCanonicalName())};
             final CtConstructor constructor = CtNewConstructor.make(params, null, CtNewConstructor.PASS_PARAMS, null, null, clasz);

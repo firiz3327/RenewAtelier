@@ -46,12 +46,13 @@ import net.firiz.renewatelier.alchemy.recipe.StarEffect;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
+import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.Pair;
 import net.firiz.renewatelier.utils.Strings;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -66,14 +67,12 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author firiz
  */
-public class AlchemyKettle {
-
-    private AlchemyKettle() {
-    }
+public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory> {
 
     private static final KettleItemManager KETTLE = KettleItemManager.INSTANCE;
     private static final KettleBonusManager BONUS_MANAGER = KettleBonusManager.INSTANCE;
@@ -84,11 +83,13 @@ public class AlchemyKettle {
     private static final String STR_RECIPE_ID = "色々試してみましょう!";
     private static final String STR_TURN2 = "";
 
-    public static boolean isAlchemyKettle(final InventoryView view) {
+    @Override
+    public boolean check(@NotNull final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
     }
 
-    public static void openKettle(final Player player, final AlchemyRecipe recipe, final Inventory catalystInv) {
+    @Override
+    public void open(@NotNull final Player player, @NotNull final AlchemyRecipe recipe, @NotNull final Inventory catalystInv) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
         final UUID uuid = player.getUniqueId();
         final PlayerInventory playerInv = player.getInventory();
@@ -157,7 +158,7 @@ public class AlchemyKettle {
         player.openInventory(inv);
     }
 
-    private static void setResultSlot(final Inventory inv, final Player player) {
+    private void setResultSlot(final Inventory inv, final Player player) {
         final UUID uuid = player.getUniqueId();
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
@@ -304,23 +305,23 @@ public class AlchemyKettle {
             final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
-            final List<Category> categorys = new ArrayList<>(result.getCategorys());
+            final List<Category> categories = new ArrayList<>(result.getCategories());
             // 錬金成分 評価
-            final List<AlchemyIngredients> ings = recipe.getDefaultIngredients();
+            final List<AlchemyIngredients> ingredients = recipe.getDefaultIngredients();
             for (final RecipeEffect effect : recipe.getEffects()) {
                 final StarEffect activeEffect = effect.getActiveEffect(uuid);
                 if (activeEffect != null) {
                     switch (activeEffect.getType()) {
                         case INGREDIENT:
                             final AlchemyIngredients ingredient = activeEffect.getIngredient();
-                            if (ingredient != null && !ings.contains(ingredient)) {
-                                ings.add(ingredient);
+                            if (ingredient != null && !ingredients.contains(ingredient)) {
+                                ingredients.add(ingredient);
                             }
                             break;
                         case CATEGORY:
                             final Category category = activeEffect.getCategory();
-                            if (category != null && !categorys.contains(category)) {
-                                categorys.add(category);
+                            if (category != null && !categories.contains(category)) {
+                                categories.add(category);
                             }
                             break;
                         default:
@@ -348,7 +349,7 @@ public class AlchemyKettle {
             }
             resultItem = AlchemyItemStatus.getItem(
                     result,
-                    ings, // 錬金属性 書き換え
+                    ingredients, // 錬金属性 書き換え
                     Chore.createCustomModelItem(
                             result.getMaterial().getLeft(),
                             recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonusAmount,
@@ -357,7 +358,7 @@ public class AlchemyKettle {
                     allQuality, // 品質 書き換え
                     resultSize, // サイズ 書き換え
                     characteristics, // 特性 書き換え
-                    result.getCategorys().equals(categorys) ? new ArrayList<>() : categorys, // カテゴリ 書き換え
+                    result.getCategories().equals(categories) ? new ArrayList<>() : categories, // カテゴリ 書き換え
                     true
             );
         } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
@@ -381,7 +382,7 @@ public class AlchemyKettle {
                 sbBonus.append(aa.getColor()).append(BONUS_MANAGER.getBonus(player, aa)).append("% ");
             }
             lore.add(2, sbBonus.toString());
-            lore.add(3, BONUS_MANAGER.getBar(player.getUniqueId(), recipe.getReqbar()));
+            lore.add(3, BONUS_MANAGER.getBar(player.getUniqueId(), recipe.getReqBar()));
 
             // 効果項目
             lore.add(4, ChatColor.GRAY + "効果:");
@@ -439,7 +440,7 @@ public class AlchemyKettle {
         }
     }
 
-    private static void setKettleItems(final Inventory inv, final Player player, final AlchemyRecipe recipe) {
+    private void setKettleItems(final Inventory inv, final Player player, final AlchemyRecipe recipe) {
         // 触媒の設置
         final ItemStack citem = KETTLE.getCatalyst(player.getUniqueId());
         Catalyst catalyst;
@@ -491,7 +492,7 @@ public class AlchemyKettle {
                 j = Catalyst.nextSlot(j, box.getCSize());
             }
 
-            final Map<DoubleData<Integer, BonusItem>, Integer> resultCS = box.getResultCS();
+            final Map<Pair<Integer, BonusItem>, Integer> resultCS = box.getResultCS();
             resultCS.keySet().forEach(slotData -> {
                 final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
@@ -500,7 +501,7 @@ public class AlchemyKettle {
         }
     }
 
-    private static void setCharacteristicPage(final Inventory inv, final Player player, final int move) {
+    private void setCharacteristicPage(final Inventory inv, final Player player, final int move) {
         final ItemStack setting = inv.getItem(1);
         final ItemMeta meta = setting.getItemMeta();
         final int page = AlchemyChore.getSetting(meta, 2);
@@ -562,7 +563,8 @@ public class AlchemyKettle {
         }
     }
 
-    public static void click(InventoryClickEvent e) {
+    @Override
+    public void onClick(@NotNull final InventoryClickEvent e) {
         if (e.isShiftClick()) {
             e.setCancelled(true);
         }
@@ -614,7 +616,7 @@ public class AlchemyKettle {
 
                                 final List<Characteristic> characteristics = KETTLE.getSelectCharacteristics(uuid);
                                 final List<AlchemyIngredients> ings = AlchemyItemStatus.getIngredients(resultSlotItem);
-                                final List<Category> categorys = AlchemyItemStatus.getCategorys(resultSlotItem);
+                                final List<Category> categories = AlchemyItemStatus.getCategories(resultSlotItem);
 
                                 final List<String> activeEffects = new ArrayList<>();
                                 recipe.getEffects().stream().map(effect -> effect.getActiveEffect(uuid)).filter(Objects::nonNull).filter(activeEffect -> (activeEffect.getType() == StarEffect.StarEffectType.NAME)).forEachOrdered(activeEffect -> activeEffects.add(activeEffect.getName()));
@@ -632,7 +634,7 @@ public class AlchemyKettle {
                                         AlchemyItemStatus.getSize(resultSlotItem), // サイズ 書き換え
                                         activeEffects, // 発現効果
                                         characteristics == null ? new ArrayList<>() : characteristics, // 特性 書き換え
-                                        categorys.isEmpty() ? null : categorys, // カテゴリ 書き換え
+                                        categories.isEmpty() ? null : categories, // カテゴリ 書き換え
                                         false
                                 );
                             } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
@@ -767,7 +769,7 @@ public class AlchemyKettle {
                             final ItemMeta setting = inv.getItem(1).getItemMeta();
                             final int sl = AlchemyChore.getSetting(setting, 1);
                             final int rludsl = AlchemyChore.getSetting(setting, 4);
-                            final DoubleData<BonusItem, KettleBoxCircleData> backData = kettleBox.backData(sl, rludsl);
+                            final Pair<BonusItem, KettleBoxCircleData> backData = kettleBox.backData(sl, rludsl);
                             if (backData != null) {
                                 final PlayerInventory playerInventory = player.getInventory();
                                 boolean check = false;
@@ -936,10 +938,10 @@ public class AlchemyKettle {
                                         final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
                                         final ItemStack clone = cursor.clone();
                                         clone.setAmount(1);
-                                        final DoubleData<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getAllLevel(clone);
+                                        final Pair<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getAllLevel(clone);
                                         BONUS_MANAGER.addBar(
                                                 uuid,
-                                                recipe.getReqbar(),
+                                                recipe.getReqBar(),
                                                 allLevel.getLeft(),
                                                 allLevel.getRight()
                                         );
@@ -970,7 +972,7 @@ public class AlchemyKettle {
         }
     }
 
-    private static boolean checkInv(AtomicInteger slot, PlayerInventory playerInventory) {
+    private boolean checkInv(AtomicInteger slot, PlayerInventory playerInventory) {
         for (int j = 0; j < 6; j++) {
             if (playerInventory.getItem(slot.intValue()) == null) {
                 return true;
@@ -980,15 +982,17 @@ public class AlchemyKettle {
         return false;
     }
 
-    public static void drag(final InventoryDragEvent e) {
+    @Override
+    public void onDrag(@NotNull final InventoryDragEvent e) {
         e.setCancelled(true);
     }
 
-    public static void close(final InventoryCloseEvent e) {
+    @Override
+    public void onClose(@NotNull final InventoryCloseEvent e) {
         KETTLE.allBack((Player) e.getPlayer());
     }
 
-    public static void pickup(final EntityPickupItemEvent e) {
+    public void pickup(final EntityPickupItemEvent e) {
         final Player player = (Player) e.getEntity();
         if (KETTLE.isOpenKettle(player.getUniqueId())) {
             e.setCancelled(true);

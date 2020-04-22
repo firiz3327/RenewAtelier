@@ -21,7 +21,7 @@
 
 package net.firiz.renewatelier.characteristic;
 
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,20 +100,20 @@ public enum CharacteristicTemplate {
     );
 
     @SafeVarargs
-    CharacteristicTemplate(FinalDoubleData<String, Integer>... cs) {
+    CharacteristicTemplate(ImmutablePair<String, Integer>... cs) {
         this.cs = cs;
     }
 
-    public List<FinalDoubleData<Characteristic, Integer>> getCs() {
+    public List<ImmutablePair<Characteristic, Integer>> getCs() {
         if (loaded == null) {
             loaded = new ArrayList<>(cs.length);
-            for (FinalDoubleData<String, Integer> fdd : cs) {
-                loaded.add(new FinalDoubleData<>(Characteristic.getCharacteristic(fdd.getLeft()), fdd.getRight()));
+            for (ImmutablePair<String, Integer> fdd : cs) {
+                loaded.add(new ImmutablePair<>(Characteristic.getCharacteristic(fdd.getLeft()), fdd.getRight()));
             }
         }
         return loaded;
     }
 
-    private final FinalDoubleData<String, Integer>[] cs;
-    private List<FinalDoubleData<Characteristic, Integer>> loaded;
+    private final ImmutablePair<String, Integer>[] cs;
+    private List<ImmutablePair<Characteristic, Integer>> loaded;
 }

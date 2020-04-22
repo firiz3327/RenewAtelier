@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.entity.Race;
+import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -22,7 +23,7 @@ public enum TargetEntityTypes {
     SKELETON(EntityType.SKELETON, EntitySkeleton.class, Race.UNDEAD, null, "SKELETON", "スケルトン", (entity -> setMainHand(entity, new ItemStack(Material.BOW)))),
     SKELETON_WITHER(EntityType.WITHER_SKELETON, EntitySkeletonWither.class, Race.UNDEAD, null, "WITHER_SKELETON", "ウィザースケルトン", (entity -> setMainHand(entity, new ItemStack(Material.STONE_SWORD)))),
     SKELETON_STRAY(EntityType.STRAY, EntitySkeletonStray.class, Race.UNDEAD, null, "STRAY", "ストレイ", (entity -> setMainHand(entity, new ItemStack(Material.BOW)))),
-    CREEPER(EntityType.CREEPER, EntityCreeper.class, Race.UNDEAD, null, "CREEPER", "クリーパー"),
+    CREEPER(EntityType.CREEPER, EntityCreeper.class, Race.UNDEAD, "クリーパー", LivingCreeper.class),
     SPIDER(EntityType.SPIDER, EntitySpider.class, Race.INSECT, null, "SPIDER", "クモ"),
     SPIDER_CAVE(EntityType.CAVE_SPIDER, EntityCaveSpider.class, Race.INSECT, null, "CAVE_SPIDER", "洞窟グモ"),
     SLIME(EntityType.SLIME, EntitySlime.class, Race.PUNI, null, "SLIME", "スライム"),
@@ -40,6 +41,8 @@ public enum TargetEntityTypes {
     final String name;
     @Nullable
     final Consumer<Entity> initConsumer;
+    @Nullable
+    final Class<?> customClass;
 
     TargetEntityTypes(
             @NotNull EntityType type,
@@ -50,6 +53,7 @@ public enum TargetEntityTypes {
             @NotNull String name
     ) {
         this.type = type;
+        this.customClass = null;
         this.clasz = clasz;
         this.race = race;
         this.name = name;
@@ -67,12 +71,29 @@ public enum TargetEntityTypes {
             @NotNull EntityType type,
             @NotNull Class<? extends EntityLiving> clasz,
             @NotNull Race race,
+            @NotNull String name,
+            @NotNull Class<?> customClass
+    ) {
+        this.type = type;
+        this.clasz = clasz;
+        this.race = race;
+        this.name = name;
+        this.initConsumer = null;
+        this.body = null;
+        this.customClass = customClass;
+    }
+
+    TargetEntityTypes(
+            @NotNull EntityType type,
+            @NotNull Class<? extends EntityLiving> clasz,
+            @NotNull Race race,
             @Nullable String body,
             @Nullable String entityType,
             @NotNull String name,
             @Nullable Consumer<Entity> initConsumer
     ) {
         this.type = type;
+        this.customClass = null;
         this.clasz = clasz;
         this.race = race;
         this.name = name;

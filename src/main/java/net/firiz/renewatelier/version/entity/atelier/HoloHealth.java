@@ -4,6 +4,7 @@ import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
+import net.minecraft.server.v1_15_R1.ChunkProviderServer;
 import net.minecraft.server.v1_15_R1.EntityLiving;
 import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class HoloHealth {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+    private final ChunkProviderServer chunkProvider;
     private final EntityLiving entity;
     private final String customName;
 
@@ -35,6 +37,7 @@ public class HoloHealth {
     private final BossBar bossBar;
 
     public HoloHealth(EntityLiving entity, String customName) {
+        this.chunkProvider = ((WorldServer) entity.world).getChunkProvider();
         this.entity = entity;
         this.customName = customName;
 
@@ -61,6 +64,11 @@ public class HoloHealth {
         }
     }
 
+    public void die() {
+        chunkProvider.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
+        chunkProvider.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
+    }
+
     private void holoNormal() {
         final LivingEntity bukkit = (LivingEntity) entity.getBukkitEntity();
         final StringBuilder displayHp = new StringBuilder(ChatColor.RED.toString());
@@ -79,27 +87,20 @@ public class HoloHealth {
         if (holoDeleteTaskId != -1) {
             scheduler.cancelTask(holoDeleteTaskId);
         }
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
-        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), customName, true).compile(holoCustomName.getEntityId()));
-        holoDeleteTaskId = scheduler.scheduleSyncDelayedTask(
-                AtelierPlugin.getPlugin(),
-                () -> {
-                    ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
-                    ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
-                },
-                20
-        );
+        chunkProvider.broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
+        chunkProvider.broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
+        chunkProvider.broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
+        chunkProvider.broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), customName, true).compile(holoCustomName.getEntityId()));
+        holoDeleteTaskId = scheduler.scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), this::die, 20);
 
         for (int i = 0; i < 10; i++) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {
-                        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getTeleportPacket(
+                        chunkProvider.broadcast(entity, EntityPacket.getTeleportPacket(
                                 holoHp.getEntityId(), getLoc(0), false
                         ));
-                        ((WorldServer) entity.world).getChunkProvider().broadcast(entity, EntityPacket.getTeleportPacket(
+                        chunkProvider.broadcast(entity, EntityPacket.getTeleportPacket(
                                 holoCustomName.getEntityId(), getLoc(1), false
                         ));
                     },

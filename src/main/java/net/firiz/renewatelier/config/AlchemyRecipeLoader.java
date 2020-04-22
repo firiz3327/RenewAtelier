@@ -103,9 +103,9 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                 levels.put(i, levelEffects);
             }
             // 使用可能触媒
-            final List<String> catalystCategorys = item.getStringList("usable_catalysts_categorys");
+            final List<String> catalystCategories = item.getStringList("usable_catalysts_categories");
             // リストに追加
-            add(new AlchemyRecipe(key, result, amount, reqMaterials, req_alchemylevel, defaultIngredients, req_bar, effects, levels, catalystCategorys));
+            add(new AlchemyRecipe(key, result, amount, reqMaterials, req_alchemylevel, defaultIngredients, req_bar, effects, levels, catalystCategories));
         });
     }
 

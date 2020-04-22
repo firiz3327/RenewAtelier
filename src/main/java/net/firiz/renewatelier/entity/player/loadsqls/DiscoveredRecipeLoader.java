@@ -22,7 +22,7 @@ package net.firiz.renewatelier.entity.player.loadsqls;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.sql.SQLManager;
 import org.jetbrains.annotations.NotNull;
 

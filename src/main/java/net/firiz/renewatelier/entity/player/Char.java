@@ -32,7 +32,7 @@ import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.notification.Notification;
-import net.firiz.renewatelier.entity.player.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.quest.QuestStatus;

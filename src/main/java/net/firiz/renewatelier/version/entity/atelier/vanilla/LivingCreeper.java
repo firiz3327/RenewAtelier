@@ -1,0 +1,37 @@
+package net.firiz.renewatelier.version.entity.atelier.vanilla;
+
+import net.firiz.renewatelier.version.entity.atelier.LivingData;
+import net.minecraft.server.v1_15_R1.DamageSource;
+import net.minecraft.server.v1_15_R1.EntityCreeper;
+import net.minecraft.server.v1_15_R1.EntityTypes;
+import net.minecraft.server.v1_15_R1.World;
+
+public class LivingCreeper extends EntityCreeper implements EntitySupplier {
+
+    private LivingData livingData;
+
+    public LivingCreeper(World world) {
+        super(EntityTypes.CREEPER, world);
+    }
+
+    @Override
+    public Object get() {
+        return livingData;
+    }
+
+    @Override
+    public boolean damageEntity(DamageSource ds, float f) {
+        return livingData.onDamageEntity(ds, f);
+    }
+
+    @Override
+    public void die(DamageSource damagesource) {
+        livingData.onDie(damagesource);
+    }
+
+    @Override
+    public void explode() {
+        super.explode();
+        livingData.getHoloHealth().die();
+    }
+}

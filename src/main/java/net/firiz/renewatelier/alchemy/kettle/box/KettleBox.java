@@ -31,7 +31,7 @@ import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.GArray;
-import net.firiz.renewatelier.utils.doubledata.DoubleData;
+import net.firiz.renewatelier.utils.doubledata.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,7 @@ import org.jetbrains.annotations.NotNull;
 public class KettleBox {
 
     // 設置されたアイテムとそのアイテムの配置とcircleValue
-    private final GArray<DoubleData<BonusItem, KettleBoxCircleData>> items;
+    private final GArray<Pair<BonusItem, KettleBoxCircleData>> items;
     private final GArray<List<CatalystBonus>> usedBonus;
 
     public KettleBox(int count) {
@@ -54,9 +54,9 @@ public class KettleBox {
      *
      * @return 削除対象のデータ
      */
-    public final DoubleData<BonusItem, KettleBoxCircleData> backData(final int rotate, final int rlud) {
+    public final Pair<BonusItem, KettleBoxCircleData> backData(final int rotate, final int rlud) {
         for (int i = 1; i <= items.length(); i++) {
-            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
+            final Pair<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
                 items.set(items.length() - i, null);
                 final int sel = items.length() - i - 1;
@@ -101,7 +101,7 @@ public class KettleBox {
     public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
         for (int i = 0; i < items.length(); i++) {
             if (items.get(i) == null) {
-                items.set(i, new DoubleData<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
+                items.set(i, new Pair<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
                 break;
             }
         }
@@ -118,7 +118,7 @@ public class KettleBox {
 
     public final void addBonus(final CatalystBonus cb) {
         for (int i = 1; i <= items.length(); i++) {
-            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
+            final Pair<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
                 final int sel = items.length() - i;
                 if (usedBonus.get(sel) == null) {
@@ -136,7 +136,7 @@ public class KettleBox {
     @NotNull
     public final List<CatalystBonus> getBonus() {
         for (int i = 1; i <= items.length(); i++) {
-            final DoubleData<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
+            final Pair<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
                 final int select = items.length() - i - 1; // 4:3 3:2
                 return select >= 0 ? usedBonus.get(select) : new ArrayList<>(0);
@@ -148,7 +148,7 @@ public class KettleBox {
     public final List<ItemStack> getItemStacks() {
         final List<ItemStack> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, KettleBoxCircleData> data : items) {
+        for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
                 result.add(data.getLeft().getItem());
             }
@@ -160,7 +160,7 @@ public class KettleBox {
     public final List<BonusItem> getItems() {
         final List<BonusItem> result = new ArrayList<>();
 
-        for (final DoubleData<BonusItem, KettleBoxCircleData> data : items) {
+        for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
                 result.add(data.getLeft());
             }
@@ -180,15 +180,15 @@ public class KettleBox {
     /**
      * @return <slot, itemStack>, value
      */
-    public final Map<DoubleData<Integer, BonusItem>, Integer> getResultCS() {
-        final Map<DoubleData<Integer, BonusItem>, Integer> result = new HashMap<>();
+    public final Map<Pair<Integer, BonusItem>, Integer> getResultCS() {
+        final Map<Pair<Integer, BonusItem>, Integer> result = new HashMap<>();
 
         // 配置
         // <layer, itemStack>, <slot, value>
-        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
+        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
         overlap.keySet().forEach(layer -> {
             final Map<Integer, Integer> datas = overlap.get(layer);
-            datas.keySet().forEach(slot -> result.put(new DoubleData<>(slot, layer.getRight()), datas.get(slot)));
+            datas.keySet().forEach(slot -> result.put(new Pair<>(slot, layer.getRight()), datas.get(slot)));
         });
 
         return result;
@@ -200,21 +200,21 @@ public class KettleBox {
 
         // 配置
         // <layer, itemStack>, <slot, value>
-        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
+        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
         overlap.keySet().forEach(layer -> result.add(layer.getRight()));
 
         return result;
     }
 
-    private Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
-        final Map<DoubleData<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
+    private Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
+        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
         for (int i = 0; i < items.length(); i++) {
-            final DoubleData<BonusItem, KettleBoxCircleData> dd = items.get(i);
+            final Pair<BonusItem, KettleBoxCircleData> dd = items.get(i);
 
             if (dd != null) {
                 final Map<Integer, Integer> rslots = dd.getRight().getRSlots();
 
-                for (final DoubleData<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
+                for (final Pair<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
                     boolean checkOver = false;
 
                     loopCheckOver:
@@ -231,7 +231,7 @@ public class KettleBox {
                         overlap.remove(layer);
                     }
                 }
-                overlap.put(new DoubleData<>(i, dd.getLeft()), rslots);
+                overlap.put(new Pair<>(i, dd.getLeft()), rslots);
             }
         }
         return overlap;

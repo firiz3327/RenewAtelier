@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.script.conversation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.script.Invocable;
@@ -29,6 +30,7 @@ import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
+import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.inventory.shop.ShopItem;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
@@ -52,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ScriptConversation {
 
+    protected final InventoryManager inventoryManager = AtelierPlugin.getPlugin().getInventoryManager();
     protected final String scriptName;
     protected final Player player;
     protected Invocable iv;
@@ -177,8 +180,8 @@ public class ScriptConversation {
     }
 
     @Export
-    public List<String> getLores(final String check, final ItemStack item) {
-        return AlchemyItemStatus.getLores(check, item);
+    public List<String> getLore(final String check, final ItemStack item) {
+        return AlchemyItemStatus.getLore(check, item);
     }
 
     @Export
@@ -208,22 +211,24 @@ public class ScriptConversation {
 
     @Export
     public void openConfirmInventory(final String title, final String yes, final String no, final String confirmFunctionName, final String cancelFunctionName, final String closeFunctionName) {
-        ConfirmInventory.openInventory(
+        inventoryManager.getInventory(ConfirmInventory.class).open(
                 player,
-                ChatColor.translateAlternateColorCodes('&', title),
-                yes,
-                no,
-                (final Player player1, final int select) -> {
-                    final String functionName = select == 1 ? confirmFunctionName : select == 0 ? cancelFunctionName : closeFunctionName;
-                    if (functionName != null) {
-                        try {
-                            iv.invokeFunction(functionName);
-                        } catch (ScriptException ex) {
-                            Chore.logWarning(ex);
-                        } catch (NoSuchMethodException ignored) {
+                new ConfirmInventory.ConfirmInfo(
+                        ChatColor.translateAlternateColorCodes('&', title),
+                        yes,
+                        no,
+                        (final Player player1, final int select) -> {
+                            final String functionName = select == 1 ? confirmFunctionName : select == 0 ? cancelFunctionName : closeFunctionName;
+                            if (functionName != null) {
+                                try {
+                                    iv.invokeFunction(functionName);
+                                } catch (ScriptException ex) {
+                                    Chore.logWarning(ex);
+                                } catch (NoSuchMethodException ignored) {
+                                }
+                            }
                         }
-                    }
-                }
+                )
         );
     }
 
@@ -239,10 +244,11 @@ public class ScriptConversation {
 
     @Export
     public void openShopInventory(final String title, List<ShopItem> shopItems) {
-        if (shopItems != null && shopItems.size() > 28) {
+        final boolean isNull = shopItems == null;
+        if (!isNull && shopItems.size() > 28) {
             throw new IllegalArgumentException("No more than 29 shop items can be placed.");
         }
-        ShopInventory.openInventory(player, title, shopItems);
+        inventoryManager.getInventory(ShopInventory.class).open(player, title, isNull ? new ArrayList<>() : shopItems);
     }
 
     @NotNull

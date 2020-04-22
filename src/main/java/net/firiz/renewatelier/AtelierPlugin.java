@@ -21,16 +21,16 @@
 package net.firiz.renewatelier;
 
 import net.firiz.renewatelier.config.ConfigManager;
+import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
-import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -43,29 +43,41 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class AtelierPlugin extends JavaPlugin {
 
+    private InventoryManager inventoryManager;
+
     @Override
     public void onEnable() {
+        inventoryManager = new InventoryManager();
         removePlayerNPCStands();
 
         // registerEvents
         final PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new ServerListener(), this);
         pluginManager.registerEvents(new DebugListener(), this);
         pluginManager.registerEvents(new BlockListener(), this);
         pluginManager.registerEvents(new EntityListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new DamageListener(), this);
-        pluginManager.registerEvents(new InventoryListener(), this);
+        pluginManager.registerEvents(new InventoryListener(this), this);
 
         // setup worlds
         Bukkit.getWorlds().forEach(AtelierPlugin::worldSettings);
 
-        // setup managers
+        // setup managers and singleton classes
         MyRoomManager.INSTANCE.setup();
         ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
         NPCManager.INSTANCE.setup();
         PlayerSaveManager.INSTANCE.loadPlayers();
+        /*
+        AtelierEntityUtils.INSTANCE
+        KettleItemManager.INSTANCE
+        KettleBonusManager.INSTANCE
+        ScriptManager.INSTANCE
+         */
+
+        ReplaceVanillaItems.changeRecipe();
     }
 
     public static void worldSettings(World world) {
@@ -112,4 +124,7 @@ public final class AtelierPlugin extends JavaPlugin {
         return getPlugin(AtelierPlugin.class);
     }
 
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
+    }
 }

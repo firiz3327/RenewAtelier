@@ -27,11 +27,14 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
+import net.firiz.renewatelier.inventory.Appraisal;
+import net.firiz.renewatelier.inventory.manager.InventoryManager;
+import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.FinalDoubleData;
+import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import net.md_5.bungee.api.ChatColor;
@@ -48,43 +51,46 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 /**
  * @author firiz
  */
-public final class RecipeSelect {
+public final class RecipeSelect implements ParamInventory<Location> {
 
-    private RecipeSelect() {
-    }
-
-    private static final String RECIPE_VALUE1 = "レシピを選択してください。";
-    private static final List<String> RECIPE_LORES;
+    private static final String RECIPE_VALUE_1 = "レシピを選択してください。";
     private static final String STRING_MATERIAL = "material:";
+    private final InventoryManager manager;
+    private final List<String> recipeLore;
 
-    static {
-        RECIPE_LORES = new ArrayList<>();
-        RECIPE_LORES.add(ChatColor.RESET + RECIPE_VALUE1);
-        RECIPE_LORES.add("");
+    public RecipeSelect(final InventoryManager manager) {
+        this.manager = manager;
+        recipeLore = new ArrayList<>();
+        recipeLore.add(ChatColor.RESET + RECIPE_VALUE_1);
+        recipeLore.add("");
     }
 
-    public static boolean isKettleRecipe(final InventoryView view) {
+    @Override
+    public boolean check(@NotNull final InventoryView view) {
         return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
     }
 
-    public static void openGUI(final Player player, final Location loc) {
+    @Override
+    public void open(@NotNull final Player player, @NotNull final Location loc) {
         final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
-        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1522, "", RECIPE_LORES));
+        inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, 1522, "", recipeLore));
         inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, 1562, "", null));
-        inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), RECIPE_LORES));
+        inv.setItem(2, Chore.ci(Material.BARRIER, 0, Chore.setLocXYZ(loc), recipeLore));
+        inv.setItem(43, Chore.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null));
 
         setRecipeScroll(player.getUniqueId(), inv, 0);
         player.openInventory(inv);
         InventoryPacket.update(player, "", InventoryPacketType.CHEST);
     }
 
-    private static void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
+    private void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         lore.add(Chore.createStridColor(recipe.getId()));
         lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getCharStats().getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
@@ -133,28 +139,28 @@ public final class RecipeSelect {
         }
     }
 
-    private static void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final List<FinalDoubleData<RecipeStatus, FinalDoubleData<Material, Integer>>> ritem = new ArrayList<>();
+    private void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
+        final List<ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>>> ritem = new ArrayList<>();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         status.getRecipeStatusList().forEach(rs -> {
             final String result_str = AlchemyRecipe.search(rs.getId()).getResult();
             final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
-            FinalDoubleData<Material, Integer> material = null;
+            ImmutablePair<Material, Integer> material = null;
             if (result[0].startsWith(STRING_MATERIAL)) {
                 material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
             } else if (result[0].startsWith("minecraft:")) {
-                material = new FinalDoubleData<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
+                material = new ImmutablePair<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
             }
             if (material != null) {
-                ritem.add(new FinalDoubleData<>(rs, material));
+                ritem.add(new ImmutablePair<>(rs, material));
             }
         });
-        ritem.sort(Comparator.comparing((FinalDoubleData<RecipeStatus, FinalDoubleData<Material, Integer>> o) -> o.getLeft().getId()));
+        ritem.sort(Comparator.comparing((ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> o) -> o.getLeft().getId()));
         final int dScroll = scroll * 6;
         if (ritem.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
             final ItemMeta meta = setting.getItemMeta();
-            AlchemyChore.setSetting(meta, 0, scroll, RECIPE_VALUE1);
+            AlchemyChore.setSetting(meta, 0, scroll, RECIPE_VALUE_1);
             AlchemyChore.setSetting(meta, 1, 0, ""); // 改行用
             setting.setItemMeta(meta);
             inv.setItem(1, setting);
@@ -182,8 +188,8 @@ public final class RecipeSelect {
                 if (ritem.size() <= i) {
                     break;
                 }
-                final FinalDoubleData<RecipeStatus, FinalDoubleData<Material, Integer>> dd = ritem.get(i);
-                final FinalDoubleData<Material, Integer> material = dd.getRight();
+                final ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> dd = ritem.get(i);
+                final ImmutablePair<Material, Integer> material = dd.getRight();
                 final RecipeStatus rs = dd.getLeft();
                 final AlchemyRecipe recipe = AlchemyRecipe.search(rs.getId());
                 final ItemStack item;
@@ -217,7 +223,7 @@ public final class RecipeSelect {
         }
     }
 
-    private static void setMetaDatas(final ItemMeta meta, final AlchemyMaterial am) {
+    private void setMetaDatas(final ItemMeta meta, final AlchemyMaterial am) {
         if (am != null) {
             if (!am.isDefaultName()) {
                 meta.setDisplayName(am.getName());
@@ -226,7 +232,8 @@ public final class RecipeSelect {
         }
     }
 
-    public static void click(final InventoryClickEvent e) {
+    @Override
+    public void onClick(@NotNull final InventoryClickEvent e) {
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR || e.isShiftClick()) { // 増殖防止 || アイテム混入防止
             e.setCancelled(true);
             return;
@@ -242,6 +249,10 @@ public final class RecipeSelect {
             final ItemStack item = e.getCurrentItem();
 
             switch (raw) {
+                case 43:
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
+                    manager.getInventory(Appraisal.class).open(player);
+                    break;
                 case 46:
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                     setRecipeScroll(player.getUniqueId(), inv, Math.max(0, scroll - 1));
@@ -255,7 +266,7 @@ public final class RecipeSelect {
                         final AlchemyRecipe recipe = AlchemyRecipe.search(Chore.getStridColor(item.getItemMeta().getLore().get(1)));
                         if (Chore.hasMaterial(player.getInventory(), recipe.getReqMaterial())) {
                             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
-                            ItemSelect.openItemSelect(player, recipe, inv);
+                            manager.getInventory(ItemSelect.class).open(player, recipe, inv);
                             return;
                         }
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
@@ -277,19 +288,19 @@ public final class RecipeSelect {
                             }
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
-                            FinalDoubleData<Material, Integer> material = null;
+                            ImmutablePair<Material, Integer> material = null;
                             if (result[0].startsWith(STRING_MATERIAL)) {
                                 am = AlchemyMaterial.getMaterial(result[0].substring(9));
                                 material = am.getMaterial();
                             } else if (result[0].startsWith("minecraft:")) {
-                                material = new FinalDoubleData<>(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
+                                material = new ImmutablePair<>(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
                             }
 
                             final List<String> lore = new ArrayList<>();
                             lore.add(ChatColor.WHITE + "  を作成します。");
                             final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                             if (recipeStatus != null && material != null) {
-                                RecipeSelect.addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, lore);
+                                addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, lore);
                                 final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createCustomModelItem(material.getLeft(), recipe.getAmount(), material.getRight());
                                 final ItemMeta meta = resultItem.getItemMeta();
                                 setMetaDatas(meta, am);
@@ -306,7 +317,8 @@ public final class RecipeSelect {
         }
     }
 
-    public static void drag(InventoryDragEvent e) {
+    @Override
+    public void onDrag(@NotNull final InventoryDragEvent e) {
         final Set<Integer> raws = e.getRawSlots();
         final Inventory inv = e.getInventory();
         raws.stream().filter(raw -> (raw >= 0 && raw < inv.getSize())).forEach(itemValue -> e.setCancelled(true));

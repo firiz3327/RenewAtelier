@@ -163,4 +163,38 @@ public final class GameConstants {
         }
     }
 
+    public static int getVanillaItemDefense(Material material) {
+        switch (material) {
+            case TURTLE_HELMET: // turtle 1
+            case LEATHER_HELMET: // leather all 5 [1, 2, 1, 1]
+            case LEATHER_LEGGINGS:
+            case LEATHER_BOOTS:
+                return 1;
+            case LEATHER_CHESTPLATE:
+            case CHAINMAIL_HELMET: // chainmail all 9 [2, 3, 2, 2]
+            case CHAINMAIL_LEGGINGS:
+            case CHAINMAIL_BOOTS:
+                return 2;
+            case CHAINMAIL_CHESTPLATE:
+            case IRON_HELMET: // iron all 13 [3, 4, 3, 3]
+            case IRON_LEGGINGS:
+            case IRON_BOOTS:
+            case GOLDEN_HELMET: // golden all 13 [3, 4, 3, 3]
+            case GOLDEN_LEGGINGS:
+            case GOLDEN_BOOTS:
+                return 3;
+            case IRON_CHESTPLATE:
+            case GOLDEN_CHESTPLATE:
+                return 4;
+            case DIAMOND_HELMET: // diamond all 21 [5, 6, 5, 5]
+            case DIAMOND_LEGGINGS:
+            case DIAMOND_BOOTS:
+                return 5;
+            case DIAMOND_CHESTPLATE:
+                return 6;
+            default:
+                return 0;
+        }
+    }
+
 }

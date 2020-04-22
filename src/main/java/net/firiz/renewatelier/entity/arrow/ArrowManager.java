@@ -10,10 +10,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.AbstractArrow;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.SpectralArrow;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -48,62 +45,64 @@ public final class ArrowManager {
         shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
     }
 
-    public void shootBow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
+    public void shootBow(@NotNull LivingEntity entity, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
         if (bow == null) {
             baseArrow.remove();
             return;
         }
-        final PlayerInventory playerInventory = player.getInventory();
-        final List<ItemStack> items = new ArrayList<>();
-        items.add(playerInventory.getItemInMainHand());
-        items.add(playerInventory.getItemInOffHand());
-        IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);
 
         ItemStack consumeArrow = null;
         ItemStack nextConsumeArrow = null;
-        for (final ItemStack item : items) {
-            if (item != null && (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW || item.getType() == Material.SPECTRAL_ARROW)) {
-                final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-                if (consumeArrow == null) {
-                    consumeArrow = item;
-                } else if (!CustomArrow.isFound(meta)) {
-                    nextConsumeArrow = item;
-                    break;
+        if (entity instanceof Player) {
+            final PlayerInventory playerInventory = ((Player) entity).getInventory();
+            final List<ItemStack> items = new ArrayList<>();
+            items.add(playerInventory.getItemInMainHand());
+            items.add(playerInventory.getItemInOffHand());
+            IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);
+            for (final ItemStack item : items) {
+                if (item != null && (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW || item.getType() == Material.SPECTRAL_ARROW)) {
+                    final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
+                    if (consumeArrow == null) {
+                        consumeArrow = item;
+                    } else if (!CustomArrow.isFound(meta)) {
+                        nextConsumeArrow = item;
+                        break;
+                    }
                 }
             }
         }
 
-        if (consumeArrow != null) {
+        if (consumeArrow != null) { // always entity is player
             final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
             if (CustomArrow.isFound(meta)) {
-                cancelArrow(player, baseArrow);
-                shootNextArrow(player, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
+                cancelArrow(entity, baseArrow);
+                shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
             } else {
-                cancelArrow(player, baseArrow);
-                shootAtelierArrow(player, bow, baseArrow, consumeArrow, true, force);
+                cancelArrow(entity, baseArrow);
+                shootAtelierArrow(entity, bow, baseArrow, consumeArrow, true, force);
             }
-        } else if(player.getGameMode() == GameMode.CREATIVE) {
-            cancelArrow(player, baseArrow);
-            shootAtelierArrow(player, bow, baseArrow, new ItemStack(Material.ARROW), true, force);
+        } else if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
+            cancelArrow(entity, baseArrow);
+            shootAtelierArrow(entity, bow, baseArrow, new ItemStack(Material.ARROW), true, force);
         }
     }
 
-    private void cancelArrow(final Player source, final AbstractArrow arrow) {
+    private void cancelArrow(final LivingEntity source, final AbstractArrow arrow) {
         arrow.remove();
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
-    private void shootAtelierArrow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
+    private void shootAtelierArrow(@NotNull LivingEntity entity, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
         IAtelierArrow cloneArrow;
         switch (consumeArrow.getType()) {
             case ARROW:
-                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player, force);
+                cloneArrow = new NMSAtelierArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
                 break;
             case TIPPED_ARROW:
-                cloneArrow = new NMSAtelierArrow(player.getEyeLocation(), bow, oneArrow, player, force);
+                cloneArrow = new NMSAtelierArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
                 final PotionMeta potionMeta = (PotionMeta) consumeArrow.getItemMeta();
                 assert potionMeta != null;
 
@@ -115,7 +114,7 @@ public final class ArrowManager {
                 }
                 break;
             case SPECTRAL_ARROW:
-                cloneArrow = new NMSAtelierSpectralArrow(player.getEyeLocation(), bow, oneArrow, player, force);
+                cloneArrow = new NMSAtelierSpectralArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
                 break;
             default:
                 throw new IllegalStateException("consumeArrow is not arrow.");
@@ -127,7 +126,7 @@ public final class ArrowManager {
         cloneArrow.setDamage(baseArrow.getDamage());
         cloneArrow.setCritical(baseArrow.isCritical());
 
-        if (player.getGameMode() == GameMode.CREATIVE) {
+        if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         } else if (!Objects.requireNonNull(bow.getItemMeta()).hasEnchant(Enchantment.ARROW_INFINITE)) {
             if (isConsumeArrow) {

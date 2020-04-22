@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.inventory.shop;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.doubledata.Triple;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -13,24 +14,24 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
 
-public final class ShopInventory {
+public final class ShopInventory implements BiParamInventory<String, List<ShopItem>> {
 
     private static final String TITLE = "SHOP";
     private static final ItemStack EMERALD = new ItemStack(Material.EMERALD);
     private static final ItemStack GLASS_PANE = Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
 
-    private ShopInventory() {
-    }
-
-    public static boolean isShopInventory(final InventoryView view) {
+    @Override
+    public boolean check(@NotNull final InventoryView view) {
         return view.getTitle().endsWith(TITLE);
     }
 
-    public static void openInventory(final Player player, final String title, final List<ShopItem> shopItems) {
+    @Override
+    public void open(@NotNull final Player player, @NotNull final String title, @NotNull final List<ShopItem> shopItems) {
         final UUID uuid = player.getUniqueId();
         final Inventory inv = Bukkit.createInventory(null, 54, uuid.toString().concat(TITLE));
         for (int slot = 0; slot < 54; slot++) {
@@ -38,11 +39,9 @@ public final class ShopInventory {
                 inv.setItem(slot, GLASS_PANE);
             }
         }
-        if (shopItems != null) {
-            for (int i = 0; i < shopItems.size() && i < 28; i++) {
-                final ShopItem shopItem = shopItems.get(i);
-                inv.addItem(shopItem.create());
-            }
+        for (int i = 0; i < shopItems.size() && i < 28; i++) {
+            final ShopItem shopItem = shopItems.get(i);
+            inv.addItem(shopItem.create());
         }
         player.openInventory(inv);
         InventoryPacket.update(
@@ -52,7 +51,8 @@ public final class ShopInventory {
         );
     }
 
-    public static void click(final InventoryClickEvent e) {
+    @Override
+    public void onClick(@NotNull final InventoryClickEvent e) {
         final Player player = (Player) e.getWhoClicked();
         final Inventory inv = e.getInventory();
         final int raw = e.getRawSlot();
@@ -108,7 +108,8 @@ public final class ShopInventory {
         Chore.addItem(player, item);
     }
 
-    public static void drag(final InventoryDragEvent e) {
+    @Override
+    public void onDrag(@NotNull final InventoryDragEvent e) {
         final Inventory inv = e.getInventory();
         e.getRawSlots().stream()
                 .filter(raw -> (raw >= 0 && raw < inv.getSize()))

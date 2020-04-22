@@ -36,7 +36,7 @@ public class TestZombie extends EntityZombie implements Supplier<Object> {
 
     @Override
     public boolean damageEntity(DamageSource ds, float f) {
-        return livingData.damageEntity(ds, f);
+        return livingData.onDamageEntity(ds, f);
     }
 
 }

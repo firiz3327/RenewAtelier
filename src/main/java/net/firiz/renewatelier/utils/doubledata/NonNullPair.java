@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class NonNullPair<L, R> extends DoubleData<L, R> {
+public class NonNullPair<L, R> extends Pair<L, R> {
 
     public NonNullPair(@NotNull L left, @NotNull R right) {
         super(Objects.requireNonNull(left), Objects.requireNonNull(right));

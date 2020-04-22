@@ -15,17 +15,17 @@ public class AlchemyChore {
     }
 
     static void setSetting(final ItemMeta meta, final int line, final int data, final String desc) {
-        final List<String> lores = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
-        if (lores.size() > line) {
-            lores.set(line, Chore.setIntColor(data) + desc);
+        final List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+        if (lore.size() > line) {
+            lore.set(line, Chore.setIntColor(data) + desc);
         } else while (true) {
-            if (lores.size() >= line) {
-                lores.add(Chore.setIntColor(data) + desc);
+            if (lore.size() >= line) {
+                lore.add(Chore.setIntColor(data) + desc);
                 break;
             }
-            lores.add("");
+            lore.add("");
         }
-        meta.setLore(lores);
+        meta.setLore(lore);
     }
 
     static int getSetting(final ItemMeta meta, final int line) {
@@ -37,18 +37,18 @@ public class AlchemyChore {
     }
 
     static void setSettingStr(final ItemMeta meta, final int line, final String data, final String desc) {
-        final List<String> lores = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-        assert lores != null;
-        if (lores.size() > line) {
-            lores.set(line, Chore.createStridColor(data) + desc);
+        final List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+        assert lore != null;
+        if (lore.size() > line) {
+            lore.set(line, Chore.createStridColor(data) + desc);
         } else while (true) {
-            if (lores.size() >= line) {
-                lores.add(Chore.createStridColor(data) + desc);
+            if (lore.size() >= line) {
+                lore.add(Chore.createStridColor(data) + desc);
                 break;
             }
-            lores.add("");
+            lore.add("");
         }
-        meta.setLore(lores);
+        meta.setLore(lore);
     }
 
     static String getSettingStr(final ItemMeta meta, final int line) {

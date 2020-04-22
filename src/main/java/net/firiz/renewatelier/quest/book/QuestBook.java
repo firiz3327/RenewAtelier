@@ -40,14 +40,12 @@ import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
-import net.firiz.renewatelier.version.packet.PayloadPacket;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -61,7 +59,7 @@ public class QuestBook {
     private QuestBook() {
     }
 
-    public static void openQuestBook(final Player player, final EquipmentSlot hand) {
+    public static void openQuestBook(final Player player, final ItemStack book) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ArrayList<>();
         final List<Quest> clearQuests = new ArrayList<>();
@@ -85,14 +83,24 @@ public class QuestBook {
         // クリア済みクエスト
         clearQuests.forEach(quest -> addSpigotPage(pages, quest, 1, player));
 
-        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+//        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
+        if (!meta.hasAuthor()) {
+            meta.setAuthor(player.getName());
+        }
+        if (!meta.hasTitle()) {
+            meta.setTitle("クエストブック");
+        }
+        if (!meta.hasGeneration()) {
+            meta.setGeneration(BookMeta.Generation.ORIGINAL);
+        }
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
 
+        System.out.println("opened quest_book");
         // 本を開くパケット
         //Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
-        player.openBook(book);
+        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> player.openBook(book), 5);
     }
 
     private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type, final Player player) {

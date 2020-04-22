@@ -5,6 +5,7 @@ import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
+import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
@@ -19,7 +20,7 @@ import java.util.function.Function;
 public enum CalcStatType {
     LEVEL(true, false),
     HP(true, true, AlchemyItemStatus::getHp),
-     MP(true, true, AlchemyItemStatus::getMp),
+    MP(true, true, AlchemyItemStatus::getMp),
     ATK(true, true, AlchemyItemStatus::getAtk),
     DEF(true, true, AlchemyItemStatus::getDef),
     SPEED(true, true, AlchemyItemStatus::getSpeed),
@@ -119,7 +120,7 @@ public enum CalcStatType {
             final PlayerInventory inv = charStats.getPlayer().getInventory();
             if (weapon) {
                 final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
-                if (itemStatus != null && itemStatus.getAlchemyMaterial().getCategorys().contains(Category.WEAPON)) {
+                if (itemStatus != null && itemStatus.getAlchemyMaterial().getCategories().contains(Category.WEAPON)) {
                     getStats(charStats, defStatus, status, item);
                 }
             } else {
@@ -133,20 +134,30 @@ public enum CalcStatType {
     private void getStats(@NotNull final CharStats charStats, final int defStatus, @NotNull final AtomicInteger status, @NotNull final ItemStack... checkItems) {
         final CharacteristicType[] characteristicType = characteristicTypes.get(this);
         for (final ItemStack item : checkItems) {
-            final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
-            if (itemStatus != null) {
-                if (runGetEquipStats != null) {
-                    status.addAndGet(runGetEquipStats.apply(itemStatus)); // getEquipItemStats
-                }
-                for (final Characteristic c : itemStatus.getCharacteristics()) {
-                    if (c.hasData(characteristicType[0])) { // percent
-                        status.addAndGet((int) (defStatus * (((int) c.getData(characteristicType[0])) * 0.01)));
-                    } else if (c.hasData(characteristicType[1])) { // fixed
-                        status.addAndGet((int) c.getData(characteristicType[1]));
-                    } else if (c.hasData(characteristicType[2])) { // quality
-                        status.addAndGet((int) ((int) c.getData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
-                    } else if (c.hasData(CharacteristicType.LEVEL_STATS_UP)) {
-                        status.addAndGet(charStats.getLevel() * (int) c.getData(CharacteristicType.LEVEL_STATS_UP));
+            if (item != null) {
+                final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
+                if (itemStatus == null) { // バニラ装備を想定
+                    switch (this) {
+                        case DEF:
+                            status.addAndGet(GameConstants.getVanillaItemDefense(item.getType()));
+                            break;
+                        default: // 想定しない
+                            break;
+                    }
+                } else {
+                    if (runGetEquipStats != null) {
+                        status.addAndGet(runGetEquipStats.apply(itemStatus)); // getEquipItemStats
+                    }
+                    for (final Characteristic c : itemStatus.getCharacteristics()) {
+                        if (c.hasData(characteristicType[0])) { // percent
+                            status.addAndGet((int) (defStatus * (((int) c.getData(characteristicType[0])) * 0.01)));
+                        } else if (c.hasData(characteristicType[1])) { // fixed
+                            status.addAndGet((int) c.getData(characteristicType[1]));
+                        } else if (c.hasData(characteristicType[2])) { // quality
+                            status.addAndGet((int) ((int) c.getData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
+                        } else if (c.hasData(CharacteristicType.LEVEL_STATS_UP)) {
+                            status.addAndGet(charStats.getLevel() * (int) c.getData(CharacteristicType.LEVEL_STATS_UP));
+                        }
                     }
                 }
             }
