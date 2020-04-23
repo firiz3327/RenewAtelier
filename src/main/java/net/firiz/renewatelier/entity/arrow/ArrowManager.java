@@ -1,7 +1,6 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;

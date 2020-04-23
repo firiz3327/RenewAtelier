@@ -4,7 +4,6 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.entity.atelier.Puni;
 import net.minecraft.server.v1_15_R1.*;
 
 import java.lang.reflect.Field;
@@ -26,6 +25,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 //        System.out.println("[WRITE] " + msg.getClass().getSimpleName());
+        /*
         if (msg instanceof PacketPlayOutEntity) {
             final Field entityIdField = VersionUtils.getField(PacketPlayOutEntity.class, "a");
             final Entity entity = player.world.getEntity((Integer) VersionUtils.getFieldValue(entityIdField, msg));
@@ -79,6 +79,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
                 player.playerConnection.sendPacket(packetEntity);
             }
         }
+        */
         super.write(ctx, msg, promise);
     }
 

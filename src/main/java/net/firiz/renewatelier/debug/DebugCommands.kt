@@ -10,16 +10,11 @@ import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
-import net.firiz.renewatelier.entity.player.PlayerSaveManager
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.Chore
-import net.firiz.renewatelier.version.entity.living.monster.C
-import net.firiz.renewatelier.version.entity.living.horse.CaneHorse
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
-import net.firiz.renewatelier.version.entity.atelier.Puni
-import net.firiz.renewatelier.version.entity.living.monster.SSSkeleton
-import net.firiz.renewatelier.version.entity.living.monster.TestZombie
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -430,12 +425,7 @@ class DebugCommands(private val debugListener: DebugListener) {
         if (args.size != 0) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin()) {
                 when (args[0]) {
-                    "c" -> C(sender.world, sender.player)
-                    "caneHorse" -> CaneHorse(sender.world, sender.player)
                     "z" -> AtelierEntityUtils.INSTANCE.spawn(TargetEntityTypes.valueOf(args[1].toString().toUpperCase()), sender.location)
-                    "puni" -> AtelierEntityUtils.INSTANCE.spawn(Puni(sender.world, sender.location), sender.location)
-                    "sss" -> AtelierEntityUtils.INSTANCE.spawn(SSSkeleton(sender.world), sender.location)
-                    "t" -> AtelierEntityUtils.INSTANCE.spawn(TestZombie(sender.location), sender.location)
                     "quest" -> QuestBook.openQuestBook(sender, sender.inventory.itemInMainHand)
                 }
             }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class CharSettingLoader implements StatusLoader<CharSettings> {
+class CharSettingLoader implements StatusLoader<CharSettings> {
 
     @NotNull
     @Override

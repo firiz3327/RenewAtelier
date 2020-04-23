@@ -8,7 +8,7 @@ import java.util.stream.StreamSupport;
 
 public class GArray<T> implements Iterable<T> {
 
-    private Object[] elementData;
+    private final Object[] elementData;
 
     public GArray(int initialCapacity) {
         elementData = new Object[initialCapacity];

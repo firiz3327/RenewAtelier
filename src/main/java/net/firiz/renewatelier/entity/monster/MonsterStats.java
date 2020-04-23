@@ -8,7 +8,6 @@ import org.bukkit.entity.Entity;
 public class MonsterStats extends EntityStatus {
 
     private final Race race;
-    private final int level;
     private int buffLevel;
     private int buffHp;
     private int buffAtk;
@@ -20,14 +19,12 @@ public class MonsterStats extends EntityStatus {
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed) {
         super(entity, level, maxHp, hp, atk, def, speed);
         this.race = race;
-        this.level = level;
         this.isBoss = false;
     }
 
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, boolean isBoss) {
         super(entity, level, maxHp, hp, atk, def, speed);
         this.race = race;
-        this.level = level;
         this.isBoss = isBoss;
     }
 
@@ -38,6 +35,10 @@ public class MonsterStats extends EntityStatus {
         this.buffAtk = CalcStatType.ATK.getMobBuffStats(this, atk);
         this.buffDef = CalcStatType.DEF.getMobBuffStats(this, def);
         this.buffSpeed = CalcStatType.SPEED.getMobBuffStats(this, speed);
+    }
+
+    public Race getRace() {
+        return race;
     }
 
     public int getLevel() {

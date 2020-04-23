@@ -34,7 +34,6 @@ public class InventoryManager {
     public CustomInventory getInventory(@NotNull InventoryView view) {
         for (final CustomInventory inventory : inventories.values()) {
             if (inventory.check(view)) {
-                System.out.println(inventory);
                 return inventory;
             }
         }
@@ -44,7 +43,6 @@ public class InventoryManager {
     @NotNull
     public <T> T getInventory(@NotNull Class<T> clasz) {
         final Object obj = Objects.requireNonNull(inventories.get(clasz));
-        System.out.println(obj);
         return Chore.cast(obj);
     }
 

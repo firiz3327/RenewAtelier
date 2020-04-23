@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author firiz
  */
-public class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
+class QuestStatusLoader implements StatusLoader<List<QuestStatus>> {
 
     @NotNull
     @Override

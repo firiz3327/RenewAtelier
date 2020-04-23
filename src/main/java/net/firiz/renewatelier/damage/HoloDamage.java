@@ -2,10 +2,10 @@ package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.player.CharSettings;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -28,8 +28,8 @@ import java.util.Objects;
 
 final class HoloDamage {
 
-    private final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
-    private final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
+    private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+    private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
     @SafeVarargs
     final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, ImmutablePair<Double, AttackAttribute>... damages) {

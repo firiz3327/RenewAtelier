@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuffLoader implements StatusLoader<List<Buff>> {
+class BuffLoader implements StatusLoader<List<Buff>> {
 
     @NotNull
     @Override

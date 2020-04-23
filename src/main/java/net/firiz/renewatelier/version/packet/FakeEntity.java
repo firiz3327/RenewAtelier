@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.version.packet;
 
 import java.util.UUID;
-import net.firiz.renewatelier.utils.doubledata.Pair;
+import net.firiz.renewatelier.utils.pair.Pair;
 import net.minecraft.server.v1_15_R1.EntityTypes;
 import org.bukkit.entity.EntityType;
 

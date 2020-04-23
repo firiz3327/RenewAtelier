@@ -27,7 +27,7 @@ import java.util.function.ObjIntConsumer;
 
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;

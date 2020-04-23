@@ -32,7 +32,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.doubledata.Pair;
+import net.firiz.renewatelier.utils.pair.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -375,21 +375,9 @@ public final class Chore {
         if (item == null) {
             return;
         }
-        int amount = item.getAmount();
-        final ItemStack[] contents = inv.getStorageContents();
-        for (final ItemStack v : contents) {
-            amount = getAmount(item, amount, v);
-        }
-        inv.setStorageContents(contents);
-        if (amount > 0) {
-            if (Arrays.asList(inv.getStorageContents()).contains(null)) {
-                item.setAmount(amount);
-                inv.addItem(item);
-            } else {
-                final ItemStack remainder = item.clone();
-                remainder.setAmount(amount);
-                Chore.drop(loc, item);
-            }
+        final ItemStack dropItem = addItemNotDrop(inv, item);
+        if (dropItem != null) {
+            Chore.drop(loc, dropItem);
         }
     }
 
@@ -407,7 +395,6 @@ public final class Chore {
 
     public static ItemStack addItemNotDrop(@NotNull Inventory inv, @NotNull ItemStack item) {
         int amount = item.getAmount();
-
         final ItemStack[] contents = inv.getStorageContents();
         for (final ItemStack v : contents) {
             amount = getAmount(item, amount, v);

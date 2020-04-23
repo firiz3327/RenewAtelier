@@ -25,7 +25,7 @@ import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;

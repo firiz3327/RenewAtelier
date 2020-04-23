@@ -26,7 +26,7 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
  *
  * @author firiz
  */
-public class RecipeQuestResult extends QuestResult<AlchemyRecipe> {
+public class RecipeQuestResult extends AbstractQuestResult<AlchemyRecipe> {
 
     public RecipeQuestResult(AlchemyRecipe recipe) {
         super(recipe);

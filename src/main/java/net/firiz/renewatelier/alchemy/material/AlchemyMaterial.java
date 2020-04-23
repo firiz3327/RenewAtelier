@@ -28,7 +28,7 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

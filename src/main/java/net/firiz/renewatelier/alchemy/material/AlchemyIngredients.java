@@ -23,7 +23,7 @@ package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.doubledata.Pair;
+import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;

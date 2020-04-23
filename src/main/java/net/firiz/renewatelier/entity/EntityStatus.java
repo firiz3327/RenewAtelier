@@ -5,7 +5,6 @@ import net.firiz.renewatelier.buff.BuffValueType;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,7 +60,7 @@ public abstract class EntityStatus {
 
     public abstract int getSpeed();
 
-    synchronized public boolean addBuff(@NotNull Buff buff) {
+    public synchronized boolean addBuff(@NotNull Buff buff) {
         if (buffs.contains(buff)) {
             return false;
         }

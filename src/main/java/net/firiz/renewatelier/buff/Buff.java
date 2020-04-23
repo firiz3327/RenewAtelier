@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.buff;
 
 import net.firiz.renewatelier.loop.LoopManager;
+import net.firiz.renewatelier.utils.Chore;
 
 public class Buff {
 
@@ -67,7 +68,7 @@ public class Buff {
 
     private boolean incrementTimer() {
         duration++;
-        System.out.println(duration + " / " + limitDuration);
+        Chore.log(duration + " / " + limitDuration);
         return limitDuration <= duration;
     }
 

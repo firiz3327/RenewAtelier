@@ -21,7 +21,7 @@
 
 package net.firiz.renewatelier.characteristic;
 
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.List;

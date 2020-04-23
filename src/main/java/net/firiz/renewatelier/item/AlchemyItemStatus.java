@@ -26,11 +26,11 @@ import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
+import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.Strings;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -90,19 +90,7 @@ public class AlchemyItemStatus {
     private int speed;
 
     public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
-        this.alchemyMaterial = alchemyMaterial;
-        this.customModel = null;
-        this.size = size;
-        this.categories = categories;
-        this.quality = quality;
-        this.ingredients = ingredients;
-        this.characteristics = characteristics;
-        this.activeEffects = activeEffects;
-        this.hp = hp;
-        this.mp = mp;
-        this.atk = atk;
-        this.def = def;
-        this.speed = speed;
+        this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed);
     }
 
     public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, ImmutablePair<Material, Integer> customModel, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
@@ -282,14 +270,14 @@ public class AlchemyItemStatus {
                 final List<Integer> size = new ArrayList<>();
                 boolean start = false;
                 for (final String lore : Objects.requireNonNull(meta.getLore())) {
-                    if (lore.contains(Strings.W_W) || lore.contains(Strings.W_B)) {
+                    if (lore.contains(GameConstants.W_W) || lore.contains(GameConstants.W_B)) {
                         start = true;
                         String b = null;
                         for (char l : lore.toCharArray()) {
                             String j = String.valueOf(l);
                             switch (j) {
-                                case Strings.W_W:
-                                case Strings.W_B:
+                                case GameConstants.W_W:
+                                case GameConstants.W_B:
                                     size.add(AlchemyCircle.colorCint(b));
                                     break;
                                 default:
@@ -332,9 +320,9 @@ public class AlchemyItemStatus {
                 int c = 0;
                 for (final int k : size) {
                     if (k == 0) {
-                        str.append(Chore.intCcolor(k)).append(Strings.W_W);
+                        str.append(Chore.intCcolor(k)).append(GameConstants.W_W);
                     } else {
-                        str.append(Chore.intCcolor(k)).append(Strings.W_B);
+                        str.append(Chore.intCcolor(k)).append(GameConstants.W_B);
                     }
                     if (cSize >= 2) {
                         lore.set(l + c, str.toString());
@@ -644,9 +632,9 @@ public class AlchemyItemStatus {
             final int[] ss = overSize == null ? am.getSizeTemplate().getSize(Randomizer.nextInt(9)) : overSize;
             for (final int i : ss) {
                 if (i == 0) {
-                    str.append(Chore.intCcolor(i)).append(Strings.W_W);
+                    str.append(Chore.intCcolor(i)).append(GameConstants.W_W);
                 } else {
-                    str.append(Chore.intCcolor(i)).append(Strings.W_B);
+                    str.append(Chore.intCcolor(i)).append(GameConstants.W_B);
                 }
                 if (cSize >= 2) {
                     lore.add(str.toString());
@@ -686,9 +674,9 @@ public class AlchemyItemStatus {
                     for (int j = 1; j <= rotate_value; j++) {
                         final int value = allcs.get(count);
                         if (value == 0) {
-                            sb.append(Chore.intCcolor(value)).append(Strings.W_W);
+                            sb.append(Chore.intCcolor(value)).append(GameConstants.W_W);
                         } else {
-                            sb.append(Chore.intCcolor(value)).append(Strings.W_B);
+                            sb.append(Chore.intCcolor(value)).append(GameConstants.W_B);
                         }
                         count++;
                     }
@@ -733,11 +721,9 @@ public class AlchemyItemStatus {
             characteristics.forEach(c -> lore.add(Type.CHARACTERISTIC.check + "§r- " + c.getName()));
         }
         // カテゴリ
-        if (visibleFlags.category) {
-            if (!categories.isEmpty()) {
-                lore.add(Type.CATEGORY.check + "§7カテゴリ:");
-                categories.forEach(category -> lore.add(Type.CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
-            }
+        if (visibleFlags.category && !categories.isEmpty()) {
+            lore.add(Type.CATEGORY.check + "§7カテゴリ:");
+            categories.forEach(category -> lore.add(Type.CATEGORY.check + "§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
         }
 
         // Lore終了

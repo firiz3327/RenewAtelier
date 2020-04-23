@@ -34,7 +34,7 @@ import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;

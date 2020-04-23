@@ -1,17 +1,12 @@
 package net.firiz.renewatelier.entity.player.stats;
 
 import net.firiz.renewatelier.buff.Buff;
-import net.firiz.renewatelier.buff.BuffValueType;
 import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.entity.CalcStatType;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -26,10 +21,10 @@ import java.util.*;
 public class CharStats extends EntityStatus {
 
     private final Player player;
-    private int level;
     private long exp;
     private int alchemyLevel;
     private int alchemyExp;
+    private int money;
     private int maxMp;
     private int mp;
 
@@ -40,13 +35,13 @@ public class CharStats extends EntityStatus {
     private final EquipStats equipStats; // 装備・ハンド更新時、更新
     private final BuffedStats buffedStats; // バフ更新時、更新
 
-    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
+    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, int money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
         super(player, level, maxHp, hp, atk, def, speed);
         this.player = player;
-        this.level = level;
         this.exp = exp;
         this.alchemyLevel = alchemyLevel;
         this.alchemyExp = alchemyExp;
+        this.money = money;
         this.maxMp = maxMp;
         this.mp = mp;
         this.acc = 100;
@@ -64,8 +59,8 @@ public class CharStats extends EntityStatus {
     public void save(int id) {
         SQLManager.INSTANCE.insert(
                 "accounts",
-                new String[]{"id", "uuid", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed"},
-                new Object[]{id, player.getUniqueId().toString(), level, exp, alchemyLevel, alchemyExp, maxHp, hp, maxMp, mp, atk, def, speed}
+                new String[]{"id", "uuid", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed", "money"},
+                new Object[]{id, player.getUniqueId().toString(), level, exp, alchemyLevel, alchemyExp, maxHp, hp, maxMp, mp, atk, def, speed, money}
         );
     }
 
@@ -115,6 +110,10 @@ public class CharStats extends EntityStatus {
         return itemStatuses;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
     public int getLevel() {
         return buffedStats.getLevel();
     }
@@ -131,8 +130,8 @@ public class CharStats extends EntityStatus {
         return alchemyExp;
     }
 
-    public Player getPlayer() {
-        return player;
+    public int getMoney() {
+        return money;
     }
 
     public int getMaxHp() {
@@ -210,7 +209,7 @@ public class CharStats extends EntityStatus {
         this.speed += speedUp;
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, VersionUtils.createTextComponent("LEVEL UP"));
+        player.sendActionBar("LEVEL UP");
         updateStats();
     }
 
@@ -274,7 +273,7 @@ public class CharStats extends EntityStatus {
             }
             sb.append('|');
         }
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, VersionUtils.createTextComponent(sb.toString()));
+        player.sendActionBar(sb.toString());
     }
 
     public void clearBuffs() {

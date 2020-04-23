@@ -18,15 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.entity.player;
+package net.firiz.renewatelier.entity.player.loadsqls;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import net.firiz.renewatelier.entity.player.loadsqls.*;
+import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
@@ -44,13 +40,34 @@ public enum PlayerSaveManager {
     private final SQLManager sql = SQLManager.INSTANCE;
     private final ScriptManager script = ScriptManager.INSTANCE;
     private final Map<UUID, Char> statusList = new HashMap<>();
-    private final StatusLoader[] loaders = {
-            new RecipeStatusLoader(),
-            new QuestStatusLoader(),
-            new DiscoveredRecipeLoader(),
-            new BuffLoader(),
-            new CharSettingLoader()
+    private final Set<StatusLoader<?>> loaders = new LinkedHashSet<>();
+
+    private final String[] columns = {
+            "uuid",
+            "id",
+            "email",
+            "password",
+            "level",
+            "exp",
+            "alchemyLevel",
+            "alchemyExp",
+            "maxHp",
+            "hp",
+            "maxMp",
+            "mp",
+            "atk",
+            "def",
+            "speed",
+            "money"
     };
+
+    PlayerSaveManager() {
+        loaders.add(new RecipeStatusLoader());
+        loaders.add(new QuestStatusLoader());
+        loaders.add(new DiscoveredRecipeLoader());
+        loaders.add(new BuffLoader());
+        loaders.add(new CharSettingLoader());
+    }
 
     public void loadPlayers() {
         Bukkit.getWorlds().forEach(world -> world.getPlayers().forEach(player -> {
@@ -72,31 +89,31 @@ public enum PlayerSaveManager {
 
     public void loadStatus(final Player player) {
         final UUID uuid = player.getUniqueId();
-        final String tableName = "accounts";
-        final String[] columns = new String[]{"uuid", "id", "email", "password", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed"};
         final Object[] wheres = new Object[]{uuid.toString()};
+        final String tableName = "accounts";
         List<List<Object>> select = sql.select(tableName, columns, wheres);
         if (select.isEmpty()) {
             sql.insert(tableName, "uuid", uuid.toString());
             select = sql.select(tableName, columns, wheres);
         }
-        final List<Object> datas = select.get(0);
-        final int id = (int) datas.get(1);
-        final String email = (String) datas.get(2);
-        final String password = (String) datas.get(3);
-        final int level = (int) datas.get(4);
-        final long exp = (long) datas.get(5);
-        final int alchemyLevel = (int) datas.get(6);
-        final int alchemyExp = (int) datas.get(7);
-        final int maxHp = (int) datas.get(8);
-        final int hp = (int) datas.get(9);
-        final int maxMp = (int) datas.get(10);
-        final int mp = (int) datas.get(11);
-        final int atk = (int) datas.get(12);
-        final int def = (int) datas.get(13);
-        final int speed = (int) datas.get(14);
+        final List<Object> dataList = select.get(0);
+        final int id = (int) dataList.get(1);
+        final String email = (String) dataList.get(2);
+        final String password = (String) dataList.get(3);
+        final int level = (int) dataList.get(4);
+        final long exp = (long) dataList.get(5);
+        final int alchemyLevel = (int) dataList.get(6);
+        final int alchemyExp = (int) dataList.get(7);
+        final int maxHp = (int) dataList.get(8);
+        final int hp = (int) dataList.get(9);
+        final int maxMp = (int) dataList.get(10);
+        final int mp = (int) dataList.get(11);
+        final int atk = (int) dataList.get(12);
+        final int def = (int) dataList.get(13);
+        final int speed = (int) dataList.get(14);
+        final int money = (int) dataList.get(15);
         final List<Object> loaderValues = new ArrayList<>();
-        for (final StatusLoader sLoader : loaders) {
+        for (final StatusLoader<?> sLoader : loaders) {
             loaderValues.add(sLoader.load(id));
         }
         final Char status = new Char(
@@ -110,6 +127,7 @@ public enum PlayerSaveManager {
                         exp,
                         alchemyLevel,
                         alchemyExp,
+                        money,
                         maxHp,
                         hp,
                         maxMp,

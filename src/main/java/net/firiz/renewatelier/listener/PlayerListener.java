@@ -29,10 +29,11 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
+import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
@@ -53,8 +54,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootTables;
-
-import java.util.Random;
 
 /**
  * @author firiz
@@ -82,7 +81,7 @@ public class PlayerListener implements Listener {
             final LootableBlockInventory loot = (LootableBlockInventory) state;
             if (player.isOp() && item != null && item.getType() == Material.STICK) { // デバッグ用
                 e.setCancelled(true);
-                loot.setLootTable(LootTables.ABANDONED_MINESHAFT.getLootTable(), new Random().nextLong());
+                loot.setLootTable(LootTables.ABANDONED_MINESHAFT.getLootTable(), Randomizer.nextLong());
                 state.update();
                 player.sendMessage("set lootTable " + loot.hasLootTable());
             } else if (loot.hasLootTable()) {
@@ -158,7 +157,7 @@ public class PlayerListener implements Listener {
             final LootableEntityInventory loot = (LootableEntityInventory) e.getRightClicked();
             if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.STICK) { // デバッグ用
                 e.setCancelled(true);
-                loot.setLootTable(LootTables.ABANDONED_MINESHAFT.getLootTable(), new Random().nextLong());
+                loot.setLootTable(LootTables.ABANDONED_MINESHAFT.getLootTable(), Randomizer.nextLong());
                 player.sendMessage("set lootTable " + loot.hasLootTable());
             } else if (loot.hasLootTable()) {
                 ReplaceVanillaItems.loot(player, loot);

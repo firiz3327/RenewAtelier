@@ -57,21 +57,42 @@ public final class Char {
     private static final String COLUMN_RECIPE_ID = "recipeId";
     private static final String COLUMN_LEVEL = "level";
 
+    @NotNull
     private final UUID uuid;
     private final int id;
+    @Nullable
     private final String email;
+    @Nullable
     private final String password;
+    @NotNull
     private final CharStats charStats;
+    @NotNull
     private final List<RecipeStatus> recipeStatuses;
+    @NotNull
     private final List<QuestStatus> questStatuses;
+    @NotNull
     private final List<MinecraftRecipeSaveType> saveTypes;
+    @NotNull
     private final CharSettings settings;
     private boolean isEnginesUsable;
+    @Nullable
     private ScriptEngine jsEngine;
+    @Nullable
     private ScriptEngine py3Engine;
+    @NotNull
     private final Runnable autoSave;
 
-    public Char(@NotNull UUID uuid, final int id, @Nullable String email, @Nullable String password, @NotNull CharStats charStats, @NotNull final List<RecipeStatus> recipeStatuses, @NotNull final List<QuestStatus> questStatuses, @NotNull final List<MinecraftRecipeSaveType> saveTypes, CharSettings settings) {
+    public Char(
+            @NotNull UUID uuid,
+            final int id,
+            @Nullable final String email,
+            @Nullable final String password,
+            @NotNull final CharStats charStats,
+            @NotNull final List<RecipeStatus> recipeStatuses,
+            @NotNull final List<QuestStatus> questStatuses,
+            @NotNull final List<MinecraftRecipeSaveType> saveTypes,
+            @NotNull final CharSettings settings
+    ) {
         this.uuid = uuid;
         this.id = id;
         this.email = email;
@@ -282,10 +303,12 @@ public final class Char {
     }
     //</editor-fold>
 
+    @NotNull
     public CharStats getCharStats() {
         return charStats;
     }
 
+    @NotNull
     public CharSettings getSettings() {
         return settings;
     }
@@ -298,19 +321,21 @@ public final class Char {
         isEnginesUsable = enginesUsable;
     }
 
+    @Nullable
     public ScriptEngine getJsEngine() {
         return jsEngine;
     }
 
-    public void setJsEngine(ScriptEngine jsEngine) {
+    public void setJsEngine(@Nullable ScriptEngine jsEngine) {
         this.jsEngine = jsEngine;
     }
 
+    @Nullable
     public ScriptEngine getPy3Engine() {
         return py3Engine;
     }
 
-    public void setPy3Engine(ScriptEngine py3Engine) {
+    public void setPy3Engine(@Nullable ScriptEngine py3Engine) {
         this.py3Engine = py3Engine;
     }
 

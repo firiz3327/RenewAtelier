@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author firiz
  */
-public class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
+class DiscoveredRecipeLoader implements StatusLoader<List<MinecraftRecipeSaveType>> {
 
     @NotNull
     @Override

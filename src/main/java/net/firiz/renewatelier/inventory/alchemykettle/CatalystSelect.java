@@ -52,8 +52,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class CatalystSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
 
+    private static final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final InventoryManager manager;
-    private final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final List<UUID> openUsers = new ArrayList<>();
 
     public CatalystSelect(final InventoryManager manager) {

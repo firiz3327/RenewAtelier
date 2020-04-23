@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author firiz
  */
-public class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
+class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
 
     @NotNull
     @Override

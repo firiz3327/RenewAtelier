@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.config;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.quest.result.QuestResult;
+import net.firiz.renewatelier.quest.result.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,9 +32,6 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
-import net.firiz.renewatelier.quest.result.ItemQuestResult;
-import net.firiz.renewatelier.quest.result.MoneyQuestResult;
-import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

@@ -26,7 +26,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import net.firiz.renewatelier.constants.ServerConstants;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.script.engine.GraalEngine;
@@ -39,7 +39,7 @@ import org.bukkit.entity.Player;
 public enum ScriptManager {
     INSTANCE; // enum singleton style
 
-    private final String STR_LOAD_ENGINE = "スクリプトエンジンを読み込み中です。しばらく経ってからもう一度実行してください。";
+    private final String stringLoadEngine = "スクリプトエンジンを読み込み中です。しばらく経ってからもう一度実行してください。";
     private final ScriptRunner script;
     private final ScriptEngineManager scriptEngineManager;
     private final GraalJSEngineFactory graalJSEngineFactory;
@@ -53,7 +53,7 @@ public enum ScriptManager {
     public void start(final String name, final Player player, final ScriptConversation conversation) {
         final ScriptEngine engine = getEngine(name, player);
         if (engine == null) {
-            player.sendMessage(STR_LOAD_ENGINE);
+            player.sendMessage(stringLoadEngine);
             return;
         }
         script.start(engine, name, player, null, conversation);
@@ -62,7 +62,7 @@ public enum ScriptManager {
     public void start(final String name, final Player player, final ScriptConversation conversation, final String functionName, final Object... args) {
         final ScriptEngine engine = getEngine(name, player);
         if (engine == null) {
-            player.sendMessage(STR_LOAD_ENGINE);
+            player.sendMessage(stringLoadEngine);
             return;
         }
         script.start(engine, name, player, functionName, conversation, args);

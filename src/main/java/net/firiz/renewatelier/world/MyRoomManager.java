@@ -28,6 +28,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,14 +51,17 @@ public enum MyRoomManager {
     public void setup() {
         final String world_name = "atelier_world";
         final World worldTemp = Bukkit.getWorld(world_name);
-        world = worldTemp != null ? worldTemp : new WorldCreator(world_name).generator(
+        world = (worldTemp != null) ? worldTemp : new WorldCreator(world_name).generator(
                 new ChunkGenerator() {
+                    @NotNull
                     @Override
-                    public ChunkGenerator.ChunkData generateChunkData(final World world, final Random random, final int chunkx, final int chunkz, final ChunkGenerator.BiomeGrid biome) {
-                        final ChunkGenerator.ChunkData data = createChunkData(world);
+                    public ChunkData generateChunkData(@NotNull final World world, @NotNull final Random random, final int chunkX, final int chunkZ, @NotNull final BiomeGrid biome) {
+                        final ChunkData data = createChunkData(world);
                         for (int x = 0; x < 16; x++) {
                             for (int z = 0; z < 16; z++) {
-                                biome.setBiome(x, z, Biome.PLAINS);
+                                for (int y = 0; y <= 255; y++) {
+                                    biome.setBiome(x, y, z, Biome.PLAINS);
+                                }
                             }
                         }
                         return data;

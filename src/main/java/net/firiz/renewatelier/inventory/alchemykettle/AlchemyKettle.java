@@ -49,11 +49,10 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.Pair;
-import net.firiz.renewatelier.utils.Strings;
+import net.firiz.renewatelier.utils.pair.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -143,8 +142,8 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
         for (final int n : ss) {
             l++;
             sb.append(String.valueOf(n)
-                    .replace("0", ChatColor.GRAY + Strings.W_W)
-                    .replace("1", ChatColor.WHITE + Strings.W_B)
+                    .replace("0", ChatColor.GRAY + GameConstants.W_W)
+                    .replace("1", ChatColor.WHITE + GameConstants.W_B)
             );
             if (l % 3 == 0) {
                 lore.add(sb.toString());
@@ -481,7 +480,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                         cmd,
                                         ChatColor.RESET + b.getData().getName(),
                                         b.getData().getDesc()
-                                );;
+                                );
                                 break getSlotItem;
                             }
                         }
@@ -743,8 +742,8 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                         for (int n : ss) {
                             l++;
                             sb.append(String.valueOf(n)
-                                    .replace("0", ChatColor.GRAY + Strings.W_W)
-                                    .replace("1", ChatColor.WHITE + Strings.W_B)
+                                    .replace("0", ChatColor.GRAY + GameConstants.W_W)
+                                    .replace("1", ChatColor.WHITE + GameConstants.W_B)
                             );
                             if (l % 3 == 0) {
                                 lore.add(sb.toString());

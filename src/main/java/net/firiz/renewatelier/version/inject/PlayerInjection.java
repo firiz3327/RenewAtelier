@@ -24,7 +24,7 @@ public class PlayerInjection {
 
     public static void inject(Player bukkitPlayer) {
         final EntityPlayer player = ((CraftPlayer) bukkitPlayer).getHandle();
-        injectPacketPipeline(player);
+//        injectPacketPipeline(player);
         injectArmorChangeEvent(player);
     }
 

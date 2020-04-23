@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 public enum CalcStatType {
     LEVEL(true, false),
@@ -29,7 +29,7 @@ public enum CalcStatType {
 
     private final boolean buff;
     private final boolean characteristic;
-    private final Function<AlchemyItemStatus, Integer> runGetEquipStats;
+    private final ToIntFunction<AlchemyItemStatus> runGetEquipStats;
 
     private static final Map<CalcStatType, BuffType[]> buffTypes = new EnumMap<>(CalcStatType.class);
     private static final Map<CalcStatType, CharacteristicType[]> characteristicTypes = new EnumMap<>(CalcStatType.class);
@@ -54,7 +54,7 @@ public enum CalcStatType {
         this(buff, characteristic, null);
     }
 
-    CalcStatType(boolean buff, boolean characteristic, Function<AlchemyItemStatus, Integer> getEquipStats) {
+    CalcStatType(boolean buff, boolean characteristic, ToIntFunction<AlchemyItemStatus> getEquipStats) {
         this.buff = buff;
         this.characteristic = characteristic;
         this.runGetEquipStats = getEquipStats;
@@ -146,7 +146,7 @@ public enum CalcStatType {
                     }
                 } else {
                     if (runGetEquipStats != null) {
-                        status.addAndGet(runGetEquipStats.apply(itemStatus)); // getEquipItemStats
+                        status.addAndGet(runGetEquipStats.applyAsInt(itemStatus)); // getEquipItemStats
                     }
                     for (final Characteristic c : itemStatus.getCharacteristics()) {
                         if (c.hasData(characteristicType[0])) { // percent

@@ -1,15 +1,13 @@
-package net.firiz.renewatelier.utils.doubledata;
+package net.firiz.renewatelier.utils.pair;
 
 import org.jetbrains.annotations.Nullable;
 
-public class Pair<L, R> {
+public class Pair<L, R> implements PairInterface<L, R> {
 
     private L left;
     private R right;
 
     public Pair() {
-        this.left = null;
-        this.right = null;
     }
 
     public Pair(L left, R right) {
@@ -33,11 +31,6 @@ public class Pair<L, R> {
 
     public void setRight(R right) {
         this.right = right;
-    }
-
-    @Override
-    public String toString() {
-        return "DoubleData[" + left.toString() + ", " + right.toString() + "]";
     }
 
 }

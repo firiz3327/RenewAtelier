@@ -1,18 +1,24 @@
-package net.firiz.renewatelier.utils.doubledata;
+package net.firiz.renewatelier.utils.pair;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class Four<A, B, C, D> {
+    @NotNull
     private final A a;
+    @NotNull
     private final B b;
+    @NotNull
     private final C c;
+    @NotNull
     private final D d;
 
     public Four(@NotNull A a, @NotNull B b, @NotNull C c, @NotNull D d) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.d = d;
+        this.a = Objects.requireNonNull(a);
+        this.b = Objects.requireNonNull(b);
+        this.c = Objects.requireNonNull(c);
+        this.d = Objects.requireNonNull(d);
     }
 
     @NotNull

@@ -24,9 +24,6 @@ import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.entity.Player;
-
-import java.util.Optional;
 
 /**
  * @author firiz

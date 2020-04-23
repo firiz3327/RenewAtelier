@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author firiz
  */
-public interface StatusLoader<T> {
+interface StatusLoader<T> {
 
     @NotNull
     T load(int id);

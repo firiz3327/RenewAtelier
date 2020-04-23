@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;
 
 import java.util.Map;

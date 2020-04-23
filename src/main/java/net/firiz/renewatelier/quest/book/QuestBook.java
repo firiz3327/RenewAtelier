@@ -29,14 +29,11 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
-import net.firiz.renewatelier.quest.result.ItemQuestResult;
-import net.firiz.renewatelier.quest.result.MoneyQuestResult;
-import net.firiz.renewatelier.quest.result.QuestResult;
-import net.firiz.renewatelier.quest.result.RecipeQuestResult;
+import net.firiz.renewatelier.quest.result.*;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
@@ -97,7 +94,6 @@ public class QuestBook {
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
 
-        System.out.println("opened quest_book");
         // 本を開くパケット
         //Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
         Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> player.openBook(book), 5);
@@ -130,9 +126,9 @@ public class QuestBook {
             builder.append(line + "\n");
         }
         builder.append("\n【報酬】\n");
-        for (final QuestResult qr : quest.getResults()) {
-            if (qr instanceof RecipeQuestResult) {
-                final RecipeQuestResult result = (RecipeQuestResult) qr;
+        for (final QuestResult questResult : quest.getResults()) {
+            if (questResult instanceof RecipeQuestResult) {
+                final RecipeQuestResult result = (RecipeQuestResult) questResult;
                 final AlchemyRecipe recipe = result.getResult();
                 final String result_str = recipe.getResult();
                 builder.append("レシピ: ");
@@ -200,8 +196,8 @@ public class QuestBook {
                 builder.append(name).event(
                         TellrawUtils.createHoverEvent(viewItem)
                 );
-            } else if (qr instanceof ItemQuestResult) {
-                final ItemQuestResult result = (ItemQuestResult) qr;
+            } else if (questResult instanceof ItemQuestResult) {
+                final ItemQuestResult result = (ItemQuestResult) questResult;
                 final QuestItem questItem = result.getResult();
                 final ItemStack viewItem = questItem.getItem(new AlchemyItemStatus.VisibleFlags(
                         false, // id
@@ -219,8 +215,8 @@ public class QuestBook {
                 builder.append("アイテム: ").append(
                         questItem.getName() == null ? name : questItem.getName()
                 ).event(TellrawUtils.createHoverEvent(viewItem));
-            } else if (qr instanceof MoneyQuestResult) {
-                final MoneyQuestResult result = (MoneyQuestResult) qr;
+            } else if (questResult instanceof MoneyQuestResult) {
+                final MoneyQuestResult result = (MoneyQuestResult) questResult;
                 final int money = result.getResult();
                 builder.append("エメラルド: x" + money);
             }

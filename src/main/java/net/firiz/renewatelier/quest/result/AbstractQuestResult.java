@@ -1,5 +1,5 @@
 /*
- * Strings.java
+ * QuestResult.java
  * 
  * Copyright (c) 2018 firiz.
  * 
@@ -18,19 +18,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
  */
-package net.firiz.renewatelier.utils;
+package net.firiz.renewatelier.quest.result;
 
 /**
  *
  * @author firiz
  */
-public class Strings {
+public abstract class AbstractQuestResult<T> implements QuestResult {
 
-    private Strings() {
+    private final T result;
+
+    public AbstractQuestResult(T result) {
+        this.result = result;
     }
-    
-    public static final String W_W = "⬜";
-    
-    public static final String W_B = "⬛";
-    
+
+    @Override
+    public T getResult() {
+        return result;
+    }
+
 }

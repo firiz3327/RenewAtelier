@@ -121,7 +121,7 @@ public enum TargetEntityTypes {
         if (entity instanceof LivingEntity) {
             final EntityEquipment equip = ((LivingEntity) entity).getEquipment();
             if (equip != null) {
-                equip.setItemInMainHand(new ItemStack(Material.BOW));
+                equip.setItemInMainHand(item);
             }
         }
     }

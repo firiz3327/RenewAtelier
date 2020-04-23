@@ -35,7 +35,7 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -58,8 +58,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
 
+    private static final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final InventoryManager manager;
-    private final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final List<UUID> openUsers = new ArrayList<>();
 
     public ItemSelect(final InventoryManager manager) {

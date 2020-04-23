@@ -32,6 +32,9 @@ public final class GameConstants {
     private GameConstants() {
     }
 
+    public static final String W_W = "⬜";
+    public static final String W_B = "⬛";
+
     public static final int PLAYER_LEVEL_CAP = 50;
     public static final long[] PLAYER_REQ_EXPS = {
             0, 100, 101, 107, 118, 134, 155, 181, 212, 249, // 10lv

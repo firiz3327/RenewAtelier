@@ -21,10 +21,10 @@
 package net.firiz.renewatelier.quest;
 
 import java.util.ArrayList;
-import net.firiz.renewatelier.quest.result.QuestResult;
 import java.util.List;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.QuestLoader;
+import net.firiz.renewatelier.quest.result.QuestResult;
 
 /**
  *
@@ -56,7 +56,7 @@ public class Quest {
                 return quest;
             }
         }
-        return null;
+        throw new IllegalArgumentException("not found quest. " + id);
     }
     
     public static void setImportantQuests(final List<Quest> importantQuests) {

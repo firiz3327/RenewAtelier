@@ -7,7 +7,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -128,6 +128,7 @@ public class ReplaceVanillaItems {
         }
     }
 
+    /*
     private static Field fieldCookingRecipe;
     private static Field fieldStonecuttingRecipe;
     private static Field fieldMerchantRecipe;
@@ -145,6 +146,7 @@ public class ReplaceVanillaItems {
             Chore.logWarning(e);
         }
     }
+    */
 
     public static void changeRecipe() {
         final Iterator<Recipe> recipes = Bukkit.recipeIterator();
@@ -236,29 +238,42 @@ public class ReplaceVanillaItems {
             case DIAMOND_HELMET:
             case DIAMOND_CHESTPLATE:
             case DIAMOND_LEGGINGS:
-            case DIAMOND_BOOTS: {
-                final List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getVanillaItemDefense(item.getType()));
-                meta.setLore(lore);
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("generic.armor", 0, AttributeModifier.Operation.ADD_NUMBER));
+            case DIAMOND_BOOTS:
+                changeArmorLore(item, meta);
                 break;
-            }
-            case SHIELD: {
-                final List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "盾で攻撃を防ぐと自身の防御力が");
-                lore.add(ChatColor.GRAY + "20%上昇した状態でダメージを受ける");
-                meta.setLore(lore);
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            case SHIELD:
+                changeShieldLore(item, meta);
                 break;
-            }
             default: // 想定しない
                 return item;
         }
-        item.setItemMeta(meta);
         return item;
     }
 
+    private static void changeArmorLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
+        final List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getVanillaItemDefense(item.getType()));
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("generic.armor", 0, AttributeModifier.Operation.ADD_NUMBER));
+        item.setItemMeta(meta);
+    }
+
+    private static void changeShieldLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
+        final List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + "盾で攻撃を防ぐと自身の防御力が");
+        lore.add(ChatColor.GRAY + "20%上昇した状態でダメージを受ける");
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        item.setItemMeta(meta);
+    }
+
+    /**
+     *
+     * @param item
+     * @param random
+     * @return 変更に成功したか否か true=成功/false=失敗
+     */
     public static boolean changeVanillaItem(@NotNull final ItemStack item, boolean random) {
         final AlchemyMaterial material = AlchemyMaterial.getVanillaReplaceItem(item.getType());
         if (material != null) {

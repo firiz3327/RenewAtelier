@@ -20,7 +20,7 @@ import org.bukkit.inventory.meta.CrossbowMeta;
 
 public class EntityListener implements Listener {
 
-    private final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+    private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private final ArrowManager arrowManager = new ArrowManager();
 
     @EventHandler

@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
-import net.firiz.renewatelier.utils.doubledata.Four;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.Four;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.function.Function;

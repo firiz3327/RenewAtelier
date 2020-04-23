@@ -7,15 +7,16 @@ import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
-import net.firiz.renewatelier.entity.player.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -27,8 +28,8 @@ import java.util.Objects;
 
 public class DamageUtilV2 {
 
-    private final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
-    private final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
+    private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
+    private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
     private final HoloDamage holo = new HoloDamage();
     private final MeruruCalcDamage meruruCalcDamage = new MeruruCalcDamage();
 
@@ -118,7 +119,7 @@ public class DamageUtilV2 {
                 characteristicLevel += c.getLevel();
                 characteristicPowers += c.hasData(CharacteristicType.POWER) ? (int) c.getData(CharacteristicType.POWER) : 0;
                 characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? (int) c.getData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
-                criticalRate = calcCriticalRate(victim, criticalRate, c);
+                criticalRate = calcCriticalRate(victim.getType(), status, criticalRate, c);
                 final Object addAttack = c.getData(CharacteristicType.ADD_ATTACK);
                 if (addAttack != null) {
                     final String[] data = (String[]) addAttack;
@@ -156,7 +157,7 @@ public class DamageUtilV2 {
             final List<AlchemyItemStatus> equips = charStats.getEquips();
             for (final AlchemyItemStatus equip : equips) {
                 for (final Characteristic c : equip.getCharacteristics()) {
-                    criticalRate = calcCriticalRate(victim, criticalRate, c);
+                    criticalRate = calcCriticalRate(victim.getType(), status, criticalRate, c);
                 }
             }
         }
@@ -198,12 +199,12 @@ public class DamageUtilV2 {
         holo.holoDamage(victim, damager, damageComponents);
     }
 
-    private int calcCriticalRate(LivingEntity victim, int criticalRate, Characteristic c) {
+    private int calcCriticalRate(@NotNull EntityType type, @Nullable EntityStatus status, int criticalRate, Characteristic c) {
         criticalRate += c.hasData(CharacteristicType.CRITICAL) ? (int) c.getData(CharacteristicType.CRITICAL) : 0;
         if (c.hasData(CharacteristicType.CRITICAL_RACE)) {
             final String[] data = (String[]) c.getData(CharacteristicType.CRITICAL_RACE);
             final Race race = Race.valueOf(Objects.requireNonNull(data)[1]);
-            if (race.hasType(victim)) {
+            if (status instanceof MonsterStats && ((MonsterStats) status).getRace() == race || race.hasVanillaType(type)) {
                 criticalRate += Integer.parseInt(data[0]);
             }
         }

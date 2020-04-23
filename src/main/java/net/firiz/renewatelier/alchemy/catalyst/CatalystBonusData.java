@@ -23,10 +23,11 @@ package net.firiz.renewatelier.alchemy.catalyst;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.doubledata.ImmutablePair;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.md_5.bungee.api.ChatColor;
 
 /**
@@ -164,9 +165,14 @@ public class CatalystBonusData {
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
         private final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
-        private final Function<Integer, String> descRepletion;
+        private final IntFunction<String> descRepletion;
 
-        BonusType(final String name, final String desc, final boolean once, final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse, final Function<Integer, String> descRepletion) {
+        BonusType(
+                final String name,
+                final String desc,
+                final boolean once,
+                final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse,
+                final IntFunction<String> descRepletion) {
             this.name = name;
             this.desc = desc;
             this.once = once;

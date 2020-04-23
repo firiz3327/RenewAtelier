@@ -17,7 +17,6 @@ import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 
 public class LivingData {
 
@@ -45,7 +44,7 @@ public class LivingData {
         final int atk = BigDecimal.valueOf(((Math.PI / 2 - 0.5) + Math.atan(levelRate * 0.03)) * (360 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int def = BigDecimal.valueOf(((Math.PI / 2 - 0.77) + Math.atan(levelRate * 0.02)) * (200 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int speed = BigDecimal.valueOf(((Math.PI / 2 - 0.4) + Math.atan(levelRate * 0.02)) * (260 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
-        final double hp = maxHp - (maxHp * (new Random().nextDouble() * 0.05));
+        final double hp = maxHp - (maxHp * (Randomizer.nextDouble() * 0.05));
         this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed);
         init();
     }
