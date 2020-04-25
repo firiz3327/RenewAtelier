@@ -5,6 +5,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.config.ConfigManager
+import net.firiz.renewatelier.constants.GameConstants
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.item.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
@@ -387,15 +388,17 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "ステータスを表示"
     )
     fun stats(sender: Player, args: ArrayList<Any>) {
+        val stats = PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats;
         sender.sendMessage("")
-        sender.sendMessage("level ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.level}")
-        sender.sendMessage("maxHp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.maxHp}")
-        sender.sendMessage("hp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.hp}")
-        sender.sendMessage("maxMp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.maxMp}")
-        sender.sendMessage("mp ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.mp}")
-        sender.sendMessage("atk ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.atk}")
-        sender.sendMessage("def ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.def}")
-        sender.sendMessage("speed ${PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats.speed}")
+        sender.sendMessage("level ${stats.naturalLevel}, buffLevel ${stats.level}")
+        sender.sendMessage("exp ${stats.exp} / ${GameConstants.PLAYER_REQ_EXPS[stats.level]}")
+        sender.sendMessage("maxHp ${stats.maxHp}")
+        sender.sendMessage("hp ${stats.hp}")
+        sender.sendMessage("maxMp ${stats.maxMp}")
+        sender.sendMessage("mp ${stats.mp}")
+        sender.sendMessage("atk ${stats.atk}")
+        sender.sendMessage("def ${stats.def}")
+        sender.sendMessage("speed ${stats.speed}")
     }
 
     @Cmd(
@@ -405,14 +408,50 @@ class DebugCommands(private val debugListener: DebugListener) {
     )
     fun lore(sender: Player, args: ArrayList<Any>) {
         val item = sender.inventory.itemInMainHand
-        if(item.hasItemMeta()) {
+        if (item.hasItemMeta()) {
             val meta = item.itemMeta!!
-            if(meta.hasLore()) {
-                for(str in meta.lore!!) {
+            if (meta.hasLore()) {
+                for (str in meta.lore!!) {
                     Chore.log(str)
                     sender.sendMessage(str)
                 }
             }
+        }
+    }
+
+    @Cmd(
+            desc = ["Money"],
+            examples = ["money", "money 1000", "money {getUUID} 1000"],
+            text = "所持金を表示、もしくはお金を給付"
+    )
+    fun money(sender: Player, args: ArrayList<Any>) {
+        val chara = PlayerSaveManager.INSTANCE.getChar(sender.uniqueId)
+        if (
+                when (args.size) {
+                    0 -> {
+                        sender.sendMessage("所持金: " + chara.money)
+                        false
+                    }
+                    1 -> {
+                        if (Chore.isNumMatch(args[0].toString())) {
+                            sender.sendMessage("gainMoney: " + chara.gainMoney(args[0].toString().toInt()))
+                            false
+                        } else {
+                            true
+                        }
+                    }
+                    2 -> {
+                        if (args[0] is UUID && Chore.isNumMatch(args[1].toString())) {
+                            sender.sendMessage("gainMoney: " + PlayerSaveManager.INSTANCE.getChar(args[0] as UUID).gainMoney(args[1].toString().toInt()))
+                            false
+                        } else {
+                            true
+                        }
+                    }
+                    else -> true
+                }
+        ) {
+            sender.sendMessage("money 1000 or money {getUUID} 1000")
         }
     }
 

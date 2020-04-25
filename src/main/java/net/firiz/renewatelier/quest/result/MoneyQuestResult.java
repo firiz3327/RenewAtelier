@@ -24,9 +24,9 @@ package net.firiz.renewatelier.quest.result;
  *
  * @author firiz
  */
-public class MoneyQuestResult extends AbstractQuestResult<Integer> {
-    
-    public MoneyQuestResult(Integer result) {
+public class MoneyQuestResult extends IntQuestResult {
+
+    public MoneyQuestResult(int result) {
         super(result);
     }
     

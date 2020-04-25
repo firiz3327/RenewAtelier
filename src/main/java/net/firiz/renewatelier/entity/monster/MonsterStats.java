@@ -8,24 +8,31 @@ import org.bukkit.entity.Entity;
 public class MonsterStats extends EntityStatus {
 
     private final Race race;
+    private final int exp;
+    private final boolean isBoss;
     private int buffLevel;
     private int buffHp;
     private int buffAtk;
     private int buffDef;
     private int buffSpeed;
 
-    private final boolean isBoss;
-
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed) {
-        super(entity, level, maxHp, hp, atk, def, speed);
-        this.race = race;
-        this.isBoss = false;
+        this(entity, race, level, maxHp, hp, atk, def, speed, 0, false);
     }
 
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, boolean isBoss) {
+        this(entity, race, level, maxHp, hp, atk, def, speed, 0, isBoss);
+    }
+
+    public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp) {
+        this(entity, race, level, maxHp, hp, atk, def, speed, exp, false);
+    }
+
+    public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp, boolean isBoss) {
         super(entity, level, maxHp, hp, atk, def, speed);
         this.race = race;
         this.isBoss = isBoss;
+        this.exp = exp;
     }
 
     @Override
@@ -67,6 +74,10 @@ public class MonsterStats extends EntityStatus {
 
     public int getSpeed() {
         return speed + buffSpeed;
+    }
+
+    public int getExp() {
+        return exp;
     }
 
     public boolean isBoss() {

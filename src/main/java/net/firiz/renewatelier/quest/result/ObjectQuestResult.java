@@ -24,15 +24,14 @@ package net.firiz.renewatelier.quest.result;
  *
  * @author firiz
  */
-public abstract class AbstractQuestResult<T> implements QuestResult {
+public abstract class ObjectQuestResult<T> implements QuestResult {
 
     private final T result;
 
-    public AbstractQuestResult(T result) {
+    public ObjectQuestResult(T result) {
         this.result = result;
     }
 
-    @Override
     public T getResult() {
         return result;
     }

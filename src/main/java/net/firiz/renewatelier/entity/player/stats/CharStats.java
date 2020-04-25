@@ -16,6 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 public class CharStats extends EntityStatus {
@@ -85,7 +87,8 @@ public class CharStats extends EntityStatus {
 
     public void updateStats() {
         equipStats.update(maxHp, maxMp, atk, def, speed, level, level);
-        buffedStats.update();
+        buffedStats.update(this.level);
+        player.setLevel(buffedStats.getLevel());
     }
 
     @Nullable
@@ -112,6 +115,10 @@ public class CharStats extends EntityStatus {
 
     public Player getPlayer() {
         return player;
+    }
+
+    public int getNaturalLevel() {
+        return level;
     }
 
     public int getLevel() {
@@ -180,36 +187,46 @@ public class CharStats extends EntityStatus {
         if (GameConstants.PLAYER_LEVEL_CAP <= level) {
             return false;
         }
+        player.sendActionBar(ChatColor.GREEN + "xp " + exp);
         this.exp += exp;
         boolean levelUp = false;
         while (true) {
             final long reqExp = GameConstants.PLAYER_REQ_EXPS[level];
-            if (GameConstants.PLAYER_LEVEL_CAP <= level || reqExp > exp) {
+            if (GameConstants.PLAYER_LEVEL_CAP <= level || reqExp > this.exp) {
                 break;
             }
-            this.exp += exp - reqExp;
+            this.exp -= reqExp;
             levelUp();
             levelUp = true;
         }
+        final BigDecimal decimal = BigDecimal.valueOf(this.exp)
+                .divide(BigDecimal.valueOf(GameConstants.PLAYER_REQ_EXPS[level]), 2, RoundingMode.DOWN);
+        player.setExp(decimal.floatValue());
         return levelUp;
     }
 
     private void levelUp() {
         this.level++;
-        final int up = level % 10 == 0 ? 2 : 0;
-        final int atkUp = level % 2 == 0 ? 1 : 0;
-        final int defUp = level % 3 == 0 ? 1 : 0;
-        final int speedUp = level % 12 == 0 ? 1 : 0;
+        final int up = this.level % 10 == 0 ? 2 : 0;
+        final int atkUp = this.level % 2 == 0 ? 1 : 0;
+        final int defUp = this.level % 3 == 0 ? 1 : 0;
+        final int speedUp = this.level % 12 == 0 ? 1 : 0;
         this.maxHp += 1 + up;
-        this.hp = maxHp;
+        this.hp = this.maxHp;
         this.maxMp += 1 + up;
-        this.mp = maxMp;
+        this.mp = this.maxMp;
         this.atk += atkUp;
         this.def += defUp;
         this.speed += speedUp;
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
-        player.sendActionBar("LEVEL UP");
+        player.sendTitle(
+                ChatColor.GREEN + "LEVEL UP",
+                "Level: " + this.level,
+                10,
+                70,
+                20
+        );
         updateStats();
     }
 
@@ -251,6 +268,27 @@ public class CharStats extends EntityStatus {
             return;
         }
         viewHp();
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
+
+    public boolean hasMoney(int money) {
+        return this.money >= money;
+    }
+
+    public boolean gainMoney(int money, boolean compulsion) {
+        final long tempMoney = (this.money + money);
+        if (compulsion) {
+            this.money += Math.max(0, Math.min(tempMoney, GameConstants.PLAYER_MONEY_CAP));
+        } else {
+            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney <= 0) {
+                return false;
+            }
+            this.money += money;
+        }
+        return true;
     }
 
     public void viewHp() {

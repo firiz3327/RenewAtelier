@@ -119,7 +119,7 @@ public enum LoopManager {
             if (period % 10 == 0) {
                 halfSecLoop();
             }
-            if (period > 20) {
+            if (period >= 20) {
                 period = 0;
                 secLoop();
                 return;

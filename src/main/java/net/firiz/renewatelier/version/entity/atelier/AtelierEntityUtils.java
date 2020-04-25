@@ -5,6 +5,7 @@ import net.firiz.renewatelier.utils.Chore;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
@@ -92,13 +93,12 @@ public enum AtelierEntityUtils {
         return (LivingData) ((Supplier<Object>) entity).get();
     }
 
-    // 名前の比較にする？
-    public boolean hasLivingData(@NotNull final EntityLiving entity) {
-        return entity instanceof Supplier;
+    public boolean hasLivingData(@NotNull final Entity entity) {
+        return entity instanceof EntityLiving && entity instanceof Supplier;
     }
 
-    public boolean hasLivingData(@NotNull final LivingEntity entity) {
-        return hasLivingData(((CraftLivingEntity) entity).getHandle());
+    public boolean hasLivingData(@NotNull final org.bukkit.entity.Entity entity) {
+        return hasLivingData(((CraftEntity) entity).getHandle());
     }
 
     @NotNull

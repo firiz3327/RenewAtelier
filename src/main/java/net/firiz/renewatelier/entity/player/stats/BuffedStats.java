@@ -24,7 +24,12 @@ public class BuffedStats {
     }
 
     public void update() {
-        this.levelB = CalcStatType.LEVEL.getCharBuffStats(charStats, level);
+        update(level);
+    }
+
+    public void update(int level) {
+        this.level = level;
+        this.levelB = CalcStatType.LEVEL.getCharBuffStats(charStats, this.level);
         this.maxHpB = CalcStatType.HP.getCharBuffStats(charStats, equipStats.getMaxHp());
         this.maxMpB = CalcStatType.MP.getCharBuffStats(charStats, equipStats.getMaxMp());
         this.atkB = CalcStatType.ATK.getCharBuffStats(charStats, equipStats.getAtk());

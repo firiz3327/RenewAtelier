@@ -1,12 +1,14 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.entity.monster.MonsterStats;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
@@ -14,15 +16,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class LivingData {
 
+    private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
     private final EntityLiving wrapEntity;
     private final MonsterStats stats;
     private final String name;
+    private final Map<Player, Double> damageSources = new HashMap<>();
 
     private HoloHealth holoHealth;
 
@@ -44,8 +46,9 @@ public class LivingData {
         final int atk = BigDecimal.valueOf(((Math.PI / 2 - 0.5) + Math.atan(levelRate * 0.03)) * (360 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int def = BigDecimal.valueOf(((Math.PI / 2 - 0.77) + Math.atan(levelRate * 0.02)) * (200 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int speed = BigDecimal.valueOf(((Math.PI / 2 - 0.4) + Math.atan(levelRate * 0.02)) * (260 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
+        final int exp = (int) (maxHp / 2.5);
         final double hp = maxHp - (maxHp * (Randomizer.nextDouble() * 0.05));
-        this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed);
+        this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed, exp);
         init();
     }
 
@@ -101,6 +104,13 @@ public class LivingData {
     }
 
     public void damage(org.bukkit.entity.Entity damager, double damage) {
+        if (damager instanceof Player) {
+            if (damageSources.containsKey(damager)) {
+                damageSources.put((Player) damager, damageSources.get(damager) + damage);
+            } else {
+                damageSources.put((Player) damager, damage);
+            }
+        }
         final LivingEntity bukkit = getBukkitEntity();
         if (hasStats()) {
             stats.setHp(Math.max(0, stats.getHp() - damage));
@@ -124,7 +134,7 @@ public class LivingData {
      * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
      *
      * @param damageSource DamageSource 原因
-     * @param damage  float ダメージ
+     * @param damage       float ダメージ
      * @return entity.damageEntity
      */
     public boolean onDamageEntity(final Object damageSource, final Object damage) {
@@ -161,6 +171,9 @@ public class LivingData {
                 void.class,
                 params
         );
+        for (final Player player : damageSources.keySet()) {
+            psm.getChar(player.getUniqueId()).getCharStats().addExp(stats.getExp());
+        }
         holoHealth.die();
     }
 

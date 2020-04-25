@@ -21,6 +21,7 @@
 package net.firiz.renewatelier;
 
 import net.firiz.renewatelier.config.ConfigManager;
+import net.firiz.renewatelier.entity.EntityCleanUp;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.loop.LoopManager;
@@ -78,6 +79,7 @@ public final class AtelierPlugin extends JavaPlugin {
          */
 
         ReplaceVanillaItems.changeRecipe();
+        LoopManager.INSTANCE.addSec(new EntityCleanUp());
     }
 
     public static void worldSettings(World world) {

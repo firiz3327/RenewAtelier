@@ -77,13 +77,15 @@ public class DamageListener implements Listener {
                 if (GameConstants.isAxe(weapon.getType())) {
                     weaponDamage = Randomizer.rand((int) weaponDamage - 4, (int) weaponDamage); // 斧のダメージは整数なので問題ない
                 }
-                damageUtilV2.normalDamage(
+                final double allDamage = damageUtilV2.normalDamage(
                         GameConstants.isSword(weapon.getType()) ? AttackAttribute.SLASH : AttackAttribute.BLOW,
                         psm.getChar(damager.getUniqueId()).getCharStats(),
                         (LivingEntity) e.getEntity(),
                         weaponDamage
                 );
-                if (Randomizer.percent(30)) {
+                if (allDamage == 0) {
+                    e.setCancelled(true);
+                } else if (Randomizer.percent(30)) {
                     e.setDamage(0);
                 } else {
                     victim.playEffect(EntityEffect.HURT);
@@ -99,7 +101,7 @@ public class DamageListener implements Listener {
                     status = aEntityUtils.getLivingData(arrow.getSource()).getStats();
                     force = 1f;
                 }
-                damageUtilV2.arrowDamage(
+                final double allDamage = damageUtilV2.arrowDamage(
                         AlchemyItemStatus.load(arrow.getBow()),
                         AlchemyItemStatus.load(arrow.getArrow()),
                         status,
@@ -108,14 +110,22 @@ public class DamageListener implements Listener {
                         force >= 1 && arrow.isCritical(),
                         force
                 );
-                e.setDamage(0);
+                if (allDamage == 0) {
+                    e.setCancelled(true);
+                } else {
+                    e.setDamage(0);
+                }
             } else if (victim instanceof Player) {
-                damageUtilV2.playerDamage(
+                final double allDamage = damageUtilV2.playerDamage(
                         psm.getChar(e.getEntity().getUniqueId()).getCharStats(),
                         e.getDamager(),
                         e.getDamage()
                 );
-                e.setDamage(0);
+                if (allDamage == 0) {
+                    e.setCancelled(true);
+                } else {
+                    e.setDamage(0);
+                }
             }
         }
     }

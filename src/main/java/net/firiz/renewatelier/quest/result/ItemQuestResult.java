@@ -26,7 +26,7 @@ import net.firiz.renewatelier.quest.QuestItem;
  *
  * @author firiz
  */
-public class ItemQuestResult extends AbstractQuestResult<QuestItem> {
+public class ItemQuestResult extends ObjectQuestResult<QuestItem> {
     
     public ItemQuestResult(QuestItem result) {
         super(result);

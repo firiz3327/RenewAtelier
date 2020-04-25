@@ -261,7 +261,7 @@ public final class Char {
                     addRecipeExp(player, true, recipe, 0);
                 } else if (result instanceof MoneyQuestResult) {
                     final int money = ((MoneyQuestResult) result).getResult();
-                    Chore.addItem(player, new ItemStack(Material.EMERALD, money));
+                    gainMoneyCompulsion(money);
                 }
             });
         }
@@ -302,6 +302,28 @@ public final class Char {
         }
     }
     //</editor-fold>
+
+    public int getMoney() {
+        return charStats.getMoney();
+    }
+
+    public boolean hasMoney(int money) {
+        final boolean result = charStats.hasMoney(money);
+        if (!result) {
+            charStats.getPlayer().sendMessage("所持金が足りません。");
+        }
+        return result;
+    }
+
+    public void gainMoney(int money) {
+        if (!charStats.gainMoney(money, false)) { // 0以下になることは想定しない
+            charStats.getPlayer().sendMessage("所持金が上限を超えるため受け取れませんでした。");
+        }
+    }
+
+    public void gainMoneyCompulsion(int money) {
+        charStats.gainMoney(money, true);
+    }
 
     @NotNull
     public CharStats getCharStats() {

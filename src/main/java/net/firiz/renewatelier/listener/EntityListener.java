@@ -6,9 +6,7 @@ import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
 import org.bukkit.Material;
-import org.bukkit.entity.AbstractArrow;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -25,12 +23,15 @@ public class EntityListener implements Listener {
 
     @EventHandler
     private void spawnEntity(final EntitySpawnEvent e) {
-        if (e.getEntity() instanceof LivingEntity && !aEntityUtils.hasLivingData((LivingEntity) e.getEntity())) {
-            final TargetEntityTypes type = TargetEntityTypes.search(e.getEntity().getType());
+        final Entity entity = e.getEntity();
+        if (entity instanceof LivingEntity && !aEntityUtils.hasLivingData((LivingEntity) entity)) {
+            final TargetEntityTypes type = TargetEntityTypes.search(entity.getType());
             if (type != null) {
                 e.setCancelled(true);
                 aEntityUtils.spawn(type, e.getLocation());
             }
+        } else if (entity.getType() == EntityType.EXPERIENCE_ORB) {
+            e.setCancelled(true);
         }
     }
 

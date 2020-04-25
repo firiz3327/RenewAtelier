@@ -1,9 +1,9 @@
 package net.firiz.renewatelier.inventory.shop;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.pair.Triple;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,6 +15,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,8 +23,8 @@ import java.util.UUID;
 
 public final class ShopInventory implements BiParamInventory<String, List<ShopItem>> {
 
+    private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
     private static final String TITLE = "SHOP";
-    private static final ItemStack EMERALD = new ItemStack(Material.EMERALD);
     private static final ItemStack GLASS_PANE = Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
 
     @Override
@@ -62,11 +63,11 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
             if (!player.hasCooldown(Material.GRAY_STAINED_GLASS_PANE)) {
                 final ItemStack item = inv.getItem(e.getRawSlot());
                 if (item != null && !GLASS_PANE.isSimilar(item)) {
-                    final Triple<Integer, AlchemyMaterial, Integer> priceMode = getPriceMode(
+                    final ShopResult priceMode = createShopResult(
                             Objects.requireNonNull(item.getItemMeta().getLore()),
                             player
                     );
-                    if (priceMode.getLeft() != -1) {
+                    if (priceMode.mode != -1) {
                         player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
                         reduceItem(priceMode, player);
                         addItem(item.clone(), player);
@@ -76,27 +77,35 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         }
     }
 
+    /**
+     * 決済を処理するモードを返す
+     *
+     * @param lore
+     * @param player
+     * @return ShopResult
+     */
     @NotNull
-    private static Triple<Integer, AlchemyMaterial, Integer> getPriceMode(@NotNull List<String> lore, @NotNull Player player) {
+    private static ShopResult createShopResult(@NotNull List<String> lore, @NotNull Player player) {
         final String str = lore.get(lore.size() - 1);
         final String id = Chore.getStridColor(str.substring(0, str.indexOf(String.valueOf(ChatColor.ITALIC) + ChatColor.RESET + ChatColor.GREEN)));
         final String v = str.substring(str.lastIndexOf(": ") + 2);
+
         final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
-        final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(id);
-        final int mode;
         if (id.equals("$null")) {
-            mode = Chore.hasMaterial(player.getInventory(), EMERALD, price) ? 1 : -1;
+            final int mode = psm.getChar(player.getUniqueId()).hasMoney(price) ? 1 : -1;
+            return new ShopResult(mode, price, null);
         } else {
-            mode = Chore.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
+            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(id);
+            final int mode = Chore.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
+            return new ShopResult(mode, price, alchemyMaterial);
         }
-        return new Triple<>(mode, alchemyMaterial, price);
     }
 
-    private static void reduceItem(Triple<Integer, AlchemyMaterial, Integer> priceMode, Player player) {
-        if (priceMode.getLeft() == 1) {
-            Chore.gainItem(player.getInventory(), EMERALD, priceMode.getRight());
-        } else {
-            Chore.gainItem(player.getInventory(), priceMode.getMiddle(), priceMode.getRight());
+    private static void reduceItem(ShopResult priceMode, Player player) {
+        if (priceMode.mode == 1) {
+            psm.getChar(player.getUniqueId()).gainMoney(-priceMode.money);
+        } else if (priceMode.material != null) {
+            Chore.gainItem(player.getInventory(), priceMode.material, priceMode.money);
         }
     }
 
@@ -117,5 +126,18 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         e.getRawSlots().stream()
                 .filter(raw -> (raw >= 0 && raw < inv.getSize()))
                 .forEach(itemValue -> e.setCancelled(true));
+    }
+
+    private static class ShopResult {
+        private final int mode;
+        private final int money;
+        @Nullable
+        private final AlchemyMaterial material;
+
+        private ShopResult(int mode, int money, @Nullable AlchemyMaterial material) {
+            this.mode = mode;
+            this.money = money;
+            this.material = material;
+        }
     }
 }

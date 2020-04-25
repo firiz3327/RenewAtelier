@@ -40,14 +40,14 @@ public class DamageUtilV2 {
         holo.holoDamage(charStats.getPlayer(), null, damageComponents);
     }
 
-    public void playerDamage(@NotNull final CharStats charStats, @NotNull Entity damager, double damage) {
+    public double playerDamage(@NotNull final CharStats charStats, @NotNull Entity damager, double damage) {
         net.firiz.renewatelier.entity.EntityStatus entityStatus = null;
         if (damager instanceof Player) {
             entityStatus = psm.getChar(damager.getUniqueId()).getCharStats();
         } else if (damager instanceof LivingEntity && aEntityUtils.hasLivingData((LivingEntity) damager)) {
             entityStatus = aEntityUtils.getLivingData((LivingEntity) damager).getStats();
         }
-        calcDamage(null, entityStatus, damager, charStats.getPlayer(), 100, damage, 1, AttackAttribute.PHYSICS, false, false);
+        return calcDamage(null, entityStatus, damager, charStats.getPlayer(), 100, damage, 1, AttackAttribute.PHYSICS, false, false);
     }
 
     public void mobDamage(@NotNull final LivingEntity victim, double damage) {
@@ -68,7 +68,7 @@ public class DamageUtilV2 {
         }
     }
 
-    public void normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity victim, double normalDamage) {
+    public double normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity victim, double normalDamage) {
         final AlchemyItemStatus weaponStats = charStats.getWeapon();
         final Player player = charStats.getPlayer();
         final boolean isMinecraftCritical = !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784); // クリティカルハック及びフライハック対策
@@ -79,15 +79,15 @@ public class DamageUtilV2 {
             final AlchemyMaterial alchemyMaterial = weaponStats.getAlchemyMaterial();
             final double baseDamage = Math.max(0D, Randomizer.rand(alchemyMaterial.getBaseDamageMin(), alchemyMaterial.getBaseDamageMax()));
             if (baseDamage == 0) {
-                return;
+                return 0;
             }
-            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, baseDamage, 1, attribute, isMinecraftCritical, false);
+            return calcDamage(weaponStats, charStats, player, victim, normalAttackPower, baseDamage, 1, attribute, isMinecraftCritical, false);
         } else {
-            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, normalDamage * 1.5, 1, attribute, isMinecraftCritical, false);
+            return calcDamage(weaponStats, charStats, player, victim, normalAttackPower, normalDamage * 1.5, 1, attribute, isMinecraftCritical, false);
         }
     }
 
-    public void arrowDamage(@Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, @Nullable EntityStatus status, @NotNull LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
+    public double arrowDamage(@Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, @Nullable EntityStatus status, @NotNull LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
         double normalAttackPower = Randomizer.rand(63, 70);
         double baseDamage = damage;
         if (bow == null && arrow == null) {
@@ -102,10 +102,10 @@ public class DamageUtilV2 {
                 baseDamage += Math.max(0D, Randomizer.rand(arrowAlchemyMaterial.getBaseDamageMin(), arrowAlchemyMaterial.getBaseDamageMax())) * calcQualityCorrection(arrow.getQuality());
             }
         }
-        calcDamage(bow, status, status == null ? null : status.getEntity(), victim, normalAttackPower, baseDamage, force, AttackAttribute.PHYSICS, isMinecraftCritical, true);
+        return calcDamage(bow, status, status == null ? null : status.getEntity(), victim, normalAttackPower, baseDamage, force, AttackAttribute.PHYSICS, isMinecraftCritical, true);
     }
 
-    private void calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus status, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
+    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus status, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
         final boolean hasItemStatus = itemStatus != null;
 
         int criticalRate = 0;
@@ -192,11 +192,14 @@ public class DamageUtilV2 {
         final ImmutablePair<Double, AttackAttribute> baseDamageComponent = new ImmutablePair<>(damage, baseAttribute);
         final List<ImmutablePair<Double, AttackAttribute>> damageComponents = new ArrayList<>();
         damageComponents.add(baseDamageComponent);
+        double allDamage = damage;
         for (final String[] addAttack : addAttacks) {
             final ImmutablePair<Double, AttackAttribute> damageComponent = AddAttackType.valueOf(addAttack[0]).runDamage(addAttack, status, victim, baseDamageComponent);
             damageComponents.add(damageComponent);
+            allDamage += damageComponent.getLeft();
         }
         holo.holoDamage(victim, damager, damageComponents);
+        return allDamage;
     }
 
     private int calcCriticalRate(@NotNull EntityType type, @Nullable EntityStatus status, int criticalRate, Characteristic c) {
