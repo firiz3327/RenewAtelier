@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.entity.player.loadsqls;
+package net.firiz.renewatelier.entity.player.sql.load;
 
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.sql.SQLManager;

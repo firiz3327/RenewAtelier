@@ -21,6 +21,7 @@
 package net.firiz.renewatelier.item.drop;
 
 import net.firiz.renewatelier.loop.LoopManager;
+import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Location;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
@@ -40,8 +41,6 @@ public abstract class AnimatedDrop {
 
     public AnimatedDrop(Location loc, ItemStack itemstack, int tick) {
         this.loop = LoopManager.INSTANCE;
-        loc.setX(loc.getX() + 0.5);
-        loc.setZ(loc.getZ() + 0.5);
         this.loc = loc;
         this.itemstack = itemstack;
         this.tick = tick;
@@ -53,7 +52,7 @@ public abstract class AnimatedDrop {
     }
 
     protected final void spawn() {
-        item = loc.getWorld().dropItem(loc, itemstack);
+        item = Chore.drop(loc, itemstack);
     }
 
     protected final void setGet(boolean isGet) {

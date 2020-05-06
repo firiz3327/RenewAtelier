@@ -8,6 +8,7 @@ import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,7 @@ public enum AtelierEntityUtils {
 
     private Method livingDamageEntity;
     private Method livingDie;
+    private Method livingDrop;
 
     AtelierEntityUtils() {
         try {
@@ -33,6 +35,8 @@ public enum AtelierEntityUtils {
             livingDamageEntity.setAccessible(true);
             livingDie = LivingData.class.getDeclaredMethod("onDie", Object.class);
             livingDie.setAccessible(true);
+            livingDrop = LivingData.class.getDeclaredMethod("dropDeathLoot", Object.class, Object.class, Object.class);
+            livingDrop.setAccessible(true);
         } catch (NoSuchMethodException e) {
             Chore.logWarning(e);
         }
@@ -56,11 +60,16 @@ public enum AtelierEntityUtils {
         }
     }
 
+    private void initEntity(EntityLiving entity, World world) {
+        world.addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
+        entity.canPickUpLoot = false;
+    }
+
     @NotNull
     public LivingData spawn(@NotNull Object wrapEntity) {
         if (wrapEntity instanceof EntityLiving && wrapEntity instanceof Supplier) {
             final EntityLiving entity = (EntityLiving) wrapEntity;
-            ((EntityLiving) wrapEntity).getWorld().addEntity(entity);
+            entity.getWorld().addEntity(entity);
             return (LivingData) ((Supplier<Object>) entity).get();
         }
         throw new IllegalArgumentException("not support class.");
@@ -71,7 +80,7 @@ public enum AtelierEntityUtils {
         if (wrapEntity instanceof EntityLiving && wrapEntity instanceof Supplier) {
             final EntityLiving entity = (EntityLiving) wrapEntity;
             entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-            ((EntityLiving) wrapEntity).getWorld().addEntity(entity);
+            entity.getWorld().addEntity(entity);
             return (LivingData) ((Supplier<Object>) entity).get();
         }
         throw new IllegalArgumentException("not support class.");
@@ -86,7 +95,7 @@ public enum AtelierEntityUtils {
         } else {
             entity = (EntityLiving) createCustomClassEntity(types, world, location);
         }
-        world.addEntity(entity);
+        initEntity(entity, world);
         if (types.initConsumer != null) {
             types.initConsumer.accept(entity.getBukkitEntity());
         }
@@ -147,6 +156,10 @@ public enum AtelierEntityUtils {
             die.setAccessible(true);
             die.set(wrapEntity, livingDie);
 
+            final Field drop = wrapClass.getDeclaredField("drop0001");
+            drop.setAccessible(true);
+            drop.set(wrapEntity, livingDrop);
+
             return wrapEntity;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
             Chore.logWarning(e);
@@ -177,6 +190,9 @@ public enum AtelierEntityUtils {
             final CtField die = CtField.make("java.lang.reflect.Method die0001;", clasz);
             clasz.addField(die);
 
+            final CtField drop = CtField.make("java.lang.reflect.Method drop0001;", clasz);
+            clasz.addField(drop);
+
             // try-catchはなくていい
             // javassistはvarargsに対応してないので、配列にして渡す
             // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
@@ -190,6 +206,11 @@ public enum AtelierEntityUtils {
                     "die0001.invoke(livingData, new Object[]{damagesource});}";
             final CtMethod overrideDie = CtNewMethod.make(dieBody, clasz);
             clasz.addMethod(overrideDie);
+
+            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_15_R1.DamageSource damagesource, int i, boolean flag) {" +
+                    "drop0001.invoke(livingData, new Object[]{damagesource, Integer.valueOf(i), Boolean.valueOf(flag)});}";
+            final CtMethod overrideDrop = CtNewMethod.make(dropBody, clasz);
+            clasz.addMethod(overrideDrop);
 
             final CtClass[] params = new CtClass[]{pool.get(World.class.getCanonicalName())};
             final CtConstructor constructor = CtNewConstructor.make(params, null, CtNewConstructor.PASS_PARAMS, null, null, clasz);

@@ -9,12 +9,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
+
+import java.util.Collections;
 
 public class EntityListener implements Listener {
 
@@ -30,8 +30,6 @@ public class EntityListener implements Listener {
                 e.setCancelled(true);
                 aEntityUtils.spawn(type, e.getLocation());
             }
-        } else if (entity.getType() == EntityType.EXPERIENCE_ORB) {
-            e.setCancelled(true);
         }
     }
 
@@ -57,6 +55,26 @@ public class EntityListener implements Listener {
     private void vehicleDamage(final VehicleDamageEvent e) {
         if (e.getVehicle() instanceof LootableEntityInventory && ((LootableEntityInventory) e.getVehicle()).hasLootTable()) {
             ReplaceVanillaItems.loot(e.getAttacker(), (LootableEntityInventory) e.getVehicle());
+        }
+    }
+
+    @EventHandler
+    private void itemMerge(final ItemMergeEvent e) {
+        if (e.getEntity().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM
+                || e.getTarget().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void death(final EntityDeathEvent e) {
+        e.setDroppedExp(0);
+        if (aEntityUtils.hasLivingData(e.getEntity())) {
+            aEntityUtils.getLivingData(e.getEntity()).drop(
+                    e.getEntity().getLocation(),
+                    Collections.unmodifiableList(e.getDrops())
+            );
+            e.getDrops().clear();
         }
     }
 

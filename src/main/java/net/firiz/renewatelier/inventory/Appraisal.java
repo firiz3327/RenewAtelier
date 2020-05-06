@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.inventory;
 
+import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.NonParamInventory;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
@@ -44,11 +46,15 @@ public final class Appraisal implements NonParamInventory {
             e.setCancelled(true);
             if (raw == 13) {
                 final Player player = (Player) e.getWhoClicked();
+                final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
                 for (int i = 0; i < 9; i++) {
                     final ItemStack item = inv.getItem(i);
                     if (item != null) {
                         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
-                        ReplaceVanillaItems.changeItems(true, item);
+                        ReplaceVanillaItems.changeItems(true, alchemyItem -> {
+                            character.increaseIdea(alchemyItem);
+                            return alchemyItem;
+                        }, item);
                     }
                     inv.setItem(i, null);
                     Chore.addItem(player, item);

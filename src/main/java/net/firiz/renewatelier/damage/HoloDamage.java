@@ -2,7 +2,7 @@ package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.player.CharSettings;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;

@@ -703,7 +703,7 @@ public class AlchemyItemStatus {
                     }
                 });
                 Collections.shuffle(cs);
-                for (ImmutablePair<Characteristic, Integer> dd : cs) {
+                for (final ImmutablePair<Characteristic, Integer> dd : cs) {
                     if (characteristics.size() < 3) {
                         if (Randomizer.nextInt(1000 /* - Math.max(500, (錬金レベル * 10)) */) <= dd.getRight()) {
                             characteristics.add(dd.getLeft());

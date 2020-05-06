@@ -84,10 +84,10 @@ public class RecipeEffect {
     }
 
     private int getBigStar(final UUID uuid) {
-        final double upcount = getUpCount(uuid);
+        final double upCount = getUpCount(uuid);
         int bigstar = 0;
         for (int i = 0; i < star.size(); i++) {
-            if (i < (int) upcount && star.get(i) != 0) {
+            if (i < (int) upCount && star.get(i) != 0) {
                 bigstar++;
             }
         }

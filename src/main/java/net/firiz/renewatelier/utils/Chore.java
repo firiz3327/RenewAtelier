@@ -28,11 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.pair.Pair;
+import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,6 +43,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -199,54 +201,54 @@ public final class Chore {
         if (result == null) {
             throw new IllegalStateException("material not found for " + str + ".");
         }
-        Chore.logWarning("Chore.getMaterial: material " + str + " is legacy name.");
+        logWarning("Chore.getMaterial: material " + str + " is legacy name.");
         return result;
     }
 
-    public static boolean checkMaterial(final ItemStack content, String material) {
-        if (material.startsWith("material:")) {
-            final AlchemyMaterial am = AlchemyMaterial.getMaterial(material.substring(9));
-            return am.equals(AlchemyMaterial.getMaterial(content));
-        } else if (material.startsWith("category:")) {
-            final Category category = Category.valueOf(material.substring(9));
-            return AlchemyItemStatus.getCategories(content).contains(category);
+    public static boolean checkMaterial(final ItemStack content, RequireAmountMaterial material) {
+        switch (material.getType()) {
+            case MATERIAL:
+                return material.getMaterial().equals(AlchemyMaterial.getMaterial(content));
+            case CATEGORY:
+                return AlchemyItemStatus.getCategories(content).contains(material.getCategory());
+            default:
+                return false;
         }
-        return false;
     }
 
-    public static boolean hasMaterial(final Inventory inv, final List<String> materials) {
+    public static boolean hasMaterial(final Inventory inv, final List<RequireAmountMaterial> materials) {
         return hasMaterial(inv.getContents(), materials);
     }
 
-    public static boolean hasMaterial(final ItemStack[] contents, final List<String> materials) {
+    public static boolean hasMaterial(final ItemStack[] contents, final List<RequireAmountMaterial> materials) {
         if (contents.length != 0) {
-            final Map<String, Pair<Integer, Integer>> check = new HashMap<>();
-            for (final String data : materials) {
-                final String[] vals = data.split(",");
-                final String material = vals[0];
-                if (!check.containsKey(material)) {
-                    final int req_amount = Integer.parseInt(vals[1]);
-                    check.put(material, new Pair<>(0, req_amount));
+            final Map<RequireAmountMaterial, Integer> check = new HashMap<>();
+            for (final RequireAmountMaterial data : materials) {
+                if (!check.containsKey(data)) {
+                    check.put(data, 0);
                 }
-                if (material.startsWith("material:")) {
-                    final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(material.substring(9));
-                    for (final ItemStack item : contents) {
-                        if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
-                            final Pair<Integer, Integer> dd = check.get(material);
-                            dd.setLeft(dd.getLeft() + item.getAmount());
+                switch (data.getType()) {
+                    case MATERIAL:
+                        final AlchemyMaterial alchemyMaterial = data.getMaterial();
+                        for (final ItemStack item : contents) {
+                            if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
+                                check.put(data, check.get(data) + item.getAmount());
+                            }
                         }
-                    }
-                } else if (material.startsWith("category:")) {
-                    final Category category = Category.valueOf(material.substring(9));
-                    for (final ItemStack item : contents) {
-                        if (item != null && AlchemyItemStatus.getCategories(item).contains(category)) {
-                            final Pair<Integer, Integer> dd = check.get(material);
-                            dd.setLeft(dd.getLeft() + item.getAmount());
+                        break;
+                    case CATEGORY:
+                        final Category category = data.getCategory();
+                        for (final ItemStack item : contents) {
+                            if (item != null && AlchemyItemStatus.getCategories(item).contains(category)) {
+                                check.put(data, check.get(data) + item.getAmount());
+                            }
                         }
-                    }
+                        break;
+                    default:
+                        throw new IllegalArgumentException("[hasMaterial] not support recipe material.");
                 }
             }
-            return !check.isEmpty() && check.values().stream().noneMatch(dd -> (dd.getLeft() < dd.getRight()));
+            return !check.isEmpty() && check.entrySet().stream().noneMatch(entry -> (entry.getValue() < entry.getKey().getAmount()));
         }
         return false;
     }
@@ -349,7 +351,7 @@ public final class Chore {
     }
 
     public static int[] getXYZString(String str) {
-        final String[] split = Chore.getStridColor(str).split(",");
+        final String[] split = getStridColor(str).split(",");
         return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
     }
 
@@ -377,7 +379,7 @@ public final class Chore {
         }
         final ItemStack dropItem = addItemNotDrop(inv, item);
         if (dropItem != null) {
-            Chore.drop(loc, dropItem);
+            VersionUtils.drop(loc, item, CreatureSpawnEvent.SpawnReason.DEFAULT);
         }
     }
 

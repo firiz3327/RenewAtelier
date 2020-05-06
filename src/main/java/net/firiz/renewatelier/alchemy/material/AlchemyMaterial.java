@@ -23,6 +23,7 @@ package net.firiz.renewatelier.alchemy.material;
 import java.util.List;
 import java.util.Map;
 
+import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
@@ -256,14 +257,14 @@ public class AlchemyMaterial {
     }
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {
-        final List<String> catalystCategories = recipe.getCatalystCategories();
+        final List<RequireMaterial> catalystCategories = recipe.getCatalystCategories();
         if (catalystCategories != null && catalyst != null) {
-            for (final String str : catalystCategories) {
-                if (str.equals("material:".concat(id))) {
+            for (final RequireMaterial requireMaterial : catalystCategories) {
+                if (requireMaterial.getMaterial().equals(this)) {
                     return true;
                 }
                 for (final Category c : categories) {
-                    if (str.equals("category:".concat(c.name()))) {
+                    if (requireMaterial.getCategory() == c) {
                         return true;
                     }
                 }

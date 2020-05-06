@@ -24,12 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
-import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
@@ -40,7 +39,6 @@ import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -56,7 +54,9 @@ public class QuestBook {
     private QuestBook() {
     }
 
-    public static void openQuestBook(final Player player, final ItemStack book) {
+    public static void openQuestBook(final Player player) {
+        player.sendMessage(ChatColor.GRAY + "[クエストを更新中...]");
+
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ArrayList<>();
         final List<Quest> clearQuests = new ArrayList<>();
@@ -80,23 +80,16 @@ public class QuestBook {
         // クリア済みクエスト
         clearQuests.forEach(quest -> addSpigotPage(pages, quest, 1, player));
 
-//        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+        final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
-        if (!meta.hasAuthor()) {
-            meta.setAuthor(player.getName());
-        }
-        if (!meta.hasTitle()) {
-            meta.setTitle("クエストブック");
-        }
-        if (!meta.hasGeneration()) {
-            meta.setGeneration(BookMeta.Generation.ORIGINAL);
-        }
+        meta.setAuthor(player.getName()); // require?
+        meta.setTitle("クエストブック"); // require?
+        meta.setGeneration(BookMeta.Generation.ORIGINAL); // require?
         meta.spigot().setPages(pages);
         book.setItemMeta(meta);
 
         // 本を開くパケット
-        //Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PayloadPacket.openBook(player, hand), 5); // 0.25 sec
-        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> player.openBook(book), 5);
+        player.openBook(book);
     }
 
     private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type, final Player player) {
@@ -183,12 +176,16 @@ public class QuestBook {
                 final List<String> viewLore = new ArrayList<>();
                 viewLore.add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
                 viewLore.add(ChatColor.GRAY + "必要素材:");
-                for (final String req : recipe.getReqMaterial()) {
-                    final String[] data = req.split(",");
-                    if (data[0].startsWith("category:")) {
-                        viewLore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
-                    } else if (data[0].startsWith("material:")) {
-                        viewLore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+                for (final RequireAmountMaterial req : recipe.getReqMaterial()) {
+                    switch (req.getType()) {
+                        case CATEGORY:
+                            viewLore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
+                            break;
+                        case MATERIAL:
+                            viewLore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
+                            break;
+                        default: // 想定しない
+                            break;
                     }
                 }
                 viewMeta.setLore(viewLore);

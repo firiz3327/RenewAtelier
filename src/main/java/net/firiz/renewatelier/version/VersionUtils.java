@@ -24,8 +24,14 @@ import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_15_R1.ChatMessage;
+import net.minecraft.server.v1_15_R1.EntityItem;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Item;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +45,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author firiz
@@ -58,7 +65,7 @@ public class VersionUtils {
             implLookup.setAccessible(false);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             Chore.logWarning(e);
-            System.exit(0);
+            System.exit(1);
         }
     }
 
@@ -77,6 +84,9 @@ public class VersionUtils {
     public static VItemStack asVItemCopy(final ItemStack item) {
         return new VItemStack(CraftItemStack.asNMSCopy(item));
     }
+    public static net.minecraft.server.v1_15_R1.ItemStack asNMSCopy(final ItemStack item) {
+        return CraftItemStack.asNMSCopy(item);
+    }
 
     public static ItemStack asItem(final VItemStack item) {
         final net.minecraft.server.v1_15_R1.ItemStack nms = (net.minecraft.server.v1_15_R1.ItemStack) item.getNmsItem();
@@ -87,6 +97,16 @@ public class VersionUtils {
         return CraftItemStack.asBukkitCopy(item);
     }
 
+    public static Item drop(@NotNull final Location location, @NotNull final ItemStack item, @NotNull final CreatureSpawnEvent.SpawnReason reason) {
+        Objects.requireNonNull(location);
+        Objects.requireNonNull(item);
+        Objects.requireNonNull(reason);
+        final CraftWorld world = (CraftWorld) Objects.requireNonNull(location.getWorld());
+        EntityItem entity = new EntityItem(world.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(item));
+        entity.pickupDelay = 10;
+        world.getHandle().addEntity(entity, reason);
+        return new CraftItem(world.getHandle().getServer(), entity);
+    }
 
     @NotNull
     public static Field getField(Object object, String name) {

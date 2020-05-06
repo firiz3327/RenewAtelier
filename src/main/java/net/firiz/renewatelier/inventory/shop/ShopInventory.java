@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.inventory.shop;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -80,12 +80,12 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
     /**
      * 決済を処理するモードを返す
      *
-     * @param lore
-     * @param player
+     * @param lore itemMeta.lore
+     * @param player 購入者
      * @return ShopResult
      */
     @NotNull
-    private static ShopResult createShopResult(@NotNull List<String> lore, @NotNull Player player) {
+    private ShopResult createShopResult(@NotNull List<String> lore, @NotNull Player player) {
         final String str = lore.get(lore.size() - 1);
         final String id = Chore.getStridColor(str.substring(0, str.indexOf(String.valueOf(ChatColor.ITALIC) + ChatColor.RESET + ChatColor.GREEN)));
         final String v = str.substring(str.lastIndexOf(": ") + 2);
@@ -101,7 +101,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         }
     }
 
-    private static void reduceItem(ShopResult priceMode, Player player) {
+    private void reduceItem(ShopResult priceMode, Player player) {
         if (priceMode.mode == 1) {
             psm.getChar(player.getUniqueId()).gainMoney(-priceMode.money);
         } else if (priceMode.material != null) {
@@ -109,7 +109,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         }
     }
 
-    private static void addItem(ItemStack item, Player player) {
+    private void addItem(ItemStack item, Player player) {
         final ItemMeta meta = item.getItemMeta();
         final List<String> cLore = Objects.requireNonNull(meta.getLore());
         for (int i = 0; i < 2; i++) {

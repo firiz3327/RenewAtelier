@@ -43,11 +43,15 @@ public abstract class ConfigLoader<T> {
         this.folder = folder;
     }
 
+    protected void initClear() {
+    }
+
     public final void load() {
         if (folder) {
             final File[] files = file.listFiles();
             if (files != null) {
                 list.clear();
+                initClear();
                 for (final File f : files) {
                     if (!(f.getName().endsWith(".yml") || f.getName().endsWith(".yaml") || f.getName().endsWith(".YML") || f.getName().endsWith(".YAML"))) {
                         continue;

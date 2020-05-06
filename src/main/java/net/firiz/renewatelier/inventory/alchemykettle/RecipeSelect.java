@@ -20,8 +20,8 @@
  */
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
-import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
@@ -31,7 +31,7 @@ import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -90,18 +90,18 @@ public final class RecipeSelect implements ParamInventory<Location> {
         InventoryPacket.update(player, "", InventoryPacketType.CHEST);
     }
 
-    private void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus rs, final List<String> lore) {
+    private void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus recipeStatus, final List<String> lore) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         lore.add(Chore.createStridColor(recipe.getId()));
         lore.add(ChatColor.GRAY + "必要錬金レベル: " + (status.getCharStats().getAlchemyLevel() >= recipe.getReqAlchemyLevel() ? ChatColor.GREEN : "") + recipe.getReqAlchemyLevel());
 
         int addAmount = 0;
-        final int level = rs.getLevel();
+        final int level = recipeStatus.getLevel();
         if (level != 0) {
             lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RANK_RECIPE[level]));
             final StringBuilder sb = new StringBuilder();
             if (level != 4) {
-                int expPer = (int) (100 * ((double) rs.getExp() / GameConstants.RECIPE_REQ_EXPS[level]));
+                int expPer = (int) (100 * ((double) recipeStatus.getExp() / GameConstants.RECIPE_REQ_EXPS[level]));
                 for (int j = 0; j < 100; j++) {
                     sb.append(expPer > j ? ChatColor.GREEN : ChatColor.WHITE).append("|");
                 }
@@ -110,9 +110,9 @@ public final class RecipeSelect implements ParamInventory<Location> {
             }
             lore.add(sb.toString());
 
-            final List<RecipeLevelEffect> rles = recipe.getLevels().get(rs.getLevel());
-            if (rles != null && !rles.isEmpty()) {
-                for (final RecipeLevelEffect rle : rles) {
+            final List<RecipeLevelEffect> recipeLevelEffects = recipe.getLevels().get(recipeStatus.getLevel());
+            if (recipeLevelEffects != null && !recipeLevelEffects.isEmpty()) {
+                for (final RecipeLevelEffect rle : recipeLevelEffects) {
                     final RecipeLevelEffect.RecipeLEType type = rle.getType();
                     lore.add(ChatColor.GRAY + "- ".concat(type.getName()).concat(type.isViewNumber() ? " +".concat(String.valueOf(rle.getCount(type))) : ""));
                     if (type == RecipeLevelEffect.RecipeLEType.ADD_AMOUNT) {
@@ -129,22 +129,26 @@ public final class RecipeSelect implements ParamInventory<Location> {
 
         lore.add(ChatColor.GRAY + "作成量: " + (recipe.getAmount() + addAmount));
         lore.add(ChatColor.GRAY + "必要素材:");
-        for (final String req : recipe.getReqMaterial()) {
-            final String[] data = req.split(",");
-            if (data[0].startsWith("category:")) {
-                lore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(Category.valueOf(data[0].substring(9)).getName()) + " × " + data[1]);
-            } else if (data[0].startsWith(STRING_MATERIAL)) {
-                lore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(AlchemyMaterial.getMaterial(data[0].substring(9)).getName()) + " × " + data[1]);
+        for (final RequireAmountMaterial req : recipe.getReqMaterial()) {
+            switch (req.getType()) {
+                case CATEGORY:
+                    lore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
+                    break;
+                case MATERIAL:
+                    lore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
+                    break;
+                default: // 想定しない
+                    break;
             }
         }
     }
 
     private void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final List<ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>>> ritem = new ArrayList<>();
+        final List<ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>>> recipeItems = new ArrayList<>();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
-        status.getRecipeStatusList().forEach(rs -> {
-            final String result_str = AlchemyRecipe.search(rs.getId()).getResult();
-            final String[] result = result_str.contains(",") ? result_str.split(",") : new String[]{result_str};
+        status.getRecipeStatusList().stream().filter(RecipeStatus::isAcquired).forEach(recipeStatus -> {
+            final String resultStr = recipeStatus.getRecipe().getResult();
+            final String[] result = resultStr.contains(",") ? resultStr.split(",") : new String[]{resultStr};
             ImmutablePair<Material, Integer> material = null;
             if (result[0].startsWith(STRING_MATERIAL)) {
                 material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
@@ -152,12 +156,12 @@ public final class RecipeSelect implements ParamInventory<Location> {
                 material = new ImmutablePair<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
             }
             if (material != null) {
-                ritem.add(new ImmutablePair<>(rs, material));
+                recipeItems.add(new ImmutablePair<>(recipeStatus, material));
             }
         });
-        ritem.sort(Comparator.comparing((ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> o) -> o.getLeft().getId()));
+        recipeItems.sort(Comparator.comparing((ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> o) -> o.getLeft().getId()));
         final int dScroll = scroll * 6;
-        if (ritem.size() > dScroll) {
+        if (recipeItems.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
             final ItemMeta meta = setting.getItemMeta();
             AlchemyChore.setSetting(meta, 0, scroll, RECIPE_VALUE_1);
@@ -185,13 +189,13 @@ public final class RecipeSelect implements ParamInventory<Location> {
 
             slot = 9;
             for (int i = dScroll; i < dScroll + 24; i++) {
-                if (ritem.size() <= i) {
+                if (recipeItems.size() <= i) {
                     break;
                 }
-                final ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> dd = ritem.get(i);
+                final ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> dd = recipeItems.get(i);
                 final ImmutablePair<Material, Integer> material = dd.getRight();
                 final RecipeStatus rs = dd.getLeft();
-                final AlchemyRecipe recipe = AlchemyRecipe.search(rs.getId());
+                final AlchemyRecipe recipe = rs.getRecipe();
                 final ItemStack item;
                 final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 

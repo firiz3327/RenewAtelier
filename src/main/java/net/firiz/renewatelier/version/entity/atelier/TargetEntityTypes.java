@@ -35,7 +35,7 @@ public enum TargetEntityTypes {
     final Class<?> clasz;
     @NotNull
     final Race race;
-    @Nullable
+    @NotNull
     final String body;
     @NotNull
     final String name;

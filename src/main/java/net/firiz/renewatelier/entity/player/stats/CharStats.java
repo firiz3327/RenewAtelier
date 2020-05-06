@@ -283,7 +283,7 @@ public class CharStats extends EntityStatus {
         if (compulsion) {
             this.money += Math.max(0, Math.min(tempMoney, GameConstants.PLAYER_MONEY_CAP));
         } else {
-            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney <= 0) {
+            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney < 0) {
                 return false;
             }
             this.money += money;

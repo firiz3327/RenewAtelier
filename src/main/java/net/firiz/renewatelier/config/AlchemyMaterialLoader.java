@@ -49,7 +49,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
-    private static final Map<Material, AlchemyMaterial> vanillaReplaceItems = new EnumMap<>(Material.class);
     private static final List<String> notFounds = new ArrayList<>();
     private static final String PREFIX = "MaterialLoader: ";
     private static final String KEY_MATERIAL = "material";
@@ -58,8 +57,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private static final String KEY_CATEGORIES = "categories";
     private static final String KEY_INGREDIENTS = "ingredients";
 
+    private final Map<Material, AlchemyMaterial> vanillaReplaceItems = new EnumMap<>(Material.class);
+
     AlchemyMaterialLoader() {
         super(new File(AtelierPlugin.getPlugin().getDataFolder(), "materials"), true);
+    }
+
+    @Override
+    protected void initClear() {
+        vanillaReplaceItems.clear();
     }
 
     @Override
@@ -72,9 +78,9 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final ConfigurationSection item = config.getConfigurationSection(key);
                 assert item != null;
 
-                final ImmutablePair<Material, Integer> mat = getMaterial(item, key); // *
+                final ImmutablePair<Material, Integer> materialData = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
-                final String name = getName(item, defaultName, mat); // *
+                final String name = getName(item, defaultName, materialData); // *
                 final int quality_min = getQualityMin(item); // *
                 final int quality_max = getQualityMax(item); // *
                 final int price = item.contains("price") ? item.getInt("price") : 1;
@@ -90,7 +96,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             key,
                             name,
                             defaultName,
-                            mat,
+                            materialData,
                             quality_min,
                             quality_max,
                             price,

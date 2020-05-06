@@ -1,9 +1,10 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.entity.monster.MonsterStats;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.VersionUtils;
+import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -11,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -171,10 +173,32 @@ public class LivingData {
                 void.class,
                 params
         );
-        for (final Player player : damageSources.keySet()) {
-            psm.getChar(player.getUniqueId()).getCharStats().addExp(stats.getExp());
+        if (damageSources.size() > 0) {
+            final double size = damageSources.size();
+            final double exp = stats.getExp() / size;
+            final int expR = (int) (exp + (exp * (size - 1) * 0.8));
+            for (final Player player : damageSources.keySet()) {
+                psm.getChar(player.getUniqueId()).getCharStats().addExp(expR);
+            }
         }
         holoHealth.die();
+    }
+
+    /**
+     * javassistで動的に生成されたEntityクラスからReflectionを用いて実行されます
+     *
+     * @param damageSource DamageSource 原因
+     * @param i            int 謎
+     * @param flag         boolean 謎
+     */
+    public void dropDeathLoot(Object damageSource, Object i, Object flag) {
+        // 機能を停止させる(今後、何かしら実装するかも)
+    }
+
+    public void drop(Location location, List<ItemStack> itemStacks) {
+        location.setX(location.getX() + 0.5);
+        location.setZ(location.getZ() + 0.5);
+        damageSources.forEach((player, damage) -> itemStacks.forEach(item -> new PlayerDropItem(player, location, item).drop()));
     }
 
 }

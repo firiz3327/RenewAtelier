@@ -21,7 +21,7 @@
 package net.firiz.renewatelier.notification;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.VersionUtils;
@@ -72,11 +72,6 @@ public class Notification {
 
         Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
             if (player.isOnline()) {
-//                final PlayerInventory inv = player.getInventory();
-//                final ItemStack offHand = inv.getItemInOffHand();
-//                inv.setItemInOffHand(book);
-//                PayloadPacket.openBook(player, EquipmentSlot.OFF_HAND);
-//                inv.setItemInOffHand(offHand);
                 player.openBook(book);
             }
         }, 20); // 1 sec

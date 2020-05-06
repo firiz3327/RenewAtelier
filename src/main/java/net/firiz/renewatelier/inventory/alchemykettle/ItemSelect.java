@@ -20,10 +20,10 @@
  */
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -96,30 +96,35 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
     }
 
     private void setItemSelectNumber(final Player player, final Inventory inv, final AlchemyRecipe recipe, final int add_page) {
-        final List<String> reqs = recipe.getReqMaterial();
+        final List<RequireAmountMaterial> reqs = recipe.getReqMaterial();
         final ItemStack settingItem = inv.getItem(1);
         final ItemMeta setting = settingItem.getItemMeta();
         final int new_page = Math.min(reqs.size() - 1, Math.max(0, AlchemyChore.getSetting(setting, 1) + add_page));
         AlchemyChore.setSetting(setting, 1, new_page, "");
         settingItem.setItemMeta(setting);
 
-        final String[] data = reqs.get(new_page).split(",");
+        final RequireAmountMaterial requireMaterial = reqs.get(new_page);
         String name = null;
-        ImmutablePair<Material, Integer> material = null;
-        if (data[0].startsWith("material:")) {
-            final AlchemyMaterial am = AlchemyMaterial.getMaterial(data[0].substring(9));
-            if (!am.isDefaultName()) {
-                name = am.getName();
-            }
-            material = am.getMaterial();
-        } else if (data[0].startsWith("category:")) {
-            final Category c = Category.valueOf(data[0].substring(9));
-            name = "§r" + c.getName();
-            material = c.getMaterial();
+        ImmutablePair<Material, Integer> material;
+        switch (requireMaterial.getType()) {
+            case MATERIAL:
+                final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();
+                if (!alchemyMaterial.isDefaultName()) {
+                    name = alchemyMaterial.getName();
+                }
+                material = alchemyMaterial.getMaterial();
+                break;
+            case CATEGORY:
+                final Category c = requireMaterial.getCategory();
+                name = "§r" + c.getName();
+                material = c.getMaterial();
+                break;
+            default:
+                throw new IllegalStateException("illegal type. " + requireMaterial);
         }
 
         if (material != null) {
-            final int req_amount = Integer.parseInt(data[1]);
+            final int req_amount = requireMaterial.getAmount();
             final ItemStack item = new ItemStack(material.getLeft(), 1);
             final ItemMeta meta = item.getItemMeta();
             if (name != null) {
@@ -149,17 +154,26 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
     }
 
     private boolean checkMaxSlot(final UUID uuid, final AlchemyRecipe recipe, final int page) {
-        final List<String> reqs = recipe.getReqMaterial();
+        final List<RequireAmountMaterial> requireMaterials = recipe.getReqMaterial();
         final List<ItemStack> pageItems = kettle.getPageItems(uuid, page);
-        final String[] data = reqs.get(page).split(",");
-        final ImmutablePair<Material, Integer> material = data[0].startsWith("material:")
-                ? AlchemyMaterial.getMaterial(data[0].substring(9)).getMaterial()
-                : (data[0].startsWith("category:")
-                ? Category.valueOf(data[0].substring(9)).getMaterial() : null);
+        final RequireAmountMaterial requireMaterial = requireMaterials.get(page);
+        ImmutablePair<Material, Integer> material;
+        switch (requireMaterial.getType()) {
+            case MATERIAL:
+                final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();
+                material = alchemyMaterial.getMaterial();
+                break;
+            case CATEGORY:
+                final Category c = requireMaterial.getCategory();
+                material = c.getMaterial();
+                break;
+            default:
+                throw new IllegalStateException("illegal type. " + requireMaterial);
+        }
         if (material != null && !pageItems.isEmpty()) {
-            final int req_amount = Integer.parseInt(data[1]);
-            Chore.log(pageItems.size() + " " + (pageItems.size() >= req_amount) + " " + Arrays.toString(data));
-            return pageItems.size() < req_amount;
+            final int requireAmount = requireMaterial.getAmount();
+            Chore.log(pageItems.size() + " " + (pageItems.size() >= requireAmount) + " " + requireMaterial);
+            return pageItems.size() < requireAmount;
         }
         return true;
     }
@@ -181,8 +195,8 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
             e.setCancelled(true);
             final ItemStack current = e.getCurrentItem();
             if (current != null && current.getType() != Material.AIR && checkMaxSlot(uuid, recipe, page)) {
-                final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
-                if (Chore.checkMaterial(current, data[0])) {
+                final RequireAmountMaterial data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1));
+                if (Chore.checkMaterial(current, data)) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
                     kettle.addPageItem(uuid, cloneItem, page);
@@ -209,8 +223,8 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
                             kettle.removePageItem(uuid, slot, page);
                         }
                     } else if (checkMaxSlot(uuid, recipe, page)) { // アイテムをスロットに設置
-                        final String[] data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1)).split(",");
-                        if (Chore.checkMaterial(cursor, data[0])) {
+                        final RequireAmountMaterial data = recipe.getReqMaterial().get(AlchemyChore.getSetting(setting, 1));
+                        if (Chore.checkMaterial(cursor, data)) {
                             final ItemStack cloneItem = cursor.clone();
                             cloneItem.setAmount(1);
                             cursor.setAmount(cursor.getAmount() - 1);

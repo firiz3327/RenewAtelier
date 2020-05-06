@@ -22,11 +22,14 @@ package net.firiz.renewatelier.entity.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.script.ScriptEngine;
 
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
@@ -40,6 +43,7 @@ import net.firiz.renewatelier.quest.result.ItemQuestResult;
 import net.firiz.renewatelier.quest.result.MoneyQuestResult;
 import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import net.firiz.renewatelier.utils.Chore;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -52,10 +56,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class Char {
 
-    private static final String COLUMN_RECIPE_LEVELS = "recipeLevels";
     private static final String COLUMN_USER_ID = "userId";
-    private static final String COLUMN_RECIPE_ID = "recipeId";
-    private static final String COLUMN_LEVEL = "level";
 
     @NotNull
     private final UUID uuid;
@@ -67,7 +68,7 @@ public final class Char {
     @NotNull
     private final CharStats charStats;
     @NotNull
-    private final List<RecipeStatus> recipeStatuses;
+    private final RecipeSQL recipeSQL;
     @NotNull
     private final List<QuestStatus> questStatuses;
     @NotNull
@@ -98,7 +99,7 @@ public final class Char {
         this.email = email;
         this.password = password;
         this.charStats = charStats;
-        this.recipeStatuses = recipeStatuses;
+        this.recipeSQL = new RecipeSQL(id, recipeStatuses);
         this.questStatuses = questStatuses;
         this.saveTypes = saveTypes;
         this.settings = settings;
@@ -121,86 +122,22 @@ public final class Char {
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
-    private void addRecipe(final RecipeStatus recipeStatus) {
-        recipeStatuses.add(recipeStatus);
-        SQLManager.INSTANCE.insert(
-                COLUMN_RECIPE_LEVELS,
-                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
-                new Object[]{id, recipeStatus.getId(), recipeStatus.getLevel(), recipeStatus.getExp()}
-        );
-    }
-
     @NotNull
     public List<RecipeStatus> getRecipeStatusList() {
-        return new ArrayList<>(recipeStatuses);
+        return recipeSQL.getRecipeStatusList();
     }
 
     @Nullable
     public RecipeStatus getRecipeStatus(final String id) {
-        for (final RecipeStatus rs : recipeStatuses) {
-            if (rs.getId().equals(id)) {
-                return rs;
-            }
-        }
-        return null;
+        return recipeSQL.getRecipeStatus(id);
     }
 
     public void setRecipeStatus(final RecipeStatus status) {
-        RecipeStatus rs = getRecipeStatus(status.getId());
-        if (rs == null) {
-            rs = status;
-            recipeStatuses.add(rs);
-        }
-        SQLManager.INSTANCE.insert(
-                COLUMN_RECIPE_LEVELS,
-                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
-                new Object[]{id, rs.getId(), rs.getLevel(), rs.getExp()}
-        );
+        recipeSQL.setRecipeStatus(status);
     }
 
     public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
-        if (addRecipeExp(recipe.getId(), exp) && view) {
-            Notification.recipeNotification(player, Material.CAULDRON);
-            player.sendMessage("レシピ【" + ChatColor.GREEN + recipe.getResult() + ChatColor.RESET + "】を開放しました。");
-        }
-    }
-
-    private boolean addRecipeExp(final String recipeId, final int exp) {
-        RecipeStatus status = null;
-        for (final RecipeStatus rs : getRecipeStatusList()) {
-            if (rs.getId().equals(recipeId)) {
-                if (rs.getLevel() > 3) {
-                    return false;
-                } else {
-                    status = rs;
-                    break;
-                }
-            }
-        }
-
-        boolean first = false;
-        if (status == null) {
-            status = new RecipeStatus(recipeId);
-            addRecipe(status);
-            first = true;
-        }
-
-        status.setExp(status.getExp() + exp);
-        while (true) {
-            final int level = status.getLevel();
-            final int req_exp = GameConstants.RECIPE_REQ_EXPS[Math.min(level, GameConstants.RECIPE_REQ_EXPS.length - 1)];
-            if (status.getExp() < req_exp) {
-                break;
-            }
-            status.setLevel(level + 1);
-            status.setExp(status.getExp() - req_exp);
-        }
-        SQLManager.INSTANCE.insert(
-                COLUMN_RECIPE_LEVELS,
-                new String[]{COLUMN_USER_ID, COLUMN_RECIPE_ID, COLUMN_LEVEL, "exp"},
-                new Object[]{id, status.getId(), status.getLevel(), status.getExp()}
-        );
-        return first;
+        recipeSQL.addRecipeExp(player, view, recipe, exp);
     }
     //</editor-fold>
 
@@ -315,6 +252,15 @@ public final class Char {
         return result;
     }
 
+    public void increaseIdea(@NotNull ItemStack item) {
+        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new RecipeIdea.IncreaseIdea(item));
+    }
+
+    public void increaseIdea(AlchemyRecipe recipe) {
+        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new RecipeIdea.IncreaseIdea(recipe));
+    }
+
+
     public void gainMoney(int money) {
         if (!charStats.gainMoney(money, false)) { // 0以下になることは想定しない
             charStats.getPlayer().sendMessage("所持金が上限を超えるため受け取れませんでした。");
@@ -360,6 +306,5 @@ public final class Char {
     public void setPy3Engine(@Nullable ScriptEngine py3Engine) {
         this.py3Engine = py3Engine;
     }
-
 
 }

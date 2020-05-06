@@ -33,7 +33,7 @@ import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
@@ -48,6 +48,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
@@ -93,7 +94,7 @@ public class PlayerListener implements Listener {
                     final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
                     if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
                         e.setCancelled(true);
-                        QuestBook.openQuestBook(player, item);
+                        QuestBook.openQuestBook(player);
                         return;
                     }
                 }
@@ -208,6 +209,18 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void death(final PlayerDeathEvent e) {
         e.setDeathMessage(null);
+    }
+
+    @EventHandler
+    private void expChange(final PlayerExpChangeEvent e) {
+        e.setAmount(0);
+    }
+
+    @EventHandler
+    private void pickup(final PlayerAttemptPickupItemEvent e) {
+        if (e.getItem().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM) {
+            PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId()).increaseIdea(e.getItem().getItemStack());
+        }
     }
 
 }

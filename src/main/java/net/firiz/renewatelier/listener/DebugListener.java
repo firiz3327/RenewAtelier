@@ -28,7 +28,7 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.debug.DebugManager;
 import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.megaphone.Megaphone;
-import net.firiz.renewatelier.entity.player.loadsqls.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;

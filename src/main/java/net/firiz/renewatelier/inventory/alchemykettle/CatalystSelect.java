@@ -20,6 +20,7 @@
  */
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
 import java.util.*;
@@ -91,15 +92,20 @@ public final class CatalystSelect implements BiParamInventory<AlchemyRecipe, Inv
         lore.add("");
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
         recipe.getCatalystCategories().forEach(ct -> {
-            if (ct.startsWith("material:")) {
-                lore.add(ChatColor.RESET + "- "
-                        + AlchemyMaterial.getMaterial(ct.substring(9)).getName()
-                );
-            } else if (ct.startsWith("category:")) {
-                lore.add(
-                        ChatColor.RESET + "- "
-                                + Category.valueOf(ct.substring(9)).getName()
-                );
+            switch (ct.getType()) {
+                case MATERIAL:
+                    lore.add(ChatColor.RESET + "- "
+                            + ct.getMaterial().getName()
+                    );
+                    break;
+                case CATEGORY:
+                    lore.add(
+                            ChatColor.RESET + "- "
+                                    + ct.getCategory().getName()
+                    );
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + ct.getType());
             }
         });
         inv.setItem(37, Chore.ci(

@@ -21,7 +21,6 @@ import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftInventory;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
@@ -31,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ReplaceVanillaItems {
 
@@ -79,7 +81,7 @@ public class ReplaceVanillaItems {
             if (inv != null) {
                 loot.clearLootTable();
                 fillInventory(inv, lootTable, builder.build());
-                changeItems(true, inv.getContents());
+                changeItems(true, item -> item, inv.getContents());
             }
         }
     }
@@ -112,17 +114,9 @@ public class ReplaceVanillaItems {
         return builder.build(lootTable.getHandle().getLootContextParameterSet());
     }
 
-    public static void changeItems(boolean random, Collection<ItemStack> items) {
+    public static void changeItems(boolean random, UnaryOperator<ItemStack> function, ItemStack... items) {
         for (final ItemStack item : items) {
-            if (item != null && !changeVanillaItem(item, random)) {
-                changeVanillaLore(item);
-            }
-        }
-    }
-
-    public static void changeItems(boolean random, ItemStack... items) {
-        for (final ItemStack item : items) {
-            if (item != null && !changeVanillaItem(item, random)) {
+            if (item != null && !changeVanillaItem(item, random, function)) {
                 changeVanillaLore(item);
             }
         }
@@ -269,12 +263,11 @@ public class ReplaceVanillaItems {
     }
 
     /**
-     *
      * @param item
      * @param random
      * @return 変更に成功したか否か true=成功/false=失敗
      */
-    public static boolean changeVanillaItem(@NotNull final ItemStack item, boolean random) {
+    public static boolean changeVanillaItem(@NotNull final ItemStack item, boolean random, @NotNull UnaryOperator<ItemStack> function) {
         final AlchemyMaterial material = AlchemyMaterial.getVanillaReplaceItem(item.getType());
         if (material != null) {
             List<AlchemyIngredients> overrideIngredients = random ? null : new ArrayList<>();
@@ -288,7 +281,7 @@ public class ReplaceVanillaItems {
                     overrideIngredients.add(material.getIngredients().get(0).getLeft());
                 }
             }
-            return AlchemyItemStatus.getItem(
+            return function.apply(AlchemyItemStatus.getItem(
                     material,
                     overrideIngredients, // override ingredients
                     item,
@@ -303,7 +296,7 @@ public class ReplaceVanillaItems {
                     0,
                     0,
                     0
-            ) != null;
+            )) != null;
         }
         return false;
     }

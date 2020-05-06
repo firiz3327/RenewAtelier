@@ -30,6 +30,11 @@ public class LivingCreeper extends EntityCreeper implements EntitySupplier {
     }
 
     @Override
+    protected void dropDeathLoot(DamageSource damagesource, int i, boolean flag) {
+        livingData.dropDeathLoot(damagesource, i, flag);
+    }
+
+    @Override
     public void explode() {
         super.explode();
         livingData.getHoloHealth().die();
