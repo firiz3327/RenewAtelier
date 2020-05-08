@@ -74,7 +74,7 @@ public class RecipeIdea {
     }
 
     private boolean checkAlchemyMaterial(final IncreaseIdea idea, final RequireMaterial require) {
-        final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(idea.item);
+        final AlchemyMaterial material = idea.material;
         boolean result = false;
         if (material != null) {
             if (require.getType() == RequireMaterial.RequireType.CATEGORY) {
@@ -102,17 +102,24 @@ public class RecipeIdea {
     }
 
     public static class IncreaseIdea {
+        private final AlchemyMaterial material;
         private final ItemStack item;
         private final AlchemyRecipe recipe;
 
         public IncreaseIdea(ItemStack item) {
-            this.item = item;
+            this.material = AlchemyMaterial.getMaterialOrNull(item);
+            this.item = material == null ? item : null;
             this.recipe = null;
         }
 
         public IncreaseIdea(AlchemyRecipe recipe) {
+            this.material = null;
             this.item = null;
             this.recipe = recipe;
+        }
+
+        public AlchemyMaterial getMaterial() {
+            return material;
         }
 
         public ItemStack getItem() {

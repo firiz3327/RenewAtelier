@@ -150,15 +150,14 @@ public class AlchemyRecipe {
             throw new IllegalStateException("There are no ideas for this recipe.");
         }
         Objects.requireNonNull(idea);
-        if (idea.getItem() != null) {
-            final AlchemyMaterial material = AlchemyMaterial.getMaterial(idea.getItem());
+        if (idea.getMaterial() != null) {
             for (final RequireAmountMaterial requireMaterial : ideaRequires) {
                 if ((
                         requireMaterial.getType() == RequireMaterial.RequireType.MATERIAL
-                                && requireMaterial.getMaterial() == material
+                                && requireMaterial.getMaterial() == idea.getMaterial()
                 ) || (
                         requireMaterial.getType() == RequireMaterial.RequireType.CATEGORY
-                                && material.getCategories().contains(requireMaterial.getCategory())
+                                && idea.getMaterial().getCategories().contains(requireMaterial.getCategory())
                 )) {
                     return true;
                 }

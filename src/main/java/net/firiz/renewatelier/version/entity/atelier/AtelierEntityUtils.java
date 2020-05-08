@@ -86,8 +86,18 @@ public enum AtelierEntityUtils {
         throw new IllegalArgumentException("not support class.");
     }
 
-    @NotNull
-    public LivingData spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location) {
+    public void spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location) {
+        spawn(types, location, true);
+    }
+
+    public void spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location, final boolean cancel) {
+        if (cancel) {
+            // スポーン地点から32マス範囲内にLivingDataを持ったエンティティの総数が10を超える場合、スポーンをキャンセルする
+            final Collection<org.bukkit.entity.Entity> nearby32 = location.getNearbyEntities(32, 32, 32);
+            if (nearby32.stream().filter(this::hasLivingData).count() >= 10) {
+                return;
+            }
+        }
         final World world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
         final EntityLiving entity;
         if (types.customClass == null) {
@@ -99,7 +109,6 @@ public enum AtelierEntityUtils {
         if (types.initConsumer != null) {
             types.initConsumer.accept(entity.getBukkitEntity());
         }
-        return (LivingData) ((Supplier<Object>) entity).get();
     }
 
     public boolean hasLivingData(@NotNull final Entity entity) {

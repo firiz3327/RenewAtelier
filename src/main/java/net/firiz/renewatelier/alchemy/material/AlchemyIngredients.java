@@ -276,8 +276,7 @@ public enum AlchemyIngredients {
     I239R15("火薬臭", AlchemyAttribute.RED, 15),
     I240R10("わずかな熱", AlchemyAttribute.RED, 10),
     I241P25("奇妙な香り", AlchemyAttribute.PURPLE, 25),
-    I242R35("高純度", AlchemyAttribute.RED, 35)
-    ;
+    I242R35("高純度", AlchemyAttribute.RED, 35);
 
     private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
     private final String name;
@@ -288,7 +287,7 @@ public enum AlchemyIngredients {
         AlchemyIngredients[] var3 = values();
         int var2 = var3.length;
 
-        for(int var1 = 0; var1 < var2; ++var1) {
+        for (int var1 = 0; var1 < var2; ++var1) {
             final AlchemyIngredients ai = var3[var1];
             BY_NAME.put(ai.name(), ai);
         }
@@ -314,7 +313,7 @@ public enum AlchemyIngredients {
 
     public static AlchemyIngredients searchName(final String str) {
         final AlchemyIngredients ai = BY_NAME.get(str.toUpperCase());
-        if(ai == null) {
+        if (ai == null) {
             for (final AlchemyIngredients ing : values()) {
                 if (ing.name.equals(str)) {
                     return ing;

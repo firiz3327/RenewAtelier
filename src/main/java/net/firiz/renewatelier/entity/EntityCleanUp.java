@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.entity;
 
-import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import org.bukkit.Bukkit;
@@ -32,20 +31,11 @@ public final class EntityCleanUp implements Runnable {
     private void removeEntity(final Entity entity) {
         final Location location = entity.getLocation();
         final Collection<Player> nearby128 = location.getNearbyPlayers(128);
-        if (nearby128.isEmpty()) {
+        if (nearby128.isEmpty() || (
+                nearby128.stream().anyMatch(player -> 1024 > player.getLocation().distanceSquared(location))
+                        && Randomizer.percent(25, 1000)
+        )) {
             entity.remove();
-        } else {
-            boolean nearby32isEmpty = true;
-            for (final Player player : nearby128) {
-                // 32マス以内にプレイヤーがいる場合
-                if (1024 > player.getLocation().distanceSquared(location)) {
-                    nearby32isEmpty = false;
-                    break;
-                }
-            }
-            if (nearby32isEmpty && Randomizer.percent(25, 1000)) {
-                entity.remove();
-            }
         }
     }
 

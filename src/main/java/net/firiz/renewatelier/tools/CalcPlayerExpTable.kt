@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.constants.runs
+package net.firiz.renewatelier.tools
 
 fun main() {
     val maxLevel = 300

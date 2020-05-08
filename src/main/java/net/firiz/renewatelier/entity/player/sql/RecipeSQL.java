@@ -42,6 +42,12 @@ public class RecipeSQL {
         this.recipeStatuses = recipeStatuses;
     }
 
+    public RecipeStatus addRecipe(final AlchemyRecipe recipe) {
+        final RecipeStatus recipeStatus = new RecipeStatus(recipe, true);
+        addRecipe(recipeStatus);
+        return recipeStatus;
+    }
+
     private void addRecipe(final RecipeStatus recipeStatus) {
         recipeStatuses.add(recipeStatus);
         insert(recipeStatus);
@@ -73,12 +79,13 @@ public class RecipeSQL {
     }
 
     public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
-        if (addRecipeExp(recipe.getId(), exp) && view) {
+        if (addRecipeExp(recipe, exp) && view) {
             notification(player, recipe);
         }
     }
 
-    private boolean addRecipeExp(final String recipeId, final int exp) {
+    private boolean addRecipeExp(final AlchemyRecipe recipe, final int exp) {
+        final String recipeId = recipe.getId();
         RecipeStatus status = null;
         for (final RecipeStatus rs : getRecipeStatusList()) {
             if (rs.getId().equals(recipeId)) {
@@ -93,8 +100,7 @@ public class RecipeSQL {
 
         boolean first = false;
         if (status == null) { // コマンドの場合のみ(基本的にアイデアで開放、若しくはその他要素で開放)
-            status = new RecipeStatus(recipeId, true);
-            addRecipe(status);
+            status = addRecipe(recipe);
             first = true;
         }
 

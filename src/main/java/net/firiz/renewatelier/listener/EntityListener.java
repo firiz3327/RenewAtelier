@@ -24,7 +24,7 @@ public class EntityListener implements Listener {
     @EventHandler
     private void spawnEntity(final EntitySpawnEvent e) {
         final Entity entity = e.getEntity();
-        if (entity instanceof LivingEntity && !aEntityUtils.hasLivingData((LivingEntity) entity)) {
+        if (entity instanceof LivingEntity && !aEntityUtils.hasLivingData(entity)) {
             final TargetEntityTypes type = TargetEntityTypes.search(entity.getType());
             if (type != null) {
                 e.setCancelled(true);

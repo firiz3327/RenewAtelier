@@ -21,7 +21,7 @@ public class UniqueList<T> extends ArrayList<T> {
 
     public boolean containsO(T t) {
         final T tnn = Objects.requireNonNull(t);
-        for(T t1 : this) {
+        for (T t1 : this) {
             if (equals.run(t1, tnn)) {
                 return true;
             }

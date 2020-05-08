@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.constants.runs
+package net.firiz.renewatelier.tools
 
 fun main() {
     var v = 20L

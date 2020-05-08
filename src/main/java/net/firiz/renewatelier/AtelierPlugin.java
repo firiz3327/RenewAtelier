@@ -102,15 +102,13 @@ public final class AtelierPlugin extends JavaPlugin {
 
     private void resetEntities() {
         final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
-        for (World world : getServer().getWorlds()) {
-            for (Entity entity : world.getEntities()) {
-                if (entity instanceof Player) {
-                    ((Player) entity).kickPlayer("server reloading.");
-                } else if (entity instanceof LivingEntity && aEntityUtils.hasLivingData((LivingEntity) entity)) {
-                    entity.remove();
-                }
+        getServer().getWorlds().forEach(world -> world.getEntities().forEach(entity -> {
+            if (entity instanceof Player) {
+                ((Player) entity).kickPlayer("server reloading.");
+            } else if (entity instanceof LivingEntity && aEntityUtils.hasLivingData(entity)) {
+                entity.remove();
             }
-        }
+        }));
     }
 
     private void removePlayerNPCStands() {
@@ -119,7 +117,7 @@ public final class AtelierPlugin extends JavaPlugin {
         ).filter(stand -> !stand.isVisible()
                 && stand.getCustomName() != null
                 && stand.getCustomName().startsWith("npc,")
-        ).forEachOrdered(Entity::remove);
+        ).forEach(Entity::remove);
     }
 
     public static AtelierPlugin getPlugin() {

@@ -43,11 +43,11 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                     final String type = str.substring(0, i);
                     final String dataStr = str.substring(i + 1).trim();
                     final Object data;
-                    if(Chore.isNumMatch(dataStr)) {
+                    if (Chore.isNumMatch(dataStr)) {
                         data = Integer.parseInt(dataStr);
                     } else {
                         final String[] split = dataStr.split(",");
-                        for(int j = 0; j < split.length; j++) {
+                        for (int j = 0; j < split.length; j++) {
                             split[j] = split[j].trim();
                         }
                         data = split;

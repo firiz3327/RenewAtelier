@@ -47,8 +47,8 @@ public class RecipeStatus {
         this.idea = new RecipeIdea(recipe);
     }
 
-    public RecipeStatus(final String id, final boolean acquired) {
-        this.recipe = Objects.requireNonNull(AlchemyRecipe.search(id));
+    public RecipeStatus(final AlchemyRecipe recipe, final boolean acquired) {
+        this.recipe = Objects.requireNonNull(recipe);
         this.acquired = acquired;
         this.idea = new RecipeIdea(recipe);
     }
