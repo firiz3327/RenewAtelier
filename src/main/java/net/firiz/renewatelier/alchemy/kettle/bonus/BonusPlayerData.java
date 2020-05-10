@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.alchemy.kettle.bonus;
 
-
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 
 import java.util.ArrayList;

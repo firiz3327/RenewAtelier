@@ -1,23 +1,3 @@
-/*
- * Catalyst.java
- *
- * Copyright (c) 2018 firiz.
- *
- * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- *
- * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
- */
 package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.List;
@@ -35,12 +15,12 @@ import org.bukkit.inventory.ItemStack;
 public class Catalyst {
 
     private final List<CatalystBonus> bonus;
-    private final int[] maincs;
+    private final int[] mainCS;
     private static DefaultCatalyst defaultCatalyst;
 
     public Catalyst(List<CatalystBonus> bonus) {
         this.bonus = bonus;
-        this.maincs = createAllCS();
+        this.mainCS = createAllCS();
     }
 
     public static DefaultCatalyst getDefaultCatalyst() {
@@ -55,7 +35,7 @@ public class Catalyst {
     }
 
     public int[] getMainCS() {
-        return maincs;
+        return mainCS;
     }
 
     public void setInv(Inventory inv, AlchemyRecipe recipe, boolean kettle) {
@@ -75,9 +55,9 @@ public class Catalyst {
         }
         inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
 
-        final int defslot = (size == 36 || size == 25 ? 3 : 13);
+        final int defSlot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach(b -> {
-            int slot = defslot;
+            int slot = defSlot;
             for (int c : b.getCS()) {
                 short cmd = getCustomModelData(c);
                 if (cmd != -1) {
@@ -107,13 +87,13 @@ public class Catalyst {
         return result;
     }
 
-    public ItemStack getSlotItem(int cslot) {
+    public ItemStack getSlotItem(int cSlot) {
         final int size = bonus.get(0).getCS().length;
-        final int defslot = (size == 36 || size == 25 ? 3 : 13);
+        final int defSlot = (size == 36 || size == 25 ? 3 : 13);
         for (final CatalystBonus b : bonus) {
-            int slot = defslot;
+            int slot = defSlot;
             for (int c : b.getCS()) {
-                if (cslot == slot) {
+                if (cSlot == slot) {
                     short cmd = getCustomModelData(c);
                     if (cmd != -1) {
                         return Chore.ci(Material.DIAMOND_AXE, cmd, ChatColor.RESET + b.getData().getName(), null);

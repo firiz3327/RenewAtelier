@@ -1,26 +1,12 @@
-/*
- * ItemQuestResult.java
- * 
- * Copyright (c) 2018 firiz.
- * 
- * This file is part of Expression program is undefined on line 6, column 40 in Templates/Licenses/license-licence-gplv3.txt..
- * 
- * Expression program is undefined on line 8, column 19 in Templates/Licenses/license-licence-gplv3.txt. is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * Expression program is undefined on line 13, column 19 in Templates/Licenses/license-licence-gplv3.txt. is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Expression program is undefined on line 19, column 30 in Templates/Licenses/license-licence-gplv3.txt..  If not, see <http ://www.gnu.org/licenses/>.
- */
 package net.firiz.renewatelier.quest.result;
 
+import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.quest.QuestItem;
+import net.firiz.renewatelier.utils.TellrawUtils;
+import net.firiz.renewatelier.version.LanguageItemUtil;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -31,5 +17,25 @@ public class ItemQuestResult extends ObjectQuestResult<QuestItem> {
     public ItemQuestResult(QuestItem result) {
         super(result);
     }
-    
+
+    @Override
+    public void appendQuestResult(Player player, ComponentBuilder builder) {
+        final QuestItem questItem = getResult();
+        final ItemStack viewItem = questItem.getItem(new AlchemyItemStatus.VisibleFlags(
+                false, // id
+                true, // quality - default min
+                (questItem.getIngredients() != null), // ings
+                false, // size
+                false, // catalyst
+                false, // category
+                false,
+                true
+        ));
+        final String name = viewItem.hasItemMeta() && viewItem.getItemMeta().hasDisplayName()
+                ? viewItem.getItemMeta().getDisplayName()
+                : LanguageItemUtil.getLocalizeName(viewItem, player);
+        builder.append("アイテム: ").append(
+                questItem.getName() == null ? name : questItem.getName()
+        ).event(TellrawUtils.createHoverEvent(viewItem));
+    }
 }
