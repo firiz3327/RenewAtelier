@@ -4,6 +4,7 @@ import net.firiz.renewatelier.AtelierPlugin
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
+import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.constants.GameConstants
 import net.firiz.renewatelier.debug.annotations.Cmd
@@ -454,6 +455,19 @@ class DebugCommands(private val debugListener: DebugListener) {
                 }
         ) {
             sender.sendMessage("money 1000 or money {getUUID} 1000")
+        }
+    }
+
+    @Cmd(
+            desc = ["Characteristic ID"],
+            examples = ["addCharacteristic item_damage_fixed_1"],
+            text = "錬金アイテムに特性を追加します"
+    )
+    fun addCharacteristic(sender: Player, args: ArrayList<Any>) {
+        val item = AlchemyItemStatus.load(sender.inventory.itemInMainHand)
+        if (item != null && args.size >= 1) {
+            item.characteristics.add(Characteristic.getCharacteristic(args[0] as String))
+            sender.inventory.setItemInMainHand(item.create())
         }
     }
 

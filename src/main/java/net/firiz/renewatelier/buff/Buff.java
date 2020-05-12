@@ -5,13 +5,12 @@ import net.firiz.renewatelier.utils.Chore;
 
 public class Buff {
 
-    private final String value;
     private final BuffValueType buffValueType;
     private final int level;
     private final BuffType type;
     private final int limitDuration;
     private final int x;
-    private Runnable timer;
+    private final Runnable timer;
 
     private static final LoopManager loopManager = LoopManager.INSTANCE;
     private int duration;
@@ -19,8 +18,7 @@ public class Buff {
     private boolean end;
     private Runnable endHandler;
 
-    public Buff(String value, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x) {
-        this.value = value;
+    public Buff(BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x) {
         this.buffValueType = buffValueType;
         this.level = level;
         this.type = type;
@@ -32,10 +30,6 @@ public class Buff {
                 stopTimer();
             }
         };
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public BuffValueType getBuffValueType() {

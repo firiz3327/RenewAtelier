@@ -150,13 +150,13 @@ public enum CalcStatType {
                     }
                     for (final Characteristic c : itemStatus.getCharacteristics()) {
                         if (c.hasData(characteristicType[0])) { // percent
-                            status.addAndGet((int) (defStatus * (((int) c.getData(characteristicType[0])) * 0.01)));
+                            status.addAndGet((int) (defStatus * ((c.getIntData(characteristicType[0])) * 0.01)));
                         } else if (c.hasData(characteristicType[1])) { // fixed
-                            status.addAndGet((int) c.getData(characteristicType[1]));
+                            status.addAndGet(c.getIntData(characteristicType[1]));
                         } else if (c.hasData(characteristicType[2])) { // quality
-                            status.addAndGet((int) ((int) c.getData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
+                            status.addAndGet((int) (c.getIntData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
                         } else if (c.hasData(CharacteristicType.LEVEL_STATS_UP)) {
-                            status.addAndGet(charStats.getLevel() * (int) c.getData(CharacteristicType.LEVEL_STATS_UP));
+                            status.addAndGet(charStats.getLevel() * c.getIntData(CharacteristicType.LEVEL_STATS_UP));
                         }
                     }
                 }

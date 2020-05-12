@@ -32,17 +32,17 @@ final class HoloDamage {
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
     @SafeVarargs
-    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, ImmutablePair<Double, AttackAttribute>... damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, DamageComponent... damages) {
         holoDamage(victim, damager, Arrays.asList(damages));
     }
 
-    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<ImmutablePair<Double, AttackAttribute>> damages) {
+    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<DamageComponent> damages) {
         final Location location = victim.getEyeLocation();
         location.setY(location.getY() + 1.2);
         double allDamage = 0;
         for (int i = 0; i < damages.size(); i++) {
-            final double damage = damages.get(i).getLeft();
-            final AttackAttribute attribute = damages.get(i).getRight();
+            final double damage = damages.get(i).getDamage();
+            final AttackAttribute attribute = damages.get(i).getAttackAttribute();
             final int intDamage = (int) damage;
             final String viewDamage;
             if (intDamage <= 0) { // 1.0 ダメージ以上でないとダメージ換算なし

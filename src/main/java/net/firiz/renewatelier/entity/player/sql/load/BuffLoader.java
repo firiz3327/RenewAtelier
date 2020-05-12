@@ -16,18 +16,17 @@ class BuffLoader implements StatusLoader<List<Buff>> {
     public List<Buff> load(int id) {
         final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
                 "buffs",
-                new String[]{"userId", "value", "buffValueType", "level", "buffType", "duration", "limitDuration", "x"},
+                new String[]{"userId", "buffValueType", "level", "buffType", "duration", "limitDuration", "x"},
                 new Object[]{id}
         );
         final List<Buff> saveTypes = new ArrayList<>();
         saveTypesObj.forEach(datas -> saveTypes.add(new Buff(
-                (String) datas.get(1), // value
-                BuffValueType.valueOf((String) datas.get(2)), // buffValueType
-                (int) datas.get(3), // level
-                BuffType.valueOf((String) datas.get(4)), // buffType
-                (int) datas.get(5), // duration
-                (int) datas.get(6), // limitDuration
-                (int) datas.get(7)) // x
+                BuffValueType.valueOf((String) datas.get(1)), // buffValueType
+                (int) datas.get(2), // level
+                BuffType.valueOf((String) datas.get(3)), // buffType
+                (int) datas.get(4), // duration
+                (int) datas.get(5), // limitDuration
+                (int) datas.get(6)) // x
         ));
         return saveTypes;
     }

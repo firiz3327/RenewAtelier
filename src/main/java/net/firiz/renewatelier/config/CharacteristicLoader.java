@@ -1,11 +1,17 @@
 package net.firiz.renewatelier.config;
 
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicCategory;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicBuff;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
+import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackData;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
+import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackType;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -35,24 +41,35 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                 categories[i] = CharacteristicCategory.valueOf(categoriesStr.get(i));
             }
             final List<List<String>> reqs = getReqs(item);
-            final List<String> datasStr = item.getStringList("datas");
-            final Map<CharacteristicType, Object> datas = new EnumMap<>(CharacteristicType.class);
-            datasStr.forEach(str -> {
+            final List<String> itemStringList = item.getStringList("datas");
+            final Map<CharacteristicType, CharacteristicData> datas = new EnumMap<>(CharacteristicType.class);
+            itemStringList.forEach(str -> {
                 if (str.contains(",")) {
                     final int i = str.indexOf(',');
-                    final String type = str.substring(0, i);
+                    final CharacteristicType type = CharacteristicType.valueOf(str.substring(0, i));
                     final String dataStr = str.substring(i + 1).trim();
-                    final Object data;
+                    final CharacteristicData data;
                     if (Chore.isNumMatch(dataStr)) {
-                        data = Integer.parseInt(dataStr);
+                        data = new CharacteristicInt(Integer.parseInt(dataStr));
                     } else {
                         final String[] split = dataStr.split(",");
                         for (int j = 0; j < split.length; j++) {
                             split[j] = split[j].trim();
                         }
-                        data = split;
+                        switch (type) {
+                            case BUFF:
+                                data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+                                break;
+                            case ADD_ATTACK:
+                                final AddAttackType addAttackType = AddAttackType.valueOf(split[0]);
+                                data = new AddAttackData(addAttackType, Integer.parseInt(split[1]), AddAttackData.AttackCategory.search(Integer.parseInt(split[2])), addAttackType.createAddAttackX(split));
+                                break;
+                            default:
+                                data = new CharacteristicArray(split);
+                                break;
+                        }
                     }
-                    datas.put(CharacteristicType.valueOf(type), data);
+                    datas.put(type, data);
                 } else {
                     datas.put(CharacteristicType.valueOf(str), null);
                 }

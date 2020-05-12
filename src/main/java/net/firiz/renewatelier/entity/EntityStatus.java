@@ -60,13 +60,13 @@ public abstract class EntityStatus {
 
     public abstract int getSpeed();
 
-    public synchronized boolean addBuff(@NotNull Buff buff) {
+    public synchronized boolean addBuff(@NotNull final Buff buff) {
         if (buffs.contains(buff)) {
             return false;
         }
         byte add = 0;
-        for (final Buff b : buffs) {
-            if (b.getBuffValueType() == BuffValueType.CHARACTERISTIC && (b.getType() == buff.getType() || b.getValue().equals(buff.getValue()))) {
+        for (final Buff b : new HashSet<>(buffs)) {
+            if (b.getBuffValueType() != BuffValueType.NONE && b.getType() == buff.getType()) {
                 if (b.getLevel() <= buff.getLevel()) { // よりレベルの高いバフへ上書き
                     b.stopTimer();
                     buffs.remove(b);

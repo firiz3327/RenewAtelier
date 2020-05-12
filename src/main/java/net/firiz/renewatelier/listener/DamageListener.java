@@ -32,7 +32,7 @@ public class DamageListener implements Listener {
         final Entity entity = e.getEntity();
         if (entity instanceof Player) {
             e.setCancelled(true);
-            psm.getChar(entity.getUniqueId()).getCharStats().damageHp(-e.getAmount());
+            psm.getChar(entity.getUniqueId()).getCharStats().heal(e.getAmount());
         } else if (entity instanceof EnderDragon && e.getRegainReason() == EntityRegainHealthEvent.RegainReason.ENDER_CRYSTAL) {
             // enderdragon crystal heal
         }

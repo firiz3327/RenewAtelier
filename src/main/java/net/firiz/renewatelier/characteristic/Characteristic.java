@@ -1,5 +1,8 @@
 package net.firiz.renewatelier.characteristic;
 
+import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
+import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +21,9 @@ public class Characteristic {
     private final String desc;
     private final CharacteristicCategory[] categories;
     private final List<List<String>> reqIds;
-    private final Map<CharacteristicType, Object> datas;
+    private final Map<CharacteristicType, CharacteristicData> datas;
 
-    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categories, List<List<String>> reqIds, Map<CharacteristicType, Object> datas) {
+    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categories, List<List<String>> reqIds, Map<CharacteristicType, CharacteristicData> datas) {
         this.id = id;
         this.lv = lv;
         this.name = name;
@@ -59,8 +62,25 @@ public class Characteristic {
     }
 
     @Nullable
-    public Object getData(CharacteristicType type) {
+    public CharacteristicData getData(CharacteristicType type) {
         return datas.get(type);
+    }
+
+    public int getIntData(CharacteristicType type) {
+        final CharacteristicData data = datas.get(type);
+        if (data instanceof CharacteristicInt) {
+            return ((CharacteristicInt) data).getX();
+        }
+        throw new IllegalStateException("not characteristicInt class.");
+    }
+
+    @Deprecated(since = "CharacteristicArray is deprecated.")
+    public String[] getArrayData(CharacteristicType type) {
+        final CharacteristicData data = datas.get(type);
+        if (data instanceof CharacteristicArray) {
+            return ((CharacteristicArray) data).getX();
+        }
+        throw new IllegalStateException("not characteristicArray class.");
     }
 
     public Collection<CharacteristicType> getTypes() {

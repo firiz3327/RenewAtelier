@@ -254,12 +254,16 @@ public class CharStats extends EntityStatus {
         return levelUp;
     }
 
+    public void heal(double heal) {
+        damageHp(-heal);
+    }
+
     public void damageHp(double damage) {
         hp = Math.max(0, Math.min(getHp() - damage, getMaxHp()));
         if (hp == 0) {
             final Inventory inv = player.getInventory();
             if (inv.contains(Material.TOTEM_OF_UNDYING)) {
-                damageHp(-getMaxHp());
+                heal(getMaxHp());
                 player.playEffect(EntityEffect.TOTEM_RESURRECT);
                 Chore.gainItem(inv, Material.TOTEM_OF_UNDYING, 1);
             } else {

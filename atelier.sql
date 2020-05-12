@@ -2,7 +2,7 @@
 -- ホスト:                          127.0.0.1
 -- サーバーのバージョン:                   8.0.17 - MySQL Community Server - GPL
 -- サーバー OS:                      Win64
--- HeidiSQL バージョン:               10.2.0.5599
+-- HeidiSQL バージョン:               11.0.0.5919
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -33,10 +33,10 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `atk` int(11) NOT NULL DEFAULT '3',
   `def` int(11) NOT NULL DEFAULT '5',
   `speed` int(11) NOT NULL DEFAULT '2',
+  `money` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uuid` (`uuid`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- エクスポートするデータが選択されていません
 
@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 CREATE TABLE IF NOT EXISTS `buffs` (
   `id` bigint(20) NOT NULL DEFAULT '0',
   `userId` int(11) NOT NULL,
-  `value` varchar(50) NOT NULL,
   `buffValueType` varchar(50) NOT NULL,
   `level` int(11) NOT NULL,
   `buffType` varchar(50) NOT NULL,
@@ -77,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `discoveredrecipes` (
   PRIMARY KEY (`id`),
   KEY `discoveredrecipes` (`userId`),
   CONSTRAINT `discoveredrecipes` FOREIGN KEY (`userId`) REFERENCES `accounts` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- エクスポートするデータが選択されていません
 
@@ -116,8 +115,10 @@ CREATE TABLE IF NOT EXISTS `questdatas` (
 CREATE TABLE IF NOT EXISTS `recipelevels` (
   `userId` int(11) NOT NULL COMMENT 'accounts.id',
   `recipeId` varchar(100) NOT NULL,
+  `acquired` tinyint(1) NOT NULL DEFAULT '0',
   `level` int(11) NOT NULL,
   `exp` int(11) NOT NULL,
+  `idea` varchar(50) DEFAULT NULL,
   UNIQUE KEY `recipe_levels_user_id_IDX` (`userId`,`recipeId`) USING BTREE,
   CONSTRAINT `recipeLevels_userId` FOREIGN KEY (`userId`) REFERENCES `accounts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -99,7 +99,7 @@ public final class Char {
 
     public void respawn() {
         charStats.clearBuffs();
-        charStats.damageHp(-charStats.getMaxHp());
+        charStats.heal(charStats.getMaxHp());
     }
 
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">

@@ -15,13 +15,11 @@ public final class EntityCleanUp implements Runnable {
 
     @Override
     public void run() {
-        Bukkit.getWorlds().forEach(world -> {
-            world.getEntities().forEach(entity -> {
-                if (aEntityUtils.hasLivingData(entity)) {
-                    removeEntity(entity);
-                }
-            });
-        });
+        Bukkit.getWorlds().forEach(world ->
+                world.getEntities().stream()
+                        .filter(aEntityUtils::hasLivingData)
+                        .forEach(entity -> removeEntity(entity))
+        );
     }
 
     /**
