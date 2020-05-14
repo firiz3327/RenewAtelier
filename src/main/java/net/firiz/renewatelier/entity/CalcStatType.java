@@ -137,29 +137,37 @@ public enum CalcStatType {
             if (item != null) {
                 final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
                 if (itemStatus == null) { // バニラ装備を想定
-                    switch (this) {
-                        case DEF:
-                            status.addAndGet(GameConstants.getVanillaItemDefense(item.getType()));
-                            break;
-                        default: // 想定しない
-                            break;
-                    }
+                    addVanilla(status, item);
                 } else {
-                    if (runGetEquipStats != null) {
-                        status.addAndGet(runGetEquipStats.applyAsInt(itemStatus)); // getEquipItemStats
-                    }
-                    for (final Characteristic c : itemStatus.getCharacteristics()) {
-                        if (c.hasData(characteristicType[0])) { // percent
-                            status.addAndGet((int) (defStatus * ((c.getIntData(characteristicType[0])) * 0.01)));
-                        } else if (c.hasData(characteristicType[1])) { // fixed
-                            status.addAndGet(c.getIntData(characteristicType[1]));
-                        } else if (c.hasData(characteristicType[2])) { // quality
-                            status.addAndGet((int) (c.getIntData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
-                        } else if (c.hasData(CharacteristicType.LEVEL_STATS_UP)) {
-                            status.addAndGet(charStats.getLevel() * c.getIntData(CharacteristicType.LEVEL_STATS_UP));
-                        }
-                    }
+                    addStatus(status, charStats, defStatus, itemStatus, characteristicType);
                 }
+            }
+        }
+    }
+
+    private void addVanilla(@NotNull final AtomicInteger status, @NotNull final ItemStack item) {
+        switch (this) {
+            case DEF:
+                status.addAndGet(GameConstants.getVanillaItemDefense(item.getType()));
+                break;
+            default: // 想定しない
+                break;
+        }
+    }
+
+    private void addStatus(@NotNull final AtomicInteger status, @NotNull final CharStats charStats, final int defStatus, @NotNull final AlchemyItemStatus itemStatus, @NotNull final CharacteristicType[] characteristicType) {
+        if (runGetEquipStats != null) {
+            status.addAndGet(runGetEquipStats.applyAsInt(itemStatus)); // getEquipItemStats
+        }
+        for (final Characteristic c : itemStatus.getCharacteristics()) {
+            if (c.hasData(characteristicType[0])) { // percent
+                status.addAndGet((int) (defStatus * ((c.getIntData(characteristicType[0])) * 0.01)));
+            } else if (c.hasData(characteristicType[1])) { // fixed
+                status.addAndGet(c.getIntData(characteristicType[1]));
+            } else if (c.hasData(characteristicType[2])) { // quality
+                status.addAndGet((int) (c.getIntData(characteristicType[2]) + Math.round(itemStatus.getQuality() / 50D)));
+            } else if (c.hasData(CharacteristicType.LEVEL_STATS_UP)) {
+                status.addAndGet(charStats.getLevel() * c.getIntData(CharacteristicType.LEVEL_STATS_UP));
             }
         }
     }

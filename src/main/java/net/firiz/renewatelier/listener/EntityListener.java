@@ -22,13 +22,21 @@ public class EntityListener implements Listener {
     private final ArrowManager arrowManager = new ArrowManager();
 
     @EventHandler
-    private void spawnEntity(final EntitySpawnEvent e) {
+    private void spawnCreature(final CreatureSpawnEvent e) {
         final Entity entity = e.getEntity();
-        if (entity instanceof LivingEntity && !aEntityUtils.hasLivingData(entity)) {
+        if (!aEntityUtils.hasLivingData(entity)) {
             final TargetEntityTypes type = TargetEntityTypes.search(entity.getType());
             if (type != null) {
                 e.setCancelled(true);
-                aEntityUtils.spawn(type, e.getLocation());
+                final boolean spawnEgg = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG;
+                final Entity atelierEntity = aEntityUtils.spawn(
+                        type,
+                        e.getLocation(),
+                        !spawnEgg
+                );
+                if (spawnEgg && atelierEntity != null) {
+                    atelierEntity.setCustomName("spawnEgg");
+                }
             }
         }
     }

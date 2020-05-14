@@ -75,7 +75,7 @@ public class LivingData {
             bukkit.setHealth(100);
         }
         wrapEntity.setCustomNameVisible(false);
-        holoHealth = new HoloHealth(wrapEntity, displayName.toString());
+        holoHealth = new HoloHealth(bukkit, this, displayName.toString());
     }
 
     @NotNull

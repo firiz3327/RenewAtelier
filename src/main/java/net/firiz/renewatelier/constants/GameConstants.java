@@ -15,6 +15,11 @@ public final class GameConstants {
     public static final String W_W = "⬜";
     public static final String W_B = "⬛";
 
+    public static final double HOLO_HEALTH_POS = 0.2;
+    public static final double HOLO_HEALTH_INTERVAL = 0.3;
+    public static final double HOLO_DAMAGE_POS = 1.2;
+    public static final double HOLO_DAMAGE_INTERVAL = 0.3;
+
     public static final int PLAYER_MONEY_CAP = 2000000000;
     public static final int PLAYER_LEVEL_CAP = 50;
     public static final long[] PLAYER_REQ_EXPS = {

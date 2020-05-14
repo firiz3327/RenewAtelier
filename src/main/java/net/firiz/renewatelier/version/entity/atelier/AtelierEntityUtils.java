@@ -90,12 +90,13 @@ public enum AtelierEntityUtils {
         spawn(types, location, true);
     }
 
-    public void spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location, final boolean cancel) {
+    @Nullable
+    public org.bukkit.entity.Entity spawn(@NotNull final TargetEntityTypes types, @NotNull final Location location, final boolean cancel) {
         if (cancel) {
             // スポーン地点から32マス範囲内にLivingDataを持ったエンティティの総数が10を超える場合、スポーンをキャンセルする
             final Collection<org.bukkit.entity.Entity> nearby32 = location.getNearbyEntities(32, 32, 32);
             if (nearby32.stream().filter(this::hasLivingData).count() >= 10) {
-                return;
+                return null;
             }
         }
         final World world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
@@ -109,6 +110,7 @@ public enum AtelierEntityUtils {
         if (types.initConsumer != null) {
             types.initConsumer.accept(entity.getBukkitEntity());
         }
+        return entity.getBukkitEntity();
     }
 
     public boolean hasLivingData(@NotNull final Entity entity) {

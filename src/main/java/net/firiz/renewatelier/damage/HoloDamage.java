@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -31,14 +31,13 @@ final class HoloDamage {
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
-    @SafeVarargs
     final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, DamageComponent... damages) {
         holoDamage(victim, damager, Arrays.asList(damages));
     }
 
     final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<DamageComponent> damages) {
         final Location location = victim.getEyeLocation();
-        location.setY(location.getY() + 1.2);
+        location.setY(location.getY() + GameConstants.HOLO_DAMAGE_POS);
         double allDamage = 0;
         for (int i = 0; i < damages.size(); i++) {
             final double damage = damages.get(i).getDamage();
@@ -69,7 +68,7 @@ final class HoloDamage {
                                 );
                             }
                         });
-                        location.setY(location.getY() + 0.3);
+                        location.setY(location.getY() + GameConstants.HOLO_DAMAGE_INTERVAL);
                     },
                     2L * i
             );

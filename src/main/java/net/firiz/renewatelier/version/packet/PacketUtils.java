@@ -41,6 +41,11 @@ public class PacketUtils {
         }
     }
 
+    public static void broadcast(final org.bukkit.entity.Entity entity, Packet<?> packet) {
+        final Entity nmsEntity = ((CraftEntity) entity).getHandle();
+        ((WorldServer) nmsEntity.world).getChunkProvider().broadcast(nmsEntity, packet);
+    }
+
     public static int getPing(final Player player) {
         return ((CraftPlayer) player).getHandle().ping;
     }

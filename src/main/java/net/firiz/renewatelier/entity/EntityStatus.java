@@ -39,7 +39,7 @@ public abstract class EntityStatus {
         this.atk = atk;
         this.def = def;
         this.speed = speed;
-        this.buffs = Collections.synchronizedSet(new HashSet<>());
+        this.buffs = new HashSet<>();
     }
 
     public Entity getEntity() {
@@ -60,12 +60,12 @@ public abstract class EntityStatus {
 
     public abstract int getSpeed();
 
-    public synchronized boolean addBuff(@NotNull final Buff buff) {
+    public boolean addBuff(@NotNull final Buff buff) {
         if (buffs.contains(buff)) {
             return false;
         }
         byte add = 0;
-        for (final Buff b : new HashSet<>(buffs)) {
+        for (final Buff b : getBuffs()) {
             if (b.getBuffValueType() != BuffValueType.NONE && b.getType() == buff.getType()) {
                 if (b.getLevel() <= buff.getLevel()) { // よりレベルの高いバフへ上書き
                     b.stopTimer();
@@ -78,17 +78,17 @@ public abstract class EntityStatus {
         }
         final boolean checkAdd = add == 0 || add == 1;
         if (checkAdd) {
+            buffs.add(buff);
             buff.setEndHandler(() -> {
                 buffs.remove(buff);
                 refreshBuffStats();
             });
             buff.startTimer();
-            buffs.add(buff);
         }
         return checkAdd;
     }
 
     public Set<Buff> getBuffs() {
-        return new HashSet<>(buffs);
+        return Collections.unmodifiableSet(new HashSet<>(buffs));
     }
 }

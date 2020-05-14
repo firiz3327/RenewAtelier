@@ -9,6 +9,7 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
+import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
@@ -19,6 +20,7 @@ import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
+import net.firiz.renewatelier.version.packet.PayloadPacket;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -148,10 +150,12 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void join(final PlayerJoinEvent e) {
-        PlayerSaveManager.INSTANCE.loadStatus(e.getPlayer());
-        PlayerInjection.inject(e.getPlayer());
-        NPCManager.INSTANCE.packet(e.getPlayer());
-        Notification.loginNotification(e.getPlayer());
+        final Player player = e.getPlayer();
+        PlayerSaveManager.INSTANCE.loadStatus(player);
+        PlayerInjection.inject(player);
+        NPCManager.INSTANCE.packet(player);
+        Notification.loginNotification(player);
+        PayloadPacket.sendBrand(player);
     }
 
     @EventHandler

@@ -4,9 +4,9 @@ import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AddAttackX;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class AddAttackData implements CharacteristicData {
 
@@ -53,7 +53,7 @@ public class AddAttackData implements CharacteristicData {
         }
 
         public static AttackCategory search(int id) {
-            final Optional<AttackCategory> value = Stream.of(values()).filter(category -> category.id == id).findFirst();
+            final Optional<AttackCategory> value = Arrays.stream(values()).filter(category -> category.id == id).findFirst();
             if (!value.isPresent()) {
                 throw new IllegalArgumentException("[AttackCategory] not found id " + id);
             }

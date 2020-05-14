@@ -6,6 +6,7 @@ import java.util.List;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.item.drop.AnimatedDrop;
 import net.firiz.renewatelier.version.packet.PacketUtils;
+import net.firiz.renewatelier.version.packet.PayloadPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -131,6 +132,7 @@ public enum LoopManager {
         }
 
         for (final Player player : players) {
+            PayloadPacket.sendBrand(player);
             final StringBuilder sb = new StringBuilder();
             final String name = player.getDisplayName();
             sb.append(name);
@@ -138,6 +140,7 @@ public enum LoopManager {
                 sb.append(" ");
             }
             sb.append(ChatColor.GREEN).append(PacketUtils.getPing(player));
+            PayloadPacket.sendBrand(player);
             player.setPlayerListName(sb.toString());
         }
 

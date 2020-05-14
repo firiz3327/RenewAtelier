@@ -1,12 +1,12 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.constants.GameConstants;
+import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
-import net.minecraft.server.v1_15_R1.ChunkProviderServer;
-import net.minecraft.server.v1_15_R1.EntityLiving;
-import net.minecraft.server.v1_15_R1.WorldServer;
+import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,14 +17,21 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class HoloHealth {
+import java.util.Set;
+import java.util.TreeSet;
+
+public final class HoloHealth {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
-    private final ChunkProviderServer chunkProvider;
-    private final EntityLiving entity;
+    @NotNull
+    private final LivingEntity entity;
+    @NotNull
     private final String customName;
 
+    @Nullable
     private final LivingData livingData;
     private final boolean isBoss;
 
@@ -36,12 +43,11 @@ public class HoloHealth {
     // boss health bar
     private final BossBar bossBar;
 
-    public HoloHealth(EntityLiving entity, String customName) {
-        this.chunkProvider = ((WorldServer) entity.world).getChunkProvider();
+    public HoloHealth(@NotNull LivingEntity entity, @Nullable LivingData livingData, @NotNull String customName) {
         this.entity = entity;
         this.customName = customName;
 
-        this.livingData = aEntityUtils.hasLivingData(entity) ? aEntityUtils.getLivingData(entity) : null;
+        this.livingData = livingData;
         this.isBoss = this.livingData != null && this.livingData.hasStats() && this.livingData.getStats().isBoss();
 
         if (isBoss) {
@@ -65,15 +71,14 @@ public class HoloHealth {
     }
 
     public void die() {
-        chunkProvider.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
-        chunkProvider.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
     }
 
     private void holoNormal() {
-        final LivingEntity bukkit = (LivingEntity) entity.getBukkitEntity();
         final StringBuilder displayHp = new StringBuilder(ChatColor.RED.toString());
         displayHp.append("❤❤❤❤❤❤❤❤❤");
-        final double p = (bukkit.getHealth() / bukkit.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()) * 10;
+        final double p = (entity.getHealth() / entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()) * 10;
         final int insertPos = (int) Math.floor(p);
         final double z = p - insertPos;
         if (z >= 0.5) {
@@ -87,22 +92,26 @@ public class HoloHealth {
         if (holoDeleteTaskId != -1) {
             scheduler.cancelTask(holoDeleteTaskId);
         }
-        chunkProvider.broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
-        chunkProvider.broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
-        chunkProvider.broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
-        chunkProvider.broadcast(entity, EntityPacket.getMessageStandMeta(bukkit.getWorld(), customName, true).compile(holoCustomName.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
+        PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
+        PacketUtils.broadcast(entity, EntityPacket.getMessageStandMeta(entity.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getMessageStandMeta(entity.getWorld(), createDisplayCustomName(), true).compile(holoCustomName.getEntityId()));
         holoDeleteTaskId = scheduler.scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), this::die, 20);
 
         for (int i = 0; i < 10; i++) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {
-                        chunkProvider.broadcast(entity, EntityPacket.getTeleportPacket(
-                                holoHp.getEntityId(), getLoc(0), false
-                        ));
-                        chunkProvider.broadcast(entity, EntityPacket.getTeleportPacket(
-                                holoCustomName.getEntityId(), getLoc(1), false
-                        ));
+                        if (entity.isDead()) {
+                            die();
+                        } else {
+                            PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
+                                    holoHp.getEntityId(), getLoc(0), false
+                            ));
+                            PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
+                                    holoCustomName.getEntityId(), getLoc(1), false
+                            ));
+                        }
                     },
                     2L * i
             );
@@ -113,10 +122,24 @@ public class HoloHealth {
 
     }
 
+    public String createDisplayCustomName() {
+        final StringBuilder sb = new StringBuilder(customName);
+        if (livingData != null && livingData.hasStats()) {
+            sb.setLength(0);
+            final EntityStatus status = livingData.getStats();
+            assert status != null;
+
+            final Set<String> iconSet = new TreeSet<>();
+            status.getBuffs().forEach(buff -> iconSet.add(buff.getType().getWord(buff.getX() > 0)));
+            sb.append("Lv.").append(status.getLevel()).append(" ");
+            iconSet.forEach(sb::append);
+        }
+        return sb.toString();
+    }
+
     private Location getLoc(int y) {
-        final LivingEntity bukkit = (LivingEntity) entity.getBukkitEntity();
-        final Location nextLoc = bukkit.getEyeLocation().clone();
-        nextLoc.setY(nextLoc.getY() + 0.2 + (0.3 * y));
+        final Location nextLoc = entity.getEyeLocation().clone();
+        nextLoc.setY(nextLoc.getY() + GameConstants.HOLO_HEALTH_POS + (GameConstants.HOLO_HEALTH_INTERVAL * y));
         return nextLoc;
     }
 
