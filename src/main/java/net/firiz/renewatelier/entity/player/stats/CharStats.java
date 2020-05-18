@@ -3,7 +3,7 @@ package net.firiz.renewatelier.entity.player.stats;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.Chore;
 import net.md_5.bungee.api.ChatColor;
@@ -37,6 +37,8 @@ public class CharStats extends EntityStatus {
     private final EquipStats equipStats; // 装備・ハンド更新時、更新
     private final BuffedStats buffedStats; // バフ更新時、更新
 
+    private long lastAttackTime = 0;
+
     public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, int money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
         super(player, level, maxHp, hp, atk, def, speed);
         this.player = player;
@@ -51,6 +53,7 @@ public class CharStats extends EntityStatus {
         this.equipStats = new EquipStats(this, maxHp, maxMp, atk, def, speed, acc, avo);
         this.buffedStats = new BuffedStats(this, equipStats, level);
         for (final Buff buff : buffs) {
+            buff.setStatus(this);
             buff.startTimer();
         }
 
@@ -64,6 +67,20 @@ public class CharStats extends EntityStatus {
                 new String[]{"id", "uuid", "level", "exp", "alchemyLevel", "alchemyExp", "maxHp", "hp", "maxMp", "mp", "atk", "def", "speed", "money"},
                 new Object[]{id, player.getUniqueId().toString(), level, exp, alchemyLevel, alchemyExp, maxHp, hp, maxMp, mp, atk, def, speed, money}
         );
+    }
+
+    public void updateLastAttack() {
+        this.lastAttackTime = System.currentTimeMillis();
+    }
+
+    public boolean attack(@NotNull final Material material) {
+        final long coolTimeMillis = GameConstants.getCoolTimeMillis(material) - getSpeed();
+        final boolean canAttack = System.currentTimeMillis() - lastAttackTime >= coolTimeMillis;
+        if (canAttack) {
+            updateLastAttack();
+//            player.setCooldown(material, (int) (coolTimeMillis * 0.02)); 速度の違い武器がわからりにくくなるため使用しない
+        }
+        return canAttack;
     }
 
     public void updateEquip() {

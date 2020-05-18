@@ -7,8 +7,10 @@ import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.arrow.AtelierArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.version.NMSEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.EntityEffect;
@@ -19,13 +21,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.inventory.ItemStack;
 
 public class DamageListener implements Listener {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
-    private final DamageUtilV2 damageUtilV2 = new DamageUtilV2();
+    private static final DamageUtilV2 damageUtilV2 = DamageUtilV2.INSTANCE;
 
     @EventHandler
     private void regainHealth(final EntityRegainHealthEvent e) {
@@ -41,13 +42,13 @@ public class DamageListener implements Listener {
     @EventHandler
     private void damage(final EntityDamageEvent e) {
         if (e.getEntity() instanceof Player) {
-            causeFilter(e.getCause(), () -> {
+            environmentalFilter(e.getCause(), () -> {
                 e.setCancelled(true);
-                damageUtilV2.playerDamage(psm.getChar(e.getEntity().getUniqueId()).getCharStats(), e.getDamage());
+                damageUtilV2.handlePlayerEnvironmentalDamage(psm.getChar(e.getEntity().getUniqueId()).getCharStats(), e.getDamage());
             });
         } else if (e.getEntity() instanceof LivingEntity) {
-            causeFilter(e.getCause(), () -> {
-                damageUtilV2.mobDamage((LivingEntity) e.getEntity(), e.getDamage());
+            environmentalFilter(e.getCause(), () -> {
+                damageUtilV2.mobEnvironmentalDamage((LivingEntity) e.getEntity(), e.getDamage());
                 if (Randomizer.percent(30)) {
                     e.setDamage(0);
                 } else {
@@ -60,38 +61,64 @@ public class DamageListener implements Listener {
 
     @EventHandler
     private void entityDamageByDamage(final EntityDamageByEntityEvent e) {
-        if (e.getDamage() == 0) {
+        final double damage = e.getDamage();
+        if (damage == 0) {
             return;
         }
         final Entity damager = e.getDamager();
         if (e.getCause() != EntityDamageEvent.DamageCause.CUSTOM && e.getEntity() instanceof LivingEntity) {
             final LivingEntity victim = (LivingEntity) e.getEntity();
             if (damager instanceof Player) {
-                if (damager.isOp() && ((Player) damager).isSneaking() && ((Player) damager).getInventory().getItemInMainHand().getType() == Material.AIR) {
-                    debugStats(damager, victim);
-                    e.setCancelled(true);
+                e.setCancelled(true);
+                final Player player = (Player) damager;
+                if (player.isOp() && player.isSneaking() && player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                    debugStats(player, victim);
                     return;
                 }
-                final ItemStack weapon = ((Player) damager).getInventory().getItemInMainHand();
-                double weaponDamage = GameConstants.getVanillaItemDamage(weapon.getType());
-                if (GameConstants.isAxe(weapon.getType())) {
-                    weaponDamage = Randomizer.rand((int) weaponDamage - 4, (int) weaponDamage); // 斧のダメージは整数なので問題ない
-                }
-                final double allDamage = damageUtilV2.normalDamage(
-                        GameConstants.isSword(weapon.getType()) ? AttackAttribute.SLASH : AttackAttribute.BLOW,
-                        psm.getChar(damager.getUniqueId()).getCharStats(),
-                        (LivingEntity) e.getEntity(),
-                        weaponDamage
-                );
-                if (allDamage == 0) {
-                    e.setCancelled(true);
-                } else if (Randomizer.percent(30)) {
-                    e.setDamage(0);
-                } else {
-                    victim.playEffect(EntityEffect.HURT);
-                    e.setCancelled(true);
+                final CharStats charStats = psm.getChar(player.getUniqueId()).getCharStats();
+                final Material weaponType = player.getInventory().getItemInMainHand().getType();
+                if (charStats.attack(weaponType)) {
+                    final double vanillaItemDamage = GameConstants.getVanillaItemDamage(weaponType);
+                    if (GameConstants.isSword(weaponType)) {
+                        player.setCooldown(weaponType, 20);
+                        e.setCancelled(true);
+                        NMSEntityUtils.sweepParticle(player);
+                        victim.getLocation().getNearbyLivingEntities(1.5).stream()
+                                .filter(entity -> !(entity instanceof Player))
+                                .limit(6) // 6 mob hit
+                                .forEach(entity -> {
+                                    damageUtilV2.normalDamage(
+                                            AttackAttribute.SLASH,
+                                            charStats,
+                                            entity,
+                                            vanillaItemDamage,
+                                            1
+                                    );
+                                    if (!NMSEntityUtils.isDead(entity)) {
+                                        NMSEntityUtils.hurt(entity, player, null);
+                                        if (Randomizer.percent(30)) {
+                                            NMSEntityUtils.knockBack(entity, player);
+                                        }
+                                    }
+                                });
+                    } else {
+                        damageUtilV2.normalDamage(
+                                AttackAttribute.BLOW,
+                                charStats,
+                                (LivingEntity) e.getEntity(),
+                                vanillaItemDamage,
+                                1
+                        );
+                        if (!NMSEntityUtils.isDead(victim)) {
+                            NMSEntityUtils.hurt(victim, player, null);
+                            if (Randomizer.percent(30)) {
+                                NMSEntityUtils.knockBack((LivingEntity) e.getEntity(), player);
+                            }
+                        }
+                    }
                 }
             } else if (damager instanceof AtelierArrow) {
+                e.setCancelled(true);
                 final AtelierArrow arrow = (AtelierArrow) damager;
                 EntityStatus status = null;
                 float force = arrow.getForce();
@@ -99,32 +126,32 @@ public class DamageListener implements Listener {
                     status = psm.getChar(arrow.getSource().getUniqueId()).getCharStats();
                 } else if (aEntityUtils.hasLivingData(arrow.getSource())) {
                     status = aEntityUtils.getLivingData(arrow.getSource()).getStats();
-                    force = 1f;
+                    force = 1f; // プレイヤー以外が放つ矢のforce値はデフォルトだと0.7 (1.15で確認)
                 }
-                final double allDamage = damageUtilV2.arrowDamage(
+                damageUtilV2.arrowDamage(
+                        damager,
                         AlchemyItemStatus.load(arrow.getBow()),
                         AlchemyItemStatus.load(arrow.getArrow()),
                         status,
                         (LivingEntity) e.getEntity(),
-                        e.getDamage(),
-                        force >= 1 && arrow.isCritical(),
+                        damage,
+                        force == 1 && arrow.isCritical(),
                         force
                 );
-                if (allDamage == 0) {
-                    e.setCancelled(true);
-                } else {
-                    e.setDamage(0);
+                if (!NMSEntityUtils.isDead(victim)) {
+                    NMSEntityUtils.hurt(victim, e.getDamager(), null);
+                    NMSEntityUtils.knockBack((LivingEntity) e.getEntity(), e.getDamager());
                 }
             } else if (victim instanceof Player) {
-                final double allDamage = damageUtilV2.playerDamage(
+                e.setCancelled(true);
+                damageUtilV2.handlePlayerDamage(
                         psm.getChar(e.getEntity().getUniqueId()).getCharStats(),
                         e.getDamager(),
-                        e.getDamage()
+                        damage
                 );
-                if (allDamage == 0) {
-                    e.setCancelled(true);
-                } else {
-                    e.setDamage(0);
+                if (!NMSEntityUtils.isDead(victim)) {
+                    NMSEntityUtils.hurt(victim, e.getDamager(), null);
+                    NMSEntityUtils.knockBack((LivingEntity) e.getEntity(), e.getDamager());
                 }
             }
         }
@@ -148,7 +175,7 @@ public class DamageListener implements Listener {
         }
     }
 
-    private void causeFilter(EntityDamageEvent.DamageCause cause, Runnable runnable) {
+    private void environmentalFilter(EntityDamageEvent.DamageCause cause, Runnable runnable) {
         switch (cause) {
             case CONTACT:
             case BLOCK_EXPLOSION:

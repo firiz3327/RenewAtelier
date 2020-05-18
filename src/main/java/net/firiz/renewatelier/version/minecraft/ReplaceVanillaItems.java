@@ -5,7 +5,7 @@ import com.destroystokyo.paper.loottable.LootableEntityInventory;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.minecraft.server.v1_15_R1.*;
@@ -28,10 +28,7 @@ import org.bukkit.loot.Lootable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class ReplaceVanillaItems {

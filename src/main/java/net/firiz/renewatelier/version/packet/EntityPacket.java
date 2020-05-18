@@ -2,8 +2,14 @@ package net.firiz.renewatelier.version.packet;
 
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
+import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 /**
  * @author firiz

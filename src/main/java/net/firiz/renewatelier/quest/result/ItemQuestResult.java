@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.quest.result;
 
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;

@@ -9,7 +9,7 @@ import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.constants.GameConstants
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
-import net.firiz.renewatelier.item.AlchemyItemStatus
+import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.npc.NPCManager
@@ -18,7 +18,6 @@ import net.firiz.renewatelier.utils.Chore
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
-import net.firiz.renewatelier.version.packet.PayloadPacket
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -415,7 +414,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             val meta = item.itemMeta!!
             if (meta.hasLore()) {
                 for (str in meta.lore!!) {
-                    Chore.log(str)
+                    Chore.log(str.toString().replace("§", "&"))
                     sender.sendMessage(str)
                 }
             }
@@ -486,6 +485,13 @@ class DebugCommands(private val debugListener: DebugListener) {
                         val loc = sender.location
                         loc.x += 2
                         PlayerDropItem(sender, loc, ItemStack(Material.GRASS_BLOCK)).drop()
+                    }
+                    "json" -> {
+                        val item = AlchemyItemStatus.load(sender.inventory.itemInMainHand)
+                        Chore.log("load json successfull.")
+                        if (item != null) {
+                            Chore.log(item.toJson())
+                        }
                     }
                 }
             }

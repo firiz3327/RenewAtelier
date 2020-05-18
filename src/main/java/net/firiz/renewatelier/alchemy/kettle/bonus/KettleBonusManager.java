@@ -8,7 +8,7 @@ import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +38,7 @@ public enum KettleBonusManager {
             final List<BonusItem> kettleSelects = kettleBox.getResultItems();
             kettleSelects.stream().filter(bonusItem -> bonusItem.getItem() != null).forEach(bonusItem -> {
                 final ItemStack item = bonusItem.getItem();
-                for (final AlchemyAttribute aa : Objects.requireNonNull(AlchemyIngredients.getAllLevel(item).getRight())) {
+                for (final AlchemyAttribute aa : Objects.requireNonNull(AlchemyIngredients.getMaxTypes(item).getRight())) {
                     if (aa == type && AlchemyIngredients.getLevel(item, type) != 0) {
                         sizes.addAndGet(AlchemyItemStatus.getSizeCount(item));
                     }

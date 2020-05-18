@@ -10,9 +10,9 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -112,10 +112,10 @@ public final class RecipeSelect implements ParamInventory<Location> {
         for (final RequireAmountMaterial req : recipe.getReqMaterial()) {
             switch (req.getType()) {
                 case CATEGORY:
-                    lore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + "§7- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
+                    lore.add("§7- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
                     break;
                 case MATERIAL:
-                    lore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + "§7- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
+                    lore.add("§7- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
                     break;
                 default: // 想定しない
                     break;
@@ -124,22 +124,22 @@ public final class RecipeSelect implements ParamInventory<Location> {
     }
 
     private void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final List<ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>>> recipeItems = new ArrayList<>();
+        final List<ImmutablePair<RecipeStatus, CustomModelMaterial>> recipeItems = new ArrayList<>();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         status.getRecipeStatusList().stream().filter(RecipeStatus::isAcquired).forEach(recipeStatus -> {
             final String resultStr = recipeStatus.getRecipe().getResult();
             final String[] result = resultStr.contains(",") ? resultStr.split(",") : new String[]{resultStr};
-            ImmutablePair<Material, Integer> material = null;
+            CustomModelMaterial material = null;
             if (result[0].startsWith(STRING_MATERIAL)) {
                 material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
             } else if (result[0].startsWith("minecraft:")) {
-                material = new ImmutablePair<>(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
+                material = new CustomModelMaterial(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
             }
             if (material != null) {
                 recipeItems.add(new ImmutablePair<>(recipeStatus, material));
             }
         });
-        recipeItems.sort(Comparator.comparing((ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> o) -> o.getLeft().getId()));
+        recipeItems.sort(Comparator.comparing((ImmutablePair<RecipeStatus, CustomModelMaterial> o) -> o.getLeft().getId()));
         final int dScroll = scroll * 6;
         if (recipeItems.size() > dScroll) {
             final ItemStack setting = Chore.ci(Material.BARRIER, 0, "", null);
@@ -172,14 +172,14 @@ public final class RecipeSelect implements ParamInventory<Location> {
                 if (recipeItems.size() <= i) {
                     break;
                 }
-                final ImmutablePair<RecipeStatus, ImmutablePair<Material, Integer>> dd = recipeItems.get(i);
-                final ImmutablePair<Material, Integer> material = dd.getRight();
+                final ImmutablePair<RecipeStatus, CustomModelMaterial> dd = recipeItems.get(i);
+                final CustomModelMaterial material = dd.getRight();
                 final RecipeStatus rs = dd.getLeft();
                 final AlchemyRecipe recipe = rs.getRecipe();
                 final ItemStack item;
                 final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 
-                item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : Chore.createCustomModelItem(material.getLeft(), 1, material.getRight());
+                item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : material.toItemStack();
                 final ItemMeta iMeta = item.getItemMeta();
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 setMetaDatas(iMeta, am);
@@ -272,12 +272,12 @@ public final class RecipeSelect implements ParamInventory<Location> {
                             }
                             final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
                             AlchemyMaterial am = null;
-                            ImmutablePair<Material, Integer> material = null;
+                            CustomModelMaterial material = null;
                             if (result[0].startsWith(STRING_MATERIAL)) {
                                 am = AlchemyMaterial.getMaterial(result[0].substring(9));
                                 material = am.getMaterial();
                             } else if (result[0].startsWith("minecraft:")) {
-                                material = new ImmutablePair<>(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
+                                material = new CustomModelMaterial(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
                             }
 
                             final List<String> lore = new ArrayList<>();
@@ -285,7 +285,7 @@ public final class RecipeSelect implements ParamInventory<Location> {
                             final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                             if (recipeStatus != null && material != null) {
                                 addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, lore);
-                                final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : Chore.createCustomModelItem(material.getLeft(), recipe.getAmount(), material.getRight());
+                                final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : material.toItemStack();
                                 final ItemMeta meta = resultItem.getItemMeta();
                                 setMetaDatas(meta, am);
                                 meta.setLore(lore);

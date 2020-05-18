@@ -2,6 +2,7 @@ package net.firiz.renewatelier.constants;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -88,6 +89,48 @@ public final class GameConstants {
             {"左右反転： ON", "上下反転： ON"}
     };
 
+    /**
+     * クリティカルハック及びフライハック対策
+     * <p>
+     * 厳密な判定は行わない
+     *
+     * @param player 検知対象のプレイヤー
+     * @return 実際にクリティカルしているかどうか
+     */
+    public static boolean isCritical(@NotNull final Player player) {
+        return !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784);
+    }
+
+    public static int getCoolTimeMillis(@NotNull Material material) {
+        if (isSword(material)) {
+            return 600; // 0.6
+        } else if (isShovel(material)) {
+            return 1000; // 1
+        } else if (isPickaxe(material)) {
+            return 850; // 0.85
+        } else if (material == Material.TRIDENT) {
+            return 950; // 0.95
+        } else {
+            switch (material) {
+                case WOODEN_AXE:
+                case STONE_AXE:
+                    return 1250; // 1.25
+                case GOLDEN_AXE:
+                case DIAMOND_AXE:
+//                case NETHERITE_AXE:
+                case WOODEN_HOE:
+                case GOLDEN_HOE:
+                    return 1000; // 1
+                case IRON_AXE:
+                    return 1100; // 1.1
+                case STONE_HOE:
+                    return 500; // 0.5
+                default:
+                    return 250; // 0.25
+            }
+        }
+    }
+
     public static boolean isSword(@NotNull Material material) {
         switch (material) {
             case WOODEN_SWORD:
@@ -108,6 +151,32 @@ public final class GameConstants {
             case IRON_AXE:
             case GOLDEN_AXE:
             case DIAMOND_AXE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isPickaxe(@NotNull Material material) {
+        switch (material) {
+            case WOODEN_PICKAXE:
+            case STONE_PICKAXE:
+            case IRON_PICKAXE:
+            case GOLDEN_PICKAXE:
+            case DIAMOND_PICKAXE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isShovel(@NotNull Material material) {
+        switch (material) {
+            case WOODEN_SHOVEL:
+            case STONE_SHOVEL:
+            case IRON_SHOVEL:
+            case GOLDEN_SHOVEL:
+            case DIAMOND_SHOVEL:
                 return true;
             default:
                 return false;

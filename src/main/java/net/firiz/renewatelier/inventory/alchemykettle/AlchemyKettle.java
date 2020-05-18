@@ -27,7 +27,7 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
@@ -329,11 +329,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             resultItem = AlchemyItemStatus.getItem(
                     result,
                     ingredients, // 錬金属性 書き換え
-                    Chore.createCustomModelItem(
-                            result.getMaterial().getLeft(),
-                            recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonusAmount,
-                            result.getMaterial().getRight()
-                    ),
+                    result.getMaterial().toItemStack(recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonusAmount),
                     allQuality, // 品質 書き換え
                     resultSize, // サイズ 書き換え
                     characteristics, // 特性 書き換え
@@ -473,7 +469,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
 
             final Map<Pair<Integer, BonusItem>, Integer> resultCS = box.getResultCS();
             resultCS.keySet().forEach(slotData -> {
-                final String color = AlchemyIngredients.getAllLevel(slotData.getRight().getItem()).getRight()[0].getColor();
+                final String color = AlchemyIngredients.getMaxTypes(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
                 inv.setItem(slotData.getLeft(), item);
             });
@@ -620,11 +616,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                 resultItem = AlchemyItemStatus.getItem(
                                         result,
                                         ingredients, // 錬金属性 書き換え
-                                        Chore.createCustomModelItem(
-                                                result.getMaterial().getLeft(),
-                                                resultSlotItem.getAmount(),
-                                                result.getMaterial().getRight()
-                                        ),
+                                        result.getMaterial().toItemStack(resultSlotItem.getAmount()),
                                         quality, // 品質 書き換え
                                         AlchemyItemStatus.getSize(resultSlotItem), // サイズ 書き換え
                                         activeEffects, // 発現効果
@@ -942,7 +934,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                         final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
                                         final ItemStack clone = cursor.clone();
                                         clone.setAmount(1);
-                                        final Pair<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getAllLevel(clone);
+                                        final Pair<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getMaxTypes(clone);
                                         BONUS_MANAGER.addBar(
                                                 uuid,
                                                 recipe.getReqBar(),

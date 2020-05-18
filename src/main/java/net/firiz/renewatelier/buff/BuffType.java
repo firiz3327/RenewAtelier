@@ -21,10 +21,11 @@ public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
     CURSE(2), // 呪い付与 <確率, 時間, ダメージ>
     DARKNESS(2), // 暗闇付与 <確率, 時間, 攻撃可能確率>
     BURN(3), // 火傷付与 <確率, 時間, ダメージ>
-    BURN2(3), // 持続ダメージ(エフェクトなし) <確率, 時間, ダメージ>
+    DOT(3), // 持続ダメージ <確率, 時間, ダメージ>
     WEAKNESS(4), // 弱体化付与 <確率, 時間, 値>
     SEALED(2), // 封印付与 <確率, 時間, レベル>
     ANTI_HEAL(2), // 回復無効付与 <確率, 時間, レベル>
+    AUTO_HEAL(5), // 持続回復 <確率, 時間, 回復量>
     DEBUFF_SLOW_SKILL(-1), // 敵のスキルループ待機時間増加％
     EXP_UP(-1), // 経験値量増加％
     ALCHEMY_EXP_UP(-1), // 錬金経験値量増加％
@@ -50,7 +51,8 @@ public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
         HP_MP(1, "⒞", "⒟"), // hp, mp
         CURSE(2, "⒠"), // slow, sleep, poison, curse, darkness, sealed, anti_heal
         BURN(3, "⒡"), // burn, burn2
-        WEAKNESS(4, "⒢") // weakness
+        WEAKNESS(4, "⒢"), // weakness
+        HEAL(5, "⒣") // auto_heal
         ;
 
         final int group;

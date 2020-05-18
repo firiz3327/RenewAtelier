@@ -1,10 +1,20 @@
 package net.firiz.renewatelier.buff;
 
+import net.firiz.renewatelier.damage.DamageUtilV2;
+import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.loop.LoopManager;
-import net.firiz.renewatelier.utils.Chore;
+import org.bukkit.EntityEffect;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class Buff {
 
+    private EntityStatus status;
     private final BuffValueType buffValueType;
     private final int level;
     private final BuffType type;
@@ -18,7 +28,8 @@ public class Buff {
     private boolean end;
     private Runnable endHandler;
 
-    public Buff(BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x) {
+    public Buff(EntityStatus status, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x) {
+        this.status = status;
         this.buffValueType = buffValueType;
         this.level = level;
         this.type = type;
@@ -26,10 +37,14 @@ public class Buff {
         this.limitDuration = limitDuration;
         this.x = x;
         this.timer = () -> {
-            if (incrementTimer()) {
+            if (incrementTimer() || status.getEntity().isDead()) {
                 stopTimer();
             }
         };
+    }
+
+    public void setStatus(@NotNull EntityStatus status) {
+        this.status = Objects.requireNonNull(status);
     }
 
     public BuffValueType getBuffValueType() {
@@ -62,7 +77,35 @@ public class Buff {
 
     private boolean incrementTimer() {
         duration++;
-        Chore.log(duration + " / " + limitDuration);
+        final Entity entity = status.getEntity();
+        if (entity instanceof LivingEntity) {
+            final Location eyeLocation = ((LivingEntity) entity).getEyeLocation();
+            boolean dot = false;
+            switch (type) {
+                case POISON:
+                    dot = true;
+                    eyeLocation.getWorld().spawnParticle(Particle.SPELL_WITCH, eyeLocation, 2);
+                    break;
+                case BURN:
+                    dot = true;
+                    eyeLocation.getWorld().spawnParticle(Particle.SMOKE_NORMAL, eyeLocation, 2);
+                    break;
+                case DOT:
+                    dot = true;
+                    eyeLocation.getWorld().spawnParticle(Particle.CRIT_MAGIC, eyeLocation, 2);
+                    break;
+                case AUTO_HEAL:
+                    eyeLocation.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, eyeLocation, 2);
+                    DamageUtilV2.INSTANCE.abnormalDamage(status, -x);
+                    break;
+                default: // 想定しない
+                    break;
+            }
+            if (dot) {
+                entity.playEffect(EntityEffect.HURT);
+                DamageUtilV2.INSTANCE.abnormalDamage(status, x);
+            }
+        }
         return limitDuration <= duration;
     }
 

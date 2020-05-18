@@ -24,11 +24,12 @@ public class PlayerInjection {
 
     public static void inject(Player bukkitPlayer) {
         final EntityPlayer player = ((CraftPlayer) bukkitPlayer).getHandle();
-//        injectPacketPipeline(player);
+        injectPacketPipeline(player);
         injectArmorChangeEvent(player);
     }
 
     private static void injectPacketPipeline(EntityPlayer player) {
+        removePacketPipeline(player);
         final NetworkManager networkManager = player.playerConnection.networkManager;
 
         // netty
@@ -40,6 +41,14 @@ public class PlayerInjection {
                 throw new RuntimeException(var2);
             }
         });
+    }
+
+    private static void removePacketPipeline(EntityPlayer player) {
+        final NetworkManager networkManager = player.playerConnection.networkManager;
+        final Channel channel = networkManager.channel;
+        if (channel.pipeline().get(ChannelHandler.class) != null) {
+            channel.pipeline().remove(ChannelHandler.class);
+        }
     }
 
     private static void injectArmorChangeEvent(EntityPlayer player) {

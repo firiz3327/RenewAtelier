@@ -8,7 +8,8 @@ import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -29,7 +30,7 @@ public class AlchemyMaterial {
     private final String id;
     private final String name;
     private final boolean defaultName;
-    private final ImmutablePair<Material, Integer> material;
+    private final CustomModelMaterial material;
     private final int qualityMin;
     private final int qualityMax;
     private final int price;
@@ -58,7 +59,7 @@ public class AlchemyMaterial {
             String id,
             String name,
             boolean defaultName,
-            ImmutablePair<Material, Integer> material,
+            CustomModelMaterial material,
             int qualityMin,
             int qualityMax,
             int price,
@@ -140,20 +141,16 @@ public class AlchemyMaterial {
 
     @Nullable
     public static AlchemyMaterial getMaterialOrNull(@NotNull final ItemStack item) {
-        final String id = AlchemyItemStatus.getId(item);
-        if (id == null) {
-            return null;
-        }
-        return getMaterial(id);
+        return AlchemyItemStatus.getMaterial(item);
     }
 
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final ItemStack item) {
-        final String id = AlchemyItemStatus.getId(item);
-        if (id == null) {
+        final AlchemyMaterial material = getMaterialOrNull(item);
+        if (material == null) {
             throw new IllegalArgumentException("item is not AlchemyMaterial.");
         }
-        return getMaterial(id);
+        return material;
     }
 
     public String getId() {
@@ -168,7 +165,7 @@ public class AlchemyMaterial {
         return defaultName;
     }
 
-    public ImmutablePair<Material, Integer> getMaterial() {
+    public CustomModelMaterial getMaterial() {
         return material;
     }
 

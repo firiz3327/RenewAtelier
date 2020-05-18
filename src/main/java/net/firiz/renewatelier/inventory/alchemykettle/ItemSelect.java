@@ -14,6 +14,7 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -85,7 +86,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
 
         final RequireAmountMaterial requireMaterial = reqs.get(new_page);
         String name = null;
-        ImmutablePair<Material, Integer> material;
+        CustomModelMaterial material;
         switch (requireMaterial.getType()) {
             case MATERIAL:
                 final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();
@@ -105,7 +106,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
 
         if (material != null) {
             final int req_amount = requireMaterial.getAmount();
-            final ItemStack item = new ItemStack(material.getLeft(), 1);
+            final ItemStack item = material.toItemStack();
             final ItemMeta meta = item.getItemMeta();
             if (name != null) {
                 meta.setDisplayName(name);
@@ -137,7 +138,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
         final List<RequireAmountMaterial> requireMaterials = recipe.getReqMaterial();
         final List<ItemStack> pageItems = kettle.getPageItems(uuid, page);
         final RequireAmountMaterial requireMaterial = requireMaterials.get(page);
-        ImmutablePair<Material, Integer> material;
+        CustomModelMaterial material;
         switch (requireMaterial.getType()) {
             case MATERIAL:
                 final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();

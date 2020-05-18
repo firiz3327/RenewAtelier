@@ -13,7 +13,7 @@ import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.inventory.shop.ShopItem;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;

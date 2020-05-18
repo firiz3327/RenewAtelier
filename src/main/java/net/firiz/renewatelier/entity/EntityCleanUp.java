@@ -25,10 +25,10 @@ public final class EntityCleanUp implements Runnable {
 
     /**
      * エンティティを一定のルールに基づいて削除する
-     *
+     * <p>
      * エンティティの場所から128マス以内にプレイヤーがいない場合、そのエンティティを削除する
      * エンティティの場所から32マス以内にプレイヤーがいない場合、2.5％の確率で削除する
-     *
+     * <p>
      * ※ 1秒毎に実行し、2.5%で削除する場合は毎分78.11%の確率で削除される
      * ※ minecraft公式の1/20秒毎に0.125%の確率で削除する場合は毎分77.71%で削除される
      *
@@ -37,6 +37,7 @@ public final class EntityCleanUp implements Runnable {
     private void removeEntity(final Entity entity) {
         final Location location = entity.getLocation();
         final Collection<Player> nearby128 = location.getNearbyPlayers(128);
+        // 32 * 32 = 1024
         if (nearby128.isEmpty() || (
                 nearby128.stream().noneMatch(player -> 1024 > player.getLocation().distanceSquared(location))
                         && Randomizer.percent(25, 1000)

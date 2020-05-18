@@ -3,7 +3,6 @@ package net.firiz.renewatelier.quest.result;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
@@ -42,8 +41,8 @@ public class RecipeQuestResult extends ObjectQuestResult<AlchemyRecipe> {
         if (result_str.startsWith("material:")) {
             final AlchemyMaterial am = AlchemyMaterial.getMaterial(result_str.substring(9));
             name = am.getName();
-            material = am.getMaterial().getLeft();
-            cmd = am.getMaterial().getRight();
+            material = am.getMaterial().getMaterial();
+            cmd = am.getMaterial().getCustomModel();
             if (am.isHideAttribute()) {
                 flags.add(ItemFlag.HIDE_ATTRIBUTES);
             }
@@ -88,10 +87,10 @@ public class RecipeQuestResult extends ObjectQuestResult<AlchemyRecipe> {
         for (final RequireAmountMaterial req : recipe.getReqMaterial()) {
             switch (req.getType()) {
                 case CATEGORY:
-                    viewLore.add(AlchemyItemStatus.Type.CATEGORY.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
+                    viewLore.add(ChatColor.RESET + "- " + ChatColor.stripColor(req.getCategory().getName()) + " × " + req.getAmount());
                     break;
                 case MATERIAL:
-                    viewLore.add(AlchemyItemStatus.Type.MATERIAL.getCheck() + ChatColor.RESET + "- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
+                    viewLore.add(ChatColor.RESET + "- " + ChatColor.stripColor(req.getMaterial().getName()) + " × " + req.getAmount());
                     break;
                 default: // 想定しない
                     break;

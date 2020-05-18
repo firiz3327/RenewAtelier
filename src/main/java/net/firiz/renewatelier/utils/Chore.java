@@ -12,7 +12,7 @@ import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;

@@ -21,6 +21,7 @@ class BuffLoader implements StatusLoader<List<Buff>> {
         );
         final List<Buff> saveTypes = new ArrayList<>();
         saveTypesObj.forEach(datas -> saveTypes.add(new Buff(
+                null,
                 BuffValueType.valueOf((String) datas.get(1)), // buffValueType
                 (int) datas.get(2), // level
                 BuffType.valueOf((String) datas.get(3)), // buffType

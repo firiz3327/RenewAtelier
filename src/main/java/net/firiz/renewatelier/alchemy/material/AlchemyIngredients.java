@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
-import net.firiz.renewatelier.item.AlchemyItemStatus;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -299,42 +299,26 @@ public enum AlchemyIngredients {
         return ai;
     }
 
-    public static Pair<Integer, AlchemyAttribute[]> getAllLevel(final ItemStack item) {
-        if (item != null && item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final List<String> lore = AlchemyItemStatus.getLore(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS, item);
-            final String values = lore.get(0).substring(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS.getCheck().length() + 10);
-            final int level = Integer.parseInt(values.substring(0, values.indexOf(' ')));
-            final String[] types = values.substring(values.indexOf(' ') + 1).split("●");
-            final List<AlchemyAttribute> list = new ArrayList<>();
-            for (final String type : types) {
-                list.add(AlchemyAttribute.searchColor(type));
+    public static Pair<Integer, AlchemyAttribute[]> getMaxTypes(final ItemStack item) {
+        if (item != null && item.hasItemMeta()) {
+            final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
+            if (itemStatus != null) {
+                final ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> levels = itemStatus.getLevels();
+                final int level = levels.getLeft();
+                final List<AlchemyAttribute> maxTypes = itemStatus.getMaxTypes(levels.getRight());
+                return new Pair<>(level, maxTypes.toArray(new AlchemyAttribute[0]));
             }
-            return new Pair<>(level, list.toArray(new AlchemyAttribute[0]));
         }
         return null;
     }
 
     public static int getLevel(final ItemStack item, final AlchemyAttribute type) {
-        if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            final List<String> lore = item.getItemMeta().getLore();
-            boolean loreArea = false;
-            int allLevel = 0;
-            for (final String line : lore) {
-                if (loreArea) {
-                    if (line.contains("-")) {
-                        String ingredients = line.substring(line.lastIndexOf(' ') + 1);
-                        AlchemyAttribute aa = AlchemyAttribute.searchColor(ingredients.substring(0, 2));
-                        if (type == aa) {
-                            allLevel += Integer.parseInt(ingredients.substring(2));
-                        }
-                    } else {
-                        break;
-                    }
-                } else if (line.startsWith(AlchemyItemStatus.Type.ALCHEMY_INGREDIENTS.getCheck())) {
-                    loreArea = true;
-                }
+        if (item.hasItemMeta()) {
+            final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
+            if (itemStatus != null) {
+                final ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> levels = itemStatus.getLevels();
+                return levels.getRight().get(type);
             }
-            return allLevel;
         }
         return 0;
     }

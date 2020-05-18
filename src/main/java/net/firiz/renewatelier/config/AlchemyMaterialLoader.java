@@ -11,6 +11,7 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
@@ -58,7 +59,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final ConfigurationSection item = config.getConfigurationSection(key);
                 assert item != null;
 
-                final ImmutablePair<Material, Integer> materialData = getMaterial(item, key); // *
+                final CustomModelMaterial materialData = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
                 final String name = getName(item, defaultName, materialData); // *
                 final int quality_min = getQualityMin(item); // *
@@ -102,8 +103,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             getBoolean(item, "hideUnbreaking")
                     );
                     if (material.isDefaultName()) {
-                        if (material.getMaterial().getRight() == 0) {
-                            vanillaReplaceItems.put(material.getMaterial().getLeft(), material);
+                        if (material.getMaterial().getCustomModel() == 0) {
+                            vanillaReplaceItems.put(material.getMaterial().getMaterial(), material);
                         } else {
                             throw new IllegalStateException("default name items cannot be assigned a custom model.");
                         }
@@ -133,8 +134,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @Nullable
-    private ImmutablePair<Material, Integer> getMaterial(ConfigurationSection item, String key) {
-        final ImmutablePair<Material, Integer> result;
+    private CustomModelMaterial getMaterial(ConfigurationSection item, String key) {
+        final CustomModelMaterial result;
         if (item.contains(KEY_MATERIAL)) {
             final String mat_str = item.getString(KEY_MATERIAL);
             assert mat_str != null;
@@ -142,10 +143,10 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 if (mat_str.equalsIgnoreCase("XXX")) {
                     Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                 }
-                result = new ImmutablePair<>(Chore.getMaterial(mat_str), 0);
+                result = new CustomModelMaterial(Chore.getMaterial(mat_str), 0);
             } else {
                 final String[] matSplit = mat_str.split(",");
-                result = new ImmutablePair<>(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+                result = new CustomModelMaterial(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
             }
         } else {
             result = null;
@@ -155,10 +156,10 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @Nullable
-    private String getName(ConfigurationSection item, boolean defaultName, final ImmutablePair<Material, Integer> mat) {
+    private String getName(ConfigurationSection item, boolean defaultName, final CustomModelMaterial mat) {
         String name = null;
         if (defaultName && mat != null) {
-            name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getLeft())); // クエストブック用に名前を設定しておく
+            name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getMaterial())); // クエストブック用に名前を設定しておく
         } else {
             if (item.contains("name")) {
                 name = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(item.getString("name")));
