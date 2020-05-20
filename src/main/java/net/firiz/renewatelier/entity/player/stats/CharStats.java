@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.entity.player.stats;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
@@ -74,11 +75,11 @@ public class CharStats extends EntityStatus {
     }
 
     public boolean attack(@NotNull final Material material) {
-        final long coolTimeMillis = GameConstants.getCoolTimeMillis(material) - getSpeed();
+        final long coolTimeMillis = GameConstants.getCoolTimeMillis(material) - (long) getSpeed();
         final boolean canAttack = System.currentTimeMillis() - lastAttackTime >= coolTimeMillis;
         if (canAttack) {
             updateLastAttack();
-//            player.setCooldown(material, (int) (coolTimeMillis * 0.02)); 速度の違い武器がわからりにくくなるため使用しない
+            player.setCooldown(material, (int) (coolTimeMillis * 0.02)); // 速度の違い武器がわからりにくくなるため使用しない
         }
         return canAttack;
     }
@@ -120,7 +121,7 @@ public class CharStats extends EntityStatus {
 
     @NotNull
     public List<AlchemyItemStatus> getEquips() {
-        final List<AlchemyItemStatus> itemStatuses = new ArrayList<>();
+        final List<AlchemyItemStatus> itemStatuses = new ObjectArrayList<>();
         for (final ItemStack armor : player.getInventory().getArmorContents()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(armor);
             if (itemStatus != null) {

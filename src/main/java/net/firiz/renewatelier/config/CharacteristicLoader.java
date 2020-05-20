@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.config;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
@@ -42,7 +44,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             }
             final List<List<String>> reqs = getReqs(item);
             final List<String> itemStringList = item.getStringList("datas");
-            final Map<CharacteristicType, CharacteristicData> datas = new EnumMap<>(CharacteristicType.class);
+            final Map<CharacteristicType, CharacteristicData> datas = new Object2ObjectOpenHashMap<>();
             itemStringList.forEach(str -> {
                 if (str.contains(",")) {
                     final int i = str.indexOf(',');
@@ -93,10 +95,10 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
     private List<List<String>> getReqs(@NotNull ConfigurationSection item) {
         List<?> list = item.getList("reqs");
         if (list == null) {
-            return new ArrayList<>(0);
+            return Collections.emptyList();
         }
 
-        final List<List<String>> result = new ArrayList<>();
+        final List<List<String>> result = new ObjectArrayList<>();
         if (list.get(0) instanceof ArrayList) {
             list.stream().<List<String>>map(Chore::cast).forEach(result::add);
         } else if (list.get(0) instanceof String) {
@@ -107,7 +109,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
 
     @NotNull
     private List<String> convertStringList(List<?> list) {
-        final List<String> result = new ArrayList<>();
+        final List<String> result = new ObjectArrayList<>();
         final Iterator iterator = list.iterator();
         while (true) {
             Object object;

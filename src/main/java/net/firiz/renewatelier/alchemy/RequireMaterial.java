@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.alchemy;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +42,7 @@ public class RequireMaterial {
         if (reqs.isEmpty()) {
             throw new IllegalStateException("reqs is Empty.");
         }
-        final List<RequireMaterial> list = new ArrayList<>();
+        final List<RequireMaterial> list = new ObjectArrayList<>();
         for (String req : reqs) {
             list.add(load(req));
         }

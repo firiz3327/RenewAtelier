@@ -1,10 +1,10 @@
 package net.firiz.renewatelier.alchemy.catalyst;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -44,7 +44,7 @@ public class CatalystBonusData {
                 .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME)
                 .replace("$z", type.descRepletion != null ? type.descRepletion.apply(x) : ERROR_NAME)
                 .split("\n");
-        final List<String> result = new ArrayList<>();
+        final List<String> result = new ObjectArrayList<>();
         for (final String str : desc) {
             result.add(ChatColor.GRAY + str);
         }

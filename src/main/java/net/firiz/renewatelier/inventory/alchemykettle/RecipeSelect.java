@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -47,7 +48,7 @@ public final class RecipeSelect implements ParamInventory<Location> {
 
     public RecipeSelect(final InventoryManager manager) {
         this.manager = manager;
-        recipeLore = new ArrayList<>();
+        recipeLore = new ObjectArrayList<>();
         recipeLore.add(ChatColor.RESET + RECIPE_VALUE_1);
         recipeLore.add("");
     }
@@ -124,7 +125,7 @@ public final class RecipeSelect implements ParamInventory<Location> {
     }
 
     private void setRecipeScroll(final UUID uuid, final Inventory inv, final int scroll) {
-        final List<ImmutablePair<RecipeStatus, CustomModelMaterial>> recipeItems = new ArrayList<>();
+        final List<ImmutablePair<RecipeStatus, CustomModelMaterial>> recipeItems = new ObjectArrayList<>();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         status.getRecipeStatusList().stream().filter(RecipeStatus::isAcquired).forEach(recipeStatus -> {
             final String resultStr = recipeStatus.getRecipe().getResult();
@@ -184,7 +185,7 @@ public final class RecipeSelect implements ParamInventory<Location> {
                 final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
                 setMetaDatas(iMeta, am);
 
-                final List<String> lore = new ArrayList<>();
+                final List<String> lore = new ObjectArrayList<>();
                 addRecipeStatus(uuid, recipe, rs, lore);
                 lore.add("");
                 iMeta.setLore(lore);
@@ -280,7 +281,7 @@ public final class RecipeSelect implements ParamInventory<Location> {
                                 material = new CustomModelMaterial(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
                             }
 
-                            final List<String> lore = new ArrayList<>();
+                            final List<String> lore = new ObjectArrayList<>();
                             lore.add(ChatColor.WHITE + "  を作成します。");
                             final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                             if (recipeStatus != null && material != null) {

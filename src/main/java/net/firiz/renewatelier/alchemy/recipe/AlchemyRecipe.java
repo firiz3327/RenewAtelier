@@ -2,14 +2,15 @@ package net.firiz.renewatelier.alchemy.recipe;
 
 import java.util.*;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyRecipeLoader;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,7 +27,7 @@ public class AlchemyRecipe {
     private final List<AlchemyIngredients> defaultIngredients;
     private final int reqBar;
     private final List<RecipeEffect> effects;
-    private final Map<Integer, List<RecipeLevelEffect>> levels;
+    private final Int2ObjectMap<List<RecipeLevelEffect>> levels;
     private final List<RequireMaterial> catalystCategories;
     private final List<RequireAmountMaterial> ideaRequires;
 
@@ -39,7 +40,7 @@ public class AlchemyRecipe {
             final List<AlchemyIngredients> defaultIngredients,
             final int reqBar,
             final List<RecipeEffect> effects,
-            final Map<Integer, List<RecipeLevelEffect>> levels,
+            final Int2ObjectMap<List<RecipeLevelEffect>> levels,
             final List<RequireMaterial> catalystCategories,
             final List<RequireAmountMaterial> ideaRequires
     ) {
@@ -85,7 +86,7 @@ public class AlchemyRecipe {
 
     @NotNull
     public List<RequireAmountMaterial> getReqMaterial() {
-        return new ArrayList<>(reqMaterial);
+        return new ObjectArrayList<>(reqMaterial);
     }
 
     public int getReqAlchemyLevel() {
@@ -94,7 +95,7 @@ public class AlchemyRecipe {
 
     @NotNull
     public List<AlchemyIngredients> getDefaultIngredients() {
-        return new ArrayList<>(defaultIngredients);
+        return new ObjectArrayList<>(defaultIngredients);
     }
 
     public int getReqBar() {
@@ -103,17 +104,17 @@ public class AlchemyRecipe {
 
     @NotNull
     public List<RecipeEffect> getEffects() {
-        return new ArrayList<>(effects);
+        return new ObjectArrayList<>(effects);
     }
 
     @NotNull
-    public Map<Integer, List<RecipeLevelEffect>> getLevels() {
-        return new HashMap<>(levels);
+    public Int2ObjectMap<List<RecipeLevelEffect>> getLevels() {
+        return new Int2ObjectOpenHashMap<>(levels);
     }
 
     @NotNull
     public List<RequireMaterial> getCatalystCategories() {
-        return new ArrayList<>(catalystCategories);
+        return new ObjectArrayList<>(catalystCategories);
     }
 
     @NotNull

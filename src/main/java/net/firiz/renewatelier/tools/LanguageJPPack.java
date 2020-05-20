@@ -3,6 +3,7 @@ package net.firiz.renewatelier.tools;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.io.*;
 import java.util.*;
@@ -15,7 +16,7 @@ public class LanguageJPPack {
         final File indexesFolder = new File(assets, "indexes");
         final List<File> indexes = Arrays.asList(Objects.requireNonNull(indexesFolder.listFiles()));
 
-        final List<String> strings = new ArrayList<>();
+        final List<String> strings = new ObjectArrayList<>();
         indexes.forEach(file -> strings.add(file.getName()));
         System.out.println("Target: " + strings);
 

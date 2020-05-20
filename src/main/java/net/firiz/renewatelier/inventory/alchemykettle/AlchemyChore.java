@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.Chore;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,7 +15,7 @@ public class AlchemyChore {
     }
 
     static void setSetting(final ItemMeta meta, final int line, final int data, final String desc) {
-        final List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+        final List<String> lore = meta.hasLore() ? new ObjectArrayList<>(Objects.requireNonNull(meta.getLore())) : new ObjectArrayList<>();
         if (lore.size() > line) {
             lore.set(line, Chore.setIntColor(data) + desc);
         } else while (true) {
@@ -37,7 +37,7 @@ public class AlchemyChore {
     }
 
     static void setSettingStr(final ItemMeta meta, final int line, final String data, final String desc) {
-        final List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+        final List<String> lore = meta.hasLore() ? meta.getLore() : new ObjectArrayList<>();
         assert lore != null;
         if (lore.size() > line) {
             lore.set(line, Chore.createStridColor(data) + desc);

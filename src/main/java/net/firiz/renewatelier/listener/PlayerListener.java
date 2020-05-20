@@ -9,7 +9,6 @@ import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
-import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
@@ -43,12 +42,6 @@ import org.bukkit.loot.LootTables;
  */
 public class PlayerListener implements Listener {
 
-    /*
-    // ドラガリのバーストアタック的な奴の試作
-    int task = -1;
-    int charge = -1;
-    */
-
     private final InventoryManager inventoryManager = AtelierPlugin.getPlugin().getInventoryManager();
 
     @EventHandler
@@ -80,25 +73,6 @@ public class PlayerListener implements Listener {
                         return;
                     }
                 }
-                /* else if (GameConstants.isSword(item.getType())) { // ドラガリのバーストアタック的な奴の試作
-                    final int nextCharge = Math.max(0, Math.min(4, charge + 1));
-                    if (task != -1) {
-                        Bukkit.getScheduler().cancelTask(task);
-                    }
-                    if (nextCharge != charge && charge % 2 == 0) {
-                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.2f, nextCharge * 0.4f);
-                    }
-                    charge = nextCharge;
-                    task = Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> {
-                        if(player.isOnGround()) {
-                            final Vector direction = player.getLocation().getDirection();
-                            final Vector unitVector = new Vector(direction.getX(), 0.1, direction.getZ()).normalize();
-                            player.setVelocity(player.getVelocity().add(unitVector.multiply(((int) (charge / 2f)) * 0.8)));
-                        }
-                        charge = 0;
-                    }, 5).getTaskId();
-                }
-                */
             }
 
             if (hasBlock) {

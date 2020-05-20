@@ -3,11 +3,7 @@ package net.firiz.renewatelier.version.inject;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 public class ChannelHandler extends ChannelDuplexHandler {
 

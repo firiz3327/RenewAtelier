@@ -1,5 +1,8 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.Randomizer;
@@ -26,7 +29,7 @@ public class LivingData {
     private final EntityLiving wrapEntity;
     private final MonsterStats stats;
     private final String name;
-    private final Map<Player, Double> damageSources = new HashMap<>();
+    private final Object2DoubleMap<Player> damageSources = new Object2DoubleOpenHashMap<>();
 
     private HoloHealth holoHealth;
 
@@ -108,7 +111,7 @@ public class LivingData {
     public void damage(org.bukkit.entity.Entity damager, double damage) {
         if (damager instanceof Player) {
             if (damageSources.containsKey(damager)) {
-                damageSources.put((Player) damager, damageSources.get(damager) + damage);
+                damageSources.put((Player) damager, damageSources.getDouble(damager) + damage);
             } else {
                 damageSources.put((Player) damager, damage);
             }
@@ -140,7 +143,7 @@ public class LivingData {
      * @return entity.damageEntity
      */
     public boolean onDamageEntity(final Object damageSource, final Object damage) {
-        final Map<Object, Class<?>> params = new LinkedHashMap<>();
+        final Map<Object, Class<?>> params = new Object2ObjectLinkedOpenHashMap<>();
         params.put(damageSource, DamageSource.class);
         params.put(damage, float.class);
         final boolean result = Objects.requireNonNull(VersionUtils.superInvoke(
@@ -164,7 +167,7 @@ public class LivingData {
      * @return entity.die
      */
     public void onDie(Object damageSource) {
-        final Map<Object, Class<?>> params = new LinkedHashMap<>();
+        final Map<Object, Class<?>> params = new Object2ObjectLinkedOpenHashMap<>();
         params.put(damageSource, DamageSource.class);
         VersionUtils.superInvoke(
                 "die",

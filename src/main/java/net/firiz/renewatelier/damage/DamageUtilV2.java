@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.damage;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.buff.Buff;
@@ -26,7 +27,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -41,23 +41,23 @@ public enum DamageUtilV2 {
 
     public void abnormalDamage(@NotNull final EntityStatus victimStatus, double damage) {
         final DamageComponent baseDamageComponent = new DamageComponent(damage, AttackAttribute.ABNORMAL);
-        final List<DamageComponent> damageComponents = new ArrayList<>();
+        final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         holo.holoDamage((LivingEntity) victimStatus.getEntity(), null, damageComponents);
     }
 
-    public void handlePlayerEnvironmentalDamage(@NotNull final CharStats charStats, double damage) {
+    void handlePlayerEnvironmentalDamage(@NotNull final CharStats charStats, double damage) {
         final DamageComponent baseDamageComponent = new DamageComponent(charStats.getMaxHp() * (damage / 20), AttackAttribute.NONE);
-        final List<DamageComponent> damageComponents = new ArrayList<>();
+        final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         holo.holoDamage(charStats.getPlayer(), null, damageComponents);
     }
 
-    public void handlePlayerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage) {
-        playerDamage(charStats, damager, damage, AttackAttribute.PHYSICS);
+    void handlePlayerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage) {
+        playerDamage(charStats, damager, damage, AttackAttribute.NONE);
     }
 
-    public void playerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage, @NotNull final AttackAttribute attackAttribute) {
+    void playerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage, @NotNull final AttackAttribute attackAttribute) {
         EntityStatus entityStatus = null;
         if (damager instanceof Player) {
             entityStatus = psm.getChar(damager.getUniqueId()).getCharStats();
@@ -78,7 +78,7 @@ public enum DamageUtilV2 {
         );
     }
 
-    public void mobEnvironmentalDamage(@NotNull final LivingEntity victim, double damage) {
+    void mobEnvironmentalDamage(@NotNull final LivingEntity victim, double damage) {
         if (damage > 0) {
             final DamageComponent baseDamageComponent;
             if (aEntityUtils.hasLivingData(victim) && aEntityUtils.getLivingData(victim).hasStats()) {
@@ -90,7 +90,7 @@ public enum DamageUtilV2 {
                 baseDamageComponent = new DamageComponent(damage, AttackAttribute.NONE);
             }
             victim.playEffect(EntityEffect.HURT);
-            final List<DamageComponent> damageComponents = new ArrayList<>();
+            final List<DamageComponent> damageComponents = new ObjectArrayList<>();
             damageComponents.add(baseDamageComponent);
             holo.holoDamage(victim, null, damageComponents);
         }
@@ -130,7 +130,7 @@ public enum DamageUtilV2 {
                 baseDamage += Math.max(0D, Randomizer.rand(arrowAlchemyMaterial.getBaseDamageMin(), arrowAlchemyMaterial.getBaseDamageMax())) * calcQualityCorrection(arrow.getQuality());
             }
         }
-        final double resultDamage = calcDamage(bow, status, status == null ? null : status.getEntity(), victim, normalAttackPower, baseDamage, force, AttackAttribute.PHYSICS, isMinecraftCritical, true);
+        final double resultDamage = calcDamage(bow, status, status == null ? null : status.getEntity(), victim, normalAttackPower, baseDamage, force, AttackAttribute.THRUST, isMinecraftCritical, true);
         if (damager != null && resultDamage > 0) {
             damager.remove(); // Pierceエンチャントの効果は考慮していない
         }
@@ -153,8 +153,8 @@ public enum DamageUtilV2 {
 
         int criticalRate = 0;
 
-        final List<Buff> buffs = new ArrayList<>();
-        final List<AddAttackData> addAttacks = new ArrayList<>();
+        final List<Buff> buffs = new ObjectArrayList<>();
+        final List<AddAttackData> addAttacks = new ObjectArrayList<>();
         int characteristicLevel = 0;
         int characteristicCPower = 0;
         double characteristicPowers = 0;
@@ -246,7 +246,7 @@ public enum DamageUtilV2 {
                 isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
         );
         final DamageComponent baseDamageComponent = new DamageComponent(damage, baseAttribute);
-        final List<DamageComponent> damageComponents = new ArrayList<>();
+        final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         double allDamage = damage;
         for (final AddAttackData addAttack : addAttacks) {

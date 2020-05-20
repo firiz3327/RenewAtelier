@@ -1,12 +1,11 @@
 package net.firiz.renewatelier.entity.player;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.script.ScriptEngine;
 
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
@@ -14,8 +13,6 @@ import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
@@ -26,7 +23,6 @@ import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -138,7 +134,7 @@ public final class Char {
     }
 
     public List<QuestStatus> getQuestStatusList() {
-        return new ArrayList<>(questStatuses);
+        return new ObjectArrayList<>(questStatuses);
     }
 
     @NotNull

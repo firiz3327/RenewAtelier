@@ -42,7 +42,10 @@ public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
     }
 
     public String getWord(boolean up) {
-        return icon.up == null ? icon.word : up ? icon.up : icon.down;
+        if (icon.up == null) {
+            return icon.word;
+        }
+        return up ? icon.up : icon.down;
     }
 
     private enum Icon {

@@ -1,20 +1,20 @@
 package net.firiz.renewatelier.alchemy.kettle.box;
 
-import java.util.Map;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 
 public class KettleBoxCircleData {
 
-    private final Map<Integer, Integer> rslots;
+    private final Int2IntMap rslots;
     private final int rotate; // 回転
     private final int rlud; // 左右上下反転
 
-    KettleBoxCircleData(Map<Integer, Integer> rslots, int rotate, int rlud) {
+    KettleBoxCircleData(Int2IntMap rslots, int rotate, int rlud) {
         this.rslots = rslots;
         this.rotate = rotate;
         this.rlud = rlud;
     }
 
-    Map<Integer, Integer> getRSlots() {
+    Int2IntMap getRSlots() {
         return rslots;
     }
 

@@ -1,12 +1,12 @@
 package net.firiz.renewatelier.version.packet;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.server.v1_15_R1.AdvancementProgress;
 import net.minecraft.server.v1_15_R1.CriterionProgress;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
@@ -24,12 +24,12 @@ public class NotificationPacket {
     }
 
     public static void sendRecipe(final Player player, final String id, final boolean remove) {
-        final ArrayList<MinecraftKey> var1 = new ArrayList<>();
+        final List<MinecraftKey> var1 = new ObjectArrayList<>();
         var1.add(new MinecraftKey(id));
         final PacketPlayOutRecipes packet = new PacketPlayOutRecipes(
                 remove ? PacketPlayOutRecipes.Action.REMOVE : PacketPlayOutRecipes.Action.ADD,
                 var1,
-                new ArrayList<>(),
+                new ObjectArrayList<>(),
                 false,
                 false,
                 false,
@@ -40,13 +40,13 @@ public class NotificationPacket {
 
     @Deprecated
     public static void sendAdvancement(final Player player, final String id, final boolean remove) {
-        final HashMap<MinecraftKey, AdvancementProgress> var3 = new HashMap<>();
+        final Map<MinecraftKey, AdvancementProgress> var3 = new Object2ObjectOpenHashMap<>();
         final AdvancementProgress progress = new AdvancementProgress();
         if (!remove) {
             try {
                 final Field a = progress.getClass().getDeclaredField("a");
                 a.setAccessible(true);
-                final HashMap<String, CriterionProgress> p = new HashMap<>();
+                final Map<String, CriterionProgress> p = new Object2ObjectOpenHashMap<>();
                 final CriterionProgress cp = new CriterionProgress();
                 final Field b2 = cp.getClass().getDeclaredField("b");
                 b2.setAccessible(true);
@@ -64,7 +64,7 @@ public class NotificationPacket {
         var3.put(new MinecraftKey(id), progress);
         final PacketPlayOutAdvancements packet = new PacketPlayOutAdvancements(
                 false,
-                new ArrayList<>(),
+                new ObjectArrayList<>(),
                 new LinkedHashSet<>(),
                 var3
         );

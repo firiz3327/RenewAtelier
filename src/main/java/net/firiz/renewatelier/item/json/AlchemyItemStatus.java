@@ -3,10 +3,14 @@ package net.firiz.renewatelier.item.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
-import net.firiz.renewatelier.alchemy.kettle.AlchemyCircle;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
@@ -14,7 +18,6 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.chores.CObjects;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.md_5.bungee.api.ChatColor;
@@ -35,11 +38,12 @@ import java.util.stream.Collectors;
  */
 public class AlchemyItemStatus {
 
-    private static final NamespacedKey key = new NamespacedKey(AtelierPlugin.getPlugin(), "alchemyItemStatus");
+    private static final NamespacedKey persistentDataKey = new NamespacedKey(AtelierPlugin.getPlugin(), "alchemyItemStatus");
     private static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new AlchemyItemStatusAdapterFactory()).create();
 
     @Expose
     private final AlchemyMaterial alchemyMaterial;
+    @Nullable
     private final CustomModelMaterial customModel;
     @Expose
     private int[] size;
@@ -191,8 +195,8 @@ public class AlchemyItemStatus {
     public static AlchemyItemStatus load(@Nullable final ItemStack item) {
         if (item != null && item.hasItemMeta()) {
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            if (container.has(key, PersistentDataType.STRING)) {
-                final String json = container.get(key, PersistentDataType.STRING);
+            if (container.has(persistentDataKey, PersistentDataType.STRING)) {
+                final String json = container.get(persistentDataKey, PersistentDataType.STRING);
                 return gson.fromJson(json, AlchemyItemStatus.class);
             }
         }
@@ -203,43 +207,19 @@ public class AlchemyItemStatus {
         return gson.toJson(this);
     }
 
-    public void saveJson(@NotNull final ItemStack item) {
+    public void writeJson(@NotNull final ItemStack item) {
         Objects.requireNonNull(item);
         final ItemMeta meta = item.getItemMeta();
-        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, toJson());
+        meta.getPersistentDataContainer().set(persistentDataKey, PersistentDataType.STRING, toJson());
         item.setItemMeta(meta);
     }
 
     @NotNull
     public static int[] getSize(final ItemStack item) {
         if (item != null && item.hasItemMeta()) {
-            final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-            if (meta.hasLore()) {
-                final List<Integer> size = new ArrayList<>();
-                boolean start = false;
-                for (final String lore : Objects.requireNonNull(meta.getLore())) {
-                    if (lore.contains(GameConstants.W_W) || lore.contains(GameConstants.W_B)) {
-                        start = true;
-                        String b = null;
-                        for (char l : lore.toCharArray()) {
-                            String j = String.valueOf(l);
-                            switch (j) {
-                                case GameConstants.W_W:
-                                case GameConstants.W_B:
-                                    size.add(AlchemyCircle.colorCint(b));
-                                    break;
-                                default:
-                                    b = j;
-                                    break;
-                            }
-                        }
-                    } else if (start) {
-                        break;
-                    }
-                }
-                if (size.size() == 9) {
-                    return CollectionUtils.parseInts(size);
-                }
+            final AlchemyItemStatus itemStatus = load(item);
+            if (itemStatus != null) {
+                return itemStatus.getSize();
             }
         }
         return new int[0];
@@ -256,13 +236,16 @@ public class AlchemyItemStatus {
         return i;
     }
 
-    public static ItemMeta setSize(final ItemStack item, final int[] size) {
-        final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-        return meta;
+    public static void setSize(final ItemStack item, final int[] size) {
+        final AlchemyItemStatus itemStatus = load(item);
+        if (itemStatus != null) {
+            itemStatus.setSize(size);
+            itemStatus.updateLore(item, new VisibleFlags(true));
+        }
     }
 
     public static List<String> getLore(final String check, final ItemStack item) {
-        final List<String> list = new ArrayList<>();
+        final List<String> list = new ObjectArrayList<>();
         if (check != null && item != null && item.hasItemMeta()) {
             final ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.hasLore()) {
@@ -374,13 +357,13 @@ public class AlchemyItemStatus {
         if (item == null || item.getType() == Material.AIR) {
             item = alchemyMaterial.getMaterial().toItemStack();
         }
-        saveJson(item);
+        writeJson(item);
         final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
         if (!alchemyMaterial.isDefaultName()) {
             meta.setDisplayName(alchemyMaterial.getName());
         }
 
-        final List<String> lore = new ArrayList<>();
+        final List<String> lore = new ObjectArrayList<>();
         if (visibleFlags.id) {
             lore.add("");
         }
@@ -401,7 +384,7 @@ public class AlchemyItemStatus {
 
         // 錬金成分
         if (visibleFlags.ingredients) {
-            final ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> levels = getLevels();
+            final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = getLevels();
             final int allLevel = levels.getLeft();
             final List<AlchemyAttribute> maxTypes = getMaxTypes(levels.getRight());
             // 錬金成分・設定
@@ -436,7 +419,7 @@ public class AlchemyItemStatus {
             final Catalyst catalyst = alchemyMaterial.getCatalyst();
             if (catalyst != null) {
                 lore.add("§7触媒:");
-                final List<Integer> allCS = new ArrayList<>();
+                final IntList allCS = new IntArrayList();
                 for (final CatalystBonus bonus : catalyst.getBonus()) {
                     if (allCS.isEmpty()) {
                         allCS.addAll(Arrays.stream(bonus.getCS()).boxed().collect(Collectors.toList()));
@@ -456,7 +439,7 @@ public class AlchemyItemStatus {
                 int count = 0;
                 for (int i = 0; i < rotate_value; i++) {
                     for (int j = 1; j <= rotate_value; j++) {
-                        final int value = allCS.get(count);
+                        final int value = allCS.getInt(count);
                         if (value == 0) {
                             sb.append(Chore.intCcolor(value)).append(GameConstants.W_W);
                         } else {
@@ -500,8 +483,8 @@ public class AlchemyItemStatus {
 
     private static List<AlchemyIngredients> createIngredientList(@NotNull AlchemyMaterial alchemyMaterial, @Nullable List<AlchemyIngredients> overrideIngredients) {
         int allLevel = 0;
-        final Map<AlchemyAttribute, Integer> levels = new EnumMap<>(AlchemyAttribute.class);
-        final List<AlchemyIngredients> activeIngredients = new ArrayList<>();
+        final Object2IntMap<AlchemyAttribute> levels = new Object2IntOpenHashMap<>();
+        final List<AlchemyIngredients> activeIngredients = new ObjectArrayList<>();
         // 錬金成分・確定取得
         if (overrideIngredients != null) {
             for (final AlchemyIngredients ingredients : overrideIngredients) {
@@ -524,7 +507,7 @@ public class AlchemyItemStatus {
                         int level = ingredients.getLevel();
                         final AlchemyAttribute type = ingredients.getType();
                         if (levels.containsKey(type)) {
-                            levels.put(type, levels.get(type) + level);
+                            levels.put(type, levels.getInt(type) + level);
                         } else {
                             levels.put(type, level);
                         }
@@ -533,7 +516,7 @@ public class AlchemyItemStatus {
                 }
             }
             // 錬金成分・非マイナス化
-            final List<AlchemyIngredients> materialIngredients = new ArrayList<>();
+            final List<AlchemyIngredients> materialIngredients = new ObjectArrayList<>();
             alchemyMaterial.getIngredients().forEach(dd -> materialIngredients.add(dd.getLeft()));
             while (allLevel <= 0) {
                 Collections.shuffle(materialIngredients);
@@ -549,10 +532,10 @@ public class AlchemyItemStatus {
     }
 
     private static List<Characteristic> createCharacteristicList(@NotNull AlchemyMaterial alchemyMaterial, @Nullable List<Characteristic> overrideCharacteristics) {
-        final List<Characteristic> characteristics = new ArrayList<>();
+        final List<Characteristic> characteristics = new ObjectArrayList<>();
         if (overrideCharacteristics == null) {
             if (alchemyMaterial.getCharas() != null) {
-                final List<ImmutablePair<Characteristic, Integer>> cs = new ArrayList<>();
+                final List<ImmutablePair<Characteristic, Integer>> cs = new ObjectArrayList<>();
                 alchemyMaterial.getCharas().forEach(obj -> {
                     if (obj instanceof CharacteristicTemplate) {
                         cs.addAll(((CharacteristicTemplate) obj).getCs());
@@ -577,16 +560,16 @@ public class AlchemyItemStatus {
         return characteristics;
     }
 
-    private static int getLevel(Map<AlchemyAttribute, Integer> levels, List<AlchemyIngredients> acls, AlchemyIngredients i) {
+    private static int getLevel(Object2IntMap<AlchemyAttribute> levels, List<AlchemyIngredients> acls, AlchemyIngredients i) {
         acls.add(i);
         return getLevel(levels, i);
     }
 
-    private static int getLevel(Map<AlchemyAttribute, Integer> levels, AlchemyIngredients i) {
+    private static int getLevel(Object2IntMap<AlchemyAttribute> levels, AlchemyIngredients i) {
         final int level = i.getLevel();
         final AlchemyAttribute type = i.getType();
         if (levels.containsKey(type)) {
-            levels.put(type, levels.get(type) + level);
+            levels.put(type, levels.getInt(type) + level);
         } else {
             levels.put(type, level);
         }
@@ -594,9 +577,9 @@ public class AlchemyItemStatus {
     }
 
     @NotNull
-    public ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> getLevels() {
+    public ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> getLevels() {
         int allLevel = 0;
-        final Map<AlchemyAttribute, Integer> levels = new EnumMap<>(AlchemyAttribute.class);
+        final Object2IntMap<AlchemyAttribute> levels = new Object2IntOpenHashMap<>();
         for (final AlchemyIngredients ingredient : ingredients) {
             allLevel += getLevel(levels, ingredient);
         }
@@ -604,15 +587,15 @@ public class AlchemyItemStatus {
     }
 
     @NotNull
-    public List<AlchemyAttribute> getMaxTypes(final Map<AlchemyAttribute, Integer> levels) {
+    public List<AlchemyAttribute> getMaxTypes(final Object2IntMap<AlchemyAttribute> levels) {
         int maxLevel = 0;
-        final List<AlchemyAttribute> maxTypes = new ArrayList<>();
-        for (final Map.Entry<AlchemyAttribute, Integer> type : levels.entrySet()) {
-            if (type.getValue() > maxLevel) {
-                maxLevel = type.getValue();
+        final List<AlchemyAttribute> maxTypes = new ObjectArrayList<>();
+        for (final Object2IntMap.Entry<AlchemyAttribute> type : levels.object2IntEntrySet()) {
+            if (type.getIntValue() > maxLevel) {
+                maxLevel = type.getIntValue();
                 maxTypes.clear();
                 maxTypes.add(type.getKey());
-            } else if (type.getValue() == maxLevel) {
+            } else if (type.getIntValue() == maxLevel) {
                 maxTypes.add(type.getKey());
             }
         }

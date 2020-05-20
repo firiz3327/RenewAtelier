@@ -1,9 +1,9 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -16,7 +16,6 @@ import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
@@ -41,7 +40,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
 
     private static final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final InventoryManager manager;
-    private final List<UUID> openUsers = new ArrayList<>();
+    private final List<UUID> openUsers = new ObjectArrayList<>();
 
     public ItemSelect(final InventoryManager manager) {
         this.manager = manager;
@@ -111,7 +110,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
             if (name != null) {
                 meta.setDisplayName(name);
             }
-            final List<String> lore = new ArrayList<>();
+            final List<String> lore = new ObjectArrayList<>();
             lore.add("§7必要個数: " + req_amount);
             meta.setLore(lore);
             item.setItemMeta(meta);

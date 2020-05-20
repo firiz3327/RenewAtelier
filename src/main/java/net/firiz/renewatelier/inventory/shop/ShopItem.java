@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.inventory.shop;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.ChatColor;
@@ -8,7 +9,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,7 +33,7 @@ public class ShopItem {
         clone.setAmount(amount);
 
         final ItemMeta meta = clone.getItemMeta();
-        final List<String> lore = meta.getLore() == null ? new ArrayList<>() : meta.getLore();
+        final List<String> lore = meta.getLore() == null ? new ObjectArrayList<>() : meta.getLore();
         lore.add("");
         final String sb = Chore.createStridColor(coinType == null ? "$null" : coinType.getId()) +
                 ChatColor.ITALIC + ChatColor.RESET + ChatColor.GREEN +

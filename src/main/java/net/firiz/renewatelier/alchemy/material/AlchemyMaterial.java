@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author firiz
  */
-public class AlchemyMaterial {
+public final class AlchemyMaterial {
 
     private static final AlchemyMaterialLoader LOADER;
 
@@ -235,7 +235,7 @@ public class AlchemyMaterial {
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {
         final List<RequireMaterial> catalystCategories = recipe.getCatalystCategories();
-        if (catalystCategories != null && catalyst != null) {
+        if (catalyst != null) {
             for (final RequireMaterial requireMaterial : catalystCategories) {
                 if (requireMaterial.getMaterial().equals(this)) {
                     return true;

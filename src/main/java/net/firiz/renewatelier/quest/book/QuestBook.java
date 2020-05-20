@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.quest.book;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
@@ -28,8 +28,8 @@ public class QuestBook {
         player.sendMessage(ChatColor.GRAY + "[クエストを更新中...]");
 
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
-        final List<Quest> progressQuests = new ArrayList<>();
-        final List<Quest> clearQuests = new ArrayList<>();
+        final List<Quest> progressQuests = new ObjectArrayList<>();
+        final List<Quest> clearQuests = new ObjectArrayList<>();
         final List<Quest> importantQuests = Quest.getImportantQuests();
         status.getQuestStatusList().forEach(qs -> {
             final Quest quest = Quest.getQuest(qs.getId());
@@ -42,7 +42,7 @@ public class QuestBook {
             }
         });
 
-        final List<BaseComponent[]> pages = new ArrayList<>();
+        final List<BaseComponent[]> pages = new ObjectArrayList<>();
         // 進行中クエスト
         progressQuests.forEach(quest -> addSpigotPage(pages, quest, 0, player));
         // 重要クエスト

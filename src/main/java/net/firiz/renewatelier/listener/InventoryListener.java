@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.listener;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.inventory.AnvilManager;
 import net.firiz.renewatelier.inventory.manager.CustomInventory;
@@ -14,7 +15,6 @@ import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class InventoryListener implements Listener {
 
-    private final Map<UUID, ItemStack> clickTemp = new HashMap<>();
+    private final Map<UUID, ItemStack> clickTemp = new Object2ObjectOpenHashMap<>();
     private final InventoryManager inventoryManager;
 
     public InventoryListener(AtelierPlugin atelierPlugin) {

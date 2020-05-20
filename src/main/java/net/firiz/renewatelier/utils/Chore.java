@@ -7,6 +7,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
@@ -202,7 +205,7 @@ public final class Chore {
 
     public static boolean hasMaterial(final ItemStack[] contents, final List<RequireAmountMaterial> materials) {
         if (contents.length != 0) {
-            final Map<RequireAmountMaterial, Integer> check = new HashMap<>();
+            final Object2IntMap<RequireAmountMaterial> check = new Object2IntOpenHashMap<>();
             for (final RequireAmountMaterial data : materials) {
                 if (!check.containsKey(data)) {
                     check.put(data, 0);
@@ -212,7 +215,7 @@ public final class Chore {
                         final AlchemyMaterial alchemyMaterial = data.getMaterial();
                         for (final ItemStack item : contents) {
                             if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
-                                check.put(data, check.get(data) + item.getAmount());
+                                check.put(data, check.getInt(data) + item.getAmount());
                             }
                         }
                         break;
@@ -220,7 +223,7 @@ public final class Chore {
                         final Category category = data.getCategory();
                         for (final ItemStack item : contents) {
                             if (item != null && AlchemyItemStatus.getCategories(item).contains(category)) {
-                                check.put(data, check.get(data) + item.getAmount());
+                                check.put(data, check.getInt(data) + item.getAmount());
                             }
                         }
                         break;
@@ -228,7 +231,7 @@ public final class Chore {
                         throw new IllegalArgumentException("[hasMaterial] not support recipe material.");
                 }
             }
-            return !check.isEmpty() && check.entrySet().stream().noneMatch(entry -> (entry.getValue() < entry.getKey().getAmount()));
+            return !check.isEmpty() && check.object2IntEntrySet().stream().noneMatch(entry -> (entry.getIntValue() < entry.getKey().getAmount()));
         }
         return false;
     }
@@ -288,7 +291,7 @@ public final class Chore {
     }
 
     public static List<Location> generateSphere(Location centerBlock, int radius, boolean hollow) {
-        List<Location> circleBlocks = new ArrayList<>();
+        List<Location> circleBlocks = new ObjectArrayList<>();
         int bx = centerBlock.getBlockX();
         int by = centerBlock.getBlockY();
         int bz = centerBlock.getBlockZ();
@@ -321,8 +324,8 @@ public final class Chore {
     }
 
     public static int near(NavigableSet<Integer> truncation, int val) {
-        int floor = truncation.floor(val);
-        int ceiling = truncation.ceiling(val);
+        final int floor = Objects.requireNonNull(truncation.floor(val));
+        final int ceiling = Objects.requireNonNull(truncation.ceiling(val));
         return Math.abs(floor - val) <= Math.abs(ceiling - val) ? floor : ceiling;
     }
 

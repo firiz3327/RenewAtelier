@@ -1,7 +1,8 @@
 package net.firiz.renewatelier.quest;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.QuestLoader;
 import net.firiz.renewatelier.quest.result.QuestResult;
@@ -44,7 +45,7 @@ public class Quest {
     }
     
     public static List<Quest> getImportantQuests() {
-        return new ArrayList<>(importantQuests);
+        return new ObjectArrayList<>(importantQuests);
     }
 
     public String getId() {

@@ -1,5 +1,9 @@
 package net.firiz.renewatelier.entity.monster;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.firiz.renewatelier.damage.AttackAttribute;
+import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.CalcStatType;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
@@ -16,6 +20,8 @@ public class MonsterStats extends EntityStatus {
     private int buffDef;
     private int buffSpeed;
 
+    private final Object2ObjectMap<AttackAttribute, AttackResistance> resistances;
+
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed) {
         this(entity, race, level, maxHp, hp, atk, def, speed, 0, false);
     }
@@ -29,10 +35,15 @@ public class MonsterStats extends EntityStatus {
     }
 
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp, boolean isBoss) {
+        this(entity, race, level, maxHp, hp, atk, def, speed, exp, isBoss, new Object2ObjectOpenHashMap<>());
+    }
+
+    public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp, boolean isBoss, Object2ObjectOpenHashMap<AttackAttribute, AttackResistance> resistances) {
         super(entity, level, maxHp, hp, atk, def, speed);
         this.race = race;
         this.isBoss = isBoss;
         this.exp = exp;
+        this.resistances = resistances;
     }
 
     @Override

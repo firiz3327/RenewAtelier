@@ -25,7 +25,6 @@ import java.util.TreeSet;
 
 public final class HoloHealth {
 
-    private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     @NotNull
     private final LivingEntity entity;
     @NotNull

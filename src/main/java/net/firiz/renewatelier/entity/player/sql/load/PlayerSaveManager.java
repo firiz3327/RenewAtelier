@@ -2,6 +2,8 @@ package net.firiz.renewatelier.entity.player.sql.load;
 
 import java.util.*;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.script.execution.ScriptManager;
@@ -19,7 +21,7 @@ public enum PlayerSaveManager {
 
     private final SQLManager sql = SQLManager.INSTANCE;
     private final ScriptManager script = ScriptManager.INSTANCE;
-    private final Map<UUID, Char> statusList = new HashMap<>();
+    private final Map<UUID, Char> statusList = new Object2ObjectOpenHashMap<>();
     private final Set<StatusLoader<?>> loaders = new LinkedHashSet<>();
 
     private final String[] columns = {
@@ -92,7 +94,7 @@ public enum PlayerSaveManager {
         final int def = (int) dataList.get(13);
         final int speed = (int) dataList.get(14);
         final int money = (int) dataList.get(15);
-        final List<Object> loaderValues = new ArrayList<>();
+        final List<Object> loaderValues = new ObjectArrayList<>();
         for (final StatusLoader<?> sLoader : loaders) {
             loaderValues.add(sLoader.load(id));
         }

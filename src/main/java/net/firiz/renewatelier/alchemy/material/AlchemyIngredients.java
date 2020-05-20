@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.utils.pair.Pair;
@@ -303,7 +304,7 @@ public enum AlchemyIngredients {
         if (item != null && item.hasItemMeta()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
-                final ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> levels = itemStatus.getLevels();
+                final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
                 final int level = levels.getLeft();
                 final List<AlchemyAttribute> maxTypes = itemStatus.getMaxTypes(levels.getRight());
                 return new Pair<>(level, maxTypes.toArray(new AlchemyAttribute[0]));
@@ -316,8 +317,8 @@ public enum AlchemyIngredients {
         if (item.hasItemMeta()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
-                final ImmutablePair<Integer, Map<AlchemyAttribute, Integer>> levels = itemStatus.getLevels();
-                return levels.getRight().get(type);
+                final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
+                return levels.getRight().getInt(type);
             }
         }
         return 0;

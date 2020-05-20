@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.inventory.manager;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
@@ -12,13 +13,12 @@ import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class InventoryManager {
 
-    private final Map<Class<?>, CustomInventory> inventories = new LinkedHashMap<>();
+    private final Map<Class<?>, CustomInventory> inventories = new Object2ObjectLinkedOpenHashMap<>();
 
     public InventoryManager() {
         inventories.put(Appraisal.class, new Appraisal());

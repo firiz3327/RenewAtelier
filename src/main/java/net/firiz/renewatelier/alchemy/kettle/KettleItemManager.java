@@ -2,6 +2,11 @@ package net.firiz.renewatelier.alchemy.kettle;
 
 import java.util.*;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.KettleBonusManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
@@ -18,14 +23,14 @@ import org.jetbrains.annotations.NotNull;
 public enum KettleItemManager {
     INSTANCE; // enum singleton style
     
-    private final Map<UUID, Map<Integer, List<ItemStack>>> useItems = new HashMap<>();
-    private final Map<UUID, ItemStack> useCatalyst = new HashMap<>();
-    private final Map<UUID, ItemStack[]> defaultContents = new HashMap<>();
-    private final Map<UUID, List<CatalystBonus>> catalystBonus = new HashMap<>();
-    private final Map<UUID, KettleBox> kettleData = new HashMap<>();
-    private final Map<UUID, List<Characteristic>> characteristics = new HashMap<>();
-    private final Map<UUID, List<Characteristic>> selectCharacteristics = new HashMap<>();
-    private final Map<UUID, List<Characteristic>> catalystCharacteristics = new HashMap<>();
+    private final Map<UUID, Int2ObjectMap<List<ItemStack>>> useItems = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, ItemStack> useCatalyst = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, ItemStack[]> defaultContents = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, List<CatalystBonus>> catalystBonus = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, KettleBox> kettleData = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, List<Characteristic>> characteristics = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, List<Characteristic>> selectCharacteristics = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, List<Characteristic>> catalystCharacteristics = new Object2ObjectOpenHashMap<>();
 
     private void clear(final Player player) {
         final UUID uuid = player.getUniqueId();
@@ -52,7 +57,7 @@ public enum KettleItemManager {
         final UUID uuid = player.getUniqueId();
         clear(player);
         if (useItems.containsKey(uuid)) {
-            final Map<Integer, List<ItemStack>> useItem = useItems.get(uuid);
+            final Int2ObjectMap<List<ItemStack>> useItem = useItems.get(uuid);
             useItem.values().stream().flatMap(Collection::stream).forEach(item -> Chore.addItem(player, item));
             useItems.remove(uuid);
         }
@@ -69,17 +74,17 @@ public enum KettleItemManager {
     //<editor-fold desc="アイテム選択画面">
     public void addPageItem(final UUID uuid, final ItemStack item, final int page) {
         if (useItems.containsKey(uuid)) { // 追加処理
-            final Map<Integer, List<ItemStack>> uses = useItems.get(uuid);
+            final Int2ObjectMap<List<ItemStack>> uses = useItems.get(uuid);
             if (uses.containsKey(page)) { // ページが存在する場合
                 uses.get(page).add(item);
             } else { // ページが存在しない場合
-                final List<ItemStack> array = new ArrayList<>();
+                final List<ItemStack> array = new ObjectArrayList<>();
                 array.add(item);
                 uses.put(page, array);
             }
         } else { // 初回追加処理
-            final HashMap<Integer, List<ItemStack>> map = new HashMap<>();
-            final List<ItemStack> array = new ArrayList<>();
+            final Int2ObjectMap<List<ItemStack>> map = new Int2ObjectOpenHashMap<>();
+            final List<ItemStack> array = new ObjectArrayList<>();
             array.add(item);
             map.put(page, array);
             useItems.put(uuid, map);
@@ -95,9 +100,9 @@ public enum KettleItemManager {
     @NotNull
     public List<ItemStack> getPageItems(final UUID uuid, final int page) {
         if (useItems.containsKey(uuid)) {
-            return Objects.requireNonNullElse(useItems.get(uuid).get(page), new ArrayList<>(0));
+            return Objects.requireNonNullElse(useItems.get(uuid).get(page), Collections.emptyList());
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
     //</editor-fold>
 
@@ -139,7 +144,7 @@ public enum KettleItemManager {
             catalystBonus.get(uuid).add(data);
             return;
         }
-        final List<CatalystBonus> list = new ArrayList<CatalystBonus>() {
+        final List<CatalystBonus> list = new ObjectArrayList<>() {
             @Override
             public boolean contains(Object obj) {
                 if (!(obj instanceof CatalystBonus)) {
@@ -159,7 +164,7 @@ public enum KettleItemManager {
         return false;
     }
 
-    public void addKettleData(final UUID uuid, final ItemStack item, final int csize, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
+    public void addKettleData(final UUID uuid, final ItemStack item, final int csize, final Int2IntMap rslots, final int rotate, final int rlud) {
         if (!kettleData.containsKey(uuid)) {
             kettleData.put(uuid, new KettleBox(csize));
         }
@@ -174,9 +179,9 @@ public enum KettleItemManager {
     public List<Characteristic> getCharacteristics(final UUID uuid) {
         final List<Characteristic> cs = characteristics.get(uuid);
         if (cs == null) {
-            return new ArrayList<>(0);
+            return Collections.emptyList();
         }
-        final List<Characteristic> result = new ArrayList<>();
+        final List<Characteristic> result = new ObjectArrayList<>();
         cs.stream().filter(c -> (!result.contains(c))).forEachOrdered(result::add);
         final List<Characteristic> ccs = catalystCharacteristics.get(uuid);
         if (ccs != null) {
@@ -188,12 +193,12 @@ public enum KettleItemManager {
     public void addCharacteristic(final UUID uuid, final Characteristic characteristic, final boolean catalyst) {
         if (!catalyst) {
             if (!characteristics.containsKey(uuid)) {
-                characteristics.put(uuid, new ArrayList<>());
+                characteristics.put(uuid, new ObjectArrayList<>());
             }
             characteristics.get(uuid).add(characteristic);
         } else {
             if (!catalystCharacteristics.containsKey(uuid)) {
-                catalystCharacteristics.put(uuid, new ArrayList<>());
+                catalystCharacteristics.put(uuid, new ObjectArrayList<>());
             }
             final List<Characteristic> cs = catalystCharacteristics.get(uuid);
             if(!cs.contains(characteristic)) {
@@ -214,7 +219,7 @@ public enum KettleItemManager {
 
     public void addSelectCharacteristic(final UUID uuid, final Characteristic characteristic) {
         if (!selectCharacteristics.containsKey(uuid)) {
-            selectCharacteristics.put(uuid, new ArrayList<>());
+            selectCharacteristics.put(uuid, new ObjectArrayList<>());
         }
         final List<Characteristic> cs = selectCharacteristics.get(uuid);
         if (!cs.contains(characteristic)) {

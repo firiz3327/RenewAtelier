@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.npc;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.script.conversation.NPCConversation;
@@ -47,13 +49,13 @@ public enum NPCManager {
     private static final String STRING_WORLD = "world";
     private static final String STRING_ACTION = "action";
     private static final String STRING_KEY = "§k§k§k";
-    private final Map<UUID, NPCConversation> scriptPlayers = new HashMap<>();
-    private final List<LivingEntity> npcs = new ArrayList<>();
-    private final List<VEntityPlayer> playerNpcs = new ArrayList<>();
-    private final Map<Location, String> playerNpcLocs = new HashMap<>();
+    private final Map<UUID, NPCConversation> scriptPlayers = new Object2ObjectOpenHashMap<>();
+    private final List<LivingEntity> npcs = new ObjectArrayList<>();
+    private final List<VEntityPlayer> playerNpcs = new ObjectArrayList<>();
+    private final Map<Location, String> playerNpcLocs = new Object2ObjectOpenHashMap<>();
 
     public void packet(@NotNull final Player player) {
-        final List<VEntityPlayer> eps = new ArrayList<>();
+        final List<VEntityPlayer> eps = new ObjectArrayList<>();
         playerNpcs.stream().filter(
                 npc -> (player.getWorld().equals(npc.getWorld()))
         ).forEachOrdered(eps::add);
@@ -82,7 +84,7 @@ public enum NPCManager {
                             EntityPacket.getDespawnPacket(npc.getEntityId())
                     ));
 
-            final List<VEntityPlayer> eps = new ArrayList<>();
+            final List<VEntityPlayer> eps = new ObjectArrayList<>();
             playerNpcs.stream().filter(npc -> (player.getWorld().equals(npc.getWorld()))).forEachOrdered(eps::add);
             FakePlayerPacket.sendLogout(player, eps);
         }));
@@ -200,7 +202,7 @@ public enum NPCManager {
     }
 
     public void removeNPC(@NotNull final Location location, @NotNull final EntityType type, @NotNull final String name, @NotNull final String script) {
-        for (final LivingEntity entity : new ArrayList<>(npcs)) {
+        for (final LivingEntity entity : new ObjectArrayList<>(npcs)) {
             if (entity.getLocation().equals(location)
                     && entity.getType() == type
                     && entity.getName().equals(name)
@@ -275,7 +277,7 @@ public enum NPCManager {
     }
 
     public void removeNPCPlayer(@NotNull final Location location, @NotNull final String name, @NotNull final UUID uuid, @NotNull final String script) {
-        for (final VEntityPlayer entityPlayer : new ArrayList<>(playerNpcs)) {
+        for (final VEntityPlayer entityPlayer : new ObjectArrayList<>(playerNpcs)) {
             if (entityPlayer.getName().equals(name)
                     && entityPlayer.getLocation().equals(location)
                     && entityPlayer.getUniqueId().equals(uuid)) {

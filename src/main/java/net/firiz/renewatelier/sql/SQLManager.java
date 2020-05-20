@@ -10,10 +10,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.utils.Chore;
 
@@ -195,7 +195,7 @@ public enum SQLManager {
      * @since 2018-12-10 / firiz
      */
     public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDatas, final int select_size) {
-        final List<List<Object>> result = new ArrayList<>();
+        final List<List<Object>> result = new ObjectArrayList<>();
         try (final Statement stmt = conn.createStatement()) {
             final StringBuilder sb = new StringBuilder();
             sb.append("select ");
@@ -219,7 +219,7 @@ public enum SQLManager {
             }
             try (final ResultSet resultSet = stmt.executeQuery(sb.toString())) {
                 while (resultSet.next()) {
-                    final List<Object> dataList = new ArrayList<>();
+                    final List<Object> dataList = new ObjectArrayList<>();
                     for (int i = 0; i < select_size; i++) {
                         dataList.add(resultSet.getObject(columns[i]));
                     }

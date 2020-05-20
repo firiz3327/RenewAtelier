@@ -3,6 +3,7 @@ package net.firiz.renewatelier.alchemy.kettle.bonus;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
@@ -24,7 +25,7 @@ public enum KettleBonusManager {
     private final KettleItemManager kettleItemManager = KettleItemManager.INSTANCE;
 
     KettleBonusManager() {
-        datas = new HashMap<>();
+        datas = new Object2ObjectOpenHashMap<>();
     }
 
     public int getBonus(Player player, AlchemyAttribute type) {
@@ -106,7 +107,7 @@ public enum KettleBonusManager {
         if (bpd != null) {
             return bpd.getLevelUps();
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     public int getLevel(UUID uuid) {

@@ -1,16 +1,18 @@
 package net.firiz.renewatelier.alchemy.kettle.box;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.GArray;
+import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +60,7 @@ public class KettleBox {
                     size = MaterialSize.rightRotation(size);
                 }
                 size = getRLUDTypeSize(rlud, size);
-                item.setItemMeta(AlchemyItemStatus.setSize(item, size));
+                AlchemyItemStatus.setSize(item, size);
                 return data;
             }
         }
@@ -78,7 +80,7 @@ public class KettleBox {
         }
     }
 
-    public final void addItem(final ItemStack item, final Map<Integer, Integer> rslots, final int rotate, final int rlud) {
+    public final void addItem(final ItemStack item, final Int2IntMap rslots, final int rotate, final int rlud) {
         for (int i = 0; i < items.length(); i++) {
             if (items.get(i) == null) {
                 items.set(i, new Pair<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
@@ -102,7 +104,7 @@ public class KettleBox {
             if (data != null) {
                 final int sel = items.length() - i;
                 if (usedBonus.get(sel) == null) {
-                    final List<CatalystBonus> cbs = new ArrayList<>();
+                    final List<CatalystBonus> cbs = new ObjectArrayList<>();
                     cbs.add(cb);
                     usedBonus.set(sel, cbs);
                 } else {
@@ -119,14 +121,14 @@ public class KettleBox {
             final Pair<BonusItem, KettleBoxCircleData> data = items.get(items.length() - i);
             if (data != null) {
                 final int select = items.length() - i - 1; // 4:3 3:2
-                return select >= 0 ? usedBonus.get(select) : new ArrayList<>(0);
+                return select >= 0 ? usedBonus.get(select) : Collections.emptyList();
             }
         }
-        return new ArrayList<>(0);
+        return Collections.emptyList();
     }
 
     public final List<ItemStack> getItemStacks() {
-        final List<ItemStack> result = new ArrayList<>();
+        final List<ItemStack> result = new ObjectArrayList<>();
 
         for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
@@ -138,7 +140,7 @@ public class KettleBox {
     }
 
     public final List<BonusItem> getItems() {
-        final List<BonusItem> result = new ArrayList<>();
+        final List<BonusItem> result = new ObjectArrayList<>();
 
         for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
             if (data != null) {
@@ -149,7 +151,7 @@ public class KettleBox {
 
     }
 
-    public final Map<Integer, Integer> getSlots() {
+    public final Int2IntMap getSlots() {
         return items.get(items.length() - 1).getRight().getRSlots();
     }
 
@@ -160,15 +162,15 @@ public class KettleBox {
     /**
      * @return <slot, itemStack>, value
      */
-    public final Map<Pair<Integer, BonusItem>, Integer> getResultCS() {
-        final Map<Pair<Integer, BonusItem>, Integer> result = new HashMap<>();
+    public final Object2IntMap<Pair<Integer, BonusItem>> getResultCS() {
+        final Object2IntMap<Pair<Integer, BonusItem>> result = new Object2IntOpenHashMap<>();
 
         // 配置
         // <layer, itemStack>, <slot, value>
-        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
+        final Map<Pair<Integer, BonusItem>, Int2IntMap> overlap = getOverlap();
         overlap.keySet().forEach(layer -> {
-            final Map<Integer, Integer> datas = overlap.get(layer);
-            datas.keySet().forEach(slot -> result.put(new Pair<>(slot, layer.getRight()), datas.get(slot)));
+            final Int2IntMap datas = overlap.get(layer);
+            datas.keySet().forEach(CollectionUtils.intConsumer(slot -> result.put(new Pair<>(slot, layer.getRight()), datas.get(slot))));
         });
 
         return result;
@@ -176,25 +178,25 @@ public class KettleBox {
     }
 
     public final List<BonusItem> getResultItems() {
-        final List<BonusItem> result = new ArrayList<>();
+        final List<BonusItem> result = new ObjectArrayList<>();
 
         // 配置
         // <layer, itemStack>, <slot, value>
-        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = getOverlap();
+        final Map<Pair<Integer, BonusItem>, Int2IntMap> overlap = getOverlap();
         overlap.keySet().forEach(layer -> result.add(layer.getRight()));
 
         return result;
     }
 
-    private Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> getOverlap() {
-        final Map<Pair<Integer, BonusItem>, Map<Integer, Integer>> overlap = new LinkedHashMap<>();
+    private Map<Pair<Integer, BonusItem>, Int2IntMap> getOverlap() {
+        final Map<Pair<Integer, BonusItem>, Int2IntMap> overlap = new Object2ObjectLinkedOpenHashMap<>();
         for (int i = 0; i < items.length(); i++) {
             final Pair<BonusItem, KettleBoxCircleData> dd = items.get(i);
 
             if (dd != null) {
-                final Map<Integer, Integer> rslots = dd.getRight().getRSlots();
+                final Int2IntMap rslots = dd.getRight().getRSlots();
 
-                for (final Pair<Integer, BonusItem> layer : new LinkedHashMap<>(overlap).keySet()) {
+                for (final Pair<Integer, BonusItem> layer : new Object2ObjectLinkedOpenHashMap<>(overlap).keySet()) {
                     boolean checkOver = false;
 
                     loopCheckOver:

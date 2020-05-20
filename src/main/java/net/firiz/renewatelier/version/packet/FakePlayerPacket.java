@@ -1,9 +1,10 @@
 package net.firiz.renewatelier.version.packet;
 
 import com.mojang.authlib.GameProfile;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.minecraft.server.v1_15_R1.ChatMessage;
 import net.minecraft.server.v1_15_R1.DataWatcher;
@@ -43,7 +44,7 @@ public class FakePlayerPacket {
     }
 
     private static PacketPlayOutPlayerInfo getInfo(final List<VEntityPlayer> players, final boolean remove) {
-        final List<EntityPlayer> eps = new ArrayList<>();
+        final List<EntityPlayer> eps = new ObjectArrayList<>();
         players.forEach(vEps -> eps.add((EntityPlayer) vEps.getEntityPlayer()));
         return new PacketPlayOutPlayerInfo(
                 remove

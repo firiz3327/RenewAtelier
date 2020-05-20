@@ -1,12 +1,12 @@
 package net.firiz.renewatelier.entity.player.sql.load;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.buff.BuffValueType;
 import net.firiz.renewatelier.sql.SQLManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class BuffLoader implements StatusLoader<List<Buff>> {
@@ -19,7 +19,7 @@ class BuffLoader implements StatusLoader<List<Buff>> {
                 new String[]{"userId", "buffValueType", "level", "buffType", "duration", "limitDuration", "x"},
                 new Object[]{id}
         );
-        final List<Buff> saveTypes = new ArrayList<>();
+        final List<Buff> saveTypes = new ObjectArrayList<>();
         saveTypesObj.forEach(datas -> saveTypes.add(new Buff(
                 null,
                 BuffValueType.valueOf((String) datas.get(1)), // buffValueType

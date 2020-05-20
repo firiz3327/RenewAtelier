@@ -1,10 +1,10 @@
 package net.firiz.renewatelier.inventory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.ObjIntConsumer;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ConfirmInventory implements ParamInventory<ConfirmInventory.ConfirmInfo> {
 
     private static final String CONFIRM_STR = "-Confirm";
-    private final Map<UUID, ImmutablePair<String, ObjIntConsumer<Player>>> consumers = new HashMap<>();
+    private final Map<UUID, ImmutablePair<String, ObjIntConsumer<Player>>> consumers = new Object2ObjectOpenHashMap<>();
 
     @Override
     public boolean check(@NotNull final InventoryView view) {

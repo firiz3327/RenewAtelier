@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.quest.result;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -14,7 +15,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,7 +34,7 @@ public class RecipeQuestResult extends ObjectQuestResult<AlchemyRecipe> {
         final String result_str = recipe.getResult();
         builder.append("レシピ: ");
 
-        final List<ItemFlag> flags = new ArrayList<>();
+        final List<ItemFlag> flags = new ObjectArrayList<>();
         String name;
         Material material;
         final int cmd;
@@ -81,7 +81,7 @@ public class RecipeQuestResult extends ObjectQuestResult<AlchemyRecipe> {
         if (!flags.isEmpty()) {
             viewMeta.addItemFlags(flags.toArray(new ItemFlag[0]));
         }
-        final List<String> viewLore = new ArrayList<>();
+        final List<String> viewLore = new ObjectArrayList<>();
         viewLore.add(ChatColor.GRAY + "作成量: " + ChatColor.RESET + recipe.getAmount());
         viewLore.add(ChatColor.GRAY + "必要素材:");
         for (final RequireAmountMaterial req : recipe.getReqMaterial()) {

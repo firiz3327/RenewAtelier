@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.characteristic;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -85,7 +85,7 @@ public enum CharacteristicTemplate {
 
     public List<ImmutablePair<Characteristic, Integer>> getCs() {
         if (loaded == null) {
-            loaded = new ArrayList<>(cs.length);
+            loaded = new ObjectArrayList<>(cs.length);
             for (ImmutablePair<String, Integer> fdd : cs) {
                 loaded.add(new ImmutablePair<>(Characteristic.getCharacteristic(fdd.getLeft()), fdd.getRight()));
             }

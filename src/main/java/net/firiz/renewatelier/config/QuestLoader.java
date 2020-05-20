@@ -1,10 +1,10 @@
 package net.firiz.renewatelier.config;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.quest.result.*;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
@@ -27,7 +27,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
 
     @Override
     protected void loadConfig(final FileConfiguration config) {
-        final List<Quest> importantQuests = new ArrayList<>();
+        final List<Quest> importantQuests = new ObjectArrayList<>();
         config.getKeys(false).forEach(key -> {
             final ConfigurationSection item = config.getConfigurationSection(key);
             // クエスト名
@@ -40,7 +40,7 @@ public class QuestLoader extends ConfigLoader<Quest> {
             final boolean important = item.contains("important") && item.getBoolean("important");
 
             // 報酬
-            final List<QuestResult> results = new ArrayList<>();
+            final List<QuestResult> results = new ObjectArrayList<>();
             final ConfigurationSection result = item.getConfigurationSection("result");
             // 報酬 - レシピ
             final List<String> recipeIds = result.contains("recipes") ? result.getStringList("recipes") : null;
@@ -62,14 +62,14 @@ public class QuestLoader extends ConfigLoader<Quest> {
                     final List<String> ingredientStrs = isec.contains("ingredients") ? isec.getStringList("ingredients") : null;
                     List<AlchemyIngredients> ingredients = null;
                     if (ingredientStrs != null) {
-                        ingredients = new ArrayList<>();
+                        ingredients = new ObjectArrayList<>();
                         for (final String iid : ingredientStrs) {
                             ingredients.add(AlchemyIngredients.valueOf(iid));
                         }
                     }
                     // 特性
-                    final List<String> characteristicStrs = isec.contains("characteristics") ? isec.getStringList("characteristics") : new ArrayList<>();
-                    final List<Characteristic> characteristics = new ArrayList<>();
+                    final List<String> characteristicStrs = isec.contains("characteristics") ? isec.getStringList("characteristics") : new ObjectArrayList<>();
+                    final List<Characteristic> characteristics = new ObjectArrayList<>();
                     characteristicStrs.forEach(cid -> characteristics.add(Characteristic.getCharacteristic(cid)));
 
                     results.add(new ItemQuestResult(new QuestItem(

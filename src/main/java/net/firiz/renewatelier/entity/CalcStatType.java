@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.entity;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffType;
@@ -31,8 +32,8 @@ public enum CalcStatType {
     private final boolean characteristic;
     private final ToIntFunction<AlchemyItemStatus> runGetEquipStats;
 
-    private static final Map<CalcStatType, BuffType[]> buffTypes = new EnumMap<>(CalcStatType.class);
-    private static final Map<CalcStatType, CharacteristicType[]> characteristicTypes = new EnumMap<>(CalcStatType.class);
+    private static final Map<CalcStatType, BuffType[]> buffTypes = new Object2ObjectOpenHashMap<>();
+    private static final Map<CalcStatType, CharacteristicType[]> characteristicTypes = new Object2ObjectOpenHashMap<>();
 
     static {
         buffTypes.put(CalcStatType.LEVEL, new BuffType[]{BuffType.STATS_LEVEL, BuffType.STATS_LEVEL_FIXED});

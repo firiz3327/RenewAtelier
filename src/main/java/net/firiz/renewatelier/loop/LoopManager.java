@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.loop;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.item.drop.AnimatedDrop;
 import net.firiz.renewatelier.version.packet.PacketUtils;
@@ -37,11 +37,11 @@ public enum LoopManager {
 
     LoopManager() {
         start = false;
-        animDrops = new ArrayList<>();
-        loopRuns = new ArrayList<>();
-        loopHalfSecRuns = new ArrayList<>();
-        loopMiriRuns = new ArrayList<>();
-        loopMinuteRuns = new ArrayList<>();
+        animDrops = new ObjectArrayList<>();
+        loopRuns = new ObjectArrayList<>();
+        loopHalfSecRuns = new ObjectArrayList<>();
+        loopMiriRuns = new ObjectArrayList<>();
+        loopMinuteRuns = new ObjectArrayList<>();
     }
 
     public void start() {
@@ -60,7 +60,7 @@ public enum LoopManager {
     }
 
     public List<AnimatedDrop> getAnimDrops() {
-        return new ArrayList<>(animDrops);
+        return new ObjectArrayList<>(animDrops);
     }
 
     public void stopLoop() {
@@ -95,8 +95,8 @@ public enum LoopManager {
     // 厳密さは求めていないので大分適当。あっているかはわからない
     private void loop() {
         taskId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            new ArrayList<>(animDrops).forEach(AnimatedDrop::anim);
-            new ArrayList<>(loopMiriRuns).forEach(Runnable::run);
+            new ObjectArrayList<>(animDrops).forEach(AnimatedDrop::anim);
+            new ObjectArrayList<>(loopMiriRuns).forEach(Runnable::run);
             if (period % 10 == 0) {
                 halfSecLoop();
             }
@@ -111,16 +111,16 @@ public enum LoopManager {
 
     private void halfSecLoop() {
         plugin.getServer().getWorlds().forEach(this::entityLoop);
-        new ArrayList<>(loopHalfSecRuns).forEach(Runnable::run);
+        new ObjectArrayList<>(loopHalfSecRuns).forEach(Runnable::run);
     }
 
     private void secLoop() {
         secPeriod++;
 
-        new ArrayList<>(loopRuns).forEach(Runnable::run);
+        new ObjectArrayList<>(loopRuns).forEach(Runnable::run);
 
         int maxLength = 0;
-        final List<Player> players = new ArrayList<>();
+        final List<Player> players = new ObjectArrayList<>();
         for (final World world : Bukkit.getWorlds()) {
             for (final Player player : world.getPlayers()) {
                 players.add(player);
@@ -151,7 +151,7 @@ public enum LoopManager {
     }
 
     private void minuteLoop() {
-        new ArrayList<>(loopMinuteRuns).forEach(Runnable::run);
+        new ObjectArrayList<>(loopMinuteRuns).forEach(Runnable::run);
     }
 
     private void cauldronDamage(final Entity entity) {

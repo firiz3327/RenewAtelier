@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.entity.player.sql.load;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.chores.ArrayUtils;
@@ -21,7 +21,7 @@ class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
                 new String[]{"userId", "recipeId", "acquired", "level", "exp", "idea"},
                 new Object[]{id}
         );
-        final List<RecipeStatus> recipeStatuses = new ArrayList<>();
+        final List<RecipeStatus> recipeStatuses = new ObjectArrayList<>();
         recipeStatusesObj.forEach(objectList -> {
             final boolean acquired = (boolean) objectList.get(2);
             if (acquired) {

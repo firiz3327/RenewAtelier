@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.inject;
 
 import io.netty.channel.Channel;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.VersionUtils;
@@ -10,7 +11,6 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -60,7 +60,7 @@ public class PlayerInjection {
             a.setAccessible(true);
 
             // reload時に更新処理が入らないためjoin時のみinjectすれば問題ない
-            a.set(armorList, new ArrayList<>((List<ItemStack>) a.get(armorList)) {
+            a.set(armorList, new ObjectArrayList<>((List<ItemStack>) a.get(armorList)) {
                 @Override
                 public boolean add(ItemStack itemStack) {
                     final boolean result = super.add(itemStack);

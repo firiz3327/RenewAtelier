@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.script.conversation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
@@ -228,7 +228,7 @@ public class ScriptConversation {
         if (!isNull && shopItems.size() > 28) {
             throw new IllegalArgumentException("No more than 29 shop items can be placed.");
         }
-        inventoryManager.getInventory(ShopInventory.class).open(player, title, isNull ? new ArrayList<>() : shopItems);
+        inventoryManager.getInventory(ShopInventory.class).open(player, title, isNull ? new ObjectArrayList<>() : shopItems);
     }
 
     @NotNull

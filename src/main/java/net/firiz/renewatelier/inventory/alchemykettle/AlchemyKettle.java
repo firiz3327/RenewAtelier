@@ -1,5 +1,9 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
 import java.util.*;
@@ -32,6 +36,7 @@ import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.Pair;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -96,7 +101,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             break;
         }
 
-        final List<String> rotateLore = new ArrayList<>();
+        final List<String> rotateLore = new ObjectArrayList<>();
         rotateLore.add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[0]);
         rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[0][0]);
         rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[0][1]);
@@ -118,7 +123,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
         final int[] ss = new int[]{0, 0, 0, 0, 1, 0, 0, 0, 0};
         int l = 0;
         StringBuilder sb = new StringBuilder();
-        final List<String> lore = new ArrayList<>();
+        final List<String> lore = new ObjectArrayList<>();
         for (final int n : ss) {
             l++;
             sb.append(String.valueOf(n)
@@ -142,14 +147,14 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
         final ItemMeta setting = inv.getItem(1).getItemMeta();
         final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
-        final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
+        final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe.getId()));
 
         setKettleItems(inv, player, recipe);
 
         // レシピレベル追加効果 評価
-        final Map<RecipeLevelEffect.RecipeLEType, Integer> recipeEffects = new LinkedHashMap<>();
-        final Map<Integer, List<RecipeLevelEffect>> levels = recipe.getLevels();
-        if (levels != null && !levels.isEmpty()) {
+        final Object2IntMap<RecipeLevelEffect.RecipeLEType> recipeEffects = new Object2IntLinkedOpenHashMap<>();
+        final Int2ObjectMap<List<RecipeLevelEffect>> levels = recipe.getLevels();
+        if (!levels.isEmpty()) {
             final List<RecipeLevelEffect> effects = levels.get(recipeStatus.getLevel());
             if (effects != null && !effects.isEmpty()) {
                 effects.forEach(e -> recipeEffects.put(e.getType(), e.getCount()));
@@ -168,7 +173,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             final int[] cs = bonus.getCS();
             final CatalystBonusData data = bonus.getData();
             int slot = defslot;
-            final List<Integer> activeSlots = new ArrayList<>();
+            final IntList activeSlots = new IntArrayList();
             for (final int c : cs) {
                 if (c != 0) {
                     final ItemStack item = inv.getItem(slot);
@@ -214,7 +219,9 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                 KETTLE.addCatalystBonus(uuid, bonus);
             }
             // アクティブ触媒効果にGlowを付与
-            activeSlots.forEach(activeSlot -> Objects.requireNonNull(inv.getItem(activeSlot)).addUnsafeEnchantment(Enchantment.LUCK, 1));
+            activeSlots.forEach(CollectionUtils.intConsumer(
+                    activeSlot -> Objects.requireNonNull(inv.getItem(activeSlot)).addUnsafeEnchantment(Enchantment.LUCK, 1)
+            ));
         }
         final List<CatalystBonus> bonusDatas = KETTLE.getCatalystBonusList(uuid);
         int bonusQuality = 0;
@@ -273,18 +280,18 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
         itemSize = Math.round((float) itemSize / itemCount);
         itemSize += bonusSize;
 
-        final Integer add_quality = recipeEffects.get(RecipeLevelEffect.RecipeLEType.ADD_QUALITY);
-        allQuality += (add_quality != null ? add_quality : 0) + bonusQuality; // +品質固定値
+        final int add_quality = recipeEffects.getInt(RecipeLevelEffect.RecipeLEType.ADD_QUALITY);
+        allQuality += add_quality + bonusQuality; // +品質固定値
         allQuality += Math.round(allQuality * (bonusQualityPercent * 0.01)); // +品質％値
 
         ItemStack resultItem = null;
         final String result_str = recipe.getResult();
-        final Integer add_amount = recipeEffects.get(RecipeLevelEffect.RecipeLEType.ADD_AMOUNT);
+        final int add_amount = recipeEffects.getInt(RecipeLevelEffect.RecipeLEType.ADD_AMOUNT);
         if (result_str.startsWith("material:")) {
             final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
-            final List<Category> categories = new ArrayList<>(result.getCategories());
+            final List<Category> categories = new ObjectArrayList<>(result.getCategories());
             // 錬金成分 評価
             final List<AlchemyIngredients> ingredients = recipe.getDefaultIngredients();
             for (final RecipeEffect effect : recipe.getEffects()) {
@@ -312,7 +319,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             // 錬金成分・非マイナス化・1番目100%+星効果ならいらないかもしれない
             // サイズ 評価 サイズ+xがない限り必要ない
             // 特性 評価 +特性がない限り必要ない
-            final List<Characteristic> characteristics = new ArrayList<>();
+            final List<Characteristic> characteristics = new ObjectArrayList<>();
 
             // 触媒設定 - 触媒の設定がなされているアイテムだった場合 - いらんかも
             // アイテムの作成
@@ -329,11 +336,11 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             resultItem = AlchemyItemStatus.getItem(
                     result,
                     ingredients, // 錬金属性 書き換え
-                    result.getMaterial().toItemStack(recipe.getAmount() + (add_amount != null ? add_amount : 0) + bonusAmount),
+                    result.getMaterial().toItemStack(recipe.getAmount() + add_amount + bonusAmount),
                     allQuality, // 品質 書き換え
                     resultSize, // サイズ 書き換え
                     characteristics, // 特性 書き換え
-                    result.getCategories().equals(categories) ? new ArrayList<>() : categories, // カテゴリ 書き換え
+                    result.getCategories().equals(categories) ? new ObjectArrayList<>() : categories, // カテゴリ 書き換え
                     true
             );
         } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
@@ -343,7 +350,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             }
             resultItem = new ItemStack(
                     material,
-                    recipe.getAmount() + (add_amount != null ? add_amount : 0)
+                    recipe.getAmount() + add_amount
             );
         }
 
@@ -387,9 +394,9 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             }
 
             // 特性項目
-            final Integer inheriting = recipeEffects.get(RecipeLevelEffect.RecipeLEType.ADD_INHERITING);
+            final int inheriting = recipeEffects.getInt(RecipeLevelEffect.RecipeLEType.ADD_INHERITING);
             lore.add(lore.size() - 1, ChatColor.GRAY + "特性:");
-            final int cslot = Math.min(3, (inheriting == null ? 0 : inheriting) + bonusInheriting);
+            final int cslot = Math.min(3, inheriting + bonusInheriting);
             if (cslot == 0) {
                 lore.add(lore.size() - 1, ChatColor.RESET + "特性引継ぎスロットなし");
             } else {
@@ -433,7 +440,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             int j = box.getCSize() == 36 || box.getCSize() == 25 ? 3 : 13;
 
             final List<CatalystBonus> bonusList = catalyst.getBonus();
-            final List<CatalystBonus> ignores = new ArrayList<>();
+            final List<CatalystBonus> ignores = new ObjectArrayList<>();
             for (final CatalystBonus catalystBonus : bonusList) {
                 if (catalystBonus.getData().getType().isOnce() && box.usedBonus(catalystBonus)) {
                     ignores.add(catalystBonus);
@@ -467,7 +474,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                 j = Catalyst.nextSlot(j, box.getCSize());
             }
 
-            final Map<Pair<Integer, BonusItem>, Integer> resultCS = box.getResultCS();
+            final Object2IntMap<Pair<Integer, BonusItem>> resultCS = box.getResultCS();
             resultCS.keySet().forEach(slotData -> {
                 final String color = AlchemyIngredients.getMaxTypes(slotData.getRight().getItem()).getRight()[0].getColor();
                 final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
@@ -486,12 +493,12 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
         if (cs == null) {
             return;
         }
-        final List<List<Characteristic>> lists = new ArrayList<>();
-        final List<Characteristic> list = new ArrayList<>();
+        final List<List<Characteristic>> lists = new ObjectArrayList<>();
+        final List<Characteristic> list = new ObjectArrayList<>();
         int i = 0;
         for (final Characteristic c : cs) {
             if (i % 6 == 0) {
-                lists.add(new ArrayList<>(list));
+                lists.add(new ObjectArrayList<>(list));
                 list.clear();
             }
             list.add(c);
@@ -521,7 +528,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
             int slot = 1;
             int count = 0;
             for (final Characteristic c : lists.get(check ? new_page : page)) {
-                final List<String> booklore = new ArrayList<>();
+                final List<String> booklore = new ObjectArrayList<>();
                 final boolean on = KETTLE.isSelectCharacteristic(uuid, c);
                 booklore.add(ChatColor.GRAY + (on ? "削除" : "追加"));
                 booklore.add(ChatColor.GRAY + c.getDesc());
@@ -582,7 +589,8 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                         }
                         if (kettleBox.getItems() != null && kettleBox.getItems().size() == reqCount) {
                             final ItemStack resultSlotItem = inv.getItem(46);
-                            final int quality = AlchemyItemStatus.getQuality(resultSlotItem);
+                            final AlchemyItemStatus itemStatus = Objects.requireNonNull(AlchemyItemStatus.load(resultSlotItem));
+                            final int quality = itemStatus.getQuality();
 
                             ItemStack resultItem = null;
                             final String result_str = recipe.getResult();
@@ -590,11 +598,11 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                 final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
 
                                 final List<Characteristic> characteristics = KETTLE.getSelectCharacteristics(uuid);
-                                final List<AlchemyIngredients> ingredients = AlchemyItemStatus.getIngredients(resultSlotItem);
-                                final List<Category> categories = AlchemyItemStatus.getCategories(resultSlotItem);
+                                final List<AlchemyIngredients> ingredients = itemStatus.getIngredients();
+                                final List<Category> categories = itemStatus.getCategories();
 
-                                final List<StarEffect.EnchantEffect> enchantEffects = new ArrayList<>();
-                                final List<String> activeEffects = new ArrayList<>();
+                                final List<StarEffect.EnchantEffect> enchantEffects = new ObjectArrayList<>();
+                                final List<String> activeEffects = new ObjectArrayList<>();
                                 for (final RecipeEffect effect : recipe.getEffects()) {
                                     StarEffect activeEffect = effect.getActiveEffect(uuid);
                                     if (activeEffect != null) {
@@ -618,9 +626,9 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                         ingredients, // 錬金属性 書き換え
                                         result.getMaterial().toItemStack(resultSlotItem.getAmount()),
                                         quality, // 品質 書き換え
-                                        AlchemyItemStatus.getSize(resultSlotItem), // サイズ 書き換え
+                                        itemStatus.getSize(), // サイズ 書き換え
                                         activeEffects, // 発現効果
-                                        characteristics == null ? new ArrayList<>() : characteristics, // 特性 書き換え
+                                        characteristics == null ? new ObjectArrayList<>() : characteristics, // 特性 書き換え
                                         categories.isEmpty() ? null : categories, // カテゴリ 書き換え
                                         false
                                 );
@@ -682,7 +690,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                         }
                         AlchemyChore.setSetting(setting, 1, nsl, STR_TURN);
                         AlchemyChore.setSetting(setting, 4, rludnsl, STR_TURN2);
-                        final List<String> rotateLore = new ArrayList<>();
+                        final List<String> rotateLore = new ObjectArrayList<>();
                         rotateLore.add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[nsl]);
                         rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[rludnsl][0]);
                         rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[rludnsl][1]);
@@ -703,7 +711,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                                 ? MaterialSize.rightRotation(AlchemyItemStatus.getSize(item))
                                                 : MaterialSize.leftRotation(AlchemyItemStatus.getSize(item));
                                     }
-                                    item.setItemMeta(AlchemyItemStatus.setSize(item, size));
+                                    AlchemyItemStatus.setSize(item, size);
                                 }
                             }
                         }
@@ -735,7 +743,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                         ss[newCenter] = 1;
                         int l = 0;
                         StringBuilder sb = new StringBuilder();
-                        final List<String> lore = new ArrayList<>();
+                        final List<String> lore = new ObjectArrayList<>();
                         for (int n : ss) {
                             l++;
                             sb.append(String.valueOf(n)
@@ -830,7 +838,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                     final ItemMeta setting = inv.getItem(1).getItemMeta();
                                     final AlchemyRecipe recipe = AlchemyRecipe.search(AlchemyChore.getSettingStr(setting, 3));
                                     final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
-                                    final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
+                                    final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe.getId()));
                                     final List<RecipeLevelEffect> effects = recipe.getLevels().get(recipeStatus.getLevel());
                                     if (effects != null) {
                                         final Characteristic c = Characteristic.search(item.getItemMeta().getDisplayName().substring(2));
@@ -884,7 +892,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                     final ItemStack catalystItem = KETTLE.getCatalyst(uuid);
                                     final Catalyst catalyst = catalystItem != null ? AlchemyMaterial.getMaterial(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
                                     final int csize = catalyst.getBonus().get(0).getCS().length;
-                                    Map<Integer, Integer> rslots = new HashMap<>();
+                                    Int2IntMap rslots = new Int2IntOpenHashMap();
                                     for (int i = 0; i < size.length; i++) {
                                         final int value = size[i];
                                         final int slot = raw + sets[i] + centerSets[center];

@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
@@ -30,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
-    private static final List<String> notFounds = new ArrayList<>();
+    private static final List<String> notFounds = new ObjectArrayList<>();
     private static final String PREFIX = "MaterialLoader: ";
     private static final String KEY_MATERIAL = "material";
     private static final String KEY_QUALITY_MIN = "quality_min";
@@ -38,7 +40,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private static final String KEY_CATEGORIES = "categories";
     private static final String KEY_INGREDIENTS = "ingredients";
 
-    private final Map<Material, AlchemyMaterial> vanillaReplaceItems = new EnumMap<>(Material.class);
+    private final Map<Material, AlchemyMaterial> vanillaReplaceItems = new Object2ObjectOpenHashMap<>();
 
     AlchemyMaterialLoader() {
         super(new File(AtelierPlugin.getPlugin().getDataFolder(), "materials"), true);
@@ -194,7 +196,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @NotNull
     private List<Category> getCategories(ConfigurationSection item) {
-        final List<Category> categories = new ArrayList<>();
+        final List<Category> categories = new ObjectArrayList<>();
         if (item.contains(KEY_CATEGORIES)) {
             final List<String> categoriesStr = Chore.cast(item.getList(KEY_CATEGORIES));
             categoriesStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
@@ -206,7 +208,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @NotNull
     private List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
-        final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = new ArrayList<>();
+        final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = new ObjectArrayList<>();
         if (item.contains(KEY_INGREDIENTS)) {
             final List<String> ingsStr = Chore.cast(item.getList(KEY_INGREDIENTS));
             if (ingsStr != null) {
@@ -235,7 +237,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @NotNull
     private List<Object> getCharacteristics(ConfigurationSection item) {
-        final List<Object> characteristics = new ArrayList<>();
+        final List<Object> characteristics = new ObjectArrayList<>();
         if (item.contains("characteristics")) {
             final List<String> stringList = Chore.cast(item.getList("characteristics"));
             stringList.forEach(cStr -> {
@@ -261,7 +263,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private Catalyst getCatalyst(ConfigurationSection item) {
         if (item.contains("catalyst")) {
             final ConfigurationSection catalystConfig = item.getConfigurationSection("catalyst");
-            final List<CatalystBonus> bonus = new ArrayList<>();
+            final List<CatalystBonus> bonus = new ObjectArrayList<>();
             assert catalystConfig != null;
             catalystConfig.getKeys(false).stream()
                     .filter(cKey -> (cKey.startsWith("bonus")))

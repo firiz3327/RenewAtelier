@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.script.conversation;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -80,19 +81,19 @@ public final class NPCConversation extends ScriptConversation {
     @NotNull
     @Export
     public List<DeliveryObject> listDeliveryOf() {
-        return new ArrayList<>();
+        return new ObjectArrayList<>();
     }
 
     @NotNull
     @Export
     public DeliveryObject createDeliveryObject(@NotNull AlchemyMaterial material, int reqAmount) {
-        return createDeliveryObject(material, reqAmount, 0, new ArrayList<>(), new ArrayList<>());
+        return createDeliveryObject(material, reqAmount, 0, new ObjectArrayList<>(), new ObjectArrayList<>());
     }
 
     @NotNull
     @Export
     public DeliveryObject createDeliveryObject(@NotNull AlchemyMaterial material, int reqAmount, int reqQuality) {
-        return createDeliveryObject(material, reqAmount, reqQuality, new ArrayList<>(), new ArrayList<>());
+        return createDeliveryObject(material, reqAmount, reqQuality, new ObjectArrayList<>(), new ObjectArrayList<>());
     }
 
     @NotNull

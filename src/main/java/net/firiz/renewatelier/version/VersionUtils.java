@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.version;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -22,7 +23,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -188,7 +188,7 @@ public class VersionUtils {
                     MethodType.methodType(rType, parameters.values().toArray(new Class[0])),
                     obj.getClass()
             );
-            final List<Object> p = new ArrayList<>(parameters.keySet());
+            final List<Object> p = new ObjectArrayList<>(parameters.keySet());
             p.add(0, obj);
             return (T) handle.invokeWithArguments(p);
         } catch (Throwable e) {

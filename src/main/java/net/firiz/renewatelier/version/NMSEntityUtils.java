@@ -1,10 +1,7 @@
 package net.firiz.renewatelier.version;
 
 import net.firiz.renewatelier.utils.Chore;
-import net.minecraft.server.v1_15_R1.DamageSource;
-import net.minecraft.server.v1_15_R1.Entity;
-import net.minecraft.server.v1_15_R1.EntityLiving;
-import net.minecraft.server.v1_15_R1.MathHelper;
+import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.EntityEffect;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftHumanEntity;
@@ -22,11 +19,11 @@ public final class NMSEntityUtils {
     private NMSEntityUtils() {
     }
 
-    public static boolean isDead(org.bukkit.entity.Entity entity) {
+    public static boolean isDead(@NotNull final org.bukkit.entity.Entity entity) {
         return entity.isDead() || (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() <= 0);
     }
 
-    public static void hurt(@NotNull LivingEntity victim, @NotNull org.bukkit.entity.Entity damager, @Nullable DamageSource damageSource) {
+    public static void hurt(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager, @Nullable final DamageSource damageSource) {
         victim.playEffect(EntityEffect.HURT);
 
         // hurt play sound
@@ -39,11 +36,11 @@ public final class NMSEntityUtils {
         }
     }
 
-    public static void sweepParticle(Player player) {
+    public static void sweepParticle(@NotNull final Player player) {
         ((CraftHumanEntity) player).getHandle().ea(); // 1.15
     }
 
-    public static void knockBack(LivingEntity victim, org.bukkit.entity.Entity damager) {
+    public static void knockBack(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
         final int i = 1;
         final Entity nmsDamager = ((CraftEntity) damager).getHandle();
         ((CraftLivingEntity) victim).getHandle().a( // 1.15
@@ -52,5 +49,16 @@ public final class NMSEntityUtils {
                 MathHelper.sin(nmsDamager.yaw * 0.017453292F),
                 -MathHelper.cos(nmsDamager.yaw * 0.017453292F)
         );
+    }
+
+    public static void knockBackArrow(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
+        final Entity nmsDamager = ((CraftEntity) damager).getHandle();
+        if (nmsDamager instanceof EntityArrow) {
+            final EntityArrow arrow = (EntityArrow) nmsDamager;
+            final Vec3D vec3d = arrow.getMot().d(1.0D, 0.0D, 1.0D).d().a((double) arrow.knockbackStrength * 0.6D);
+            if (vec3d.g() > 0.0D) {
+                ((CraftLivingEntity) victim).getHandle().h(vec3d.x, 0.1D, vec3d.z);
+            }
+        }
     }
 }

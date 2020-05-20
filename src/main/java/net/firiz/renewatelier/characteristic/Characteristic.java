@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class Characteristic {
+public final class Characteristic {
 
     private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
@@ -74,7 +74,13 @@ public class Characteristic {
         throw new IllegalStateException("not characteristicInt class.");
     }
 
-    @Deprecated(since = "CharacteristicArray is deprecated.")
+    /**
+     *
+     * @deprecated 全ての特性タイプに対してクラスを用意するため
+     * @param type
+     * @return data.x
+     */
+    @Deprecated(forRemoval = true)
     public String[] getArrayData(CharacteristicType type) {
         final CharacteristicData data = datas.get(type);
         if (data instanceof CharacteristicArray) {

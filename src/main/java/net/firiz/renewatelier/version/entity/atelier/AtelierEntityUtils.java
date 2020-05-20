@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
 import net.firiz.renewatelier.utils.Chore;
 import net.minecraft.server.v1_15_R1.*;
@@ -22,7 +23,7 @@ public enum AtelierEntityUtils {
     INSTANCE;
 
     private final ClassPool pool = ClassPool.getDefault();
-    private final Map<TargetEntityTypes, Class<?>> entityMap = new EnumMap<>(TargetEntityTypes.class);
+    private final Map<TargetEntityTypes, Class<?>> entityMap = new Object2ObjectOpenHashMap<>();
     private final CtClass[] interfaces;
 
     private Method livingDamageEntity;
@@ -50,7 +51,7 @@ public enum AtelierEntityUtils {
                     final Class<?> entityClass = createWrapClass(
                             "net.firiz.renewatelier.version.entity.wrapper.AWrap".concat(types.clasz.getSimpleName()),
                             types.clasz,
-                            types.body
+                            Objects.requireNonNull(types.body)
                     );
                     entityMap.put(types, entityClass);
                 } catch (NotFoundException | CannotCompileException e) {

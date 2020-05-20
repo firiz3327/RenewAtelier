@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.entity.arrow;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
@@ -17,7 +18,6 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public final class ArrowManager {
         ItemStack nextConsumeArrow = null;
         if (entity instanceof Player) {
             final PlayerInventory playerInventory = ((Player) entity).getInventory();
-            final List<ItemStack> items = new ArrayList<>();
+            final List<ItemStack> items = new ObjectArrayList<>();
             items.add(playerInventory.getItemInMainHand());
             items.add(playerInventory.getItemInOffHand());
             IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);

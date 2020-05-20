@@ -2,6 +2,7 @@ package net.firiz.renewatelier.version.minecraft;
 
 import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
@@ -141,7 +142,7 @@ public class ReplaceVanillaItems {
 
     public static void changeRecipe() {
         final Iterator<Recipe> recipes = Bukkit.recipeIterator();
-        final List<Recipe> addRecipes = new ArrayList<>();
+        final List<Recipe> addRecipes = new ObjectArrayList<>();
         while (recipes.hasNext()) {
             final Recipe recipe = recipes.next();
             final org.bukkit.Material material = recipe.getResult().getType();
@@ -242,7 +243,7 @@ public class ReplaceVanillaItems {
     }
 
     private static void changeArmorLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
-        final List<String> lore = new ArrayList<>();
+        final List<String> lore = new ObjectArrayList<>();
         lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getVanillaItemDefense(item.getType()));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
@@ -251,7 +252,7 @@ public class ReplaceVanillaItems {
     }
 
     private static void changeShieldLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
-        final List<String> lore = new ArrayList<>();
+        final List<String> lore = new ObjectArrayList<>();
         lore.add(ChatColor.GRAY + "盾で攻撃を防ぐと自身の防御力が");
         lore.add(ChatColor.GRAY + "20%上昇した状態でダメージを受ける");
         meta.setLore(lore);
@@ -267,7 +268,7 @@ public class ReplaceVanillaItems {
     public static boolean changeVanillaItem(@NotNull final ItemStack item, boolean random, @NotNull UnaryOperator<ItemStack> function) {
         final AlchemyMaterial material = AlchemyMaterial.getVanillaReplaceItem(item.getType());
         if (material != null) {
-            List<AlchemyIngredients> overrideIngredients = random ? null : new ArrayList<>();
+            List<AlchemyIngredients> overrideIngredients = random ? null : new ObjectArrayList<>();
             if (overrideIngredients != null) {
                 for (ImmutablePair<AlchemyIngredients, Integer> ing : material.getIngredients()) {
                     if (ing.getRight() >= 100) {

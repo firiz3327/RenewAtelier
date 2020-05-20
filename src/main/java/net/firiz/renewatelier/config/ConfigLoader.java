@@ -1,9 +1,9 @@
 package net.firiz.renewatelier.config;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.utils.CustomConfig;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -15,7 +15,7 @@ public abstract class ConfigLoader<T> {
 
     private final File file;
     private final boolean folder;
-    private final List<T> list = new ArrayList<>();
+    private final List<T> list = new ObjectArrayList<>();
     protected final AtelierPlugin plugin = AtelierPlugin.getPlugin();
 
     ConfigLoader(final File file, final boolean folder) {

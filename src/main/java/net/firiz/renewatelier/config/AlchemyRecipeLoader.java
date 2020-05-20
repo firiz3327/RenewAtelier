@@ -3,6 +3,9 @@ package net.firiz.renewatelier.config;
 import java.io.File;
 import java.util.*;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
@@ -22,7 +25,7 @@ import org.bukkit.enchantments.Enchantment;
  */
 public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
 
-    private final List<AlchemyRecipe> ideaRecipes = new ArrayList<>();
+    private final List<AlchemyRecipe> ideaRecipes = new ObjectArrayList<>();
 
     AlchemyRecipeLoader() {
         super(new File(AtelierPlugin.getPlugin().getDataFolder(), "recipes"), true);
@@ -47,12 +50,12 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             final int requireAlchemyLevel = item.contains("req_alchemylevel") ? item.getInt("req_alchemylevel") : 1;
             // 初期錬金属性 *
             final List<String> defaultIngredientsStr = item.getStringList("default_ingredients");
-            final List<AlchemyIngredients> defaultIngredients = new ArrayList<>();
+            final List<AlchemyIngredients> defaultIngredients = new ObjectArrayList<>();
             defaultIngredientsStr.forEach(str -> defaultIngredients.add(AlchemyIngredients.searchName(str)));
             // 効果-必要ゲージ数 *
             final int req_bar = item.getInt("req_bar");
             // 効果
-            final List<RecipeEffect> effects = new ArrayList<>();
+            final List<RecipeEffect> effects = new ObjectArrayList<>();
             if (item.contains("effects")) {
                 final ConfigurationSection effectsItem = item.getConfigurationSection("effects");
                 effectsItem.getKeys(false).stream().map(effectsItem::getConfigurationSection).filter(Objects::nonNull).forEachOrdered(esec -> {
@@ -62,7 +65,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                     }
                     final AlchemyAttribute attribute = AlchemyAttribute.valueOf(esec.getString("attribute"));
                     final List<Integer> star = esec.getIntegerList("star");
-                    final List<StarEffect> starEffects = new ArrayList<>();
+                    final List<StarEffect> starEffects = new ObjectArrayList<>();
                     star.stream()
                             .filter(s -> (s != 0))
                             .map(s -> esec.getConfigurationSection("star_effect_" + s))
@@ -79,11 +82,11 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                 });
             }
             // 熟練度 *
-            final Map<Integer, List<RecipeLevelEffect>> levels = new HashMap<>();
+            final Int2ObjectMap<List<RecipeLevelEffect>> levels = new Int2ObjectOpenHashMap<>();
             final ConfigurationSection levelsec = item.getConfigurationSection("levels");
             for (int i = 1; i <= 4; i++) {
                 final List<String> levelEffectStr = levelsec.getStringList("level_" + i);
-                final List<RecipeLevelEffect> levelEffects = new ArrayList<>();
+                final List<RecipeLevelEffect> levelEffects = new ObjectArrayList<>();
                 levelEffectStr.stream()
                         .map(effect -> effect.split(","))
                         .forEachOrdered(effectSplit -> levelEffects.add(new RecipeLevelEffect(

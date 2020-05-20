@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.inventory.alchemykettle;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public final class CatalystSelect implements BiParamInventory<AlchemyRecipe, Inv
 
     private static final KettleItemManager kettle = KettleItemManager.INSTANCE;
     private final InventoryManager manager;
-    private final List<UUID> openUsers = new ArrayList<>();
+    private final List<UUID> openUsers = new ObjectArrayList<>();
 
     public CatalystSelect(final InventoryManager manager) {
         this.manager = manager;
@@ -66,7 +67,7 @@ public final class CatalystSelect implements BiParamInventory<AlchemyRecipe, Inv
             catalyst = AlchemyMaterial.getMaterial(cItem).getCatalyst();
         }
         catalyst.setInv(inv, recipe, false);
-        final List<String> lore = new ArrayList<>();
+        final List<String> lore = new ObjectArrayList<>();
         lore.add("");
         lore.add(ChatColor.GRAY + "使用可能カテゴリー");
         recipe.getCatalystCategories().forEach(ct -> {

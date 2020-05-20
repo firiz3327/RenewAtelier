@@ -1,6 +1,9 @@
 package net.firiz.renewatelier.characteristic.datas;
 
-@Deprecated(since = "CharacteristicInt以外の要素は全て専用クラスを設けるためCharacteristicArrayは一時的なクラスとする")
+/**
+ * @deprecated CharacteristicInt以外の要素は全て専用クラスを設けるためCharacteristicArrayは一時的なクラスとする
+ */
+@Deprecated(forRemoval = true)
 public class CharacteristicArray implements CharacteristicData {
 
     private final String[] x;
