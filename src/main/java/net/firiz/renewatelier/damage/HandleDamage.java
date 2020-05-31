@@ -7,6 +7,7 @@ import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.NMSEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
@@ -57,7 +58,7 @@ public final class HandleDamage {
         final Player player = charStats.getPlayer();
         NMSEntityUtils.sweepParticle(player);
         location.getNearbyLivingEntities(1.5).stream()
-                .filter(entity -> !(entity instanceof Player))
+                .filter(entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity))
                 .limit(6) // 6 mob hit
                 .forEach(entity -> {
                     damageUtilV2.normalDamage(

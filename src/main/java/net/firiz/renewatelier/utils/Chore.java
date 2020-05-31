@@ -23,6 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -350,7 +351,7 @@ public final class Chore {
         return Integer.parseInt(str.substring(0, str.indexOf('r')).replace("§", "").replace("a", "5"));
     }
 
-    public static void addItem(@NotNull Player player, ItemStack item) {
+    public static void addItem(@NotNull HumanEntity player, ItemStack item) {
         if (item != null) {
             addItem(player.getInventory(), item, player.getLocation());
         }

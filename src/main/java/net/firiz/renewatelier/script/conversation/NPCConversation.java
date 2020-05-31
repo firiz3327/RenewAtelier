@@ -7,16 +7,15 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.inventory.delivery.DeliveryObject;
+import net.firiz.renewatelier.npc.NPC;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.graalvm.polyglot.HostAccess.Export;
@@ -24,28 +23,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.script.Invocable;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author firiz
  */
 public final class NPCConversation extends ScriptConversation {
 
-    private final LivingEntity npc;
-    private final VEntityPlayer npcPlayer; // EntityPlayer class
+    private final NPC npc;
     private FakeEntity fakeEntity;
     private BukkitTask runTaskLater;
 
-    public NPCConversation(@NotNull LivingEntity npc, @NotNull String scriptName, @NotNull Player player) {
+    public NPCConversation(@NotNull NPC npc, @NotNull String scriptName, @NotNull Player player) {
         super(scriptName, player);
         this.npc = npc;
-        this.npcPlayer = null;
-    }
-
-    public NPCConversation(@NotNull VEntityPlayer npcPlayer, @NotNull String scriptName, @NotNull Player player) {
-        super(scriptName, player);
-        this.npc = null;
-        this.npcPlayer = npcPlayer;
     }
 
     @Nullable
@@ -54,28 +46,21 @@ public final class NPCConversation extends ScriptConversation {
         return iv;
     }
 
-    @Nullable
     @Export
-    public LivingEntity getNPC() {
+    public NPC getNPC() {
         return npc;
-    }
-
-    @Nullable
-    @Export
-    public VEntityPlayer getPlayerNPC() {
-        return npcPlayer;
     }
 
     @NotNull
     @Export
     public String getNPCName() {
-        return npc == null ? npcPlayer.getName() : npc.getCustomName();
+        return npc.getName();
     }
 
     @NotNull
     @Export
     public Location getLocation() {
-        return (npc == null ? npcPlayer.getLocation() : npc.getLocation()).clone();
+        return npc.getLocation();
     }
 
     @NotNull
@@ -118,7 +103,7 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void removeNPC(@NotNull final String name, @NotNull final String script, @NotNull final Location location, @NotNull final EntityType type) {
-        NPCManager.INSTANCE.removeNPC(location, type, name, script);
+//        NPCManager.INSTANCE.removeNPC(location, type, name, script);
     }
 
     @Export
@@ -128,7 +113,7 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void createNPC(@NotNull final String name, @NotNull final String script, @NotNull final Location location, @NotNull final EntityType type) {
-        NPCManager.INSTANCE.createNPC(location, type, name, script);
+//        NPCManager.INSTANCE.createNPC(location, type, name, script);
     }
 
     @Export
@@ -138,7 +123,7 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void removePlayerNPC(@NotNull final String name, @NotNull final String script, @NotNull final Location location, @NotNull final UUID uuid) {
-        NPCManager.INSTANCE.removeNPCPlayer(location, name, uuid, script);
+//        NPCManager.INSTANCE.removeNPCPlayer(location, name, uuid, script);
     }
 
     @Export
@@ -148,7 +133,7 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void createPlayerNPC(@NotNull final String name, @NotNull final String script, @NotNull final Location location, @NotNull final UUID uuid) {
-        NPCManager.INSTANCE.createNPCPlayer(location, name, uuid, script);
+//        NPCManager.INSTANCE.createNPCPlayer(location, name, uuid, script);
     }
 
     @Export
@@ -219,8 +204,6 @@ public final class NPCConversation extends ScriptConversation {
              */
             @Override
             void run(NPCConversation conversation, Object... args) {
-                // https://wiki.vg/Protocol#Spawn_Mob
-                // https://wiki.vg/Entity_metadata#Entity_Metadata_Format
                 try {
                     final FakeEntity fakeEntity = new FakeEntity(-1, (FakeEntity.FakeEntityType) args[0], 0);
                     conversation.fakeEntity = fakeEntity;

@@ -10,6 +10,7 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
+import net.firiz.renewatelier.version.tab.TabList;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
@@ -25,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class AtelierPlugin extends JavaPlugin {
 
     private InventoryManager inventoryManager;
+    private TabList tabList;
 
     @Override
     public void onEnable() {
@@ -49,7 +51,7 @@ public final class AtelierPlugin extends JavaPlugin {
         ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
         LoopManager.INSTANCE.start();
-        NPCManager.INSTANCE.setup();
+        NPCManager.INSTANCE.load();
         PlayerSaveManager.INSTANCE.loadPlayers();
         /*
         AtelierEntityUtils.INSTANCE
@@ -59,7 +61,11 @@ public final class AtelierPlugin extends JavaPlugin {
          */
 
         ReplaceVanillaItems.changeRecipe();
+        tabList = new TabList();
+        tabList.init();
+
         LoopManager.INSTANCE.addSec(new EntityCleanUp());
+        LoopManager.INSTANCE.addSec(NPCManager.INSTANCE.lookEyeLoop());
     }
 
     public static void worldSettings(World world) {
@@ -106,5 +112,9 @@ public final class AtelierPlugin extends JavaPlugin {
 
     public InventoryManager getInventoryManager() {
         return inventoryManager;
+    }
+
+    public TabList getTabList() {
+        return tabList;
     }
 }

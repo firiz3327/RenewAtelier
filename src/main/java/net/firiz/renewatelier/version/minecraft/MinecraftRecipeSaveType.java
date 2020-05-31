@@ -1,9 +1,11 @@
 package net.firiz.renewatelier.version.minecraft;
 
+import net.firiz.renewatelier.version.MinecraftVersion;
+
 /**
- *
  * @author firiz
  */
+@MinecraftVersion("1.15")
 public enum MinecraftRecipeSaveType {
     CAULDRON("minecraft:cauldron");
 

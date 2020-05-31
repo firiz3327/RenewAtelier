@@ -1,12 +1,14 @@
 package net.firiz.renewatelier.version.packet;
 
 import com.mojang.authlib.GameProfile;
+
 import java.util.List;
 import java.util.UUID;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.renewatelier.utils.FakeId;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
-import net.minecraft.server.v1_15_R1.ChatMessage;
 import net.minecraft.server.v1_15_R1.DataWatcher;
 import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
 import net.minecraft.server.v1_15_R1.EntityPlayer;
@@ -22,10 +24,10 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 /**
- *
  * @author firiz
  */
 public class FakePlayerPacket {
@@ -38,9 +40,11 @@ public class FakePlayerPacket {
         final WorldServer nmsWorld = ((CraftWorld) world).getHandle();
         final GameProfile profile = new GameProfile(uuid, name);
         final EntityPlayer entityPlayer = new EntityPlayer(server, nmsWorld, profile, new PlayerInteractManager(nmsWorld));
-        entityPlayer.listName = new ChatMessage("");
+        final int fakeId = FakeId.createId();
+        entityPlayer.e(fakeId); // Entity.id = fakeId (1.15)
+        entityPlayer.listName = CraftChatMessage.fromStringOrNull("npc");
         entityPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
-        return new VEntityPlayer(entityPlayer, entityPlayer.getId(), uuid, name, location);
+        return new VEntityPlayer(entityPlayer, fakeId, uuid, name, location);
     }
 
     private static PacketPlayOutPlayerInfo getInfo(final List<VEntityPlayer> players, final boolean remove) {
@@ -61,7 +65,7 @@ public class FakePlayerPacket {
     public static void sendLogout(final Player player, final List<VEntityPlayer> players) {
         final int[] ids = new int[players.size()];
         for (int i = 0; i < ids.length; i++) {
-            ids[i] = players.get(i).getId();
+            ids[i] = players.get(i).getEntityId();
         }
         PacketUtils.sendPackets(
                 player,
@@ -70,18 +74,21 @@ public class FakePlayerPacket {
         );
     }
 
+    @MinecraftVersion("1.15")
     public static void sendSkin(final Player player, final VEntityPlayer vePlayer, final byte bitmask) {
         final EntityPlayer ePlayer = (EntityPlayer) vePlayer.getEntityPlayer();
         final DataWatcher watcher = ePlayer.getDataWatcher();
-        watcher.set(DataWatcherRegistry.a.a(15), bitmask); // 1.13.2(13) -> 1.14(15)
+        // https://wiki.vg/Entity_metadata#Player
+        // index (minecraft 1.15) -> 16
+        watcher.set(DataWatcherRegistry.a.a(16), bitmask);
         PacketUtils.sendPackets(
                 player,
+                new PacketPlayOutNamedEntitySpawn(ePlayer),
                 new PacketPlayOutEntityMetadata(
                         ePlayer.getId(),
                         watcher,
                         true
-                ),
-                new PacketPlayOutNamedEntitySpawn(ePlayer)
+                )
         );
     }
 

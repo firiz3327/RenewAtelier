@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
@@ -51,6 +52,7 @@ public class PlayerInjection {
         }
     }
 
+    @MinecraftVersion("1.15")
     private static void injectArmorChangeEvent(EntityPlayer player) {
         try {
             final Field armorField = PlayerInventory.class.getDeclaredField("armor");

@@ -36,6 +36,8 @@ public final class Char {
     private static final String COLUMN_USER_ID = "userId";
 
     @NotNull
+    private final Player player;
+    @NotNull
     private final UUID uuid;
     private final int id;
     @Nullable
@@ -61,6 +63,7 @@ public final class Char {
     private final Runnable autoSave;
 
     public Char(
+            @NotNull Player player,
             @NotNull UUID uuid,
             final int id,
             @Nullable final String email,
@@ -71,6 +74,7 @@ public final class Char {
             @NotNull final List<MinecraftRecipeSaveType> saveTypes,
             @NotNull final CharSettings settings
     ) {
+        this.player = player;
         this.uuid = uuid;
         this.id = id;
         this.email = email;
@@ -113,7 +117,7 @@ public final class Char {
         recipeSQL.setRecipeStatus(status);
     }
 
-    public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
+    public void addRecipeExp(final boolean view, final AlchemyRecipe recipe, final int exp) {
         recipeSQL.addRecipeExp(player, view, recipe, exp);
     }
     //</editor-fold>
@@ -128,7 +132,7 @@ public final class Char {
         );
     }
 
-    public void addQuest(final Player player, final String questId) {
+    public void addQuest(final String questId) {
         addQuest(new QuestStatus(questId));
         player.sendMessage("クエスト「" + ChatColor.GREEN + Quest.getQuest(questId).getName() + ChatColor.RESET + "」を受注しました。");
     }
@@ -147,11 +151,11 @@ public final class Char {
         throw new IllegalStateException("not found questStatus for ".concat(id));
     }
 
-    public void questClear(final Player player, final String id, final boolean view) {
-        questClear(player, getQuestStatus(id), view);
+    public void questClear(final String id, final boolean view) {
+        questClear(getQuestStatus(id), view);
     }
 
-    public void questClear(final Player player, final QuestStatus questStatus, final boolean view) {
+    public void questClear(final QuestStatus questStatus, final boolean view) {
         SQLManager.INSTANCE.insert(
                 "questDatas",
                 new String[]{COLUMN_USER_ID, "questId", "clear"},
@@ -163,7 +167,7 @@ public final class Char {
             player.sendMessage("クエスト「" + ChatColor.GREEN + quest.getName() + ChatColor.RESET + "」を完了しました。");
         }
         if (quest.getNextQuestId() != null) {
-            addQuest(player, quest.getNextQuestId());
+            addQuest(quest.getNextQuestId());
         }
         if (quest.getResults() != null) {
             quest.getResults().forEach(result -> {
@@ -172,7 +176,7 @@ public final class Char {
                     Chore.addItem(player, item.getItem());
                 } else if (result instanceof RecipeQuestResult) {
                     final AlchemyRecipe recipe = ((RecipeQuestResult) result).getResult();
-                    addRecipeExp(player, true, recipe, 0);
+                    addRecipeExp(true, recipe, 0);
                 } else if (result instanceof MoneyQuestResult) {
                     final int money = ((MoneyQuestResult) result).getResult();
                     gainMoneyCompulsion(money);

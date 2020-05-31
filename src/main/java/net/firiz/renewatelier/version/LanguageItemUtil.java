@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author firiz
  */
+@MinecraftVersion("1.15")
 public enum LanguageItemUtil {
     //<editor-fold defaultstate="collapsed" desc="es 1.15">
     E0("block.minecraft.acacia_button", "アカシアのボタン"),

@@ -655,7 +655,7 @@ public class AlchemyKettle implements BiParamInventory<AlchemyRecipe, Inventory>
                                 player.closeInventory();
                                 final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
                                 status.increaseIdea(recipe);
-                                status.addRecipeExp(player, false, recipe, status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
+                                status.addRecipeExp(false, recipe, status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
                                 new AlchemyResultDrop(loc, resultItem).start();
                             }
                         }

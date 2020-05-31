@@ -1,9 +1,7 @@
 package net.firiz.renewatelier.version.nms;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
-import net.firiz.renewatelier.utils.Chore;
-import net.firiz.renewatelier.version.VersionUtils;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -14,14 +12,14 @@ import org.bukkit.World;
 public class VEntityPlayer {
 
     private final Object entityPlayer; // EntityPlayer class
-    private final int id;
+    private final int entityId;
     private final UUID uuid;
     private final String name;
     private final Location location;
 
-    public VEntityPlayer(Object entityPlayer, int id, UUID uuid, String name, Location location) {
+    public VEntityPlayer(Object entityPlayer, int entityId, UUID uuid, String name, Location location) {
         this.entityPlayer = entityPlayer;
-        this.id = id;
+        this.entityId = entityId;
         this.uuid = uuid;
         this.name = name;
         this.location = location;
@@ -31,8 +29,8 @@ public class VEntityPlayer {
         return entityPlayer;
     }
 
-    public int getId() {
-        return id;
+    public int getEntityId() {
+        return entityId;
     }
 
     public UUID getUniqueId() {
@@ -49,15 +47,6 @@ public class VEntityPlayer {
 
     public World getWorld() {
         return location.getWorld();
-    }
-
-    public void setListName(final String listName) {
-        try {
-            final Field listNameField = entityPlayer.getClass().getField("listName");
-            listNameField.set(entityPlayer, VersionUtils.createChatMessage(listName));
-        } catch (SecurityException | IllegalArgumentException | NoSuchFieldException | IllegalAccessException ex) {
-            Chore.logWarning(ex);
-        }
     }
 
 }

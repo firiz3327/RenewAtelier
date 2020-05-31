@@ -9,6 +9,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
+@MinecraftVersion("1.15")
 public class ReplaceVanillaItems {
 
     private ReplaceVanillaItems() {

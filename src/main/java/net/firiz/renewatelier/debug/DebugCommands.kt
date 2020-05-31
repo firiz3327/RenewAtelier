@@ -9,15 +9,17 @@ import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.constants.GameConstants
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
+import net.firiz.renewatelier.item.json.AlchemyItemBag
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
-import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.Chore
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
+import net.firiz.renewatelier.version.packet.PacketUtils
+import net.firiz.renewatelier.version.tab.TabList
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -194,7 +196,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     private fun npc(loc: Location, type: EntityType, name: String, script: String, save: Boolean) {
-        NPCManager.INSTANCE.createNPC(loc, type, name, script, save);
+//        NPCManager.INSTANCE.createNPC(loc, type, name, script, save);
     }
 
     @Cmd(
@@ -236,7 +238,7 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     private fun playerNpc(loc: Location, name: String, uuid: UUID, script: String, save: Boolean) {
-        NPCManager.INSTANCE.createNPCPlayer(loc, name, uuid, script, save)
+//        NPCManager.INSTANCE.createNPCPlayer(loc, name, uuid, script, save)
     }
 
     @Cmd(
@@ -492,6 +494,14 @@ class DebugCommands(private val debugListener: DebugListener) {
                         if (item != null) {
                             Chore.log(item.toJson())
                         }
+                    }
+                    "t" -> {
+                        val bag = ItemStack(Material.STICK)
+                        val aib = AlchemyItemBag()
+                        aib.writeItem(bag)
+                        val b = AlchemyItemBag.load(bag)
+                        println(b.items)
+                        sender.inventory.addItem(bag)
                     }
                 }
             }

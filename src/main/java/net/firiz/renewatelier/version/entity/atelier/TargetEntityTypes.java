@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.entity.Race;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.entity.Entity;
@@ -52,12 +53,25 @@ public enum TargetEntityTypes {
             @Nullable String entityType,
             @NotNull String name
     ) {
+        this(type, clasz, race, body, entityType, name, null);
+    }
+
+    @MinecraftVersion("1.15")
+    TargetEntityTypes(
+            @NotNull EntityType type,
+            @NotNull Class<? extends EntityLiving> clasz,
+            @NotNull Race race,
+            @Nullable String body,
+            @Nullable String entityType,
+            @NotNull String name,
+            @Nullable Consumer<Entity> initConsumer
+    ) {
         this.type = type;
         this.customClass = null;
         this.clasz = clasz;
         this.race = race;
         this.name = name;
-        this.initConsumer = null;
+        this.initConsumer = initConsumer;
         if (body != null) {
             this.body = body.replace("$NMS", "net.minecraft.server.v1_15_R1");
         } else if (entityType != null) {
@@ -81,30 +95,6 @@ public enum TargetEntityTypes {
         this.initConsumer = null;
         this.body = null;
         this.customClass = customClass;
-    }
-
-    TargetEntityTypes(
-            @NotNull EntityType type,
-            @NotNull Class<? extends EntityLiving> clasz,
-            @NotNull Race race,
-            @Nullable String body,
-            @Nullable String entityType,
-            @NotNull String name,
-            @Nullable Consumer<Entity> initConsumer
-    ) {
-        this.type = type;
-        this.customClass = null;
-        this.clasz = clasz;
-        this.race = race;
-        this.name = name;
-        this.initConsumer = initConsumer;
-        if (body != null) {
-            this.body = body.replace("$NMS", "net.minecraft.server.v1_15_R1");
-        } else if (entityType != null) {
-            this.body = "{super(net.minecraft.server.v1_15_R1.EntityTypes." + entityType + ", (net.minecraft.server.v1_15_R1.World) $args[0]);}";
-        } else {
-            throw new IllegalStateException("not found body code.");
-        }
     }
 
     @Nullable

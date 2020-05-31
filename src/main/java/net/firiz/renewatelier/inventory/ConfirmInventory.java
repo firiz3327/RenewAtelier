@@ -49,7 +49,7 @@ public final class ConfirmInventory implements ParamInventory<ConfirmInventory.C
 
     @Override
     public void onClick(@NotNull final InventoryClickEvent e) {
-        e.setCancelled(e.getSlotType() == InventoryType.SlotType.CONTAINER);
+        e.setCancelled(true);
         final Player player = (Player) e.getWhoClicked();
         final UUID uuid = player.getUniqueId();
         final ObjIntConsumer<Player> cr = consumers.get(uuid).getRight();
@@ -68,10 +68,7 @@ public final class ConfirmInventory implements ParamInventory<ConfirmInventory.C
 
     @Override
     public void onDrag(@NotNull final InventoryDragEvent e) {
-        final Inventory inv = e.getInventory();
-        e.getRawSlots().stream()
-                .filter(raw -> (raw >= 0 && raw < inv.getSize()))
-                .forEach(itemValue -> e.setCancelled(true));
+        e.setCancelled(true);
     }
 
     @Override

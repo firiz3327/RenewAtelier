@@ -22,9 +22,11 @@ import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.graalvm.polyglot.HostAccess.Export;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,7 +120,7 @@ public class ScriptConversation {
     @Export
     public void questStart(final String questId, final boolean view) {
         if (view) {
-            getStatus().addQuest(player, questId);
+            getStatus().addQuest(questId);
         } else {
             getStatus().addQuest(new QuestStatus(questId));
         }
@@ -131,7 +133,7 @@ public class ScriptConversation {
 
     @Export
     public void questClear(final String questId, final boolean view) {
-        getStatus().questClear(player, questId, view);
+        getStatus().questClear(questId, view);
     }
 
     @Export
@@ -298,6 +300,11 @@ public class ScriptConversation {
     @Export
     public Characteristic getCharacteristicForName(final String name) {
         return Characteristic.search(name);
+    }
+
+    @Export
+    public AlchemyItemStatus loadItemStatus(final ItemStack item) {
+        return AlchemyItemStatus.load(item);
     }
 
     @Export

@@ -133,15 +133,6 @@ public enum LoopManager {
 
         for (final Player player : players) {
             PayloadPacket.sendBrand(player);
-            final StringBuilder sb = new StringBuilder();
-            final String name = player.getDisplayName();
-            sb.append(name);
-            for (int i = 0; i < maxLength - name.length() + 1; i++) {
-                sb.append(" ");
-            }
-            sb.append(ChatColor.GREEN).append(PacketUtils.getPing(player));
-            PayloadPacket.sendBrand(player);
-            player.setPlayerListName(sb.toString());
         }
 
         if (secPeriod % 60 == 0) {

@@ -64,6 +64,7 @@ public class VersionUtils {
     public static VItemStack asVItemCopy(final ItemStack item) {
         return new VItemStack(CraftItemStack.asNMSCopy(item));
     }
+
     public static net.minecraft.server.v1_15_R1.ItemStack asNMSCopy(final ItemStack item) {
         return CraftItemStack.asNMSCopy(item);
     }

@@ -111,9 +111,9 @@ public class DebugListener implements Listener {
                 if (search != null) {
                     final RecipeStatus rs = status.getRecipeStatus(strs[3]);
                     if (rs == null) {
-                        status.addRecipeExp(player, true, search, 0);
+                        status.addRecipeExp(true, search, 0);
                     } else if (strs.length > 4) {
-                        status.addRecipeExp(player, true, search, Integer.parseInt(strs[4]));
+                        status.addRecipeExp(true, search, Integer.parseInt(strs[4]));
                     }
                 }
                 break;

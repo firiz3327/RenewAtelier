@@ -1,13 +1,9 @@
 package net.firiz.renewatelier.item.json;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.*;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
@@ -39,23 +35,28 @@ import java.util.stream.Collectors;
 public class AlchemyItemStatus {
 
     private static final NamespacedKey persistentDataKey = new NamespacedKey(AtelierPlugin.getPlugin(), "alchemyItemStatus");
-    private static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new AlchemyItemStatusAdapterFactory()).create();
 
     @Expose
+    @NotNull
     private final AlchemyMaterial alchemyMaterial;
     @Nullable
     private final CustomModelMaterial customModel;
     @Expose
+    @NotNull
     private int[] size;
     @Expose
+    @NotNull
     private final List<Category> categories;
     @Expose
     private int quality;
     @Expose
+    @NotNull
     private final List<AlchemyIngredients> ingredients;
     @Expose
+    @NotNull
     private final List<Characteristic> characteristics;
     @Expose
+    @NotNull
     private final List<String> activeEffects;
     @Expose
     private int hp;
@@ -67,12 +68,18 @@ public class AlchemyItemStatus {
     private int def;
     @Expose
     private int speed;
+    @Expose
+    @NotNull
+    private final List<String> prefix;
+    @Expose
+    @NotNull
+    private final Map<String, String> dataContainer;
 
-    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
-        this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed);
+    private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
+        this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
     }
 
-    public AlchemyItemStatus(AlchemyMaterial alchemyMaterial, CustomModelMaterial customModel, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
+    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<String> activeEffects, int hp, int mp, int atk, int def, int speed, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
         this.alchemyMaterial = alchemyMaterial;
         this.customModel = customModel;
         this.size = size;
@@ -86,6 +93,8 @@ public class AlchemyItemStatus {
         this.atk = atk;
         this.def = def;
         this.speed = speed;
+        this.prefix = prefix;
+        this.dataContainer = dataContainer;
     }
 
     @NotNull
@@ -97,6 +106,7 @@ public class AlchemyItemStatus {
         return size;
     }
 
+    @NotNull
     public List<Category> getCategories() {
         return categories;
     }
@@ -105,19 +115,22 @@ public class AlchemyItemStatus {
         return quality;
     }
 
+    @NotNull
     public List<AlchemyIngredients> getIngredients() {
         return ingredients;
     }
 
+    @NotNull
     public List<Characteristic> getCharacteristics() {
         return characteristics;
     }
 
+    @NotNull
     public List<String> getActiveEffects() {
         return activeEffects;
     }
 
-    public void setSize(int[] size) {
+    public void setSize(@NotNull int[] size) {
         this.size = size;
     }
 
@@ -165,6 +178,51 @@ public class AlchemyItemStatus {
         this.speed = speed;
     }
 
+    /**
+     * 一部のアイテムで使用するscript用メソッド
+     * @return prefix
+     */
+    @NotNull
+    public List<String> getPrefix() {
+        return prefix;
+    }
+
+    /**
+     * 一部のアイテムで使用するscript用メソッド
+     * @param prefix prefixに追加する文字列
+     * @return add
+     */
+    public boolean addPrefix(String prefix) {
+        return this.prefix.add(prefix);
+    }
+
+    /**
+     * 一部のアイテムで使用するscript用メソッド
+     * @param key アイテムのキー
+     * @return get
+     */
+    public String getDataContainerValue(String key) {
+        return dataContainer.get(key);
+    }
+
+    /**
+     * 一部のアイテムで使用するscript用メソッド
+     * @param key 登録したいアイテムのキー
+     * @param value 登録したい文字列データ
+     */
+    public void addDataContainer(@NotNull String key, @NotNull String value) {
+        dataContainer.put(Objects.requireNonNull(key), Objects.requireNonNull(value));
+    }
+
+    /**
+     * 一部のアイテムで使用するscript用メソッド
+     * @param key　アイテムのキー
+     * @return containsKey
+     */
+    public boolean hasDataContainer(@NotNull String key) {
+        return dataContainer.containsKey(key);
+    }
+
     @NotNull
     public ItemStack create() {
         final ItemStack item;
@@ -187,8 +245,18 @@ public class AlchemyItemStatus {
                 mp,
                 atk,
                 def,
-                speed
+                speed,
+                prefix,
+                dataContainer
         ));
+    }
+
+    public static boolean has(@Nullable final ItemStack item) {
+        if (item != null && item.hasItemMeta()) {
+            final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            return container.has(persistentDataKey, PersistentDataType.STRING);
+        }
+        return false;
     }
 
     @Nullable
@@ -196,15 +264,25 @@ public class AlchemyItemStatus {
         if (item != null && item.hasItemMeta()) {
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(persistentDataKey, PersistentDataType.STRING)) {
-                final String json = container.get(persistentDataKey, PersistentDataType.STRING);
-                return gson.fromJson(json, AlchemyItemStatus.class);
+                return loadJson(container.get(persistentDataKey, PersistentDataType.STRING));
             }
         }
         return null;
     }
 
+    @NotNull
+    public static AlchemyItemStatus loadJson(@Nullable final String json) {
+        final AlchemyItemStatus status = JsonFactory.fromJson(json, AlchemyItemStatus.class);
+        status.update();
+        return status;
+    }
+
+    private void update() {
+        // AlchemyItemStatusにフィールド変数を追加した場合json読み込み時にnullになる為、バージョンアップ処理を施す必要性がある？
+    }
+
     public String toJson() {
-        return gson.toJson(this);
+        return JsonFactory.toJson(this);
     }
 
     public void writeJson(@NotNull final ItemStack item) {
@@ -240,7 +318,7 @@ public class AlchemyItemStatus {
         final AlchemyItemStatus itemStatus = load(item);
         if (itemStatus != null) {
             itemStatus.setSize(size);
-            itemStatus.updateLore(item, new VisibleFlags(true));
+            itemStatus.updateItem(item);
         }
     }
 
@@ -332,6 +410,28 @@ public class AlchemyItemStatus {
             final int def,
             final int speed
     ) {
+        return getItem(alchemyMaterial, overrideIngredients, item, overQuality, overSize, activeEffects, overrideCharacteristics, overrideCategory, visibleFlags, hp, mp, atk, def, speed, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
+    }
+
+    @Nullable
+    public static ItemStack getItem(
+            @Nullable final AlchemyMaterial alchemyMaterial,
+            @Nullable final List<AlchemyIngredients> overrideIngredients,
+            @Nullable ItemStack item,
+            final int overQuality,
+            final int[] overSize,
+            @Nullable final List<String> activeEffects,
+            @Nullable final List<Characteristic> overrideCharacteristics,
+            @Nullable final List<Category> overrideCategory,
+            @NotNull final VisibleFlags visibleFlags,
+            final int hp,
+            final int mp,
+            final int atk,
+            final int def,
+            final int speed,
+            final List<String> prefix,
+            final Map<String, String> dataContainer
+    ) {
         if (alchemyMaterial == null || (alchemyMaterial.getIngredients().isEmpty() && (overrideIngredients == null || overrideIngredients.isEmpty()))) {
             return null;
         }
@@ -348,12 +448,18 @@ public class AlchemyItemStatus {
                 mp,
                 atk,
                 def,
-                speed
+                speed,
+                prefix,
+                dataContainer
         );
-        return itemStatus.updateLore(item, visibleFlags);
+        return itemStatus.updateItem(item, visibleFlags);
     }
 
-    private ItemStack updateLore(@Nullable ItemStack item, @NotNull VisibleFlags visibleFlags) {
+    public ItemStack updateItem(@Nullable ItemStack item) {
+        return updateItem(item, new VisibleFlags(true));
+    }
+
+    public ItemStack updateItem(@Nullable ItemStack item, @NotNull VisibleFlags visibleFlags) {
         if (item == null || item.getType() == Material.AIR) {
             item = alchemyMaterial.getMaterial().toItemStack();
         }
@@ -362,8 +468,17 @@ public class AlchemyItemStatus {
         if (!alchemyMaterial.isDefaultName()) {
             meta.setDisplayName(alchemyMaterial.getName());
         }
+        final PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
+        dataContainer.forEach((key, value) -> persistentDataContainer.set(
+                new NamespacedKey(AtelierPlugin.getPlugin(), key),
+                PersistentDataType.STRING,
+                value
+        ));
 
         final List<String> lore = new ObjectArrayList<>();
+        if (!prefix.isEmpty()) {
+            lore.addAll(prefix);
+        }
         if (visibleFlags.id) {
             lore.add("");
         }

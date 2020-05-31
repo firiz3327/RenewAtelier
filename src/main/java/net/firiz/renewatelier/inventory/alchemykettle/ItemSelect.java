@@ -181,7 +181,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
                     cloneItem.setAmount(1);
                     kettle.addPageItem(uuid, cloneItem, page);
                     e.getCurrentItem().setAmount(e.getCurrentItem().getAmount() - 1);
-                    setItemSelectNumber(player, inv, recipe, 0); // reflesh page
+                    setItemSelectNumber(player, inv, recipe, 0); // refresh page
                 }
             }
             return;
@@ -211,7 +211,7 @@ public final class ItemSelect implements BiParamInventory<AlchemyRecipe, Invento
                             kettle.addPageItem(uuid, cloneItem, page);
                         }
                     }
-                    setItemSelectNumber(player, inv, recipe, 0); // reflesh page
+                    setItemSelectNumber(player, inv, recipe, 0); // refresh page
                 }
             } else if (raw == 20 || raw == 24) { // ページ変更
                 setItemSelectNumber(player, inv, recipe, raw != 20 ? 1 : -1);

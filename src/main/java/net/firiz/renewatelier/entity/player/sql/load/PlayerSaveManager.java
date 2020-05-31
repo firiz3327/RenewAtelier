@@ -6,12 +6,14 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  * @author firiz
@@ -70,6 +72,10 @@ public enum PlayerSaveManager {
     }
 
     public void loadStatus(final Player player) {
+        final PlayerInventory inv = player.getInventory();
+        if (!AlchemyItemBag.has(inv.getItem(9))) {
+            inv.setItem(9, AlchemyItemBag.createBagItem());
+        }
         final UUID uuid = player.getUniqueId();
         final Object[] wheres = new Object[]{uuid.toString()};
         final String tableName = "accounts";
@@ -99,6 +105,7 @@ public enum PlayerSaveManager {
             loaderValues.add(sLoader.load(id));
         }
         final Char status = new Char(
+                player,
                 uuid,
                 id,
                 email,

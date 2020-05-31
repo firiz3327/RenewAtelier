@@ -4,15 +4,16 @@ import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
 import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
+import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
-import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.book.QuestBook;
@@ -24,7 +25,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -64,7 +64,7 @@ public class PlayerListener implements Listener {
                 ReplaceVanillaItems.loot(player, loot);
             }
         } else if (Chore.isRight(action)) {
-            if (item != null) {
+            if (item != null && item.hasItemMeta()) {
                 if (item.getType() == Material.WRITTEN_BOOK) {
                     final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
                     if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
@@ -100,24 +100,23 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    private void interactEntity(final PlayerInteractEntityEvent e) {
+    private void interactEntity(final AsyncPlayerInteractEntityEvent e) {
         final Player player = e.getPlayer();
-        final Entity rightClicked = e.getRightClicked();
-        if (e.getHand() == EquipmentSlot.HAND && rightClicked instanceof LivingEntity) {
-            final LivingEntity entity = (LivingEntity) rightClicked;
-            if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.WOODEN_AXE) { // デバッグ用
-                entity.remove();
-            } else {
-                e.setCancelled(NPCManager.INSTANCE.start(player, entity, player.isSneaking()));
-            }
-        } else if (e.getRightClicked() instanceof LootableEntityInventory) { // エンティティ(チェストマインカートなど)でのアイテムルート時、アイテム更新とデバッグ
-            final LootableEntityInventory loot = (LootableEntityInventory) e.getRightClicked();
+        final Entity rightClicked = e.getEntity();
+        if (rightClicked instanceof LootableEntityInventory) { // エンティティ(チェストマインカートなど)でのアイテムルート時、アイテム更新とデバッグ
+            final LootableEntityInventory loot = (LootableEntityInventory) rightClicked;
             if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.STICK) { // デバッグ用
                 e.setCancelled(true);
                 loot.setLootTable(LootTables.ABANDONED_MINESHAFT.getLootTable(), Randomizer.nextLong());
                 player.sendMessage("set lootTable " + loot.hasLootTable());
             } else if (loot.hasLootTable()) {
                 ReplaceVanillaItems.loot(player, loot);
+            }
+        } else if (e.getHand() == EquipmentSlot.HAND) {
+            if (rightClicked != null) {
+                e.setCancelled(NPCManager.INSTANCE.action(player, rightClicked));
+            } else if (e.getEntityId() < 0) { // fakeEntity
+                e.setCancelled(NPCManager.INSTANCE.action(player, e.getEntityId()));
             }
         }
     }
@@ -129,6 +128,7 @@ public class PlayerListener implements Listener {
         PlayerInjection.inject(player);
         NPCManager.INSTANCE.packet(player);
         Notification.loginNotification(player);
+        AtelierPlugin.getPlugin().getTabList().update(player);
         PayloadPacket.sendBrand(player);
     }
 

@@ -3,7 +3,9 @@ package net.firiz.renewatelier.version.packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.constants.ServerConstants;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -27,12 +29,17 @@ public class PayloadPacket {
     private PayloadPacket() {
     }
 
+    @MinecraftVersion("1.15")
     private static final String CHANNEL_BRAND = "minecraft:brand";
 
     static {
         final StandardMessenger messenger = (StandardMessenger) Bukkit.getMessenger();
         try {
-            final Method method = StandardMessenger.class.getDeclaredMethod("addToOutgoing", Plugin.class, String.class);
+            @MinecraftVersion("1.15") final Method method = StandardMessenger.class.getDeclaredMethod(
+                    "addToOutgoing",
+                    Plugin.class,
+                    String.class
+            );
             method.setAccessible(true);
             method.invoke(messenger, AtelierPlugin.getPlugin(), CHANNEL_BRAND);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
@@ -40,15 +47,7 @@ public class PayloadPacket {
         }
     }
 
-    public static void openBook(final Player player, final EquipmentSlot hand) {
-        PacketUtils.sendPacket(
-                player,
-                new PacketPlayOutOpenBook(
-                        hand == EquipmentSlot.HAND ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND
-                )
-        );
-    }
-
+    @MinecraftVersion("1.15")
     private static void addChannel(final Player player) {
         try {
             final Field playerChannels = CraftPlayer.class.getDeclaredField("channels");
@@ -60,10 +59,11 @@ public class PayloadPacket {
         }
     }
 
+    @MinecraftVersion("1.15")
     public static void sendBrand(final Player player) {
         addChannel(player);
 
-        final String brand = ChatColor.GREEN + "Atelier (ping: " + PacketUtils.getPing(player) + ")" + ChatColor.RESET;
+        final String brand = ServerConstants.SERVER_NAME + " (ping: " + PacketUtils.getPing(player) + ")" + ChatColor.RESET;
         final ByteBuf buf = Unpooled.buffer();
         final byte[] utf8Bytes = brand.getBytes(StandardCharsets.UTF_8);
         buf.writeByte(utf8Bytes.length & 0x7F);

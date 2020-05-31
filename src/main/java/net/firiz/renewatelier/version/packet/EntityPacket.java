@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.version.packet;
 
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.EntityEffect;
@@ -47,6 +48,7 @@ public class EntityPacket {
         );
     }
 
+    @MinecraftVersion("1.15")
     public static PacketPlayOutEntityHeadRotation getHeadRotationPacket(int entityId, double yaw) {
         final PacketPlayOutEntityHeadRotation packet = new PacketPlayOutEntityHeadRotation();
         VersionUtils.setFieldValue(VersionUtils.getField(packet, "a"), packet, entityId);
@@ -84,6 +86,7 @@ public class EntityPacket {
         );
     }
 
+    @MinecraftVersion("1.15")
     public static PacketPlayOutEntityTeleport getTeleportPacket(final int entityId, final Location location, final boolean onGround) {
         final PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport();
         VersionUtils.setFieldValue(VersionUtils.getField(packet, "a"), packet, entityId);

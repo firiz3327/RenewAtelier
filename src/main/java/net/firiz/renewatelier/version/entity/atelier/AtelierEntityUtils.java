@@ -3,6 +3,7 @@ package net.firiz.renewatelier.version.entity.atelier;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
 import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
@@ -19,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
 
+@MinecraftVersion("1.15")
 public enum AtelierEntityUtils {
     INSTANCE;
 

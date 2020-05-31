@@ -5,7 +5,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -50,7 +50,7 @@ final class HoloDamage {
                 viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
                 allDamage += damage;
             }
-            final FakeEntity fakeEntity = new FakeEntity(-Randomizer.nextInt(Integer.MAX_VALUE), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+            final FakeEntity fakeEntity = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {

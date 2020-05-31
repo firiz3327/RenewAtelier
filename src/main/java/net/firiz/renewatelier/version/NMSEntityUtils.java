@@ -23,6 +23,7 @@ public final class NMSEntityUtils {
         return entity.isDead() || (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() <= 0);
     }
 
+    @MinecraftVersion("1.15")
     public static void hurt(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager, @Nullable final DamageSource damageSource) {
         victim.playEffect(EntityEffect.HURT);
 
@@ -36,14 +37,16 @@ public final class NMSEntityUtils {
         }
     }
 
+    @MinecraftVersion("1.15")
     public static void sweepParticle(@NotNull final Player player) {
-        ((CraftHumanEntity) player).getHandle().ea(); // 1.15
+        ((CraftHumanEntity) player).getHandle().ea();
     }
 
+    @MinecraftVersion("1.15")
     public static void knockBack(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
         final int i = 1;
         final Entity nmsDamager = ((CraftEntity) damager).getHandle();
-        ((CraftLivingEntity) victim).getHandle().a( // 1.15
+        ((CraftLivingEntity) victim).getHandle().a(
                 nmsDamager,
                 (float) i * 0.5F,
                 MathHelper.sin(nmsDamager.yaw * 0.017453292F),
@@ -51,6 +54,7 @@ public final class NMSEntityUtils {
         );
     }
 
+    @MinecraftVersion("1.15")
     public static void knockBackArrow(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
         final Entity nmsDamager = ((CraftEntity) damager).getHandle();
         if (nmsDamager instanceof EntityArrow) {

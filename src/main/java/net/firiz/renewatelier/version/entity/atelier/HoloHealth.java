@@ -3,7 +3,7 @@ package net.firiz.renewatelier.version.entity.atelier;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
@@ -54,7 +54,7 @@ public final class HoloHealth {
             this.holoCustomName = null;
             this.bossBar = Bukkit.createBossBar(customName, BarColor.RED, BarStyle.SOLID, BarFlag.PLAY_BOSS_MUSIC);
         } else {
-            final int holoId = -Randomizer.nextInt(Integer.MAX_VALUE);
+            final int holoId = FakeId.createId();
             this.holoHp = new FakeEntity(holoId, FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             this.holoCustomName = new FakeEntity(holoId + 1, FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             this.bossBar = null;
