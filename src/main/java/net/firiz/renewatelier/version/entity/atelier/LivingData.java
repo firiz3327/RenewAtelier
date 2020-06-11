@@ -53,7 +53,7 @@ public class LivingData {
         final int speed = BigDecimal.valueOf(((Math.PI / 2 - 0.4) + Math.atan(levelRate * 0.02)) * (260 / Math.PI)).setScale(0, RoundingMode.HALF_UP).intValue();
         final int exp = (int) (maxHp / 2.5);
         final double hp = maxHp - (maxHp * (Randomizer.nextDouble() * 0.05));
-        this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed, exp);
+        this.stats = new MonsterStats(getBukkitEntity(), types.race, level, maxHp, hp, atk, def, speed, exp, false, types.resistances);
         init();
     }
 

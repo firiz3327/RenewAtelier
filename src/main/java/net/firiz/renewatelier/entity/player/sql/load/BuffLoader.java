@@ -20,15 +20,16 @@ class BuffLoader implements StatusLoader<List<Buff>> {
                 new Object[]{id}
         );
         final List<Buff> saveTypes = new ObjectArrayList<>();
-        saveTypesObj.forEach(datas -> saveTypes.add(new Buff(
+        saveTypesObj.forEach(obj -> saveTypes.add(new Buff(
                 null,
-                BuffValueType.valueOf((String) datas.get(1)), // buffValueType
-                (int) datas.get(2), // level
-                BuffType.valueOf((String) datas.get(3)), // buffType
-                (int) datas.get(4), // duration
-                (int) datas.get(5), // limitDuration
-                (int) datas.get(6)) // x
-        ));
+                BuffValueType.valueOf((String) obj.get(1)), // buffValueType
+                (int) obj.get(2), // level
+                BuffType.valueOf((String) obj.get(3)), // buffType
+                (int) obj.get(4), // duration
+                (int) obj.get(5), // limitDuration
+                (int) obj.get(6), // x
+                (String) obj.get(7) // y
+        )));
         return saveTypes;
     }
 

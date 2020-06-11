@@ -3,12 +3,12 @@ package net.firiz.renewatelier.damage;
 import java.util.Arrays;
 
 public enum AttackResistance {
-    WEAKNESS(0, "×", 2), // 弱点
-    NONE(1, "－", 1), // なし
-    SMALL(2, "△", 0.8), // 小耐性
-    MEDIUM(3, "○", 0.6), // 中耐性
-    LARGE(4, "◎", 0.4), // 大耐性
-    SUPER(5, "☆", 0.2); // 超耐性
+    WEAKNESS(0, "×", -20), // 弱点
+    NONE(1, "－", 0), // なし
+    SMALL(2, "△", 20), // 小耐性
+    MEDIUM(3, "○", 40), // 中耐性
+    LARGE(4, "◎", 60), // 大耐性
+    SUPER(5, "☆", 80); // 超耐性
 
     private final int id;
     private final String icon;
@@ -18,6 +18,14 @@ public enum AttackResistance {
         this.id = id;
         this.icon = icon;
         this.magnification = magnification;
+    }
+
+    public AttackResistance up() {
+        if(this == SUPER) {
+            return this;
+        }
+        final int upId = this.id + 1;
+        return Arrays.stream(values()).filter(attackResistance -> upId == attackResistance.id).findFirst().orElse(AttackResistance.NONE);
     }
 
     public AttackResistance down() {

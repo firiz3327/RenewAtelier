@@ -1,5 +1,6 @@
 package net.firiz.renewatelier;
 
+import net.firiz.renewatelier.command.CheckCommand;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.entity.EntityCleanUp;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
@@ -19,6 +20,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 /**
  * @author firiz
@@ -42,6 +45,8 @@ public final class AtelierPlugin extends JavaPlugin {
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new DamageListener(), this);
         pluginManager.registerEvents(new InventoryListener(this), this);
+
+        Objects.requireNonNull(getCommand("check")).setExecutor(new CheckCommand());
 
         // setup worlds
         Bukkit.getWorlds().forEach(AtelierPlugin::worldSettings);

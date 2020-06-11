@@ -159,12 +159,6 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    private void discoverRecipe(final PlayerRecipeDiscoverEvent e) {
-        final Char status = PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId());
-        status.discoverRecipe(e.getRecipe().getNamespace() + ":" + e.getRecipe().getKey());
-    }
-
-    @EventHandler
     private void death(final PlayerDeathEvent e) {
         e.setDeathMessage(null);
     }

@@ -15,6 +15,7 @@ import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.Chore
+import net.firiz.renewatelier.version.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
@@ -395,7 +396,7 @@ class DebugCommands(private val debugListener: DebugListener) {
         val stats = PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).charStats;
         sender.sendMessage("")
         sender.sendMessage("level ${stats.naturalLevel}, buffLevel ${stats.level}")
-        sender.sendMessage("exp ${stats.exp} / ${GameConstants.PLAYER_REQ_EXPS[stats.level]}")
+        sender.sendMessage("exp ${stats.exp} / ${stats.requiredExp}")
         sender.sendMessage("maxHp ${stats.maxHp}")
         sender.sendMessage("hp ${stats.hp}")
         sender.sendMessage("maxMp ${stats.maxMp}")
@@ -437,16 +438,12 @@ class DebugCommands(private val debugListener: DebugListener) {
                         false
                     }
                     1 -> {
-                        if (Chore.isNumMatch(args[0].toString())) {
-                            sender.sendMessage("gainMoney: " + chara.gainMoney(args[0].toString().toInt()))
-                            false
-                        } else {
-                            true
-                        }
+                        sender.sendMessage("gainMoney: " + chara.gainMoneyCompulsion(args[0].toString().toLong()))
+                        false
                     }
                     2 -> {
-                        if (args[0] is UUID && Chore.isNumMatch(args[1].toString())) {
-                            sender.sendMessage("gainMoney: " + PlayerSaveManager.INSTANCE.getChar(args[0] as UUID).gainMoney(args[1].toString().toInt()))
+                        if (args[0] is UUID) {
+                            sender.sendMessage("gainMoney: " + PlayerSaveManager.INSTANCE.getChar(args[0] as UUID).gainMoneyCompulsion(args[1].toString().toLong()))
                             false
                         } else {
                             true
@@ -502,6 +499,9 @@ class DebugCommands(private val debugListener: DebugListener) {
                         val b = AlchemyItemBag.load(bag)
                         println(b.items)
                         sender.inventory.addItem(bag)
+                    }
+                    "h" -> {
+                        sender.sendMessage("hasRecipe: ${NMSEntityUtils.hasRecipe(sender, "cauldron")}")
                     }
                 }
             }

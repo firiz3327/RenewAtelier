@@ -61,4 +61,27 @@ public class BuffedStats {
         return equipStats.getSpeed() + speedB;
     }
 
+    public int getPlusLevel() {
+        return levelB;
+    }
+
+    public int getPlusMaxHp() {
+        return equipStats.getMaxHpEW() + maxHpB;
+    }
+
+    public int getPlusMaxMp() {
+        return equipStats.getMaxMpEW() + maxMpB;
+    }
+
+    public int getPlusAtk() {
+        return equipStats.getAtkEW() + atkB;
+    }
+
+    public int getPlusDef() {
+        return equipStats.getDefEW() + defB;
+    }
+
+    public int getPlusSpeed() {
+        return equipStats.getSpeedEW() + speedB;
+    }
 }

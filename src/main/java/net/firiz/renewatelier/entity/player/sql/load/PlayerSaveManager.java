@@ -48,7 +48,6 @@ public enum PlayerSaveManager {
     PlayerSaveManager() {
         loaders.add(new RecipeStatusLoader());
         loaders.add(new QuestStatusLoader());
-        loaders.add(new DiscoveredRecipeLoader());
         loaders.add(new BuffLoader());
         loaders.add(new CharSettingLoader());
     }
@@ -99,7 +98,7 @@ public enum PlayerSaveManager {
         final int atk = (int) dataList.get(12);
         final int def = (int) dataList.get(13);
         final int speed = (int) dataList.get(14);
-        final int money = (int) dataList.get(15);
+        final long money = (long) dataList.get(15);
         final List<Object> loaderValues = new ObjectArrayList<>();
         for (final StatusLoader<?> sLoader : loaders) {
             loaderValues.add(sLoader.load(id));
@@ -124,12 +123,11 @@ public enum PlayerSaveManager {
                         atk,
                         def,
                         speed,
-                        Chore.cast(loaderValues.get(3)) // buffLoader
+                        Chore.cast(loaderValues.get(2)) // buffLoader
                 ),
                 Chore.cast(loaderValues.get(0)), // recipeStatusLoader
                 Chore.cast(loaderValues.get(1)), // questStatusLoader
-                Chore.cast(loaderValues.get(2)), // discoveredRecipeLoader
-                Chore.cast(loaderValues.get(4)) // charSettingLoader
+                Chore.cast(loaderValues.get(3)) // charSettingLoader
         );
         new Thread(() -> {
             status.setJsEngine(script.createJsEngine());

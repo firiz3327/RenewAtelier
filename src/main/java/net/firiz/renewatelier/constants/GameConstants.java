@@ -21,7 +21,7 @@ public final class GameConstants {
     public static final double HOLO_DAMAGE_POS = 1.2;
     public static final double HOLO_DAMAGE_INTERVAL = 0.3;
 
-    public static final int PLAYER_MONEY_CAP = 2000000000;
+    public static final long PLAYER_MONEY_CAP = 20000000000L; // 20b
     public static final int PLAYER_LEVEL_CAP = 50;
     public static final long[] PLAYER_REQ_EXPS = {
             0, 100, 101, 107, 118, 134, 155, 181, 212, 249, // 10lv
@@ -101,6 +101,11 @@ public final class GameConstants {
         return !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784);
     }
 
+    /**
+     * 「attackSpeed * 0.25」でクールタイムを算出できる
+     * @param material
+     * @return
+     */
     public static int getCoolTimeMillis(@NotNull Material material) {
         if (isSword(material)) {
             return 600; // 0.6

@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.entity.player.stats;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
@@ -27,7 +28,7 @@ public class CharStats extends EntityStatus {
     private long exp;
     private int alchemyLevel;
     private int alchemyExp;
-    private int money;
+    private long money;
     private int maxMp;
     private int mp;
 
@@ -40,7 +41,7 @@ public class CharStats extends EntityStatus {
 
     private long lastAttackTime = 0;
 
-    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, int money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
+    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, long money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
         super(player, level, maxHp, hp, atk, def, speed);
         this.player = player;
         this.exp = exp;
@@ -58,8 +59,8 @@ public class CharStats extends EntityStatus {
             buff.startTimer();
         }
 
-        viewHp();
-        viewMp();
+        updateHp();
+        updateMp();
     }
 
     public void save(int id) {
@@ -74,8 +75,16 @@ public class CharStats extends EntityStatus {
         this.lastAttackTime = System.currentTimeMillis();
     }
 
+    public long getAttackSpeed() {
+        return getAttackSpeed(player.getInventory().getItemInMainHand().getType());
+    }
+
+    public long getAttackSpeed(@NotNull final Material material) {
+        return Math.max(250, GameConstants.getCoolTimeMillis(material) - (long) getSpeed()); // 素手より早くなることはない
+    }
+
     public boolean attack(@NotNull final Material material) {
-        final long coolTimeMillis = GameConstants.getCoolTimeMillis(material) - (long) getSpeed();
+        final long coolTimeMillis = getAttackSpeed(material);
         final boolean canAttack = System.currentTimeMillis() - lastAttackTime >= coolTimeMillis;
         if (canAttack) {
             updateLastAttack();
@@ -85,28 +94,45 @@ public class CharStats extends EntityStatus {
     }
 
     public void updateEquip() {
-        equipStats.updateEquip();
-        buffedStats.update();
+        update(() -> {
+            equipStats.updateEquip();
+            buffedStats.update();
+        });
     }
 
     public void updateWeapon() {
-        equipStats.updateWeapon(-1);
-        buffedStats.update();
+        update(() -> {
+            equipStats.updateWeapon(-1);
+            buffedStats.update();
+        });
     }
 
     public void updateWeapon(int slot) {
-        equipStats.updateWeapon(slot);
-        buffedStats.update();
+        update(() -> {
+            equipStats.updateWeapon(slot);
+            buffedStats.update();
+        });
     }
 
     public void updateBuffs() {
-        buffedStats.update();
+        update(buffedStats::update);
     }
 
     public void updateStats() {
-        equipStats.update(maxHp, maxMp, atk, def, speed, level, level);
-        buffedStats.update(this.level);
-        player.setLevel(buffedStats.getLevel());
+        update(() -> {
+            equipStats.update(maxHp, maxMp, atk, def, speed, level, level);
+            buffedStats.update(this.level);
+            player.setLevel(buffedStats.getLevel());
+        });
+    }
+
+    private void update(@NotNull final Runnable updater) {
+        final int oldMaxHp = getMaxHp();
+        final int oldMaxMp = getMaxMp();
+        updater.run();
+        updateHp(oldMaxHp);
+        updateMp(oldMaxMp);
+        AtelierPlugin.getPlugin().getTabList().update(player);
     }
 
     @Nullable
@@ -143,6 +169,10 @@ public class CharStats extends EntityStatus {
         return buffedStats.getLevel();
     }
 
+    public long getRequiredExp() {
+        return GameConstants.PLAYER_REQ_EXPS[getNaturalLevel()];
+    }
+
     public long getExp() {
         return exp;
     }
@@ -151,11 +181,15 @@ public class CharStats extends EntityStatus {
         return alchemyLevel;
     }
 
+    public long getRequiredAlchemyExp() {
+        return GameConstants.ALCHEMY_REQ_EXPS[getAlchemyLevel()];
+    }
+
     public int getAlchemyExp() {
         return alchemyExp;
     }
 
-    public int getMoney() {
+    public long getMoney() {
         return money;
     }
 
@@ -193,6 +227,30 @@ public class CharStats extends EntityStatus {
 
     public int getAvo() {
         return equipStats.getAvo();
+    }
+
+    public int getPlusLevel() {
+        return buffedStats.getPlusLevel();
+    }
+
+    public int getPlusMaxHp() {
+        return buffedStats.getPlusMaxHp();
+    }
+
+    public int getPlusMaxMp() {
+        return buffedStats.getPlusMaxMp();
+    }
+
+    public int getPlusAtk() {
+        return buffedStats.getPlusAtk();
+    }
+
+    public int getPlusDef() {
+        return buffedStats.getPlusDef();
+    }
+
+    public int getPlusSpeed() {
+        return buffedStats.getPlusSpeed();
     }
 
     /**
@@ -272,6 +330,32 @@ public class CharStats extends EntityStatus {
         return levelUp;
     }
 
+    public void setMoney(long money) {
+        this.money = money;
+    }
+
+    public boolean hasMoney(long money) {
+        return this.money >= money;
+    }
+
+    /**
+     * @param money      お金
+     * @param compulsion 強制的にお金を所持制限最大もしくは最低になるまで変動させるかどうか
+     * @return 無事に所持金を変動させられたか
+     */
+    public boolean gainMoney(long money, boolean compulsion) {
+        final long tempMoney = (this.money + money);
+        if (compulsion) {
+            this.money = Math.max(0, Math.min(tempMoney, GameConstants.PLAYER_MONEY_CAP));
+        } else {
+            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney < 0) {
+                return false;
+            }
+            this.money += money;
+        }
+        return true;
+    }
+
     public void heal(double heal) {
         damageHp(-heal);
     }
@@ -289,46 +373,47 @@ public class CharStats extends EntityStatus {
             }
             return;
         }
+        updateHp();
+    }
+
+    private void updateHp(int oldMaxHp) {
+        final int currentMaxHp = getMaxHp();
+        hp = Math.min(hp * ((double) currentMaxHp / oldMaxHp), currentMaxHp);
         viewHp();
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    private void updateHp() {
+        hp = Math.min(hp, getMaxHp());
+        viewHp();
     }
 
-    public boolean hasMoney(int money) {
-        return this.money >= money;
-    }
-
-    public boolean gainMoney(int money, boolean compulsion) {
-        final long tempMoney = (this.money + money);
-        if (compulsion) {
-            this.money += Math.max(0, Math.min(tempMoney, GameConstants.PLAYER_MONEY_CAP));
-        } else {
-            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney < 0) {
-                return false;
-            }
-            this.money += money;
-        }
-        return true;
-    }
-
-    public void viewHp() {
+    private void viewHp() {
         player.setHealth(Math.max(1, 20 * (hp / getMaxHp())));
     }
 
     public void damageMp(double damage) {
         mp -= damage;
         mp = Math.max(0, Math.min(mp, getMaxMp()));
+        updateMp();
+    }
+
+    public void updateMp(int oldMaxMp) {
+        final int currentMaxMp = getMaxMp();
+        mp = (int) Math.min(mp * ((double) currentMaxMp / oldMaxMp), currentMaxMp);
         viewMp();
     }
 
-    public void viewMp() {
-        final double newMp = 30 * ((double) mp / getMaxMp());
+    public void updateMp() {
+        mp = Math.min(mp, getMaxMp());
+        viewMp();
+    }
+
+    private void viewMp() {
+        final double mpGage = 30 * ((double) mp / getMaxMp());
         final StringBuilder sb = new StringBuilder();
         sb.append("MP ").append(mp).append(" / ").append(getMaxMp()).append(' ').append(ChatColor.BLUE.toString());
         for (int i = 0; i < 30; i++) {
-            if (i >= newMp) {
+            if (i >= mpGage) {
                 sb.append(ChatColor.GRAY);
             }
             sb.append('|');
@@ -343,6 +428,6 @@ public class CharStats extends EntityStatus {
 
     @Override
     protected void refreshBuffStats() {
-        buffedStats.update();
+        updateBuffs();
     }
 }

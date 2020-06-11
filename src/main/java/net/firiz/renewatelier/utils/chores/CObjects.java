@@ -3,6 +3,7 @@ package net.firiz.renewatelier.utils.chores;
 import java.io.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class CObjects {
 
@@ -17,6 +18,10 @@ public final class CObjects {
         if (obj != null) {
             consumer.accept(obj);
         }
+    }
+
+    public static <R> R supplier(Supplier<R> supplier) {
+        return supplier.get();
     }
 
 }

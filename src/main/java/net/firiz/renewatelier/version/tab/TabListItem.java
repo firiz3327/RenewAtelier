@@ -69,7 +69,7 @@ public class TabListItem {
     public void resetTabItem() {
         modifyTextures(SkinProperty.GRAY);
         modifyListName(ChatColor.RESET + "                     ");
-        modifyPing(100);
+        modifyPing(0);
     }
 
     @NotNull

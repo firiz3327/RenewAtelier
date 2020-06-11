@@ -2,7 +2,9 @@ package net.firiz.renewatelier.version.entity.atelier;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
+import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.EntityStatus;
+import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
@@ -20,6 +22,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,6 +40,7 @@ public final class HoloHealth {
     // normal health bar
     private final FakeEntity holoHp;
     private final FakeEntity holoCustomName;
+    private final FakeEntity holoResistances;
     private int holoDeleteTaskId = -1;
 
     // boss health bar
@@ -52,11 +56,12 @@ public final class HoloHealth {
         if (isBoss) {
             this.holoHp = null;
             this.holoCustomName = null;
+            this.holoResistances = null;
             this.bossBar = Bukkit.createBossBar(customName, BarColor.RED, BarStyle.SOLID, BarFlag.PLAY_BOSS_MUSIC);
         } else {
-            final int holoId = FakeId.createId();
-            this.holoHp = new FakeEntity(holoId, FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-            this.holoCustomName = new FakeEntity(holoId + 1, FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+            this.holoHp = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+            this.holoCustomName = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+            this.holoResistances = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
             this.bossBar = null;
         }
     }
@@ -72,6 +77,7 @@ public final class HoloHealth {
     public void die() {
         PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
         PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoResistances.getEntityId()));
     }
 
     private void holoNormal() {
@@ -92,7 +98,16 @@ public final class HoloHealth {
             scheduler.cancelTask(holoDeleteTaskId);
         }
         PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
-        PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(1)));
+        final boolean hasResistances;
+        if (livingData != null && livingData.getStats() != null && !livingData.getStats().isEmptyResistances()) {
+            hasResistances = true;
+            PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoResistances, getLoc(1)));
+            PacketUtils.broadcast(entity, EntityPacket.getMessageStandMeta(entity.getWorld(), createDisplayResistances(), true).compile(holoResistances.getEntityId()));
+        } else {
+            hasResistances = false;
+        }
+        final int customNameLoc = hasResistances ? 2 : 1;
+        PacketUtils.broadcast(entity, EntityPacket.getSpawnPacket(holoCustomName, getLoc(customNameLoc)));
         PacketUtils.broadcast(entity, EntityPacket.getMessageStandMeta(entity.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
         PacketUtils.broadcast(entity, EntityPacket.getMessageStandMeta(entity.getWorld(), createDisplayCustomName(), true).compile(holoCustomName.getEntityId()));
         holoDeleteTaskId = scheduler.scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), this::die, 20);
@@ -108,8 +123,13 @@ public final class HoloHealth {
                                     holoHp.getEntityId(), getLoc(0), false
                             ));
                             PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
-                                    holoCustomName.getEntityId(), getLoc(1), false
+                                    holoCustomName.getEntityId(), getLoc(customNameLoc), false
                             ));
+                            if (hasResistances) {
+                                PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
+                                        holoResistances.getEntityId(), getLoc(1), false
+                                ));
+                            }
                         }
                     },
                     2L * i
@@ -121,7 +141,19 @@ public final class HoloHealth {
 
     }
 
-    public String createDisplayCustomName() {
+    private String createDisplayResistances() {
+        Objects.requireNonNull(livingData);
+        Objects.requireNonNull(livingData.getStats());
+
+        final StringBuilder sb = new StringBuilder();
+        final MonsterStats status = livingData.getStats();
+        status.getBuffResistances().entrySet().stream()
+                .filter(entry -> entry.getValue() != AttackResistance.NONE)
+                .forEach(entry -> sb.append(entry.getKey().getIcon()).append(entry.getValue().getIcon()));
+        return sb.toString();
+    }
+
+    private String createDisplayCustomName() {
         final StringBuilder sb = new StringBuilder(customName);
         if (livingData != null && livingData.hasStats()) {
             sb.setLength(0);
@@ -130,8 +162,11 @@ public final class HoloHealth {
 
             final Set<String> iconSet = new TreeSet<>();
             status.getBuffs().forEach(buff -> iconSet.add(buff.getType().getWord(buff.getX() > 0)));
-            sb.append("Lv.").append(status.getLevel()).append(" ");
-            iconSet.forEach(sb::append);
+            sb.append("Lv.").append(status.getLevel());
+            if (!iconSet.isEmpty()) {
+                sb.append(" ");
+                iconSet.forEach(sb::append);
+            }
         }
         return sb.toString();
     }

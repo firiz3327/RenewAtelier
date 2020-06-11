@@ -19,7 +19,7 @@ class MeruruCalcDamage {
     public double attributeDamage(
             double atk, // 攻撃者の攻撃力
             double power, // 威力値
-            double victimAttributeDef, // 被害者の物理耐性
+            double victimAttributeDef, // 被害者の属性耐性
             double criticalMag, // クリティカル倍率 150~
             boolean isCritical
     ) {

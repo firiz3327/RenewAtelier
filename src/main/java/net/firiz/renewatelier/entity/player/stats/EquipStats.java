@@ -78,31 +78,58 @@ public class EquipStats {
     }
 
     public int getMaxHp() {
-        return maxHp + maxHpE + maxHpW;
+        return maxHp + getMaxHpEW();
     }
 
     public int getMaxMp() {
-        return maxMp + maxMpE + maxMpW;
+        return maxMp + getMaxMpEW();
     }
 
     public int getAtk() {
-        return atk + atkE + atkW;
+        return atk + getAtkEW();
     }
 
     public int getDef() {
-        return def + defE + defW;
+        return def + getDefEW();
     }
 
     public int getSpeed() {
-        return speed + speedE + speedW;
+        return speed + getSpeedEW();
     }
 
     public int getAcc() {
-        return acc + accE + accW;
+        return acc + getAccEW();
     }
 
     public int getAvo() {
-        return avo + avoE + avoW;
+        return avo + getAvoEW();
     }
 
+    public int getMaxHpEW() {
+        return maxHpE + maxHpW;
+    }
+
+    public int getMaxMpEW() {
+        return maxMpE + maxMpW;
+    }
+
+    public int getAtkEW() {
+        return atkE + atkW;
+    }
+
+    public int getDefEW() {
+        return defE + defW;
+    }
+
+    public int getSpeedEW() {
+        return speedE + speedW;
+    }
+
+    public int getAccEW() {
+        return accE + accW;
+    }
+
+    public int getAvoEW() {
+        return avoE + avoW;
+    }
 }

@@ -6,6 +6,7 @@ import org.bukkit.EntityEffect;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.*;
 
 public final class NMSEntityUtils {
 
@@ -65,4 +67,18 @@ public final class NMSEntityUtils {
             }
         }
     }
+
+    @MinecraftVersion("1.15")
+    public static boolean hasRecipe(@NotNull final Player player, @NotNull final String recipeId) {
+        Objects.requireNonNull(player);
+        Objects.requireNonNull(recipeId);
+        String key;
+        if (recipeId.startsWith("minecraft:")) {
+            key = recipeId.substring(recipeId.indexOf(':') + 1);
+        } else {
+            key = recipeId;
+        }
+        return ((CraftPlayer) player).getHandle().B().b(MinecraftKey.a(key));
+    }
+
 }

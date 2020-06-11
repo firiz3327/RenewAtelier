@@ -60,7 +60,11 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                         }
                         switch (type) {
                             case BUFF:
-                                data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+                                if (split.length == 4) {
+                                    data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+                                } else {
+                                    data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]), split[4]);
+                                }
                                 break;
                             case ADD_ATTACK:
                                 final AddAttackType addAttackType = AddAttackType.valueOf(split[0]);

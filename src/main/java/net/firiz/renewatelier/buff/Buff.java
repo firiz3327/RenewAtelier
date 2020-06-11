@@ -9,6 +9,7 @@ import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -20,6 +21,8 @@ public class Buff {
     private final BuffType type;
     private final int limitDuration;
     private final int x;
+    @Nullable
+    private final String y;
     private final Runnable timer;
 
     private static final LoopManager loopManager = LoopManager.INSTANCE;
@@ -28,7 +31,7 @@ public class Buff {
     private boolean end;
     private Runnable endHandler;
 
-    public Buff(EntityStatus status, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x) {
+    public Buff(EntityStatus status, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x, @Nullable String y) {
         this.status = status;
         this.buffValueType = buffValueType;
         this.level = level;
@@ -36,6 +39,7 @@ public class Buff {
         this.duration = duration;
         this.limitDuration = limitDuration;
         this.x = x;
+        this.y = y;
         this.timer = () -> {
             if (incrementTimer() || status.getEntity().isDead()) {
                 stopTimer();
@@ -61,6 +65,11 @@ public class Buff {
 
     public int getX() {
         return x;
+    }
+
+    @Nullable
+    public String getY() {
+        return y;
     }
 
     public boolean isEnd() {

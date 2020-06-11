@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.damage;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
@@ -17,6 +18,8 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.EntityEffect;
@@ -138,21 +141,8 @@ public enum DamageUtilV2 {
 
     private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
         final boolean hasItemStatus = itemStatus != null;
-
-        @Nullable final EntityStatus victimStatus = ((Supplier<EntityStatus>) () -> {
-            if (aEntityUtils.hasLivingData(victim)) {
-                final LivingData livingData = aEntityUtils.getLivingData(victim);
-                if (livingData.hasStats()) {
-                    return livingData.getStats();
-                }
-            } else if (victim instanceof Player) {
-                return psm.getChar(victim.getUniqueId()).getCharStats();
-            }
-            return null;
-        }).get();
-
+        @Nullable final EntityStatus victimStatus = getEntityStatus(victim);
         int criticalRate = 0;
-
         final List<Buff> buffs = new ObjectArrayList<>();
         final List<AddAttackData> addAttacks = new ObjectArrayList<>();
         int characteristicLevel = 0;
@@ -177,7 +167,8 @@ public enum DamageUtilV2 {
                                     characteristicBuff.getBuffType(),
                                     0,
                                     characteristicBuff.getDuration(),
-                                    (int) (characteristicBuff.getX() * calcQualityCorrection(itemStatus.getQuality()))
+                                    (int) (characteristicBuff.getX() * calcQualityCorrection(itemStatus.getQuality())),
+                                    characteristicBuff.getY()
                             ));
                         }
                     }
@@ -225,26 +216,17 @@ public enum DamageUtilV2 {
             }
         }
 
-        double victimDef = 0;
-        double victimPhysicsDef = 0;
-        if (victimStatus != null) {
-            victimDef = victimStatus.getDef();
-            victimPhysicsDef = 0; // 物理防御率という概念がまだ実装されてないっす
-            if (victim instanceof Player && ((Player) victim).isBlocking()) {
-                victimDef *= 1.2; // 盾で守っている時は、防御力を20％上昇
-            }
-            buffs.forEach(victimStatus::addBuff);
-        }
-
-        final double damage = meruruCalcDamage.calcPhysicsDamage(
-                baseDamage, // original
-                damagerStatus == null ? 0 : damagerStatus.getAtk(),
+        final double damage = damage(
+                baseDamage,
                 powerValue,
-                victimDef,
-                victimPhysicsDef,
-                150,
+                damagerStatus,
+                victim,
+                victimStatus,
+                baseAttribute,
+                buffs,
                 isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
         );
+
         final DamageComponent baseDamageComponent = new DamageComponent(damage, baseAttribute);
         final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
@@ -252,12 +234,87 @@ public enum DamageUtilV2 {
         for (final AddAttackData addAttack : addAttacks) {
             final DamageComponent damageComponent = addAttack.getAddAttackType().applyDamage(addAttack, damagerStatus, victim, baseDamageComponent);
             if (damageComponent != null) {
+                // とりあえず攻撃属性によるパーセント減少のみ
+                final ImmutablePair<Double, Double> def = getDef(victim, victimStatus, buffs, damageComponent.getAttackAttribute());
+                damageComponent.setDamage(damageComponent.getDamage() * ((100 - def.getRight()) / 100));
                 damageComponents.add(damageComponent);
                 allDamage += damageComponent.getDamage();
             }
         }
         holo.holoDamage(victim, damager, damageComponents);
         return allDamage;
+    }
+
+    private double damage(
+            double baseDamage,
+            double powerValue,
+            EntityStatus damagerStatus,
+            LivingEntity victim,
+            EntityStatus victimStatus,
+            AttackAttribute baseAttribute,
+            List<Buff> buffs,
+            boolean isCritical
+    ) {
+        final boolean isPhysicalAttack = AttackAttribute.isPhysicalAttack(baseAttribute);
+        final ImmutablePair<Double, Double> def = getDef(victim, victimStatus, buffs, baseAttribute);
+        if (isPhysicalAttack) {
+            return meruruCalcDamage.calcPhysicsDamage(
+                    baseDamage, // original
+                    damagerStatus == null ? 0 : damagerStatus.getAtk(),
+                    powerValue,
+                    def.getLeft(),
+                    def.getRight(),
+                    150,
+                    isCritical
+            );
+        } else {
+            return meruruCalcDamage.attributeDamage(
+                    damagerStatus == null ? 0 : damagerStatus.getAtk(),
+                    powerValue,
+                    def.getRight(),
+                    150,
+                    isCritical
+            );
+        }
+    }
+
+    /**
+     *
+     * @param victim
+     * @param victimStatus
+     * @param buffs
+     * @param attackAttribute
+     * @return def, percentDef
+     */
+    private ImmutablePair<Double, Double> getDef(Entity victim, EntityStatus victimStatus, List<Buff> buffs, AttackAttribute attackAttribute) {
+        double victimDef = 0;
+        double victimPercentDef = 0;
+        if (victimStatus != null) {
+            if (victimStatus instanceof MonsterStats) {
+                victimPercentDef += ((MonsterStats) victimStatus).getBuffResistances().object2ObjectEntrySet().stream()
+                        .filter(entry -> entry.getKey() == attackAttribute)
+                        .mapToDouble(entry -> entry.getValue().getMagnification())
+                        .sum();
+            } else if (((Player) victim).isBlocking()) {
+                victimDef = victimStatus.getDef();
+                victimDef *= 1.2; // 盾で守っている時は、防御力を20％上昇
+            }
+            buffs.forEach(victimStatus::addBuff);
+        }
+        return new ImmutablePair<>(victimDef, victimPercentDef);
+    }
+
+    @Nullable
+    private EntityStatus getEntityStatus(LivingEntity entity) {
+        if (aEntityUtils.hasLivingData(entity)) {
+            final LivingData livingData = aEntityUtils.getLivingData(entity);
+            if (livingData.hasStats()) {
+                return livingData.getStats();
+            }
+        } else if (entity instanceof Player) {
+            return psm.getChar(entity.getUniqueId()).getCharStats();
+        }
+        return null;
     }
 
     private int calcCriticalRate(@NotNull EntityType type, @Nullable EntityStatus status, int criticalRate, Characteristic c) {

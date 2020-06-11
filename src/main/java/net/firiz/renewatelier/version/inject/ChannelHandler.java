@@ -4,6 +4,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
+import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.EquipmentSlot;
@@ -15,6 +16,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     private final EntityPlayer player;
     final Field a;
 
+    @MinecraftVersion("1.15")
     public ChannelHandler(EntityPlayer player) {
         this.player = player;
         try {
@@ -26,6 +28,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     }
 
     @Override
+    @MinecraftVersion("1.15")
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        System.out.println("[READ] " + msg.getClass().getSimpleName());
         if (msg instanceof PacketPlayInUseEntity) {

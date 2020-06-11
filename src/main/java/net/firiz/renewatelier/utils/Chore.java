@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.utils;
 
 import java.awt.Point;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 public final class Chore {
 
     private static final Logger log = AtelierPlugin.getPlugin().getLogger();
+    public static final NumberFormat commaFormatter = NumberFormat.getNumberInstance();
     private static final String S_WARNING = "\u001B[41m";
     private static final String S_OFF = "\u001B[0m";
 
@@ -99,6 +101,10 @@ public final class Chore {
         final Pattern pattern = Pattern.compile("^[0-9]*$");
         final Matcher matcher = pattern.matcher(number);
         return matcher.matches();
+    }
+
+    public static String comma(Number number) {
+        return commaFormatter.format(number);
     }
 
     public static ItemStack createCustomModelItem(final Material material, int amount, int value) {

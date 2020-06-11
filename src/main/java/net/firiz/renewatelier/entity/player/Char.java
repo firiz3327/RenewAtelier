@@ -51,8 +51,6 @@ public final class Char {
     @NotNull
     private final List<QuestStatus> questStatuses;
     @NotNull
-    private final List<MinecraftRecipeSaveType> saveTypes;
-    @NotNull
     private final CharSettings settings;
     private boolean isEnginesUsable;
     @Nullable
@@ -71,7 +69,6 @@ public final class Char {
             @NotNull final CharStats charStats,
             @NotNull final List<RecipeStatus> recipeStatuses,
             @NotNull final List<QuestStatus> questStatuses,
-            @NotNull final List<MinecraftRecipeSaveType> saveTypes,
             @NotNull final CharSettings settings
     ) {
         this.player = player;
@@ -82,7 +79,6 @@ public final class Char {
         this.charStats = charStats;
         this.recipeSQL = new RecipeSQL(id, recipeStatuses);
         this.questStatuses = questStatuses;
-        this.saveTypes = saveTypes;
         this.settings = settings;
 
         this.autoSave = () -> {
@@ -186,46 +182,11 @@ public final class Char {
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="minecraft recipe">
-    public boolean discoveredRecipe(final MinecraftRecipeSaveType type) {
-        return saveTypes.contains(type);
-    }
-
-    public void discoverRecipe(final String itemId) {
-        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(itemId);
-        if (type != null) {
-            saveTypes.add(type);
-            SQLManager.INSTANCE.insert(
-                    "discoveredRecipes",
-                    new String[]{COLUMN_USER_ID, "itemId"},
-                    new Object[]{id, itemId}
-            );
-        }
-    }
-
-    /**
-     * 基本レシピの喪失は起こりえないので、使用しない
-     *
-     * @param itemId
-     */
-    public void undiscoverRecipe(final String itemId) {
-        final MinecraftRecipeSaveType type = MinecraftRecipeSaveType.search(itemId);
-        if (type != null) {
-            saveTypes.remove(type);
-            SQLManager.INSTANCE.delete(
-                    "discoveredRecipes",
-                    new String[]{COLUMN_USER_ID, "itemId"},
-                    new Object[]{id, itemId}
-            );
-        }
-    }
-    //</editor-fold>
-
-    public int getMoney() {
+    public long getMoney() {
         return charStats.getMoney();
     }
 
-    public boolean hasMoney(int money) {
+    public boolean hasMoney(long money) {
         final boolean result = charStats.hasMoney(money);
         if (!result) {
             charStats.getPlayer().sendMessage("所持金が足りません。");
@@ -243,14 +204,13 @@ public final class Char {
         recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new RecipeIdea.IncreaseIdea(recipe));
     }
 
-
-    public void gainMoney(int money) {
+    public void gainMoney(long money) {
         if (!charStats.gainMoney(money, false)) { // 0以下になることは想定しない
             charStats.getPlayer().sendMessage("所持金が上限を超えるため受け取れませんでした。");
         }
     }
 
-    public void gainMoneyCompulsion(int money) {
+    public void gainMoneyCompulsion(long money) {
         charStats.gainMoney(money, true);
     }
 

@@ -2,11 +2,14 @@ package net.firiz.renewatelier.entity.monster;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.CalcStatType;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
+import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.entity.Entity;
 
 public class MonsterStats extends EntityStatus {
@@ -38,7 +41,7 @@ public class MonsterStats extends EntityStatus {
         this(entity, race, level, maxHp, hp, atk, def, speed, exp, isBoss, new Object2ObjectOpenHashMap<>());
     }
 
-    public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp, boolean isBoss, Object2ObjectOpenHashMap<AttackAttribute, AttackResistance> resistances) {
+    public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed, int exp, boolean isBoss, Object2ObjectMap<AttackAttribute, AttackResistance> resistances) {
         super(entity, level, maxHp, hp, atk, def, speed);
         this.race = race;
         this.isBoss = isBoss;
@@ -94,4 +97,35 @@ public class MonsterStats extends EntityStatus {
     public boolean isBoss() {
         return isBoss;
     }
+
+    public boolean isEmptyResistances() {
+        return resistances.isEmpty();
+    }
+
+    public Object2ObjectMap<AttackAttribute, AttackResistance> getResistances() {
+        return resistances;
+    }
+
+    public Object2ObjectMap<AttackAttribute, AttackResistance> getBuffResistances() {
+        final Object2ObjectMap<AttackAttribute, AttackResistance> result = new Object2ObjectOpenHashMap<>(resistances);
+        for (final Buff buff : buffs) {
+            if (buff.getType() == BuffType.RESISTANCE) {
+                final AttackAttribute attribute = AttackAttribute.valueOf(buff.getY());
+                AttackResistance resultResistance = result.getOrDefault(attribute, AttackResistance.NONE);
+                if (buff.getLevel() >= 0) { // plus
+                    for (int i = 0; i < buff.getLevel(); i++) {
+                        resultResistance = resultResistance.up();
+                    }
+                } else { // minus
+                    final int loops = buff.getLevel() * -1;
+                    for (int i = 0; i <loops; i++) {
+                        resultResistance = resultResistance.down();
+                    }
+                }
+                result.put(attribute, resultResistance);
+            }
+        }
+        return result;
+    }
+
 }

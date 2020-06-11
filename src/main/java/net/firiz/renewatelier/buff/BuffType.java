@@ -30,6 +30,7 @@ public enum BuffType { // 全て <BuffType, 確率, 時間, 値>
     EXP_UP(-1), // 経験値量増加％
     ALCHEMY_EXP_UP(-1), // 錬金経験値量増加％
     RECIPE_EXP_UP(-1), // レシピ経験値量増加％
+    RESISTANCE(4) // 耐性 <確率, 時間, レベル, 属性>
     ;
 
     private final Icon icon;

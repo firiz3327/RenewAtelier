@@ -91,4 +91,5 @@ public abstract class EntityStatus {
     public Set<Buff> getBuffs() {
         return Collections.unmodifiableSet(new HashSet<>(buffs));
     }
+
 }
