@@ -33,10 +33,10 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `atk` int(11) NOT NULL DEFAULT '3',
   `def` int(11) NOT NULL DEFAULT '5',
   `speed` int(11) NOT NULL DEFAULT '2',
-  `money` int(11) NOT NULL,
+  `money` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 -- エクスポートするデータが選択されていません
 
@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `buffs` (
   `duration` int(11) NOT NULL,
   `limitDuration` int(11) NOT NULL,
   `x` int(11) NOT NULL,
+  `y` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `buffs_userId` (`userId`),
   CONSTRAINT `buffs_userId` FOREIGN KEY (`userId`) REFERENCES `accounts` (`id`)
@@ -65,18 +66,6 @@ CREATE TABLE IF NOT EXISTS `charsettings` (
   PRIMARY KEY (`userId`),
   CONSTRAINT `charSettings_userId` FOREIGN KEY (`userId`) REFERENCES `accounts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- エクスポートするデータが選択されていません
-
---  テーブル atelier.discoveredrecipes の構造をダンプしています
-CREATE TABLE IF NOT EXISTS `discoveredrecipes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userId` int(11) NOT NULL,
-  `itemId` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `discoveredrecipes` (`userId`),
-  CONSTRAINT `discoveredrecipes` FOREIGN KEY (`userId`) REFERENCES `accounts` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- エクスポートするデータが選択されていません
 
