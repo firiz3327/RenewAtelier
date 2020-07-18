@@ -7,19 +7,20 @@ import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_15_R1.CraftLootTable;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_16_R1.CraftLootTable;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftInventory;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.ItemStack;
@@ -104,7 +105,7 @@ public class ReplaceVanillaItems {
         Location loc = context.getLocation();
         WorldServer handle = ((CraftWorld) loc.getWorld()).getHandle();
         LootTableInfo.Builder builder = new LootTableInfo.Builder(handle);
-        if (lootTable.getHandle() != net.minecraft.server.v1_15_R1.LootTable.EMPTY) {
+        if (lootTable.getHandle() != net.minecraft.server.v1_16_R1.LootTable.EMPTY) {
             builder.set(LootContextParameters.POSITION, new BlockPosition(
                     context.getLocation().getX(),
                     context.getLocation().getY(),
@@ -208,7 +209,7 @@ public class ReplaceVanillaItems {
             }
         }
         for (final Recipe recipe : addRecipes) {
-            Chore.log("[" + recipe.getClass().getSimpleName() + "] Replace Recipe: " + recipe.getResult().getType());
+            CommonUtils.log("[" + recipe.getClass().getSimpleName() + "] Replace Recipe: " + recipe.getResult().getType());
             Bukkit.addRecipe(recipe);
         }
     }
@@ -246,7 +247,7 @@ public class ReplaceVanillaItems {
 
     private static void changeArmorLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
         final List<String> lore = new ObjectArrayList<>();
-        lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getVanillaItemDefense(item.getType()));
+        lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getItemDefense(item.getType()));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("generic.armor", 0, AttributeModifier.Operation.ADD_NUMBER));

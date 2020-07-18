@@ -6,7 +6,8 @@ import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.NPCConversation;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.pair.NonNullPair;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
@@ -63,7 +64,7 @@ public enum NPCManager {
         return () -> Bukkit.getServer().getOnlinePlayers().forEach(player -> {
             for (final NPC npc : npcList) {
                 final Location loc = npc.getLocation();
-                if (Chore.distanceSq(loc, player.getLocation(), 15, 5)) {
+                if (CommonUtils.distanceSq(loc, player.getLocation(), 15, 5)) {
                     final Location eyeLoc = player.getLocation();
                     if (player.isSneaking()) {
                         eyeLoc.setY(eyeLoc.getY() - 0.5);
@@ -151,7 +152,7 @@ public enum NPCManager {
                         try {
                             Objects.requireNonNull(scriptPlayers.get(uuid).getLeft().getIv()).invokeFunction("action", sneaking);
                         } catch (ScriptException ex) {
-                            Chore.logWarning(ex);
+                            CommonUtils.logWarning(ex);
                         } catch (NoSuchMethodException ignored) {
                             // ignored
                         }

@@ -3,7 +3,8 @@ package net.firiz.renewatelier.command;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,7 +27,7 @@ public class CheckCommand implements CommandExecutor {
 
     public CheckCommand() {
         statsFunction = new ArrayList<>();
-        statsFunction.add(stats -> "Money: " + Chore.comma(stats.getMoney()));
+        statsFunction.add(stats -> "Money: " + CommonUtils.comma(stats.getMoney()));
         statsFunction.add(stats -> "AlchemyLevel: " + stats.getAlchemyLevel());
         statsFunction.add(this::alchemyExp);
         statsFunction.add(stats -> "Level: " + stats.getLevel() + symbol(stats.getPlusLevel()));
@@ -70,7 +71,7 @@ public class CheckCommand implements CommandExecutor {
         final BigDecimal percent = BigDecimal.valueOf(stats.getExp())
                 .multiply(BigDecimal.valueOf(100))
                 .divide(BigDecimal.valueOf(stats.getRequiredExp()), 0, RoundingMode.DOWN);
-        return "Exp: " + Chore.comma(stats.getExp()) + "/" + Chore.comma(stats.getRequiredExp()) + "(" + Chore.comma(percent.intValue()) + "%)";
+        return "Exp: " + CommonUtils.comma(stats.getExp()) + "/" + CommonUtils.comma(stats.getRequiredExp()) + "(" + CommonUtils.comma(percent.intValue()) + "%)";
     }
 
     @NotNull
@@ -78,7 +79,7 @@ public class CheckCommand implements CommandExecutor {
         final BigDecimal percent = BigDecimal.valueOf(stats.getAlchemyExp())
                 .multiply(BigDecimal.valueOf(100))
                 .divide(BigDecimal.valueOf(stats.getRequiredAlchemyExp()), 0, RoundingMode.DOWN);
-        return "AlchemyExp: " + Chore.comma(stats.getAlchemyExp()) + "/" + Chore.comma(stats.getRequiredAlchemyExp()) + "(" + Chore.comma(percent.intValue()) + "%)";
+        return "AlchemyExp: " + CommonUtils.comma(stats.getAlchemyExp()) + "/" + CommonUtils.comma(stats.getRequiredAlchemyExp()) + "(" + CommonUtils.comma(percent.intValue()) + "%)";
     }
 
     @NotNull

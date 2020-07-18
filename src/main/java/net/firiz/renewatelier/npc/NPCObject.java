@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.npc;
 
-import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.md_5.bungee.api.ChatColor;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class NPCObject {
 
-    private static final NamespacedKey persistentDataKey = new NamespacedKey(AtelierPlugin.getPlugin(), "npcObject");
+    private static final NamespacedKey persistentDataKey = CommonUtils.createKey("npcObject");
 
     @NotNull
     private final EntityType entityType;

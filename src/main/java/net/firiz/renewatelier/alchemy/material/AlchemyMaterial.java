@@ -10,6 +10,7 @@ import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.skill.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -34,19 +35,23 @@ public final class AlchemyMaterial {
     private final int qualityMin;
     private final int qualityMax;
     private final int price;
-    private final int hp;
-    private final int mp;
-    private final int atk;
-    private final int def;
-    private final int speed;
-    private final int baseDamageMin;
-    private final int baseDamageMax;
+    private final int hp; // equip
+    private final int mp; // equip
+    private final int atk; // equip
+    private final int def; // equip
+    private final int speed; // equip
+    private final int baseDamageMin; // weapon
+    private final int baseDamageMax; // weapon
+    private final int power; // usable item
     private final List<Category> categories;
     private final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients;
     private final MaterialSizeTemplate sizeTemplate;
     private final List<Object> charas;
     private final Catalyst catalyst;
+    @Nullable
     private final String script;
+    @Nullable
+    private final EnumItemSkill itemSkill; // usable item
     private final boolean unbreaking;
     private final boolean hideAttribute;
     private final boolean hideDestroy;
@@ -70,12 +75,14 @@ public final class AlchemyMaterial {
             int speed,
             int baseDamageMin,
             int baseDamageMax,
+            int power,
             List<Category> categories,
             List<ImmutablePair<AlchemyIngredients, Integer>> ingredients,
             MaterialSizeTemplate sizeTemplate,
             List<Object> charas,
             Catalyst catalyst,
-            String script,
+            @Nullable String script,
+            @Nullable EnumItemSkill itemSkill,
             boolean unbreaking,
             boolean hideAttribute,
             boolean hideDestroy,
@@ -98,12 +105,14 @@ public final class AlchemyMaterial {
         this.speed = speed;
         this.baseDamageMin = baseDamageMin;
         this.baseDamageMax = baseDamageMax;
+        this.power = power;
         this.categories = categories;
         this.ingredients = ingredients;
         this.sizeTemplate = sizeTemplate;
         this.charas = charas;
         this.catalyst = catalyst;
         this.script = script;
+        this.itemSkill = itemSkill;
         this.unbreaking = unbreaking;
         this.hideAttribute = hideAttribute;
         this.hideDestroy = hideDestroy;
@@ -209,6 +218,10 @@ public final class AlchemyMaterial {
         return baseDamageMax;
     }
 
+    public int getPower() {
+        return power;
+    }
+
     public List<Category> getCategories() {
         return categories;
     }
@@ -229,8 +242,14 @@ public final class AlchemyMaterial {
         return catalyst;
     }
 
+    @Nullable
     public String getScript() {
         return script;
+    }
+
+    @Nullable
+    public EnumItemSkill getItemSkill() {
+        return itemSkill;
     }
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {

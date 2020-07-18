@@ -3,7 +3,8 @@ package net.firiz.renewatelier.version.tab;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.loop.LoopManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.PacketUtils;
@@ -12,12 +13,12 @@ import net.firiz.renewatelier.version.tab.contents.PartyListTabContents;
 import net.firiz.renewatelier.version.tab.contents.PlayerListTabContents;
 import net.firiz.renewatelier.version.tab.contents.StatusListTabContents;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
-import net.minecraft.server.v1_15_R1.EnumGamemode;
-import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_16_R1.EnumGamemode;
+import net.minecraft.server.v1_16_R1.IChatBaseComponent;
+import net.minecraft.server.v1_16_R1.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_15_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_16_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
@@ -87,8 +88,8 @@ public class TabList {
     private void infoPacket(Player player, InfoAction action) {
         final PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(action.enumAction);
         try {
-            final List b = Chore.cast(VersionUtils.getFieldValue(PacketPlayOutPlayerInfo.class, packet, "b"));
-            final Constructor infoDataConstructor = Class.forName("net.minecraft.server.v1_15_R1.PacketPlayOutPlayerInfo$PlayerInfoData").getDeclaredConstructor(
+            final List b = CommonUtils.cast(VersionUtils.getFieldValue(PacketPlayOutPlayerInfo.class, packet, "b"));
+            final Constructor infoDataConstructor = Class.forName("net.minecraft.server.v1_16_R1.PacketPlayOutPlayerInfo$PlayerInfoData").getDeclaredConstructor(
                     PacketPlayOutPlayerInfo.class, GameProfile.class, int.class, EnumGamemode.class, IChatBaseComponent.class
             );
             infoDataConstructor.setAccessible(true);
@@ -114,7 +115,7 @@ public class TabList {
             }
             PacketUtils.sendPacket(player, packet);
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
     }
 

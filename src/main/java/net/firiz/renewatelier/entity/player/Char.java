@@ -13,14 +13,13 @@ import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.version.minecraft.MinecraftRecipeSaveType;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.quest.result.ItemQuestResult;
 import net.firiz.renewatelier.quest.result.MoneyQuestResult;
 import net.firiz.renewatelier.quest.result.RecipeQuestResult;
-import net.firiz.renewatelier.utils.Chore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -98,6 +97,11 @@ public final class Char {
         charStats.heal(charStats.getMaxHp());
     }
 
+    @NotNull
+    public Player getPlayer() {
+        return player;
+    }
+
     //<editor-fold defaultstate="collapsed" desc="alchemy recipe">
     @NotNull
     public List<RecipeStatus> getRecipeStatusList() {
@@ -169,7 +173,7 @@ public final class Char {
             quest.getResults().forEach(result -> {
                 if (result instanceof ItemQuestResult) {
                     final QuestItem item = ((ItemQuestResult) result).getResult();
-                    Chore.addItem(player, item.getItem());
+                    ItemUtils.addItem(player, item.getItem());
                 } else if (result instanceof RecipeQuestResult) {
                     final AlchemyRecipe recipe = ((RecipeQuestResult) result).getResult();
                     addRecipeExp(true, recipe, 0);

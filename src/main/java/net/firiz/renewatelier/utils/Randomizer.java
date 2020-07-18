@@ -29,6 +29,10 @@ public final class Randomizer {
         return RAND.nextLong();
     }
 
+    public static float nextFloat() {
+        return RAND.nextFloat();
+    }
+
     /**
      * min以上、max以下の乱数を生成します。
      *

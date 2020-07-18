@@ -7,7 +7,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -367,7 +367,7 @@ public class CharStats extends EntityStatus {
             if (inv.contains(Material.TOTEM_OF_UNDYING)) {
                 heal(getMaxHp());
                 player.playEffect(EntityEffect.TOTEM_RESURRECT);
-                Chore.gainItem(inv, Material.TOTEM_OF_UNDYING, 1);
+                ItemUtils.gainItem(inv, Material.TOTEM_OF_UNDYING, 1);
             } else {
                 player.setHealth(0D);
             }

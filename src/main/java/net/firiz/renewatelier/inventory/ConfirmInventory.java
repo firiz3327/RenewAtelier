@@ -6,7 +6,7 @@ import java.util.function.ObjIntConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
@@ -38,8 +38,8 @@ public final class ConfirmInventory implements ParamInventory<ConfirmInventory.C
     public void open(@NotNull final Player player, @NotNull final ConfirmInfo info) {
         final UUID uuid = player.getUniqueId();
         final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, uuid.toString().concat(CONFIRM_STR));
-        inv.setItem(1, Chore.ci(Material.LIME_WOOL, 0, info.yes, null));
-        inv.setItem(3, Chore.ci(Material.RED_WOOL, 0, info.no, null));
+        inv.setItem(1, ItemUtils.ci(Material.LIME_WOOL, 0, info.yes, null));
+        inv.setItem(3, ItemUtils.ci(Material.RED_WOOL, 0, info.no, null));
         if (!consumers.containsKey(uuid) || !consumers.get(uuid).getLeft().equals(info.title)) {
             consumers.put(uuid, new ImmutablePair<>(info.title, info.consumer));
         }

@@ -9,7 +9,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.entity.Player;
 
 /**
@@ -37,13 +38,13 @@ final class ScriptRunner {
                 try {
                     iv.invokeFunction(functionName == null ? "start" : functionName, args);
                 } catch (NoSuchMethodException ex) {
-                    Chore.logWarning(ex);
+                    CommonUtils.logWarning(ex);
                 }
             } else {
-                Chore.log(name.concat(" is not found or error for script."));
+                CommonUtils.log(name.concat(" is not found or error for script."));
             }
         } catch (ScriptException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 
@@ -67,7 +68,7 @@ final class ScriptRunner {
         } catch(FileNotFoundException ex) {
             return false;
         } catch (ScriptException | IOException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return false;
     }

@@ -11,7 +11,8 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.KettleBonusManager;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum KettleItemManager {
     INSTANCE; // enum singleton style
-    
+
     private final Map<UUID, Int2ObjectMap<List<ItemStack>>> useItems = new Object2ObjectOpenHashMap<>();
     private final Map<UUID, ItemStack> useCatalyst = new Object2ObjectOpenHashMap<>();
     private final Map<UUID, ItemStack[]> defaultContents = new Object2ObjectOpenHashMap<>();
@@ -58,12 +59,12 @@ public enum KettleItemManager {
         clear(player);
         if (useItems.containsKey(uuid)) {
             final Int2ObjectMap<List<ItemStack>> useItem = useItems.get(uuid);
-            useItem.values().stream().flatMap(Collection::stream).forEach(item -> Chore.addItem(player, item));
+            useItem.values().stream().flatMap(Collection::stream).forEach(item -> ItemUtils.addItem(player, item));
             useItems.remove(uuid);
         }
         if (useCatalyst.containsKey(uuid)) {
             final ItemStack catalyst = useCatalyst.get(uuid);
-            Chore.addItem(player, catalyst);
+            ItemUtils.addItem(player, catalyst);
             useCatalyst.remove(uuid);
         }
         characteristics.remove(uuid);
@@ -148,7 +149,7 @@ public enum KettleItemManager {
             @Override
             public boolean contains(Object obj) {
                 if (!(obj instanceof CatalystBonus)) {
-                    Chore.log("not contains : " + obj);
+                    CommonUtils.log("not contains : " + obj);
                 }
                 return super.contains(obj);
             }

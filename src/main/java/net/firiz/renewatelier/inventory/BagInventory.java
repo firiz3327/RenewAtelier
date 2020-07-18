@@ -4,13 +4,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.item.json.AlchemyItemBag;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -46,6 +44,6 @@ public final class BagInventory implements ParamInventory<ItemStack> {
         final AlchemyItemBag bag = bagData.getRight();
         final List<ItemStack> notApplicableItems = bag.refreshInventory(event.getInventory());
         bag.writeItem(bagData.getLeft());
-        notApplicableItems.forEach(i -> Chore.addItem(event.getPlayer(), i));
+        notApplicableItems.forEach(i -> ItemUtils.addItem(event.getPlayer(), i));
     }
 }

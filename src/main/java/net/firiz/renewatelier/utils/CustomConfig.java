@@ -75,7 +75,7 @@ public class CustomConfig {
             }
             config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
         } catch (FileNotFoundException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 
@@ -93,7 +93,7 @@ public class CustomConfig {
         try {
             getConfig().save(configFile);
         } catch (IOException ex) {
-            Chore.log(Level.SEVERE, "Could not save config to " + configFile, ex);
+            CommonUtils.log(Level.SEVERE, "Could not save config to " + configFile, ex);
         }
     }
 

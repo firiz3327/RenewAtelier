@@ -2,15 +2,15 @@ package net.firiz.renewatelier.version.tab.contents;
 
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.tab.TabListItem;
-import net.minecraft.server.v1_15_R1.EntityPlayer;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R1.EntityPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
 
 public class StatusListTabContents implements TabContents {
 
@@ -68,7 +68,7 @@ public class StatusListTabContents implements TabContents {
             divideValue = 1000000;
             unit = "M";
         } else {
-            return Chore.comma(money);
+            return CommonUtils.comma(money);
         }
         final BigDecimal decimal = BigDecimal.valueOf(money)
                 .divide(BigDecimal.valueOf(divideValue), 2, RoundingMode.DOWN);

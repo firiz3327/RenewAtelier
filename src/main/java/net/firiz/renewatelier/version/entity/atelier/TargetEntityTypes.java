@@ -7,7 +7,7 @@ import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -26,9 +26,10 @@ public enum TargetEntityTypes {
             p(AttackAttribute.ABNORMAL, AttackResistance.LARGE),
             p(AttackAttribute.FIRE, AttackResistance.WEAKNESS)
     )),
-    ZOMBIE_PIG(EntityType.PIG_ZOMBIE, EntityPigZombie.class, Race.UNDEAD, null, "ZOMBIE_PIGMAN", "ゾンビピッグマン", (entity -> setMainHand(entity, new ItemStack(Material.GOLDEN_SWORD))), r(
+    ZOMBIFIED_PIGLIN(EntityType.ZOMBIFIED_PIGLIN, EntityPigZombie.class, Race.UNDEAD, null, "ZOMBIFIED_PIGLIN", "ゾンビピグリン", (entity -> setMainHand(entity, new ItemStack(Material.GOLDEN_SWORD))), r(
             p(AttackAttribute.BLOW, AttackResistance.SMALL),
-            p(AttackAttribute.ABNORMAL, AttackResistance.LARGE)
+            p(AttackAttribute.ABNORMAL, AttackResistance.LARGE),
+            p(AttackAttribute.FIRE, AttackResistance.LARGE)
     )),
     ZOMBIE_VILLAGER(EntityType.ZOMBIE_VILLAGER, EntityZombieVillager.class, Race.UNDEAD, null, "ZOMBIE_VILLAGER", "村人ゾンビ", r(
             p(AttackAttribute.BLOW, AttackResistance.SMALL),
@@ -117,9 +118,9 @@ public enum TargetEntityTypes {
         this.initConsumer = initConsumer;
         this.resistances = resistances;
         if (body != null) {
-            this.body = body.replace("$NMS", "net.minecraft.server.v1_15_R1");
+            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R1");
         } else if (entityType != null) {
-            this.body = "{super(net.minecraft.server.v1_15_R1.EntityTypes." + entityType + ", (net.minecraft.server.v1_15_R1.World) $args[0]);}";
+            this.body = "{super(net.minecraft.server.v1_16_R1.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R1.World) $args[0]);}";
         } else {
             throw new IllegalStateException("not found body code.");
         }

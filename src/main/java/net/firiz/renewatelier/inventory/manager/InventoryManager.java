@@ -1,16 +1,16 @@
 package net.firiz.renewatelier.inventory.manager;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import net.firiz.renewatelier.a.AAlchemyKettle;
+import net.firiz.renewatelier.a.ACatalystSelect;
+import net.firiz.renewatelier.a.AItemSelect;
+import net.firiz.renewatelier.a.ARecipeSelect;
 import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.BagInventory;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
-import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
-import net.firiz.renewatelier.inventory.alchemykettle.CatalystSelect;
-import net.firiz.renewatelier.inventory.alchemykettle.ItemSelect;
-import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.item.json.AlchemyItemBag;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -19,7 +19,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,10 +32,10 @@ public class InventoryManager {
 
     public InventoryManager() {
         inventories.put(Appraisal.class, new Appraisal());
-        inventories.put(RecipeSelect.class, new RecipeSelect(this));
-        inventories.put(ItemSelect.class, new ItemSelect(this));
-        inventories.put(CatalystSelect.class, new CatalystSelect(this));
-        inventories.put(AlchemyKettle.class, new AlchemyKettle());
+        inventories.put(ARecipeSelect.class, new ARecipeSelect(this));
+        inventories.put(AItemSelect.class, new AItemSelect(this));
+        inventories.put(ACatalystSelect.class, new ACatalystSelect(this));
+        inventories.put(AAlchemyKettle.class, new AAlchemyKettle());
         inventories.put(ConfirmInventory.class, new ConfirmInventory());
         inventories.put(ShopInventory.class, new ShopInventory());
         inventories.put(BagInventory.class, new BagInventory());
@@ -80,7 +79,7 @@ public class InventoryManager {
     @NotNull
     public <T> T getInventory(@NotNull Class<T> clasz) {
         final Object obj = Objects.requireNonNull(inventories.get(clasz));
-        return Chore.cast(obj);
+        return CommonUtils.cast(obj);
     }
 
 }

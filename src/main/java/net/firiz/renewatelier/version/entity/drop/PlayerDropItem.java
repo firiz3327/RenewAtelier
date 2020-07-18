@@ -2,9 +2,9 @@ package net.firiz.renewatelier.version.entity.drop;
 
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.minecraft.server.v1_15_R1.*;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R1.*;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 public class PlayerDropItem extends EntityItem {

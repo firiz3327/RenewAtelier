@@ -6,7 +6,6 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.config.ConfigManager
-import net.firiz.renewatelier.constants.GameConstants
 import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
 import net.firiz.renewatelier.item.json.AlchemyItemBag
@@ -14,13 +13,12 @@ import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
-import net.firiz.renewatelier.utils.Chore
+import net.firiz.renewatelier.utils.CommonUtils
+import net.firiz.renewatelier.utils.ItemUtils
 import net.firiz.renewatelier.version.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
-import net.firiz.renewatelier.version.packet.PacketUtils
-import net.firiz.renewatelier.version.tab.TabList
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -151,7 +149,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             text = "SpigotのMaterialクラスを返します。"
     )
     fun getMaterial(sender: Player, args: ArrayList<Any>): Material {
-        return Chore.getMaterial(args[0] as String)
+        return ItemUtils.getMaterial(args[0] as String)
     }
 
     @Cmd(
@@ -374,7 +372,7 @@ class DebugCommands(private val debugListener: DebugListener) {
         val item = sender.inventory.itemInMainHand
         val value = args[0].toString().toInt()
         val meta = item.itemMeta
-        Chore.setCustomModelData(meta, value)
+        ItemUtils.setCustomModelData(meta, value)
         item.itemMeta = meta
     }
 
@@ -417,7 +415,7 @@ class DebugCommands(private val debugListener: DebugListener) {
             val meta = item.itemMeta!!
             if (meta.hasLore()) {
                 for (str in meta.lore!!) {
-                    Chore.log(str.toString().replace("§", "&"))
+                    CommonUtils.log(str.toString().replace("§", "&"))
                     sender.sendMessage(str)
                 }
             }
@@ -487,9 +485,9 @@ class DebugCommands(private val debugListener: DebugListener) {
                     }
                     "json" -> {
                         val item = AlchemyItemStatus.load(sender.inventory.itemInMainHand)
-                        Chore.log("load json successfull.")
+                        CommonUtils.log("load json successfull.")
                         if (item != null) {
-                            Chore.log(item.toJson())
+                            CommonUtils.log(item.toJson())
                         }
                     }
                     "t" -> {

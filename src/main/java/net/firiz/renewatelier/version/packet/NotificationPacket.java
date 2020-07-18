@@ -7,11 +7,11 @@ import java.util.logging.Logger;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.server.v1_15_R1.AdvancementProgress;
-import net.minecraft.server.v1_15_R1.CriterionProgress;
-import net.minecraft.server.v1_15_R1.MinecraftKey;
-import net.minecraft.server.v1_15_R1.PacketPlayOutAdvancements;
-import net.minecraft.server.v1_15_R1.PacketPlayOutRecipes;
+import net.minecraft.server.v1_16_R1.AdvancementProgress;
+import net.minecraft.server.v1_16_R1.CriterionProgress;
+import net.minecraft.server.v1_16_R1.MinecraftKey;
+import net.minecraft.server.v1_16_R1.PacketPlayOutAdvancements;
+import net.minecraft.server.v1_16_R1.PacketPlayOutRecipes;
 import org.bukkit.entity.Player;
 
 /**

@@ -2,8 +2,8 @@ package net.firiz.renewatelier.item.json;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,8 +21,7 @@ import java.util.Objects;
 
 public class AlchemyItemBag {
 
-    private static final Plugin plugin = AtelierPlugin.getPlugin();
-    private static final NamespacedKey persistentDataKey = new NamespacedKey(plugin, "alchemyItemBag");
+    private static final NamespacedKey persistentDataKey = CommonUtils.createKey("alchemyItemBag");
     private final ObjectList<JsonItem> items;
 
     public AlchemyItemBag() {
@@ -36,7 +34,7 @@ public class AlchemyItemBag {
     }
 
     public static ItemStack createBagItem() {
-        final ItemStack bagItem = Chore.createCustomModelItem(Material.FLINT, 1, 1);
+        final ItemStack bagItem = ItemUtils.createCustomModelItem(Material.FLINT, 1, 1);
         final ItemMeta meta = bagItem.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + "錬金バッグ");
         final List<String> lore = new ArrayList<>();

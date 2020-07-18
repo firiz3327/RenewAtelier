@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.version.entity.atelier.vanilla;
 
-import net.minecraft.server.v1_15_R1.DamageSource;
+import net.minecraft.server.v1_16_R1.DamageSource;
 
 import java.util.function.Supplier;
 

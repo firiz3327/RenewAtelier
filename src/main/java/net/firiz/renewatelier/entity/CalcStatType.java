@@ -149,7 +149,7 @@ public enum CalcStatType {
     private void addVanilla(@NotNull final AtomicInteger status, @NotNull final ItemStack item) {
         switch (this) {
             case DEF:
-                status.addAndGet(GameConstants.getVanillaItemDefense(item.getType()));
+                status.addAndGet(GameConstants.getItemDefense(item.getType()));
                 break;
             default: // 想定しない
                 break;

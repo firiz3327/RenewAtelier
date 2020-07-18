@@ -1,7 +1,8 @@
 package net.firiz.renewatelier.version.packet;
 
-import net.minecraft.server.v1_15_R1.*;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import net.firiz.renewatelier.version.MinecraftVersion;
+import net.minecraft.server.v1_16_R1.*;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 /**
@@ -9,9 +10,9 @@ import org.bukkit.entity.Player;
  */
 public class InventoryPacket {
 
+    @MinecraftVersion("1.15")
     public static void update(final Player player, final String title, final InventoryPacketType type) {
         final EntityPlayer ep = ((CraftPlayer) player).getHandle();
-
         final PacketPlayOutOpenWindow packet = new PacketPlayOutOpenWindow(
                 ep.activeContainer.windowId,
                 type.getContainer(player.getOpenInventory().getTopInventory().getSize()),
@@ -21,6 +22,7 @@ public class InventoryPacket {
         ep.updateInventory(ep.activeContainer);
     }
 
+    @MinecraftVersion("1.15")
     public enum InventoryPacketType {
         CHEST(null),
         DISPENSER(Containers.GENERIC_3X3),

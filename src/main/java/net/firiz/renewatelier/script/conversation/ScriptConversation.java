@@ -18,15 +18,14 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestStatus;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.graalvm.polyglot.HostAccess.Export;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,12 +47,12 @@ public class ScriptConversation {
 
     @Export
     public void log(final Object str) {
-        Chore.log(str);
+        CommonUtils.log(str);
     }
 
     @Export
     public void debug(final Object str) {
-        Chore.log(str);
+        CommonUtils.log(str);
         player.sendMessage(str.toString());
     }
 
@@ -146,15 +145,15 @@ public class ScriptConversation {
         return UUID.fromString(uuid);
     }
 
-    @Export
-    public String createStridColor(final String str) {
-        return Chore.createStridColor(str);
-    }
-
-    @Export
-    public String getStridColor(final String str) {
-        return Chore.getStridColor(str);
-    }
+//    @Export
+//    public String createStridColor(final String str) {
+//        return Chore.createStridColor(str);
+//    }
+//
+//    @Export
+//    public String getStridColor(final String str) {
+//        return Chore.getStridColor(str);
+//    }
 
     @Export
     public String chatColor(final String str) {
@@ -205,7 +204,7 @@ public class ScriptConversation {
                                 try {
                                     iv.invokeFunction(functionName);
                                 } catch (ScriptException ex) {
-                                    Chore.logWarning(ex);
+                                    CommonUtils.logWarning(ex);
                                 } catch (NoSuchMethodException ignored) {
                                 }
                             }
@@ -269,7 +268,7 @@ public class ScriptConversation {
 
     @Export
     public Material getMaterial(final String id) {
-        return Chore.getMaterial(id);
+        return ItemUtils.getMaterial(id);
     }
 
     @Export

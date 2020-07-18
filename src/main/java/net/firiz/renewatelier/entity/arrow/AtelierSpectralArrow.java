@@ -3,8 +3,8 @@ package net.firiz.renewatelier.entity.arrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftSpectralArrow;
+import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftSpectralArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -66,6 +66,7 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
         return bow;
     }
 
+    @NotNull
     @Override
     public ItemStack getArrow() {
         return arrow;
@@ -74,5 +75,11 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     @Override
     public float getForce() {
         return force;
+    }
+
+    @NotNull
+    @Override
+    public ItemStack getItemStack() {
+        return getArrow();
     }
 }

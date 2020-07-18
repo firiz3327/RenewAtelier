@@ -5,7 +5,8 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.npc.NPCManager
-import net.firiz.renewatelier.utils.Chore
+import net.firiz.renewatelier.utils.CommonUtils
+import net.firiz.renewatelier.utils.ItemUtils
 import net.firiz.renewatelier.version.LanguageItemUtil
 import net.firiz.renewatelier.version.packet.InventoryPacket
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType
@@ -83,8 +84,8 @@ object DeliveryInventory {
         for (i in size - 9 until size) {
             when (i) {
                 size - 4 -> inv.setItem(i, getConfirmItem(text, inv, player))
-                size - 6 -> inv.setItem(i, Chore.ci(Material.RED_WOOL, 0, ChatColor.RED.toString() + "キャンセル", null))
-                else -> inv.setItem(i, Chore.ci(Material.BARRIER, 0, "§r", null))
+                size - 6 -> inv.setItem(i, ItemUtils.ci(Material.RED_WOOL, 0, ChatColor.RED.toString() + "キャンセル", null))
+                else -> inv.setItem(i, ItemUtils.ci(Material.BARRIER, 0, "§r", null))
             }
         }
         player.openInventory(inv)
@@ -116,7 +117,7 @@ object DeliveryInventory {
         }
         lore.add("")
 
-        return Chore.ci(Material.LIME_WOOL, 0, ChatColor.GREEN.toString() + "納品", lore)
+        return ItemUtils.ci(Material.LIME_WOOL, 0, ChatColor.GREEN.toString() + "納品", lore)
     }
 
     @JvmStatic
@@ -150,7 +151,7 @@ object DeliveryInventory {
             e.isShiftClick -> { // other slot shift click Item
                 e.isCancelled = true
                 if (e.currentItem != null && checkItem(e.view, e.currentItem!!)) {
-                    e.currentItem = Chore.addItemNotDrop(inv, e.currentItem!!)
+                    e.currentItem = ItemUtils.addItemNotDrop(inv, e.currentItem!!)
                 }
                 return
             }
@@ -281,9 +282,9 @@ object DeliveryInventory {
                 conv.iv!!.invokeFunction(method, value)
             }
         } catch (ex: ScriptException) {
-            Chore.logWarning(ex)
+            CommonUtils.logWarning(ex)
         } catch (ex: NoSuchMethodException) {
-            Chore.logWarning(ex)
+            CommonUtils.logWarning(ex)
         }
     }
 

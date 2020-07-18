@@ -7,8 +7,11 @@ import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.VersionUtils;
+import net.firiz.renewatelier.version.entity.atelier.holo.AbstractHoloHealth;
+import net.firiz.renewatelier.version.entity.atelier.holo.HoloBossHealth;
+import net.firiz.renewatelier.version.entity.atelier.holo.HoloHealth;
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
@@ -31,7 +34,7 @@ public class LivingData {
     private final String name;
     private final Object2DoubleMap<Player> damageSources = new Object2DoubleOpenHashMap<>();
 
-    private HoloHealth holoHealth;
+    private AbstractHoloHealth holoHealth;
 
     public LivingData(TargetEntityTypes types, EntityLiving wrapEntity, Location location) {
         this(types, wrapEntity, location, null);
@@ -78,7 +81,11 @@ public class LivingData {
             bukkit.setHealth(100);
         }
         wrapEntity.setCustomNameVisible(false);
-        holoHealth = new HoloHealth(bukkit, this, displayName.toString());
+        if (hasStats() && Objects.requireNonNull(getStats()).isBoss()) {
+            holoHealth = new HoloBossHealth(bukkit, this, displayName.toString());
+        } else {
+            holoHealth = new HoloHealth(bukkit, this, displayName.toString());
+        }
     }
 
     @NotNull
@@ -100,12 +107,16 @@ public class LivingData {
         return stats;
     }
 
-    public HoloHealth getHoloHealth() {
+    public AbstractHoloHealth getHoloHealth() {
         return holoHealth;
     }
 
     public String getName() {
         return name;
+    }
+
+    public Object2DoubleMap<Player> getDamageSources() {
+        return new Object2DoubleOpenHashMap<>(damageSources);
     }
 
     public void damage(org.bukkit.entity.Entity damager, double damage) {

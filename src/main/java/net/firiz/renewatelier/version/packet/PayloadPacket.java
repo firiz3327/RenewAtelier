@@ -4,14 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.ServerConstants;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_15_R1.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 
@@ -43,7 +42,7 @@ public class PayloadPacket {
             method.setAccessible(true);
             method.invoke(messenger, AtelierPlugin.getPlugin(), CHANNEL_BRAND);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 
@@ -52,10 +51,10 @@ public class PayloadPacket {
         try {
             final Field playerChannels = CraftPlayer.class.getDeclaredField("channels");
             playerChannels.setAccessible(true);
-            final Set<String> channels = Chore.cast(playerChannels.get(player));
+            final Set<String> channels = CommonUtils.cast(playerChannels.get(player));
             channels.add(CHANNEL_BRAND);
         } catch (NoSuchFieldException | IllegalAccessException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 

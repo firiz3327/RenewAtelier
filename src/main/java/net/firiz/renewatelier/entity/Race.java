@@ -36,7 +36,6 @@ public enum Race {
         switch (type) {
             case ZOMBIE: // ゾンビ
             case ZOMBIE_VILLAGER:
-            case PIG_ZOMBIE:
             case ZOMBIE_HORSE: // 未使用MOB
             case HUSK:
             case DROWNED:
@@ -47,10 +46,11 @@ public enum Race {
             case SKELETON_HORSE:
             case PHANTOM: // other
             case WITHER:
-//            case ZOGLIN: // v1.16
-//            case ZOMBIFIED_PIGLIN: v1.16
             case GHAST: // バニラではアンデッドではないが、アトリエの幽霊に該当する為追加
+            case STRIDER: // v1.16 GHASTと同様
             case VEX:
+            case ZOGLIN: // v1.16
+            case ZOMBIFIED_PIGLIN: // v1.16
                 race = UNDEAD;
                 break;
             case PLAYER: // 人間
@@ -107,6 +107,8 @@ public enum Race {
             case RABBIT:
             case LLAMA:
             case PANDA:
+            case HOGLIN: // v1.16
+            case PIGLIN: // v1.16
                 race = ANIMAL;
                 break;
             case BAT: // 猛獣

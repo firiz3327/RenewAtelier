@@ -9,7 +9,8 @@ import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -123,11 +124,11 @@ public enum PlayerSaveManager {
                         atk,
                         def,
                         speed,
-                        Chore.cast(loaderValues.get(2)) // buffLoader
+                        CommonUtils.cast(loaderValues.get(2)) // buffLoader
                 ),
-                Chore.cast(loaderValues.get(0)), // recipeStatusLoader
-                Chore.cast(loaderValues.get(1)), // questStatusLoader
-                Chore.cast(loaderValues.get(3)) // charSettingLoader
+                CommonUtils.cast(loaderValues.get(0)), // recipeStatusLoader
+                CommonUtils.cast(loaderValues.get(1)), // questStatusLoader
+                CommonUtils.cast(loaderValues.get(3)) // charSettingLoader
         );
         new Thread(() -> {
             status.setJsEngine(script.createJsEngine());

@@ -3,7 +3,8 @@ package net.firiz.renewatelier.inventory.shop;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.pair.Pair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -25,7 +26,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
 
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
     private static final String TITLE = "SHOP";
-    private static final ItemStack GLASS_PANE = Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
+    private static final ItemStack GLASS_PANE = ItemUtils.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
@@ -63,10 +64,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
             if (!player.hasCooldown(Material.GRAY_STAINED_GLASS_PANE)) {
                 final ItemStack item = inv.getItem(e.getRawSlot());
                 if (item != null && !GLASS_PANE.isSimilar(item)) {
-                    final ShopResult priceMode = createShopResult(
-                            Objects.requireNonNull(item.getItemMeta().getLore()),
-                            player
-                    );
+                    final ShopResult priceMode = createShopResult(item, player);
                     if (priceMode.mode != -1) {
                         player.setCooldown(Material.GRAY_STAINED_GLASS_PANE, 10);
                         reduceItem(priceMode, player);
@@ -80,23 +78,20 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
     /**
      * 決済を処理するモードを返す
      *
-     * @param lore itemMeta.lore
+     * @param item   アイテム
      * @param player 購入者
      * @return ShopResult
      */
     @NotNull
-    private ShopResult createShopResult(@NotNull List<String> lore, @NotNull Player player) {
-        final String str = lore.get(lore.size() - 1);
-        final String id = Chore.getStridColor(str.substring(0, str.indexOf(String.valueOf(ChatColor.ITALIC) + ChatColor.RESET + ChatColor.GREEN)));
-        final String v = str.substring(str.lastIndexOf(": ") + 2);
-
-        final int price = Integer.parseInt(v.substring(0, v.indexOf(' ')));
-        if (id.equals("$null")) {
+    private ShopResult createShopResult(@NotNull ItemStack item, @NotNull Player player) {
+        final Pair<Integer, String> shopItem = ShopItem.loadShopItem(item);
+        final int price = Objects.requireNonNull(shopItem.getLeft());
+        if (shopItem.getRight() == null) {
             final int mode = psm.getChar(player.getUniqueId()).hasMoney(price) ? 1 : -1;
             return new ShopResult(mode, price, null);
         } else {
-            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(id);
-            final int mode = Chore.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
+            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(shopItem.getRight());
+            final int mode = ItemUtils.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
             return new ShopResult(mode, price, alchemyMaterial);
         }
     }
@@ -105,7 +100,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         if (priceMode.mode == 1) {
             psm.getChar(player.getUniqueId()).gainMoney(-priceMode.money);
         } else if (priceMode.material != null) {
-            Chore.gainItem(player.getInventory(), priceMode.material, priceMode.money);
+            ItemUtils.gainItem(player.getInventory(), priceMode.material, priceMode.money);
         }
     }
 
@@ -117,7 +112,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         }
         meta.setLore(cLore);
         item.setItemMeta(meta);
-        Chore.addItem(player, item);
+        ItemUtils.addItem(player, item);
     }
 
     @Override

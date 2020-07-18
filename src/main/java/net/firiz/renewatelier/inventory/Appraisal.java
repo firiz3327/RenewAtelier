@@ -3,7 +3,7 @@ package net.firiz.renewatelier.inventory;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.NonParamInventory;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,9 +30,9 @@ public final class Appraisal implements NonParamInventory {
         final Inventory inv = Bukkit.createInventory(player, 18, TITLE);
         for (int i = 9; i < 18; i++) {
             if (i == 13) {
-                inv.setItem(i, Chore.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null));
+                inv.setItem(i, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null));
             } else {
-                inv.setItem(i, Chore.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null));
+                inv.setItem(i, ItemUtils.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null));
             }
         }
         player.openInventory(inv);
@@ -57,7 +57,7 @@ public final class Appraisal implements NonParamInventory {
                         }, item);
                     }
                     inv.setItem(i, null);
-                    Chore.addItem(player, item);
+                    ItemUtils.addItem(player, item);
                 }
             }
         }

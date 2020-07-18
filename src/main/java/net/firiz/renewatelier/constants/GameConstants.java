@@ -122,7 +122,7 @@ public final class GameConstants {
                     return 1250; // 1.25
                 case GOLDEN_AXE:
                 case DIAMOND_AXE:
-//                case NETHERITE_AXE:
+                case NETHERITE_AXE:
                 case WOODEN_HOE:
                 case GOLDEN_HOE:
                     return 1000; // 1
@@ -143,6 +143,7 @@ public final class GameConstants {
             case IRON_SWORD:
             case GOLDEN_SWORD:
             case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
                 return true;
             default:
                 return false;
@@ -156,6 +157,7 @@ public final class GameConstants {
             case IRON_AXE:
             case GOLDEN_AXE:
             case DIAMOND_AXE:
+            case NETHERITE_AXE:
                 return true;
             default:
                 return false;
@@ -169,6 +171,7 @@ public final class GameConstants {
             case IRON_PICKAXE:
             case GOLDEN_PICKAXE:
             case DIAMOND_PICKAXE:
+            case NETHERITE_PICKAXE:
                 return true;
             default:
                 return false;
@@ -182,6 +185,7 @@ public final class GameConstants {
             case IRON_SHOVEL:
             case GOLDEN_SHOVEL:
             case DIAMOND_SHOVEL:
+            case NETHERITE_SHOVEL:
                 return true;
             default:
                 return false;
@@ -203,6 +207,7 @@ public final class GameConstants {
             case WOODEN_SWORD:
             case GOLDEN_SWORD:
             case IRON_PICKAXE:
+            case NETHERITE_HOE:
                 return 4;
             case IRON_SHOVEL:
                 return 4.5;
@@ -212,21 +217,28 @@ public final class GameConstants {
             case DIAMOND_SHOVEL:
                 return 5.5;
             case IRON_SWORD:
+            case NETHERITE_PICKAXE:
                 return 6;
+            case NETHERITE_SHOVEL:
+                return 6.5;
             case DIAMOND_SWORD:
             case WOODEN_AXE:
             case GOLDEN_AXE:
                 return 7;
+            case NETHERITE_SWORD:
+                return 8;
             case STONE_AXE:
             case IRON_AXE:
             case DIAMOND_AXE:
                 return 9;
+            case NETHERITE_AXE:
+                return 10;
             default:
                 return 1;
         }
     }
 
-    public static int getVanillaItemDefense(Material material) {
+    public static int getItemDefense(Material material) {
         switch (material) {
             case TURTLE_HELMET: // turtle 1
             case LEATHER_HELMET: // leather all 5 [1, 2, 1, 1]
@@ -254,7 +266,12 @@ public final class GameConstants {
             case DIAMOND_BOOTS:
                 return 5;
             case DIAMOND_CHESTPLATE:
+            case NETHERITE_HELMET: // netherite all 25 [6, 7, 6, 6]
+            case NETHERITE_LEGGINGS:
+            case NETHERITE_BOOTS:
                 return 6;
+            case NETHERITE_CHESTPLATE:
+                return 7;
             default:
                 return 0;
         }

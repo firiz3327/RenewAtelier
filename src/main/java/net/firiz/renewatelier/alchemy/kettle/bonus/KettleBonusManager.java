@@ -21,11 +21,11 @@ import org.jetbrains.annotations.NotNull;
 public enum KettleBonusManager {
     INSTANCE; // enum singleton style
 
-    private final Map<UUID, BonusPlayerData> datas;
+    private final Map<UUID, BonusPlayerData> dataMap;
     private final KettleItemManager kettleItemManager = KettleItemManager.INSTANCE;
 
     KettleBonusManager() {
-        datas = new Object2ObjectOpenHashMap<>();
+        dataMap = new Object2ObjectOpenHashMap<>();
     }
 
     public int getBonus(Player player, AlchemyAttribute type) {
@@ -50,9 +50,9 @@ public enum KettleBonusManager {
     }
 
     public String getBar(final UUID uuid, final int req) {
-        if (datas.containsKey(uuid)) {
+        if (dataMap.containsKey(uuid)) {
             final StringBuilder sb = new StringBuilder();
-            final BonusPlayerData bpd = datas.get(uuid);
+            final BonusPlayerData bpd = dataMap.get(uuid);
             final int bar = (int) ((double) bpd.getBar() / bpd.getReq() * 10);
             for (int i = 0; i < 10; i++) {
                 if (i < bar) {
@@ -75,11 +75,11 @@ public enum KettleBonusManager {
 
     public void addBar(UUID uuid, int req, int plus, AlchemyAttribute[] aas) {
         BonusPlayerData bpd;
-        if (datas.containsKey(uuid)) {
-            bpd = datas.get(uuid);
+        if (dataMap.containsKey(uuid)) {
+            bpd = dataMap.get(uuid);
         } else {
             bpd = new BonusPlayerData(req);
-            datas.put(uuid, bpd);
+            dataMap.put(uuid, bpd);
         }
 
         int bonus = Arrays.stream(aas).mapToInt(aa -> getBonus(uuid, aa)).sum();
@@ -103,7 +103,7 @@ public enum KettleBonusManager {
 
     @NotNull
     public List<AlchemyAttribute[]> getLevelUps(UUID uuid) {
-        final BonusPlayerData bpd = datas.get(uuid);
+        final BonusPlayerData bpd = dataMap.get(uuid);
         if (bpd != null) {
             return bpd.getLevelUps();
         }
@@ -111,7 +111,7 @@ public enum KettleBonusManager {
     }
 
     public int getLevel(UUID uuid) {
-        final BonusPlayerData bpd = datas.get(uuid);
+        final BonusPlayerData bpd = dataMap.get(uuid);
         if (bpd != null) {
             return bpd.getLevel();
         }
@@ -119,12 +119,12 @@ public enum KettleBonusManager {
     }
 
     public void removeData(UUID uuid) {
-        datas.remove(uuid);
+        dataMap.remove(uuid);
     }
 
     public void back(UUID uuid) {
-        if (datas.containsKey(uuid)) {
-            datas.get(uuid).back();
+        if (dataMap.containsKey(uuid)) {
+            dataMap.get(uuid).back();
         }
     }
 

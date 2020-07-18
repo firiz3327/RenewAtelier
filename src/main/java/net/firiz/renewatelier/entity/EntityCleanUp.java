@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.entity;
 
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import org.bukkit.Bukkit;
@@ -43,7 +44,7 @@ public final class EntityCleanUp implements Runnable {
                         && Randomizer.percent(25, 1000)
         )) {
             if (entity.getCustomName() != null) {
-                Chore.log("cleanUp CN: " + entity.getCustomName());
+                CommonUtils.log("cleanUp CN: " + entity.getCustomName());
             }
             entity.remove();
         }

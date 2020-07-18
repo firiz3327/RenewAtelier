@@ -3,7 +3,8 @@ package net.firiz.renewatelier.version.nms;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.VersionUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -59,7 +60,7 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return obj;
     }
@@ -84,7 +85,7 @@ public class VItemStack {
             }
             return obj;
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return obj;
     }

@@ -2,7 +2,8 @@ package net.firiz.renewatelier.config;
 
 import java.util.List;
 
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,7 +29,7 @@ public enum ConfigManager {
     public <T> ConfigLoader<T> getLoader(@NotNull final Class<?> clasz, @NotNull final Class<T> tClass) {
         for (final ConfigLoader<?> loader : loaders) {
             if (loader.getClass() == clasz) {
-                return Chore.cast(loader);
+                return CommonUtils.cast(loader);
             }
         }
         throw new IllegalStateException(clasz.getName().concat(" not found."));
@@ -38,7 +39,7 @@ public enum ConfigManager {
     public <T> List<T> getList(@NotNull final Class<?> clasz, @NotNull final Class<T> tClass) {
         for (final ConfigLoader<?> loader : loaders) {
             if (loader.getClass() == clasz) {
-                return Chore.cast(loader.getList());
+                return CommonUtils.cast(loader.getList());
             }
         }
         throw new IllegalStateException(clasz.getName().concat(" not found."));

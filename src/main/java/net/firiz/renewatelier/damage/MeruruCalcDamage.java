@@ -27,4 +27,13 @@ class MeruruCalcDamage {
         return ((baseDamage * power / 100) * (100 - victimAttributeDef) / 100) * (isCritical ? criticalMag * 0.01 : 1);
     }
 
+    public double itemDamage(
+            double power,
+            double victimAttributeDef,
+            double criticalMag,
+            boolean isCritical
+    ) {
+        return (0.4 * power * (100 - victimAttributeDef) / 100) * (isCritical ? criticalMag * 0.01 : 1);
+    }
+
 }

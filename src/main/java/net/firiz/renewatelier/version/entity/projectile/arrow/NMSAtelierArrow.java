@@ -4,15 +4,15 @@ import com.google.common.base.Preconditions;
 import net.firiz.renewatelier.entity.arrow.AtelierTippedArrow;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_15_R1.potion.CraftPotionUtil;
-import org.bukkit.craftbukkit.v1_15_R1.util.CraftVector;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R1.potion.CraftPotionUtil;
+import org.bukkit.craftbukkit.v1_16_R1.util.CraftVector;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -117,7 +117,7 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     @Override
     public void setPickupStatus(AbstractArrow.PickupStatus status) {
         Preconditions.checkNotNull(status, "status");
-        fromPlayer = net.minecraft.server.v1_15_R1.EntityArrow.PickupStatus.a(status.ordinal());
+        fromPlayer = net.minecraft.server.v1_16_R1.EntityArrow.PickupStatus.a(status.ordinal());
     }
 
     @Override
@@ -192,7 +192,7 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     }
 
     @Override
-    protected net.minecraft.server.v1_15_R1.ItemStack getItemStack() {
-        return (net.minecraft.server.v1_15_R1.ItemStack) arrow.getNmsItem();
+    protected net.minecraft.server.v1_16_R1.ItemStack getItemStack() {
+        return (net.minecraft.server.v1_16_R1.ItemStack) arrow.getNmsItem();
     }
 }

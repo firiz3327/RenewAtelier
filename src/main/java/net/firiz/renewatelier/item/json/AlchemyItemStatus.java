@@ -12,7 +12,8 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.CustomModelMaterial;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class AlchemyItemStatus {
 
-    private static final NamespacedKey persistentDataKey = new NamespacedKey(AtelierPlugin.getPlugin(), "alchemyItemStatus");
+    private static final NamespacedKey persistentDataKey = CommonUtils.createKey("alchemyItemStatus");
 
     @Expose
     @NotNull
@@ -516,9 +517,9 @@ public class AlchemyItemStatus {
             int cSize = 0;
             for (final int i : size) {
                 if (i == 0) {
-                    str.append(Chore.intCcolor(i)).append(GameConstants.W_W);
+                    str.append(CommonUtils.intCcolor(i)).append(GameConstants.W_W);
                 } else {
-                    str.append(Chore.intCcolor(i)).append(GameConstants.W_B);
+                    str.append(CommonUtils.intCcolor(i)).append(GameConstants.W_B);
                 }
                 if (cSize >= 2) {
                     lore.add(str.toString());
@@ -556,9 +557,9 @@ public class AlchemyItemStatus {
                     for (int j = 1; j <= rotate_value; j++) {
                         final int value = allCS.getInt(count);
                         if (value == 0) {
-                            sb.append(Chore.intCcolor(value)).append(GameConstants.W_W);
+                            sb.append(CommonUtils.intCcolor(value)).append(GameConstants.W_W);
                         } else {
-                            sb.append(Chore.intCcolor(value)).append(GameConstants.W_B);
+                            sb.append(CommonUtils.intCcolor(value)).append(GameConstants.W_B);
                         }
                         count++;
                     }
@@ -580,7 +581,7 @@ public class AlchemyItemStatus {
         // カテゴリ
         if (visibleFlags.category && !categories.isEmpty()) {
             lore.add("§7カテゴリ:");
-            categories.forEach(category -> lore.add("§r- " + category.getName() + "§0" + Chore.createStridColor(category.toString())));
+            categories.forEach(category -> lore.add("§r- " + category.getName()));
         }
         // Lore終了
         if (visibleFlags.end) {
@@ -589,7 +590,7 @@ public class AlchemyItemStatus {
         meta.setLore(lore);
 
         // unbreaking & flag系
-        Chore.addHideFlags(meta, alchemyMaterial);
+        ItemUtils.addHideFlags(meta, alchemyMaterial);
 
         // meta設定
         item.setItemMeta(meta);
@@ -655,7 +656,7 @@ public class AlchemyItemStatus {
                     if (obj instanceof CharacteristicTemplate) {
                         cs.addAll(((CharacteristicTemplate) obj).getCs());
                     } else {
-                        cs.add(Chore.cast(obj));
+                        cs.add(CommonUtils.cast(obj));
                     }
                 });
                 Collections.shuffle(cs);

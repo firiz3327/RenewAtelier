@@ -1,7 +1,9 @@
 package net.firiz.renewatelier.listener;
 
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
@@ -51,6 +53,19 @@ public class EntityListener implements Listener {
                     assert itemMeta != null;
                     arrowManager.shootCrossbow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), itemMeta.getChargedProjectiles().get(0));
                 } else {
+                    if (AlchemyItemStatus.has(bow)) {
+                        final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(bow);
+                        assert itemStatus != null;
+                        if (itemStatus.getAlchemyMaterial().getItemSkill() != null) {
+                            e.setCancelled(true);
+                            itemStatus.getAlchemyMaterial().getItemSkill().createSkill(
+                                    (Player) e.getEntity(),
+                                    itemStatus,
+                                    e.getForce()
+                            ).fire();
+                            return;
+                        }
+                    }
                     arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
                 }
             } else {

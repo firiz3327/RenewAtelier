@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.item.drop;
 
 import net.firiz.renewatelier.loop.LoopManager;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +32,7 @@ public abstract class AnimatedDrop {
     }
 
     protected final void spawn() {
-        item = Chore.drop(loc, itemstack);
+        item = ItemUtils.drop(loc, itemstack);
     }
 
     protected final void setGet(boolean isGet) {

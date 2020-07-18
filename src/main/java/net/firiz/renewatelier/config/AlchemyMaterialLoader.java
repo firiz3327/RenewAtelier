@@ -14,7 +14,9 @@ import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.item.CustomModelMaterial;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.skill.item.EnumItemSkill;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -72,7 +74,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final MaterialSizeTemplate sizeTemplate = getSize(item);
                 final List<Object> characteristics = getCharacteristics(item);
                 final Catalyst catalyst = getCatalyst(item);
-                final String script = item.getString("script");
+                final EnumItemSkill itemSkill = getItemSkill(item);
 
                 if (notFounds.isEmpty()) {
                     final AlchemyMaterial material = new AlchemyMaterial(
@@ -90,12 +92,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             getValueOrZero(item, "speed"),
                             getValueOrZero(item, "baseDamageMin"),
                             getValueOrZero(item, "baseDamageMax"),
+                            getValueOrZero(item, "power"),
                             categories,
                             ingredients,
                             sizeTemplate,
                             characteristics,
                             catalyst,
-                            script,
+                            item.getString("script"),
+                            itemSkill,
                             getBoolean(item, "unbreaking"),
                             getBoolean(item, "hideAttribute"),
                             getBoolean(item, "hideDestroy"),
@@ -114,20 +118,20 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                     add(material);
                 }
             } catch (Exception ex) {
-                Chore.logWarning(PREFIX.concat(key).concat(" -> "), ex);
+                CommonUtils.logWarning(PREFIX.concat(key).concat(" -> "), ex);
                 errorCount.incrementAndGet();
             } finally {
                 if (!notFounds.isEmpty()) {
-                    Chore.logWarning(PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
+                    CommonUtils.logWarning(PREFIX.concat(key).concat(" -> Not found columns for ").concat(notFounds.toString()).concat("."));
                     errorCount.incrementAndGet();
                 }
             }
         });
         if (errorCount.intValue() != 0) {
-            Chore.logWhiteWarning("error founded.");
+            CommonUtils.logWhiteWarning("error founded.");
         }
         final String fileName = ((CustomConfig.CConfiguration) config).getConfigFile().getName();
-        Chore.log(PREFIX + fileName + " - " + getList().size() + " loaded and " + errorCount + " errors found.");
+        CommonUtils.log(PREFIX + fileName + " - " + getList().size() + " loaded and " + errorCount + " errors found.");
     }
 
     @NotNull
@@ -143,12 +147,12 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             assert mat_str != null;
             if (!mat_str.contains(",")) {
                 if (mat_str.equalsIgnoreCase("XXX")) {
-                    Chore.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
+                    CommonUtils.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                 }
-                result = new CustomModelMaterial(Chore.getMaterial(mat_str), 0);
+                result = new CustomModelMaterial(ItemUtils.getMaterial(mat_str), 0);
             } else {
                 final String[] matSplit = mat_str.split(",");
-                result = new CustomModelMaterial(Chore.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+                result = new CustomModelMaterial(ItemUtils.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
             }
         } else {
             result = null;
@@ -198,7 +202,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<Category> getCategories(ConfigurationSection item) {
         final List<Category> categories = new ObjectArrayList<>();
         if (item.contains(KEY_CATEGORIES)) {
-            final List<String> categoriesStr = Chore.cast(item.getList(KEY_CATEGORIES));
+            final List<String> categoriesStr = CommonUtils.cast(item.getList(KEY_CATEGORIES));
             categoriesStr.forEach(cStr -> categories.add(Category.searchName(cStr)));
         } else {
             notFounds.add(KEY_CATEGORIES);
@@ -210,7 +214,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
         final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = new ObjectArrayList<>();
         if (item.contains(KEY_INGREDIENTS)) {
-            final List<String> ingsStr = Chore.cast(item.getList(KEY_INGREDIENTS));
+            final List<String> ingsStr = CommonUtils.cast(item.getList(KEY_INGREDIENTS));
             if (ingsStr != null) {
                 ingsStr.forEach(ing -> {
                     final String[] ingData = ing.split(",");
@@ -239,7 +243,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private List<Object> getCharacteristics(ConfigurationSection item) {
         final List<Object> characteristics = new ObjectArrayList<>();
         if (item.contains("characteristics")) {
-            final List<String> stringList = Chore.cast(item.getList("characteristics"));
+            final List<String> stringList = CommonUtils.cast(item.getList("characteristics"));
             stringList.forEach(cStr -> {
                 if (cStr.contains(",")) {
                     final String[] strs = cStr.split(",");
@@ -281,6 +285,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                         ));
                     });
             return new Catalyst(bonus);
+        }
+        return null;
+    }
+
+    @Nullable
+    private EnumItemSkill getItemSkill(ConfigurationSection item) {
+        if (item.contains("item_skill")) {
+            return EnumItemSkill.valueOf(Objects.requireNonNull(item.getString("item_skill")).toUpperCase());
         }
         return null;
     }

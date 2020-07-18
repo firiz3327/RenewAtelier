@@ -10,7 +10,8 @@ import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.megaphone.Megaphone;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,7 +42,7 @@ public class DebugListener implements Listener {
                         || event instanceof VehicleUpdateEvent
                         || event instanceof VehicleBlockCollisionEvent
                 )) {
-                    Chore.log(event.getEventName());
+                    CommonUtils.log(event.getEventName());
                 }
             },
             EventPriority.NORMAL,
@@ -99,7 +100,7 @@ public class DebugListener implements Listener {
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
                     for (int i = 0; i < val; i++) {
                         final ItemStack item = AlchemyItemStatus.getItem("kaen_stone", new ItemStack(Material.STONE));
-                        Chore.drop(player.getLocation(), item);
+                        ItemUtils.drop(player.getLocation(), item);
                     }
                 }, 20);
                 break;

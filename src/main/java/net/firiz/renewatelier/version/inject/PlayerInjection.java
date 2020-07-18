@@ -3,12 +3,13 @@ package net.firiz.renewatelier.version.inject;
 import io.netty.channel.Channel;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -90,9 +91,9 @@ public class PlayerInjection {
                     Bukkit.getPluginManager().callEvent(new PlayerArmorChangeEvent(player.getBukkitEntity(), null, PlayerArmorChangeEvent.ChangeType.CLEAR));
                 }
             });
-            Chore.log("inject successfully");
+            CommonUtils.log("inject successfully");
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            Chore.logWarning("It may have been changed by the version upgrade.", e);
+            CommonUtils.logWarning("It may have been changed by the version upgrade.", e);
         }
     }
 

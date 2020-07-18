@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.item;
 
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,7 +28,7 @@ public class CustomModelMaterial {
 
     public ItemStack toItemStack(int amount) {
         if (customModel >= 0) {
-            return Chore.createCustomModelItem(material, amount, customModel);
+            return ItemUtils.createCustomModelItem(material, amount, customModel);
         }
         return new ItemStack(material, amount);
     }

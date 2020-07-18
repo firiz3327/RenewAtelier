@@ -3,15 +3,17 @@ package net.firiz.renewatelier.item.json;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 
 import java.util.Objects;
 
-class JsonFactory implements TypeAdapterFactory {
+public class JsonFactory implements TypeAdapterFactory {
 
     private static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new JsonFactory()).create();
 
@@ -25,21 +27,27 @@ class JsonFactory implements TypeAdapterFactory {
 
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
-        final Class<T> rawType = Chore.cast(typeToken.getRawType());
+        final Class<T> rawType = CommonUtils.cast(typeToken.getRawType());
         if (rawType == AlchemyMaterial.class) {
-            return Chore.cast(StringTypeAdapter.createAdapter(
+            return CommonUtils.cast(StringTypeAdapter.createAdapter(
                     gson,
                     AlchemyMaterial::getId,
                     AlchemyMaterial::getMaterial
             ));
+        } else if (rawType == AlchemyRecipe.class) {
+            return CommonUtils.cast(StringTypeAdapter.createAdapter(
+                    gson,
+                    AlchemyRecipe::getId,
+                    AlchemyRecipe::search
+            ));
         } else if (rawType == Characteristic.class) {
-            return Chore.cast(StringTypeAdapter.createAdapter(
+            return CommonUtils.cast(StringTypeAdapter.createAdapter(
                     gson,
                     Characteristic::getId,
                     Characteristic::search
             ));
         } else if (rawType == Material.class) {
-            return Chore.cast(ItemTypeAdapter.createAdapter(
+            return CommonUtils.cast(ItemTypeAdapter.createAdapter(
                     gson,
                     (jsonObject, o) -> {
                         jsonObject.add("version", new JsonPrimitive(Bukkit.getUnsafe().getDataVersion()));

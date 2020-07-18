@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.alchemy.kettle;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -113,8 +113,8 @@ public enum AlchemyCircle {
     }
 
     public static ItemStack getCircle(final int value, final ItemStack sitem) {
-        if (Chore.getType(sitem) == Material.DIAMOND_AXE) {
-            final AlchemyCircle ai = sertchData(Chore.getCustomModelData(sitem));
+        if (ItemUtils.getType(sitem) == Material.DIAMOND_AXE) {
+            final AlchemyCircle ai = sertchData(ItemUtils.getCustomModelData(sitem));
             if (ai != null && !String.valueOf(ai.value).substring(1, 2).equals("0")) {
                 final int v2 = Integer.parseInt(String.valueOf(ai.value).substring(0, 1));
                 return i(value, v2, sitem);
@@ -127,7 +127,7 @@ public enum AlchemyCircle {
         final ItemStack item = new ItemStack(Material.DIAMOND_AXE, 1);
         final int cmd = AlchemyCircle.searchValue(Integer.parseInt(v2 + "" + v1)).data;
         final ItemMeta meta = item.getItemMeta();
-        Chore.setCustomModelData(meta, cmd);
+        ItemUtils.setCustomModelData(meta, cmd);
         if (sitem != null) {
             final ItemMeta smeta = sitem.getItemMeta();
             meta.setDisplayName(smeta.getDisplayName());

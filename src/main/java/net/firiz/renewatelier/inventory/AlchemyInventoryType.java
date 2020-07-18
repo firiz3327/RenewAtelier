@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.inventory;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.a.ARecipeSelect;
+import net.firiz.renewatelier.utils.CommonUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -36,7 +36,7 @@ public enum AlchemyInventoryType {
                 }
                 return block.getType() == Material.CAULDRON
                         && !player.isSneaking()
-                        && Chore.isRightOnly(action, true)
+                        && CommonUtils.isRightOnly(action, true)
                         && cauldron.getLevel() == cauldron.getMaximumLevel()
                         && typeCheck;
             }
@@ -46,7 +46,7 @@ public enum AlchemyInventoryType {
         @Override
         public boolean run(Action action, ItemStack item, Block block, Player player) {
             AtelierPlugin.getPlugin().getInventoryManager()
-                    .getInventory(RecipeSelect.class).open(player, block.getLocation());
+                    .getInventory(ARecipeSelect.class).open(player, block.getLocation());
             return true;
         }
     }),

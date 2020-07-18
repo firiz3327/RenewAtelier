@@ -1,16 +1,17 @@
 package net.firiz.renewatelier.version;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_15_R1.ChatMessage;
-import net.minecraft.server.v1_15_R1.EntityItem;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_16_R1.ChatMessage;
+import net.minecraft.server.v1_16_R1.EntityItem;
+import net.minecraft.server.v1_16_R1.NBTTagCompound;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +45,7 @@ public class VersionUtils {
             lkp = (MethodHandles.Lookup) implLookup.get(null);
             implLookup.setAccessible(false);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
             System.exit(1);
         }
     }
@@ -65,16 +66,16 @@ public class VersionUtils {
         return new VItemStack(CraftItemStack.asNMSCopy(item));
     }
 
-    public static net.minecraft.server.v1_15_R1.ItemStack asNMSCopy(final ItemStack item) {
+    public static net.minecraft.server.v1_16_R1.ItemStack asNMSCopy(final ItemStack item) {
         return CraftItemStack.asNMSCopy(item);
     }
 
     public static ItemStack asItem(final VItemStack item) {
-        final net.minecraft.server.v1_15_R1.ItemStack nms = (net.minecraft.server.v1_15_R1.ItemStack) item.getNmsItem();
+        final net.minecraft.server.v1_16_R1.ItemStack nms = (net.minecraft.server.v1_16_R1.ItemStack) item.getNmsItem();
         return CraftItemStack.asBukkitCopy(nms);
     }
 
-    public static ItemStack asItem(final net.minecraft.server.v1_15_R1.ItemStack item) {
+    public static ItemStack asItem(final net.minecraft.server.v1_16_R1.ItemStack item) {
         return CraftItemStack.asBukkitCopy(item);
     }
 
@@ -96,7 +97,7 @@ public class VersionUtils {
             field.setAccessible(true);
             return field;
         } catch (NoSuchFieldException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         throw new IllegalStateException("getField error");
     }
@@ -106,7 +107,7 @@ public class VersionUtils {
         try {
             return getField(clasz, name).get(obj);
         } catch (IllegalAccessException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -116,7 +117,7 @@ public class VersionUtils {
         try {
             return field.get(obj);
         } catch (IllegalAccessException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -128,7 +129,7 @@ public class VersionUtils {
             field.setAccessible(true);
             return field;
         } catch (NoSuchFieldException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         throw new IllegalStateException("getField error");
     }
@@ -137,7 +138,7 @@ public class VersionUtils {
         try {
             field.set(obj, value);
         } catch (IllegalAccessException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
     }
 
@@ -145,7 +146,7 @@ public class VersionUtils {
         try {
             getField(clasz, name).set(obj, value);
         } catch (IllegalAccessException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
     }
 
@@ -155,7 +156,7 @@ public class VersionUtils {
             method.setAccessible(true);
             return method.invoke(obj, args);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -165,7 +166,7 @@ public class VersionUtils {
         try {
             return lkp.unreflectGetter(getField(clazz, name));
         } catch (Exception e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -175,7 +176,7 @@ public class VersionUtils {
         try {
             return lkp.unreflectSetter(getField(clazz, name));
         } catch (Exception e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -193,7 +194,7 @@ public class VersionUtils {
             p.add(0, obj);
             return (T) handle.invokeWithArguments(p);
         } catch (Throwable e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }
@@ -206,7 +207,7 @@ public class VersionUtils {
             f = clazz.getDeclaredMethod(method, params);
             f.setAccessible(true);
         } catch (Exception e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return f;
     }
@@ -217,7 +218,7 @@ public class VersionUtils {
         try {
             return lkp.unreflect(getMethod(clazz, method, params));
         } catch (Exception e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
         return null;
     }

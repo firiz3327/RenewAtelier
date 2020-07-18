@@ -129,24 +129,18 @@ public class KettleBox {
 
     public final List<ItemStack> getItemStacks() {
         final List<ItemStack> result = new ObjectArrayList<>();
-
-        for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
-            if (data != null) {
-                result.add(data.getLeft().getItem());
-            }
-        }
+        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.getLeft().getItem()));
         return result;
 
     }
 
+    public final long getNonNullItemCount() {
+        return items.stream().filter(Objects::nonNull).count();
+    }
+
     public final List<BonusItem> getItems() {
         final List<BonusItem> result = new ObjectArrayList<>();
-
-        for (final Pair<BonusItem, KettleBoxCircleData> data : items) {
-            if (data != null) {
-                result.add(data.getLeft());
-            }
-        }
+        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.getLeft()));
         return result;
 
     }

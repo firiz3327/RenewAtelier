@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.damage;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
@@ -18,7 +17,6 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
@@ -32,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public enum DamageUtilV2 {
     INSTANCE;
@@ -41,6 +38,19 @@ public enum DamageUtilV2 {
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
     private final HoloDamage holo = new HoloDamage();
     private final MeruruCalcDamage meruruCalcDamage = new MeruruCalcDamage();
+
+    private final double defaultCriticalMag = 150;
+
+    public void itemDamage(final AlchemyItemStatus itemStatus, final LivingEntity damager, @NotNull final LivingEntity victim, float force, double power, AttackAttribute attackAttribute) {
+        final CalcDamageData data = calcData(itemStatus, getEntityStatus(damager), victim, power, force, false);
+        final ImmutablePair<Double, Double> def = getDef(victim, data.victimStatus, data.buffs, attackAttribute);
+        meruruCalcDamage.itemDamage(
+                data.powerValue,
+                def.getRight(),
+                defaultCriticalMag,
+                data.criticalRate >= 100 || Randomizer.percent(data.criticalRate)
+        );
+    }
 
     public void abnormalDamage(@NotNull final EntityStatus victimStatus, double damage) {
         final DamageComponent baseDamageComponent = new DamageComponent(damage, AttackAttribute.ABNORMAL);
@@ -139,7 +149,7 @@ public enum DamageUtilV2 {
         }
     }
 
-    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
+    private CalcDamageData calcData(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @NotNull LivingEntity victim, double power, double force, boolean arrow) {
         final boolean hasItemStatus = itemStatus != null;
         @Nullable final EntityStatus victimStatus = getEntityStatus(victim);
         int criticalRate = 0;
@@ -159,7 +169,16 @@ public enum DamageUtilV2 {
                     final CharacteristicBuff characteristicBuff = (CharacteristicBuff) c.getData(CharacteristicType.BUFF);
                     if (characteristicBuff != null) {
                         final int percent = characteristicBuff.getPercent();
-                        if (percent >= 100 || Randomizer.percent(percent)) {
+                        final double totalAbnormalResistanceMag;
+                        if (victimStatus instanceof MonsterStats) {
+                            totalAbnormalResistanceMag = ((MonsterStats) victimStatus).getBuffResistances().object2ObjectEntrySet().stream()
+                                    .filter(entry -> entry.getKey() == AttackAttribute.ABNORMAL)
+                                    .mapToDouble(entry -> entry.getValue().getMagnification()).sum();
+                        } else {
+                            totalAbnormalResistanceMag = 0;
+                        }
+                        final int abnormalPercent = (int) (100 + totalAbnormalResistanceMag);
+                        if (percent >= abnormalPercent || Randomizer.percent(percent, abnormalPercent)) {
                             buffs.add(new Buff(
                                     victimStatus,
                                     BuffValueType.CHARACTERISTIC,
@@ -215,27 +234,30 @@ public enum DamageUtilV2 {
                 }
             }
         }
+        return new CalcDamageData(victimStatus, criticalRate, buffs, addAttacks, powerValue);
+    }
 
+    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
+        final CalcDamageData data = calcData(itemStatus, damagerStatus, victim, power, force, arrow);
         final double damage = damage(
                 baseDamage,
-                powerValue,
+                data.powerValue,
                 damagerStatus,
                 victim,
-                victimStatus,
+                data.victimStatus,
                 baseAttribute,
-                buffs,
-                isMinecraftCritical || criticalRate >= 100 || Randomizer.percent(criticalRate)
+                data.buffs,
+                isMinecraftCritical || data.criticalRate >= 100 || Randomizer.percent(data.criticalRate)
         );
-
         final DamageComponent baseDamageComponent = new DamageComponent(damage, baseAttribute);
         final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         double allDamage = damage;
-        for (final AddAttackData addAttack : addAttacks) {
+        for (final AddAttackData addAttack : data.addAttacks) {
             final DamageComponent damageComponent = addAttack.getAddAttackType().applyDamage(addAttack, damagerStatus, victim, baseDamageComponent);
             if (damageComponent != null) {
                 // とりあえず攻撃属性によるパーセント減少のみ
-                final ImmutablePair<Double, Double> def = getDef(victim, victimStatus, buffs, damageComponent.getAttackAttribute());
+                final ImmutablePair<Double, Double> def = getDef(victim, data.victimStatus, data.buffs, damageComponent.getAttackAttribute());
                 damageComponent.setDamage(damageComponent.getDamage() * ((100 - def.getRight()) / 100));
                 damageComponents.add(damageComponent);
                 allDamage += damageComponent.getDamage();
@@ -264,7 +286,7 @@ public enum DamageUtilV2 {
                     powerValue,
                     def.getLeft(),
                     def.getRight(),
-                    150,
+                    defaultCriticalMag,
                     isCritical
             );
         } else {
@@ -272,18 +294,13 @@ public enum DamageUtilV2 {
                     damagerStatus == null ? 0 : damagerStatus.getAtk(),
                     powerValue,
                     def.getRight(),
-                    150,
+                    defaultCriticalMag,
                     isCritical
             );
         }
     }
 
     /**
-     *
-     * @param victim
-     * @param victimStatus
-     * @param buffs
-     * @param attackAttribute
      * @return def, percentDef
      */
     private ImmutablePair<Double, Double> getDef(Entity victim, EntityStatus victimStatus, List<Buff> buffs, AttackAttribute attackAttribute) {
@@ -339,5 +356,21 @@ public enum DamageUtilV2 {
      */
     private double calcQualityCorrection(final int quality) {
         return quality <= 100 ? 0.75 + quality / 200D : 1.25 + Math.sqrt((quality - 100) * 10D) / 100;
+    }
+
+    private static class CalcDamageData {
+        EntityStatus victimStatus;
+        int criticalRate;
+        List<Buff> buffs;
+        List<AddAttackData> addAttacks;
+        double powerValue;
+
+        public CalcDamageData(EntityStatus victimStatus, int criticalRate, List<Buff> buffs, List<AddAttackData> addAttacks, double powerValue) {
+            this.victimStatus = victimStatus;
+            this.criticalRate = criticalRate;
+            this.buffs = buffs;
+            this.addAttacks = addAttacks;
+            this.powerValue = powerValue;
+        }
     }
 }

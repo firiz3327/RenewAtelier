@@ -3,22 +3,21 @@ package net.firiz.renewatelier.listener;
 import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.a.AAlchemyKettle;
+import net.firiz.renewatelier.a.ARecipeSelect;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
-import net.firiz.renewatelier.inventory.alchemykettle.AlchemyKettle;
-import net.firiz.renewatelier.inventory.alchemykettle.RecipeSelect;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.npc.NPCManager;
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
-import net.firiz.renewatelier.utils.Chore;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import net.firiz.renewatelier.version.packet.PayloadPacket;
 import org.bukkit.Material;
@@ -63,7 +62,7 @@ public class PlayerListener implements Listener {
             } else if (loot.hasLootTable()) {
                 ReplaceVanillaItems.loot(player, loot);
             }
-        } else if (Chore.isRight(action)) {
+        } else if (CommonUtils.isRight(action)) {
             if (item != null && item.hasItemMeta()) {
                 if (item.getType() == Material.WRITTEN_BOOK) {
                     final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
@@ -79,7 +78,7 @@ public class PlayerListener implements Listener {
                 final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
                 if (type != null) {
                     e.setCancelled(type.run(action, item, block, player));
-                    inventoryManager.getInventory(RecipeSelect.class).open(player, block.getLocation());
+                    inventoryManager.getInventory(ARecipeSelect.class).open(player, block.getLocation());
                     return;
                 }
             }
@@ -95,7 +94,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
-            inventoryManager.getInventory(AlchemyKettle.class).pickup(e);
+            inventoryManager.getInventory(AAlchemyKettle.class).pickup(e);
         }
     }
 

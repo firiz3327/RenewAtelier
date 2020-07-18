@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
@@ -71,7 +71,7 @@ public class RecipeQuestResult extends ObjectQuestResult<AlchemyRecipe> {
         } else {
             throw new IllegalStateException("not support result_str");
         }
-        final ItemStack viewItem = Chore.createCustomModelItem(material, 1, cmd);
+        final ItemStack viewItem = ItemUtils.createCustomModelItem(material, 1, cmd);
         final ItemMeta viewMeta = Objects.requireNonNull(viewItem.getItemMeta());
         if (name != null) {
             viewMeta.setDisplayName(name);

@@ -3,7 +3,7 @@ package net.firiz.renewatelier.alchemy.catalyst;
 import java.util.List;
 
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -38,22 +38,22 @@ public class Catalyst {
         return mainCS;
     }
 
-    public void setInv(Inventory inv, AlchemyRecipe recipe, boolean kettle) {
+    public void setInv(Inventory inv, boolean kettle) {
         final int size = bonus.get(0).getCS().length;
         switch (size) {
             case 36: // 0 6x6
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
+                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
                 break;
             case 25: // 1 5x5
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1523, "", null));
+                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1523, "", null));
                 break;
             case 16: // 2 4x4
-                inv.setItem(0, Chore.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, "", null));
+                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, "", null));
                 break;
             default:
                 throw new IllegalStateException("catalyst bonus size number is not supported.");
         }
-        inv.setItem(45, Chore.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
+        inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
 
         final int defSlot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach(b -> {
@@ -61,7 +61,7 @@ public class Catalyst {
             for (int c : b.getCS()) {
                 short cmd = getCustomModelData(c);
                 if (cmd != -1) {
-                    inv.setItem(slot, Chore.ci(
+                    inv.setItem(slot, ItemUtils.ci(
                             Material.DIAMOND_AXE,
                             cmd,
                             ChatColor.RESET + b.getData().getName(),
@@ -96,7 +96,7 @@ public class Catalyst {
                 if (cSlot == slot) {
                     short cmd = getCustomModelData(c);
                     if (cmd != -1) {
-                        return Chore.ci(Material.DIAMOND_AXE, cmd, ChatColor.RESET + b.getData().getName(), null);
+                        return ItemUtils.ci(Material.DIAMOND_AXE, cmd, ChatColor.RESET + b.getData().getName(), null);
                     }
                 }
                 slot = nextSlot(slot, size);

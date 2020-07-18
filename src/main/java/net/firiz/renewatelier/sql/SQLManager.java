@@ -15,7 +15,8 @@ import java.util.Properties;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 
 /**
  * @author firiz
@@ -53,12 +54,12 @@ public enum SQLManager {
             password = prop.getProperty("password");
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         try {
             conn = DriverManager.getConnection(url, user, password);
         } catch (SQLException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
             System.exit(1);
         }
     }
@@ -77,7 +78,7 @@ public enum SQLManager {
             try {
                 conn.close();
             } catch (SQLException ex) {
-                Chore.logWarning(ex);
+                CommonUtils.logWarning(ex);
             }
         }
     }
@@ -227,7 +228,7 @@ public enum SQLManager {
                 }
             }
         } catch (SQLException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return result;
     }
@@ -315,7 +316,7 @@ public enum SQLManager {
             sb.append(";");
             stmt.executeUpdate(sb.toString());
         } catch (SQLException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 
@@ -372,7 +373,7 @@ public enum SQLManager {
             sb.append(";");
             stmt.executeUpdate(sb.toString());
         } catch (SQLException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 

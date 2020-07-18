@@ -5,7 +5,7 @@ import com.mojang.authlib.properties.Property;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;

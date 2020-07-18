@@ -13,7 +13,8 @@ import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
 import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackData;
 import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
 import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackType;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                     final CharacteristicType type = CharacteristicType.valueOf(str.substring(0, i));
                     final String dataStr = str.substring(i + 1).trim();
                     final CharacteristicData data;
-                    if (Chore.isNumMatch(dataStr)) {
+                    if (CommonUtils.isNumMatch(dataStr)) {
                         data = new CharacteristicInt(Integer.parseInt(dataStr));
                     } else {
                         final String[] split = dataStr.split(",");
@@ -90,7 +91,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             try {
                 Characteristic.getCharacteristic(r);
             } catch (IllegalArgumentException e) {
-                Chore.logWarning(e);
+                CommonUtils.logWarning(e);
             }
         });
     }
@@ -104,7 +105,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
 
         final List<List<String>> result = new ObjectArrayList<>();
         if (list.get(0) instanceof ArrayList) {
-            list.stream().<List<String>>map(Chore::cast).forEach(result::add);
+            list.stream().<List<String>>map(CommonUtils::cast).forEach(result::add);
         } else if (list.get(0) instanceof String) {
             result.add(convertStringList(list));
         }

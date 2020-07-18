@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.version.entity.atelier;
+package net.firiz.renewatelier.version.entity.atelier.holo;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
@@ -6,17 +6,13 @@ import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.utils.FakeId;
+import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
@@ -26,64 +22,25 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-public final class HoloHealth {
+public final class HoloHealth extends AbstractHoloHealth {
 
-    @NotNull
-    private final LivingEntity entity;
-    @NotNull
-    private final String customName;
-
-    @Nullable
-    private final LivingData livingData;
-    private final boolean isBoss;
-
-    // normal health bar
     private final FakeEntity holoHp;
     private final FakeEntity holoCustomName;
     private final FakeEntity holoResistances;
     private int holoDeleteTaskId = -1;
 
-    // boss health bar
-    private final BossBar bossBar;
-
     public HoloHealth(@NotNull LivingEntity entity, @Nullable LivingData livingData, @NotNull String customName) {
-        this.entity = entity;
-        this.customName = customName;
-
-        this.livingData = livingData;
-        this.isBoss = this.livingData != null && this.livingData.hasStats() && this.livingData.getStats().isBoss();
-
-        if (isBoss) {
-            this.holoHp = null;
-            this.holoCustomName = null;
-            this.holoResistances = null;
-            this.bossBar = Bukkit.createBossBar(customName, BarColor.RED, BarStyle.SOLID, BarFlag.PLAY_BOSS_MUSIC);
-        } else {
-            this.holoHp = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-            this.holoCustomName = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-            this.holoResistances = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-            this.bossBar = null;
-        }
+        super(entity, livingData, customName);
+        this.holoHp = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+        this.holoCustomName = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+        this.holoResistances = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
     }
 
+    @Override
     public void holo() {
-        if (isBoss) {
-            holoBoss();
-        } else {
-            holoNormal();
-        }
-    }
-
-    public void die() {
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoResistances.getEntityId()));
-    }
-
-    private void holoNormal() {
         final StringBuilder displayHp = new StringBuilder(ChatColor.RED.toString());
         displayHp.append("❤❤❤❤❤❤❤❤❤");
-        final double p = (entity.getHealth() / entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()) * 10;
+        final double p = getPercentHealth() * 10;
         final int insertPos = (int) Math.floor(p);
         final double z = p - insertPos;
         if (z >= 0.5) {
@@ -137,8 +94,11 @@ public final class HoloHealth {
         }
     }
 
-    private void holoBoss() {
-
+    @Override
+    public void die() {
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
+        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoResistances.getEntityId()));
     }
 
     private String createDisplayResistances() {

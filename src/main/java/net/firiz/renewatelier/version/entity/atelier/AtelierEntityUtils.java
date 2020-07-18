@@ -2,13 +2,14 @@ package net.firiz.renewatelier.version.entity.atelier;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +42,7 @@ public enum AtelierEntityUtils {
             livingDrop = LivingData.class.getDeclaredMethod("dropDeathLoot", Object.class, Object.class, Object.class);
             livingDrop.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
         }
 
         final CtClass supplier = pool.getOrNull(Supplier.class.getCanonicalName());
@@ -57,7 +58,7 @@ public enum AtelierEntityUtils {
                     );
                     entityMap.put(types, entityClass);
                 } catch (NotFoundException | CannotCompileException e) {
-                    Chore.logWarning(e);
+                    CommonUtils.logWarning(e);
                 }
             }
         }
@@ -146,7 +147,7 @@ public enum AtelierEntityUtils {
 
             return wrapEntity;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchFieldException | NoSuchMethodException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
             throw new IllegalStateException("error createCustomClassEntity. " + types.name());
         }
     }
@@ -176,7 +177,7 @@ public enum AtelierEntityUtils {
 
             return wrapEntity;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
-            Chore.logWarning(e);
+            CommonUtils.logWarning(e);
             throw new IllegalStateException("error createWrapEntity. " + types.name());
         }
     }
@@ -211,17 +212,17 @@ public enum AtelierEntityUtils {
             // javassistはvarargsに対応してないので、配列にして渡す
             // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
             // booleanを返すとBooleanになるので、booleanValue()でbooleanへ変換
-            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_15_R1.DamageSource damagesource, float f) {" +
+            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_16_R1.DamageSource damagesource, float f) {" +
                     "return ((Boolean) damageEntity0001.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
             final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody, clasz);
             clasz.addMethod(overrideDamageEntity);
 
-            final String dieBody = "public void die(net.minecraft.server.v1_15_R1.DamageSource damagesource) {" +
+            final String dieBody = "public void die(net.minecraft.server.v1_16_R1.DamageSource damagesource) {" +
                     "die0001.invoke(livingData, new Object[]{damagesource});}";
             final CtMethod overrideDie = CtNewMethod.make(dieBody, clasz);
             clasz.addMethod(overrideDie);
 
-            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_15_R1.DamageSource damagesource, int i, boolean flag) {" +
+            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_16_R1.DamageSource damagesource, int i, boolean flag) {" +
                     "drop0001.invoke(livingData, new Object[]{damagesource, Integer.valueOf(i), Boolean.valueOf(flag)});}";
             final CtMethod overrideDrop = CtNewMethod.make(dropBody, clasz);
             clasz.addMethod(overrideDrop);

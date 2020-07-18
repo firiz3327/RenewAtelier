@@ -1,7 +1,8 @@
 package net.firiz.renewatelier.world;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.Chore;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.ItemUtils;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -60,7 +61,7 @@ public enum MyRoomManager {
 
     public void warpRoom(final Player warpPlayer, final UUID islandUuid) {
         if (hasRoom(islandUuid)) {
-            Chore.warp(warpPlayer, getRoom(islandUuid));
+            ItemUtils.warp(warpPlayer, getRoom(islandUuid));
         }
     }
 
@@ -81,7 +82,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return null;
     }
@@ -97,7 +98,7 @@ public enum MyRoomManager {
                 }
             }
         } catch (IOException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
         return false;
     }
@@ -115,7 +116,7 @@ public enum MyRoomManager {
             );
             createDefaultRoom(loc);
         } catch (IOException ex) {
-            Chore.logWarning(ex);
+            CommonUtils.logWarning(ex);
         }
     }
 
@@ -177,7 +178,7 @@ public enum MyRoomManager {
                         try {
                             f2.createNewFile();
                         } catch (IOException ex) {
-                            Chore.logWarning(ex);
+                            CommonUtils.logWarning(ex);
                         }
                         return f2;
                     }
@@ -193,7 +194,7 @@ public enum MyRoomManager {
                 try {
                     f.createNewFile();
                 } catch (IOException ex) {
-                    Chore.logWarning(ex);
+                    CommonUtils.logWarning(ex);
                 }
                 return f;
             }
