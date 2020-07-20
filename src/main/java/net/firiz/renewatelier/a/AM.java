@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -34,11 +33,15 @@ public enum AM {
             final AData aData = userMap.remove(uuid);
             CObjects.nonNullConsumer(
                     aData.getContents(),
-                    contents -> player.getInventory().setContents(Objects.requireNonNull(contents))
+                    contents -> {
+                        player.getInventory().setContents(Objects.requireNonNull(contents));
+                        player.updateInventory();
+                    }
             );
             if (!resetContents) {
                 aData.getPageItems().forEach(list -> list.forEach(item -> ItemUtils.addItem(player, item)));
             }
+
             return aData;
         }
         return null;
