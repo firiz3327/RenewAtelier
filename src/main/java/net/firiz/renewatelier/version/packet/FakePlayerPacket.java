@@ -75,7 +75,7 @@ public class FakePlayerPacket {
         );
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static void sendSkin(final Player player, final VEntityPlayer vePlayer, final byte bitmask) {
         final EntityPlayer ePlayer = (EntityPlayer) vePlayer.getEntityPlayer();
         final DataWatcher watcher = ePlayer.getDataWatcher();

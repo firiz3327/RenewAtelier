@@ -61,7 +61,7 @@ public class RecipeIdea {
                     check = checkAlchemyMaterial(idea, require);
                     break;
                 case RECIPE:
-                    check = idea.recipe == require.getRecipe();
+                    check = idea.getRecipe() == require.getRecipe();
                     break;
                 default: // 想定しない
                     break;
@@ -74,7 +74,7 @@ public class RecipeIdea {
     }
 
     private boolean checkAlchemyMaterial(final IncreaseIdea idea, final RequireMaterial require) {
-        final AlchemyMaterial material = idea.material;
+        final AlchemyMaterial material = idea.getMaterial();
         boolean result = false;
         if (material != null) {
             if (require.getType() == RequireMaterial.RequireType.CATEGORY) {
@@ -99,36 +99,6 @@ public class RecipeIdea {
             return after >= require.getAmount();
         }
 
-    }
-
-    public static class IncreaseIdea {
-        private final AlchemyMaterial material;
-        private final ItemStack item;
-        private final AlchemyRecipe recipe;
-
-        public IncreaseIdea(ItemStack item) {
-            this.material = AlchemyMaterial.getMaterialOrNull(item);
-            this.item = material == null ? item : null;
-            this.recipe = null;
-        }
-
-        public IncreaseIdea(AlchemyRecipe recipe) {
-            this.material = null;
-            this.item = null;
-            this.recipe = recipe;
-        }
-
-        public AlchemyMaterial getMaterial() {
-            return material;
-        }
-
-        public ItemStack getItem() {
-            return item;
-        }
-
-        public AlchemyRecipe getRecipe() {
-            return recipe;
-        }
     }
 
 }

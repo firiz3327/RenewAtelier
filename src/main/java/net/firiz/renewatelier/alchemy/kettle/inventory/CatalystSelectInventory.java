@@ -1,7 +1,9 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
+import net.firiz.renewatelier.alchemy.kettle.KettleManager;
+import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
@@ -26,13 +28,13 @@ import java.util.UUID;
 /**
  * @author firiz
  */
-public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
+public final class CatalystSelectInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
-    private static final AM am = AM.INSTANCE;
+    private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
     private final InventoryManager manager;
     private final List<UUID> openUsers = new ObjectArrayList<>();
 
-    public ACatalystSelect(final InventoryManager manager) {
+    public CatalystSelectInventory(final InventoryManager manager) {
         this.manager = manager;
     }
 
@@ -52,8 +54,8 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
         for (int i = 3; i < inv.getSize(); i++) {
             inv.setItem(i, null);
         }
-        final AData aData = am.getUserData(uuid);
-        final ItemStack catalystItem = aData.getCatalystItem();
+        final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(uuid);
+        final ItemStack catalystItem = kettleUserData.getCatalystItem();
         Catalyst catalyst;
         if (catalystItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
@@ -99,12 +101,12 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
         final Player player = (Player) e.getWhoClicked();
         final UUID uuid = player.getUniqueId();
         final int raw = e.getRawSlot();
-        final AData aData = am.getUserData(uuid);
-        final AlchemyRecipe recipe = aData.getRecipe();
+        final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(uuid);
+        final AlchemyRecipe recipe = kettleUserData.getRecipe();
         if (raw >= inv.getSize() && e.isShiftClick()) {
             e.setCancelled(true);
             if (Objects.requireNonNull(inv.getItem(37)).getType() != Material.BARRIER) {
-                ItemUtils.addItem(player, aData.getCatalystItem());
+                ItemUtils.addItem(player, kettleUserData.getCatalystItem());
             }
             final ItemStack current = e.getCurrentItem();
             setCatalystItem(inv, uuid, recipe, current);
@@ -118,7 +120,7 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
                         final ItemStack cursor = e.getCursor();
                         setCatalystItem(inv, uuid, recipe, cursor);
                     } else {
-                        ItemUtils.addItem(player, aData.removeCatalystItem());
+                        ItemUtils.addItem(player, kettleUserData.removeCatalystItem());
                         setCatalystSlot(uuid, inv, recipe);
                     }
                     break;
@@ -126,7 +128,7 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
                 case 19: {
                     openUsers.add(player.getUniqueId());
                     player.closeInventory();
-                    manager.getInventory(AAlchemyKettle.class).open(player, recipe, inv);
+                    manager.getInventory(AlchemyKettleInventory.class).open(player, recipe, inv);
                     openUsers.remove(uuid);
                     break;
                 }
@@ -143,7 +145,7 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
             final ItemStack cloneItem = item.clone();
             cloneItem.setAmount(1);
             item.setAmount(item.getAmount() - 1);
-            am.getUserData(uuid).setCatalystItem(cloneItem);
+            KETTLE_MANAGER.getUserData(uuid).setCatalystItem(cloneItem);
             setCatalystSlot(uuid, inv, recipe);
         }
     }
@@ -158,7 +160,7 @@ public final class ACatalystSelect implements BiParamInventory<AlchemyRecipe, In
     @Override
     public void onClose(@NotNull final InventoryCloseEvent e) {
         if (!openUsers.contains(e.getPlayer().getUniqueId())) {
-            am.remove((Player) e.getPlayer(), false);
+            KETTLE_MANAGER.remove((Player) e.getPlayer(), false);
         }
     }
 }

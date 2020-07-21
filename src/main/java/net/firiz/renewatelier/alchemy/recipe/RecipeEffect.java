@@ -1,11 +1,9 @@
 package net.firiz.renewatelier.alchemy.recipe;
 
 import java.util.List;
-import java.util.UUID;
 
+import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
-import net.firiz.renewatelier.alchemy.kettle.bonus.KettleBonusManager;
-import net.firiz.renewatelier.alchemy.kettle.KettleItemManager;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
 import net.md_5.bungee.api.ChatColor;
@@ -15,8 +13,6 @@ import net.md_5.bungee.api.ChatColor;
  */
 public class RecipeEffect {
 
-    private static final KettleItemManager KETTLE_ITEM_MANAGER = KettleItemManager.INSTANCE;
-    private static final KettleBonusManager KETTLE_BONUS_MANAGER = KettleBonusManager.INSTANCE;
     private final AlchemyAttribute attribute;
     private final List<Integer> star;
     private final List<StarEffect> starEffects;
@@ -41,30 +37,30 @@ public class RecipeEffect {
         return starEffects;
     }
 
-    private double getUpCount(final UUID uuid) {
-        double upcount = 0;
-        final List<AlchemyAttribute[]> ups = KETTLE_BONUS_MANAGER.getLevelUps(uuid);
+    private double getUpCount(final KettleUserData kettleUserData) {
+        double upCount = 0;
+        final List<AlchemyAttribute[]> ups = kettleUserData.getBonusManager().getLevelUps();
         for (final AlchemyAttribute[] aas : ups) {
             for (final AlchemyAttribute aa : aas) {
                 if (aa == attribute) {
-                    upcount++;
+                    upCount++;
                 }
             }
         }
-        final List<CatalystBonus> bonusDatas = KETTLE_ITEM_MANAGER.getCatalystBonusList(uuid);
-        if (bonusDatas != null) {
-            for (final CatalystBonus cb : bonusDatas) {
+        final List<CatalystBonus> catalystBonuses = kettleUserData.getBonusManager().getCatalystBonuses();
+        if (catalystBonuses != null) {
+            for (final CatalystBonus cb : catalystBonuses) {
                 if (cb.getData().getType() == CatalystBonusData.BonusType.STARLEVEL && attribute == cb.getData().getY()) {
-                    upcount += cb.getData().getX();
+                    upCount += cb.getData().getX();
                 }
             }
         }
-        upcount += KETTLE_BONUS_MANAGER.getLevel(uuid) * 0.5;
-        return upcount;
+        upCount += kettleUserData.getBonusManager().getLevel() * 0.5;
+        return upCount;
     }
 
-    private int getBigStar(final UUID uuid) {
-        final double upCount = getUpCount(uuid);
+    private int getBigStar(final KettleUserData kettleUserData) {
+        final double upCount = getUpCount(kettleUserData);
         int bigstar = 0;
         for (int i = 0; i < star.size(); i++) {
             if (i < (int) upCount && star.get(i) != 0) {
@@ -74,18 +70,18 @@ public class RecipeEffect {
         return bigstar;
     }
 
-    public String getStar(final UUID uuid) {
-        final double upcount = getUpCount(uuid);
+    public String getStar(final KettleUserData kettleUserData) {
+        final double upCount = getUpCount(kettleUserData);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < star.size(); i++) {
             final int _star = star.get(i);
-            if (i < (int) upcount) {
+            if (i < (int) upCount) {
                 if (_star == 0) {
                     sb.append(ChatColor.GOLD).append("★");
                 } else {
                     sb.append(ChatColor.GOLD).append("✮");
                 }
-            } else if (i < upcount) {
+            } else if (i < upCount) {
                 if (_star == 0) {
                     sb.append(ChatColor.YELLOW).append("★");
                 } else {
@@ -102,15 +98,15 @@ public class RecipeEffect {
         return sb.toString();
     }
 
-    public String getName(final UUID uuid) {
-        final int bigstar = getBigStar(uuid);
-        final StarEffect effect = bigstar != 0 ? starEffects.get(bigstar - 1) : defaultStarEffect;
+    public String getName(final KettleUserData kettleUserData) {
+        final int bigStar = getBigStar(kettleUserData);
+        final StarEffect effect = bigStar != 0 ? starEffects.get(bigStar - 1) : defaultStarEffect;
         return effect != null ? effect.getName() : null;
     }
 
-    public StarEffect getActiveEffect(final UUID uuid) {
-        final int bigstar = getBigStar(uuid);
-        return bigstar != 0 ? starEffects.get(bigstar - 1) : defaultStarEffect;
+    public StarEffect getActiveEffect(final KettleUserData kettleUserData) {
+        final int bigStar = getBigStar(kettleUserData);
+        return bigStar != 0 ? starEffects.get(bigStar - 1) : defaultStarEffect;
     }
 
 }

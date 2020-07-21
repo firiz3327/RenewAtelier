@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle;
 
 import it.unimi.dsi.fastutil.objects.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ACM {
+public class KettleCharacteristicManager {
 
     private final Object2BooleanMap<Characteristic> characteristics = new Object2BooleanLinkedOpenHashMap<>();
     private final ObjectSet<Characteristic> catalystCharacteristics = new ObjectLinkedOpenHashSet<>();

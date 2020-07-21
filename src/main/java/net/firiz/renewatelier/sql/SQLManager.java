@@ -52,7 +52,7 @@ public enum SQLManager {
             url = prop.getProperty("url");
             user = prop.getProperty("user");
             password = prop.getProperty("password");
-        } catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ignored) {
         } catch (IOException ex) {
             CommonUtils.logWarning(ex);
         }
@@ -144,7 +144,7 @@ public enum SQLManager {
      * Execute select query
      *
      * <p>
-     * {@code table}の{@code columns}に対して{@code columnDatas}の値が
+     * {@code table}の{@code columns}に対して{@code columnDataArray}の値が
      * 一致するものをリストアップし返します。
      * </p>
      *
@@ -161,19 +161,19 @@ public enum SQLManager {
      *
      * @param table       String 参照するテーブル名
      * @param columns     String[] {@code table}から参照するカラム名配列
-     * @param columnDatas Object[] {@code columns}に対しての値
+     * @param columnDataArray Object[] {@code columns}に対しての値
      * @return List&lt;List&lt;Object&gt;&gt; 列&lt;行&lt;値&gt;&gt;
      * @since 2018-12-10 / firiz
      */
-    public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDatas) {
-        return select(table, columns, columnDatas, columns.length);
+    public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDataArray) {
+        return select(table, columns, columnDataArray, columns.length);
     }
 
     /**
      * Execute select query
      *
      * <p>
-     * {@code table}の{@code columns}に対して{@code columnDatas}の値が
+     * {@code table}の{@code columns}に対して{@code columnDataArray}の値が
      * 一致するものをリストアップし返します。
      * </p>
      *
@@ -190,12 +190,12 @@ public enum SQLManager {
      *
      * @param table       String 参照するテーブル名
      * @param columns     String[] {@code table}から参照するカラム名配列
-     * @param columnDatas Object[] {@code columns}に対しての値
+     * @param columnDataArray Object[] {@code columns}に対しての値
      * @param select_size int 選択範囲
      * @return List&lt;List&lt;Object&gt;&gt; 列&lt;行&lt;値&gt;&gt;
      * @since 2018-12-10 / firiz
      */
-    public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDatas, final int select_size) {
+    public List<List<Object>> select(final String table, final String[] columns, final Object[] columnDataArray, final int select_size) {
         final List<List<Object>> result = new ObjectArrayList<>();
         try (final Statement stmt = conn.createStatement()) {
             final StringBuilder sb = new StringBuilder();
@@ -207,15 +207,15 @@ public enum SQLManager {
                 sb.append(columns[i]);
             }
             sb.append(" from ").append(table);
-            if (columnDatas != null) {
-                for (int i = 0; i < columnDatas.length; i++) {
+            if (columnDataArray != null) {
+                for (int i = 0; i < columnDataArray.length; i++) {
                     if (i > 0) {
                         sb.append(" and ");
                     } else {
                         sb.append(" where ");
                     }
                     sb.append(columns[i]).append("=");
-                    addObject(sb, columnDatas[i]);
+                    addObject(sb, columnDataArray[i]);
                 }
             }
             try (final ResultSet resultSet = stmt.executeQuery(sb.toString())) {
@@ -238,7 +238,7 @@ public enum SQLManager {
      *
      * <p>
      * {@code table}の{@code column}に対して{@code columnData}の値を
-     * 存在しない場合はinsertで追加し、存在する場合はdeplicate key updateで更新します。
+     * 存在しない場合はinsertで追加し、存在する場合はduplicate key updateで更新します。
      * </p>
      *
      * <p>
@@ -265,8 +265,8 @@ public enum SQLManager {
      * Execute insert ... on duplicate key update query.
      *
      * <p>
-     * {@code table}の{@code columns}に対して{@code columnDatas}の値を
-     * 存在しない場合はinsertで追加し、存在する場合はdeplicate key updateで更新します。
+     * {@code table}の{@code columns}に対して{@code columnDataArray}の値を
+     * 存在しない場合はinsertで追加し、存在する場合はduplicate key updateで更新します。
      * </p>
      *
      * <p>
@@ -282,11 +282,11 @@ public enum SQLManager {
      *
      * @param table       String 参照するテーブル名
      * @param columns     String[] {@code table}から参照するカラム名の配列
-     * @param columnDatas Object[] {@code columns}に対しての値の配列
+     * @param columnDataArray Object[] {@code columns}に対しての値の配列
      * @since 2018-12-10 / firiz
      */
-    public void insert(final String table, final String[] columns, final Object[] columnDatas) {
-        if (columns.length != columnDatas.length) {
+    public void insert(final String table, final String[] columns, final Object[] columnDataArray) {
+        if (columns.length != columnDataArray.length) {
             return;
         }
         try (final Statement stmt = conn.createStatement()) {
@@ -299,11 +299,11 @@ public enum SQLManager {
                 sb.append(columns[i]);
             }
             sb.append(") values (");
-            for (int i = 0; i < columnDatas.length; i++) {
+            for (int i = 0; i < columnDataArray.length; i++) {
                 if (i > 0) {
                     sb.append(",");
                 }
-                addObject(sb, columnDatas[i]);
+                addObject(sb, columnDataArray[i]);
             }
             sb.append(") on duplicate key update ");
             for (int i = 0; i < columns.length; i++) {
@@ -311,7 +311,7 @@ public enum SQLManager {
                     sb.append(",");
                 }
                 sb.append(columns[i]).append("=");
-                addObject(sb, columnDatas[i]);
+                addObject(sb, columnDataArray[i]);
             }
             sb.append(";");
             stmt.executeUpdate(sb.toString());
@@ -344,7 +344,7 @@ public enum SQLManager {
      * Execute delete query
      *
      * <p>
-     * {@code table}の{@code columns}に対して{@code columnDatas}の値が 一致するものを削除します。
+     * {@code table}の{@code columns}に対して{@code columnDataArray}の値が 一致するものを削除します。
      * </p>
      *
      * <p>
@@ -353,11 +353,11 @@ public enum SQLManager {
      *
      * @param table       String 参照するテーブル名
      * @param columns     String[] {@code table}から参照するカラム名の配列
-     * @param columnDatas Object[] {@code columns}に対しての値の配列
+     * @param columnDataArray Object[] {@code columns}に対しての値の配列
      * @since 2018-12-10 / firiz
      */
-    public void delete(final String table, final String[] columns, final Object[] columnDatas) {
-        if (columns.length != columnDatas.length) {
+    public void delete(final String table, final String[] columns, final Object[] columnDataArray) {
+        if (columns.length != columnDataArray.length) {
             return;
         }
         try (final Statement stmt = conn.createStatement()) {
@@ -368,7 +368,7 @@ public enum SQLManager {
                     sb.append(" and ");
                 }
                 sb.append(columns[i]).append("=");
-                addObject(sb, columnDatas[i]);
+                addObject(sb, columnDataArray[i]);
             }
             sb.append(";");
             stmt.executeUpdate(sb.toString());
@@ -385,8 +385,8 @@ public enum SQLManager {
      * ObjectがStringの場合は変換し、 それ以外の場合はStringBuilderに変換せずに追加します。
      * </p>
      *
-     * @param sb
-     * @param obj
+     * @param sb    StringBuilder オブジェクトを文字列として追加する
+     * @param obj   Object 対象オブジェクト
      * @since 2018-12-10 / firiz
      */
     private void addObject(final StringBuilder sb, final Object obj) {

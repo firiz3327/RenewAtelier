@@ -64,12 +64,14 @@ public class LanguageJPPack {
 
     private static void item(JsonObject json) {
         int i = 0;
+        final StringJoiner joiner = new StringJoiner(",\n", "", ";");
         for (final Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (entry.getKey().startsWith("block.minecraft.") || entry.getKey().startsWith("item.minecraft.")) {
-                System.out.println("E" + i + "(\"" + entry.getKey() + "\", \"" + entry.getValue().getAsString() + "\"),");
+                joiner.add("E" + i + "(\"" + entry.getKey() + "\", \"" + entry.getValue().getAsString() + "\")");
                 i++;
             }
         }
+        System.out.println(joiner.toString());
     }
 
 }

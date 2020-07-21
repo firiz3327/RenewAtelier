@@ -7,7 +7,7 @@ import net.minecraft.server.v1_16_R1.EntityCreeper;
 import net.minecraft.server.v1_16_R1.EntityTypes;
 import net.minecraft.server.v1_16_R1.World;
 
-@MinecraftVersion("1.15")
+@MinecraftVersion("1.16")
 public class LivingCreeper extends EntityCreeper implements EntitySupplier {
 
     private LivingData livingData;

@@ -1,10 +1,10 @@
 package net.firiz.renewatelier.inventory.manager;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.firiz.renewatelier.a.AAlchemyKettle;
-import net.firiz.renewatelier.a.ACatalystSelect;
-import net.firiz.renewatelier.a.AItemSelect;
-import net.firiz.renewatelier.a.ARecipeSelect;
+import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
+import net.firiz.renewatelier.alchemy.kettle.inventory.CatalystSelectInventory;
+import net.firiz.renewatelier.alchemy.kettle.inventory.ItemSelectInventory;
+import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.BagInventory;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
@@ -32,10 +32,10 @@ public class InventoryManager {
 
     public InventoryManager() {
         inventories.put(Appraisal.class, new Appraisal());
-        inventories.put(ARecipeSelect.class, new ARecipeSelect(this));
-        inventories.put(AItemSelect.class, new AItemSelect(this));
-        inventories.put(ACatalystSelect.class, new ACatalystSelect(this));
-        inventories.put(AAlchemyKettle.class, new AAlchemyKettle());
+        inventories.put(RecipeSelectInventory.class, new RecipeSelectInventory(this));
+        inventories.put(ItemSelectInventory.class, new ItemSelectInventory(this));
+        inventories.put(CatalystSelectInventory.class, new CatalystSelectInventory(this));
+        inventories.put(AlchemyKettleInventory.class, new AlchemyKettleInventory());
         inventories.put(ConfirmInventory.class, new ConfirmInventory());
         inventories.put(ShopInventory.class, new ShopInventory());
         inventories.put(BagInventory.class, new BagInventory());

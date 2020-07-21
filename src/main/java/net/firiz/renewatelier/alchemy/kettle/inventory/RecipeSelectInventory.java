@@ -1,7 +1,8 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
+import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
@@ -37,7 +38,7 @@ import java.util.*;
 /**
  * @author firiz
  */
-public final class ARecipeSelect implements ParamInventory<Location> {
+public final class RecipeSelectInventory implements ParamInventory<Location> {
 
     private static final NamespacedKey locationKey = CommonUtils.createKey("location");
     private static final NamespacedKey recipeKey = CommonUtils.createKey("recipe");
@@ -46,7 +47,7 @@ public final class ARecipeSelect implements ParamInventory<Location> {
     private final InventoryManager manager;
     private final List<String> recipeLore;
 
-    public ARecipeSelect(final InventoryManager manager) {
+    public RecipeSelectInventory(final InventoryManager manager) {
         this.manager = manager;
         recipeLore = new ObjectArrayList<>();
         recipeLore.add(ChatColor.RESET + STRING_RECIPE);
@@ -64,7 +65,7 @@ public final class ARecipeSelect implements ParamInventory<Location> {
         inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, 1522, "", recipeLore)); // 外見上
         inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, 1562, "", null)); // 外見下
         inv.setItem(43, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null)); // 鑑定ボタン
-        inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), AConstants.scrollKey, 0)); // スクロール
+        inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), KettleConstants.scrollKey, 0)); // スクロール
         setLocation(inv, loc);
 
         setRecipeScroll(player.getUniqueId(), inv, 0);
@@ -237,8 +238,8 @@ public final class ARecipeSelect implements ParamInventory<Location> {
                         final AlchemyRecipe recipe = getRecipe(item);
                         if (ItemUtils.hasMaterial(player.getInventory(), recipe.getReqMaterial())) {
                             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
-                            AM.INSTANCE.create(player.getUniqueId(), getLocation(inv), recipe);
-                            manager.getInventory(AItemSelect.class).open(player, recipe, inv);
+                            KettleManager.INSTANCE.create(player.getUniqueId(), getLocation(inv), recipe);
+                            manager.getInventory(ItemSelectInventory.class).open(player, recipe, inv);
                             return;
                         }
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
@@ -297,11 +298,11 @@ public final class ARecipeSelect implements ParamInventory<Location> {
     }
 
     public int getScroll(Inventory inv) {
-        return ItemUtils.getSettingInt(Objects.requireNonNull(inv.getItem(1)), AConstants.scrollKey);
+        return ItemUtils.getSettingInt(Objects.requireNonNull(inv.getItem(1)), KettleConstants.scrollKey);
     }
 
     public void setScroll(Inventory inv, int scroll) {
-        ItemUtils.setSetting(Objects.requireNonNull(inv.getItem(1)), AConstants.scrollKey, scroll);
+        ItemUtils.setSetting(Objects.requireNonNull(inv.getItem(1)), KettleConstants.scrollKey, scroll);
     }
 
     public Location getLocation(Inventory inv) {

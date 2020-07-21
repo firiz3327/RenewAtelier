@@ -9,7 +9,7 @@ public class JsonItemList {
     @Expose
     private final List<JsonItem> jsonItems;
 
-    public JsonItemList(List<JsonItem> jsonItems) {
+    private JsonItemList(List<JsonItem> jsonItems) {
         this.jsonItems = jsonItems;
     }
 
@@ -19,6 +19,10 @@ public class JsonItemList {
 
     public String toJson() {
         return JsonFactory.toJson(this);
+    }
+
+    public static String toJson(List<JsonItem> jsonItems) {
+        return new JsonItemList(jsonItems).toJson();
     }
 
     public static JsonItemList fromJson(String json) {

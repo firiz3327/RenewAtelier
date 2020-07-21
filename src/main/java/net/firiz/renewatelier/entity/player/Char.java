@@ -8,6 +8,7 @@ import javax.script.ScriptEngine;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
 import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
@@ -200,12 +201,12 @@ public final class Char {
 
     public void increaseIdea(@NotNull final ItemStack item) {
         Objects.requireNonNull(item);
-        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new RecipeIdea.IncreaseIdea(item));
+        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new IncreaseIdea(item));
     }
 
     public void increaseIdea(@NotNull final AlchemyRecipe recipe) {
         Objects.requireNonNull(recipe);
-        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new RecipeIdea.IncreaseIdea(recipe));
+        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new IncreaseIdea(recipe));
     }
 
     public void gainMoney(long money) {

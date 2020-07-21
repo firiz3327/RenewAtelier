@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class AData {
+public class KettleUserData {
 
     private static final ItemStack AIR = new ItemStack(Material.AIR);
 
@@ -27,14 +27,14 @@ public class AData {
     private final ABonus aBonus;
     private final List<List<ItemStack>> pageItems = new ObjectArrayList<>(); // 保存されている使用中のアイテム
 
-    private final ACM acm = new ACM();
+    private final KettleCharacteristicManager kettleCharacteristicManager = new KettleCharacteristicManager();
 
     private boolean isOpen;
     private ItemStack[] contents; // 保存されているインベントリ
     private ItemStack catalystItem;
     private KettleBox kettleBox;
 
-    public AData(Location location, AlchemyRecipe recipe) {
+    public KettleUserData(Location location, AlchemyRecipe recipe) {
         this.location = location;
         this.recipe = recipe;
         this.aBonus = new ABonus(this, recipe.getReqBar());
@@ -122,8 +122,8 @@ public class AData {
         return old;
     }
 
-    public ACM getAcm() {
-        return acm;
+    public KettleCharacteristicManager getKettleCharacteristicManager() {
+        return kettleCharacteristicManager;
     }
 
     public ABonus getBonusManager() {

@@ -3,6 +3,7 @@ package net.firiz.renewatelier.entity.player.sql;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.notification.Notification;
@@ -117,7 +118,7 @@ public class RecipeSQL {
         return first;
     }
 
-    public void increaseIdea(@Nullable final Player player, @NotNull RecipeIdea.IncreaseIdea item) {
+    public void increaseIdea(@Nullable final Player player, @NotNull IncreaseIdea item) {
         Objects.requireNonNull(item);
         AlchemyRecipe.getIdeaRecipeList().stream()
                 .filter(ideaRecipe -> ideaRecipe.hasIdeaRequire(item))

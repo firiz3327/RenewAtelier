@@ -1,7 +1,11 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
+import net.firiz.renewatelier.alchemy.kettle.KettleManager;
+import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
+import net.firiz.renewatelier.alchemy.kettle.inventory.CatalystSelectInventory;
+import net.firiz.renewatelier.alchemy.kettle.inventory.KettleConstants;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -32,13 +36,13 @@ import java.util.UUID;
 /**
  * @author firiz
  */
-public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Inventory> {
+public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
-    private static final AM am = AM.INSTANCE;
+    private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
     private final InventoryManager manager;
     private final List<UUID> openUsers = new ObjectArrayList<>();
 
-    public AItemSelect(final InventoryManager manager) {
+    public ItemSelectInventory(final InventoryManager manager) {
         this.manager = manager;
     }
 
@@ -52,14 +56,14 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
         final Inventory inv = Bukkit.createInventory(player, 45, AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
         inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, 1508, "", null));
         inv.setItem(36, ItemUtils.ci(Material.DIAMOND_AXE, 1562, "", null));
-        inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), AConstants.scrollKey, 0)); // ページ番号
+        inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), KettleConstants.scrollKey, 0)); // ページ番号
 
         for (int i = 3; i < inv.getSize(); i++) {
             if (i != 36) {
                 inv.setItem(i, ItemUtils.ci(Material.BARRIER, 0, "", null));
             }
         }
-        am.getUserData(player.getUniqueId()).createPageItemSize(recipe.getReqMaterial().size());
+        KETTLE_MANAGER.getUserData(player.getUniqueId()).createPageItemSize(recipe.getReqMaterial().size());
         setItemSelectNumber(player, inv, recipe, 0);
         player.openInventory(inv);
         InventoryPacket.update(player, "", InventoryPacketType.CHEST);
@@ -103,7 +107,7 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
             item.setItemMeta(meta);
             inv.setItem(4, item);
 
-            final List<ItemStack> useItems = am.getUserData(player.getUniqueId()).getPageItems(nextPage);
+            final List<ItemStack> useItems = KETTLE_MANAGER.getUserData(player.getUniqueId()).getPageItems(nextPage);
             int count = 0;
             for (int i = 1; i <= 3; i++) { // 12,13,14 - 21,22,23 - 30,31,32
                 for (int j = 0; j < 3; j++) {
@@ -122,7 +126,7 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
 
     private boolean checkMaxSlot(final UUID uuid, final AlchemyRecipe recipe, final int page) {
         final List<RequireAmountMaterial> requireMaterials = recipe.getReqMaterial();
-        final List<ItemStack> pageItems = am.getUserData(uuid).getPageItems(page);
+        final List<ItemStack> pageItems = KETTLE_MANAGER.getUserData(uuid).getPageItems(page);
         final RequireAmountMaterial requireMaterial = requireMaterials.get(page);
         CustomModelMaterial material;
         switch (requireMaterial.getType()) {
@@ -154,10 +158,10 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
         final Inventory inv = e.getInventory();
         final Player player = (Player) e.getWhoClicked();
         final UUID uuid = player.getUniqueId();
-        final AData aData = am.getUserData(uuid);
+        final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(uuid);
         final int page = getPage(inv);
         final int raw = e.getRawSlot();
-        final AlchemyRecipe recipe = aData.getRecipe();
+        final AlchemyRecipe recipe = kettleUserData.getRecipe();
 
         // shift click
         if ((e.getSlotType() == InventoryType.SlotType.CONTAINER || e.getSlotType() == InventoryType.SlotType.QUICKBAR)
@@ -169,7 +173,7 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
                 if (ItemUtils.checkMaterial(current, data)) {
                     final ItemStack cloneItem = current.clone();
                     cloneItem.setAmount(1);
-                    aData.addPageItem(page, cloneItem);
+                    kettleUserData.addPageItem(page, cloneItem);
                     e.getCurrentItem().setAmount(e.getCurrentItem().getAmount() - 1);
                     setItemSelectNumber(player, inv, recipe, 0); // refresh page
                 }
@@ -187,10 +191,10 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
                 if (current != null) {
                     final ItemStack cursor = e.getCursor();
                     if (current.getType() != Material.AIR) { // アイテムを外す
-                        final List<ItemStack> items = aData.getPageItems(page);
+                        final List<ItemStack> items = kettleUserData.getPageItems(page);
                         if (items != null && !items.isEmpty()) {
                             final ItemStack item = items.get(raw >= 21 ? (raw >= 30 ? raw - 24 : raw - 18) : raw - 12);
-                            if (aData.removePageItem(page, item)) {
+                            if (kettleUserData.removePageItem(page, item)) {
                                 ItemUtils.addItem(player, item);
                             }
                         }
@@ -200,7 +204,7 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
                             final ItemStack cloneItem = cursor.clone();
                             cloneItem.setAmount(1);
                             cursor.setAmount(cursor.getAmount() - 1);
-                            aData.addPageItem(page, cloneItem);
+                            kettleUserData.addPageItem(page, cloneItem);
                         }
                     }
                     setItemSelectNumber(player, inv, recipe, 0); // refresh page
@@ -223,7 +227,7 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
                 }
                 openUsers.add(uuid);
                 player.closeInventory();
-                manager.getInventory(ACatalystSelect.class).open(player, recipe, inv);
+                manager.getInventory(CatalystSelectInventory.class).open(player, recipe, inv);
                 openUsers.remove(uuid);
             }
         }
@@ -239,16 +243,16 @@ public final class AItemSelect implements BiParamInventory<AlchemyRecipe, Invent
     @Override
     public void onClose(@NotNull InventoryCloseEvent e) {
         if (!openUsers.contains(e.getPlayer().getUniqueId())) {
-            am.remove((Player) e.getPlayer(), false);
+            KETTLE_MANAGER.remove((Player) e.getPlayer(), false);
         }
     }
 
     public int getPage(Inventory inv) {
-        return ItemUtils.getSettingInt(Objects.requireNonNull(inv.getItem(1)), AConstants.scrollKey);
+        return ItemUtils.getSettingInt(Objects.requireNonNull(inv.getItem(1)), KettleConstants.scrollKey);
     }
 
     public void setPage(Inventory inv, int scroll) {
-        ItemUtils.setSetting(Objects.requireNonNull(inv.getItem(1)), AConstants.scrollKey, scroll);
+        ItemUtils.setSetting(Objects.requireNonNull(inv.getItem(1)), KettleConstants.scrollKey, scroll);
     }
 
 }

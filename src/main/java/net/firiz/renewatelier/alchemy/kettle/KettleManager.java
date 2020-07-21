@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.a;
+package net.firiz.renewatelier.alchemy.kettle;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -13,36 +13,35 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.UUID;
 
-public enum AM {
+public enum KettleManager {
     INSTANCE;
 
-    final Object2ObjectMap<UUID, AData> userMap = new Object2ObjectOpenHashMap<>();
+    final Object2ObjectMap<UUID, KettleUserData> userMap = new Object2ObjectOpenHashMap<>();
 
     public void create(@NotNull UUID uuid, @NotNull Location location, @NotNull AlchemyRecipe recipe) {
-        userMap.put(uuid, new AData(location, recipe));
+        userMap.put(uuid, new KettleUserData(location, recipe));
     }
 
-    public AData getUserData(@NotNull UUID uuid) {
+    public KettleUserData getUserData(@NotNull UUID uuid) {
         return userMap.get(uuid);
     }
 
     @Nullable
-    public AData remove(@NotNull Player player, boolean resetContents) {
+    public KettleUserData remove(@NotNull Player player, boolean resetContents) {
         final UUID uuid = player.getUniqueId();
         if (userMap.containsKey(uuid)) {
-            final AData aData = userMap.remove(uuid);
+            final KettleUserData kettleUserData = userMap.remove(uuid);
             CObjects.nonNullConsumer(
-                    aData.getContents(),
+                    kettleUserData.getContents(),
                     contents -> {
                         player.getInventory().setContents(Objects.requireNonNull(contents));
                         player.updateInventory();
                     }
             );
             if (!resetContents) {
-                aData.getPageItems().forEach(list -> list.forEach(item -> ItemUtils.addItem(player, item)));
+                kettleUserData.getPageItems().forEach(list -> list.forEach(item -> ItemUtils.addItem(player, item)));
             }
-
-            return aData;
+            return kettleUserData;
         }
         return null;
     }

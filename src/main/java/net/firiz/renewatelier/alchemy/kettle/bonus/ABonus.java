@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.alchemy.kettle.bonus;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.a.AData;
+import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ABonus {
 
-    private final AData aData;
+    private final KettleUserData kettleUserData;
     private final BonusPlayerData bpd;
     private final List<CatalystBonus> catalystBonuses = new ObjectArrayList<>() {
         @Override
@@ -29,14 +29,14 @@ public class ABonus {
         }
     };
 
-    public ABonus(AData aData, int req) {
-        this.aData = aData;
+    public ABonus(KettleUserData kettleUserData, int req) {
+        this.kettleUserData = kettleUserData;
         this.bpd = new BonusPlayerData(req);
     }
 
     public int getBonus(AlchemyAttribute type) {
         final AtomicInteger sizes = new AtomicInteger();
-        final KettleBox kettleBox = aData.getKettleBox();
+        final KettleBox kettleBox = kettleUserData.getKettleBox();
         if (kettleBox != null) {
             final List<BonusItem> kettleSelects = kettleBox.getResultItems();
             kettleSelects.stream().filter(bonusItem -> bonusItem.getItem() != null).forEach(bonusItem -> {
@@ -76,7 +76,7 @@ public class ABonus {
 
     public void addBar(int plus, AlchemyAttribute[] aas) {
         final int bonus = Arrays.stream(aas).mapToInt(this::getBonus).sum();
-        final KettleBox kettleBox = aData.getKettleBox();
+        final KettleBox kettleBox = kettleUserData.getKettleBox();
         if (kettleBox != null) {
             final List<BonusItem> kettleSelects = kettleBox.getItems();
             plus += plus * ((double) bonus * 0.01 + (kettleSelects.isEmpty() ? 0 : kettleSelects.get(kettleSelects.size() - 1).getBonus() * 0.01));

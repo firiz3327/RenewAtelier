@@ -69,10 +69,11 @@ public class AlchemyItemBag {
 
     public void writeItem(@NotNull final ItemStack item) {
         final ItemMeta meta = item.getItemMeta();
+        final String json = JsonItemList.toJson(items);
         meta.getPersistentDataContainer().set(
                 persistentDataKey,
                 PersistentDataType.STRING,
-                new JsonItemList(items).toJson()
+                json
         );
         item.setItemMeta(meta);
     }

@@ -3,8 +3,8 @@ package net.firiz.renewatelier.listener;
 import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.a.AAlchemyKettle;
-import net.firiz.renewatelier.a.ARecipeSelect;
+import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
+import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
@@ -78,7 +78,7 @@ public class PlayerListener implements Listener {
                 final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
                 if (type != null) {
                     e.setCancelled(type.run(action, item, block, player));
-                    inventoryManager.getInventory(ARecipeSelect.class).open(player, block.getLocation());
+                    inventoryManager.getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
                     return;
                 }
             }
@@ -94,7 +94,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void pickup(final EntityPickupItemEvent e) {
         if (e.getEntity() instanceof Player) {
-            inventoryManager.getInventory(AAlchemyKettle.class).pickup(e);
+            inventoryManager.getInventory(AlchemyKettleInventory.class).pickup(e);
         }
     }
 

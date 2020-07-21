@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.inventory;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.a.ARecipeSelect;
+import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.utils.CommonUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -46,7 +46,7 @@ public enum AlchemyInventoryType {
         @Override
         public boolean run(Action action, ItemStack item, Block block, Player player) {
             AtelierPlugin.getPlugin().getInventoryManager()
-                    .getInventory(ARecipeSelect.class).open(player, block.getLocation());
+                    .getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
             return true;
         }
     }),

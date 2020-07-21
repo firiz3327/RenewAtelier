@@ -28,13 +28,13 @@ public class PayloadPacket {
     private PayloadPacket() {
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     private static final String CHANNEL_BRAND = "minecraft:brand";
 
     static {
         final StandardMessenger messenger = (StandardMessenger) Bukkit.getMessenger();
         try {
-            @MinecraftVersion("1.15") final Method method = StandardMessenger.class.getDeclaredMethod(
+            @MinecraftVersion("1.16") final Method method = StandardMessenger.class.getDeclaredMethod(
                     "addToOutgoing",
                     Plugin.class,
                     String.class
@@ -46,7 +46,7 @@ public class PayloadPacket {
         }
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     private static void addChannel(final Player player) {
         try {
             final Field playerChannels = CraftPlayer.class.getDeclaredField("channels");
@@ -58,7 +58,7 @@ public class PayloadPacket {
         }
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static void sendBrand(final Player player) {
         addChannel(player);
 

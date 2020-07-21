@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
+import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyRecipeLoader;
@@ -126,7 +127,7 @@ public class AlchemyRecipe {
         return !ideaRequires.isEmpty();
     }
 
-    public boolean hasIdeaRequire(@NotNull RecipeIdea.IncreaseIdea idea) {
+    public boolean hasIdeaRequire(@NotNull IncreaseIdea idea) {
         if (!isIdeaRequired()) {
             throw new IllegalStateException("There are no ideas for this recipe.");
         }

@@ -16,7 +16,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     private final EntityPlayer player;
     final Field a;
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public ChannelHandler(EntityPlayer player) {
         this.player = player;
         try {
@@ -28,7 +28,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        System.out.println("[READ] " + msg.getClass().getSimpleName());
         if (msg instanceof PacketPlayInUseEntity) {
