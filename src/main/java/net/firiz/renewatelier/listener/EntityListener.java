@@ -21,7 +21,7 @@ import java.util.Collections;
 public class EntityListener implements Listener {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
-    private final ArrowManager arrowManager = new ArrowManager();
+    private static final ArrowManager arrowManager = ArrowManager.INSTANCE;
 
     @EventHandler
     private void spawnCreature(final CreatureSpawnEvent e) {
@@ -66,10 +66,13 @@ public class EntityListener implements Listener {
                             return;
                         }
                     }
-                    arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
+                    if (arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce())) {
+                        e.setCancelled(true);
+                        ((Player) e.getEntity()).updateInventory();
+                    }
                 }
             } else {
-                arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce());
+                e.setCancelled(arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce()));
             }
         }
     }

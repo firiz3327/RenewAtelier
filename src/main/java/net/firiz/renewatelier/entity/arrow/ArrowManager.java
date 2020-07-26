@@ -2,6 +2,8 @@ package net.firiz.renewatelier.entity.arrow;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
@@ -13,6 +15,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
@@ -23,10 +26,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public final class ArrowManager {
+public enum ArrowManager {
+    INSTANCE;
+
+    private static final String STR_NO_AVAILABLE_ARROW = "使用可能な矢がありません。";
 
     private enum CustomArrow {
-        BOOK(1);
+        BAG(1);
 
         private final int customModel;
 
@@ -39,55 +45,93 @@ public final class ArrowManager {
         }
     }
 
+    public boolean handleDigPacketCrossbow(@NotNull Player player) {
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (mainHand.getType() == Material.CROSSBOW) {
+            final InteractCrossbowResult data = ArrowManager.INSTANCE.interactCrossbow2(player);
+            if (data.result) { // consumeArrow and nextConsumeArrow is null
+                player.updateInventory();
+                return true;
+            } else if (CObjects.nullIfPredicate(
+                    data.arrows.getLeft(),
+                    itemStack -> CustomArrow.isFound(itemStack.getItemMeta()),
+                    false)) {
+                final ItemStack nextConsumeArrow = data.arrows.getRight();
+                if (nextConsumeArrow != null) {
+                    final ItemStack arrow = nextConsumeArrow.clone();
+                    arrow.setAmount(1);
+                    final CrossbowMeta meta = (CrossbowMeta) mainHand.getItemMeta();
+                    meta.addChargedProjectile(arrow);
+                    mainHand.setItemMeta(meta);
+                    if (player.getGameMode() != GameMode.CREATIVE) {
+                        nextConsumeArrow.setAmount(nextConsumeArrow.getAmount() - 1);
+                    }
+                }
+                player.updateInventory();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean interactCrossbow(@NotNull Player player) {
+        return interactCrossbow2(player).result;
+    }
+
+    private InteractCrossbowResult interactCrossbow2(@NotNull Player player) {
+        final ImmutableNullablePair<ItemStack, ItemStack> arrows = getConsumeArrow(player);
+        final ItemStack consumeArrow = arrows.getLeft();
+        if (consumeArrow != null) {
+            final ItemStack nextConsumeArrow = arrows.getRight();
+            if (CustomArrow.isFound(consumeArrow.getItemMeta()) && nextConsumeArrow == null) {
+                player.sendMessage(STR_NO_AVAILABLE_ARROW);
+            } else {
+                return new InteractCrossbowResult(arrows, false);
+            }
+        }
+        return new InteractCrossbowResult(arrows, true);
+    }
+
     public void shootCrossbow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow) {
-        cancelArrow(player, baseArrow);
+        removeArrow(baseArrow);
         shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
     }
 
-    public void shootBow(@NotNull LivingEntity entity, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
+    public boolean shootBow(@NotNull LivingEntity entity, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
         if (bow == null) {
             baseArrow.remove();
-            return;
+            return true;
         }
 
         ItemStack consumeArrow = null;
         ItemStack nextConsumeArrow = null;
         if (entity instanceof Player) {
-            final PlayerInventory playerInventory = ((Player) entity).getInventory();
-            final List<ItemStack> items = new ObjectArrayList<>();
-            items.add(playerInventory.getItemInMainHand());
-            items.add(playerInventory.getItemInOffHand());
-            IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);
-            for (final ItemStack item : items) {
-                if (item != null && (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW || item.getType() == Material.SPECTRAL_ARROW)) {
-                    final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-                    if (consumeArrow == null) {
-                        consumeArrow = item;
-                    } else if (!CustomArrow.isFound(meta)) {
-                        nextConsumeArrow = item;
-                        break;
-                    }
-                }
-            }
+            final ImmutableNullablePair<ItemStack, ItemStack> arrows = getConsumeArrow((Player) entity);
+            consumeArrow = arrows.getLeft();
+            nextConsumeArrow = arrows.getRight();
         }
 
         if (consumeArrow != null) { // always entity is player
             final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
             if (CustomArrow.isFound(meta)) {
-                cancelArrow(entity, baseArrow);
-                shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
+                removeArrow(baseArrow);
+                return shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
             } else {
-                cancelArrow(entity, baseArrow);
+                removeArrow(baseArrow);
                 shootAtelierArrow(entity, bow, baseArrow, consumeArrow, true, force);
             }
         } else if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
-            cancelArrow(entity, baseArrow);
+            removeArrow(baseArrow);
             shootAtelierArrow(entity, bow, baseArrow, new ItemStack(Material.ARROW), true, force);
         }
+        return false;
     }
 
-    private void cancelArrow(final LivingEntity source, final AbstractArrow arrow) {
+    private void removeArrow(final AbstractArrow arrow) {
         arrow.remove();
+    }
+
+    private void soundArrow(final LivingEntity source) {
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
@@ -135,19 +179,20 @@ public final class ArrowManager {
         } else {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         }
+        soundArrow(entity);
         cloneArrow.shoot(baseArrow.getVelocity());
     }
 
-    private void shootNextArrow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
+    private boolean shootNextArrow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
         if (nextConsumeArrow == null) {
-            player.sendMessage("使用可能な矢がありません。");
+            player.sendMessage(STR_NO_AVAILABLE_ARROW);
             final int consumeArrowAmount = consumeArrow.getAmount();
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> consumeArrow.setAmount(consumeArrowAmount),
                     1L
             );
-            return;
+            return true;
         }
         shootAtelierArrow(player, bow == null ? new ItemStack(Material.BOW) : bow, baseArrow, nextConsumeArrow, true, force);
         final int consumeArrowAmount = consumeArrow.getAmount();
@@ -156,6 +201,39 @@ public final class ArrowManager {
                 () -> consumeArrow.setAmount(consumeArrowAmount),
                 1L
         );
+        return false;
+    }
+
+    private ImmutableNullablePair<ItemStack, ItemStack> getConsumeArrow(@NotNull Player player) {
+        ItemStack consumeArrow = null;
+        ItemStack nextConsumeArrow = null;
+        final PlayerInventory playerInventory = player.getInventory();
+        final List<ItemStack> items = new ObjectArrayList<>();
+        items.add(playerInventory.getItemInMainHand());
+        items.add(playerInventory.getItemInOffHand());
+        IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);
+        for (final ItemStack item : items) {
+            if (item != null && (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW || item.getType() == Material.SPECTRAL_ARROW)) {
+                final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
+                if (consumeArrow == null) {
+                    consumeArrow = item;
+                } else if (!CustomArrow.isFound(meta)) {
+                    nextConsumeArrow = item;
+                    break;
+                }
+            }
+        }
+        return new ImmutableNullablePair<>(consumeArrow, nextConsumeArrow);
+    }
+
+    private class InteractCrossbowResult {
+        final ImmutableNullablePair<ItemStack, ItemStack> arrows;
+        final boolean result;
+
+        public InteractCrossbowResult(ImmutableNullablePair<ItemStack, ItemStack> arrows, boolean result) {
+            this.arrows = arrows;
+            this.result = result;
+        }
     }
 
 }

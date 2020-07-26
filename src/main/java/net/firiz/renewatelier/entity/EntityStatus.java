@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.entity;
 
 import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.BuffData;
 import net.firiz.renewatelier.buff.BuffValueType;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;

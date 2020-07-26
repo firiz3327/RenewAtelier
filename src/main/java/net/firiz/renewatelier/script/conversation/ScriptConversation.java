@@ -13,6 +13,7 @@ import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.inventory.shop.ShopItem;
+import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
@@ -324,7 +325,7 @@ public class ScriptConversation {
             final int over_quality,
             final List<AlchemyIngredients> overIngs,
             int[] overSize,
-            final List<String> activeEffects,
+            final List<AlchemyItemEffect> activeEffects,
             final List<Characteristic> overCharacteristics,
             final List<Category> overCategory,
             final boolean notVisibleCatalyst
@@ -349,7 +350,7 @@ public class ScriptConversation {
             final List<AlchemyIngredients> overIngs,
             final int overQuality,
             final int[] overSize,
-            final List<String> activeEffects,
+            final List<AlchemyItemEffect> activeEffects,
             final List<Characteristic> overCharacteristics,
             final List<Category> overCategory,
             final boolean not_visible_catalyst

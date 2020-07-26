@@ -1,13 +1,16 @@
 package net.firiz.renewatelier.listener;
 
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
+import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
-import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.npc.NPCManager;
@@ -34,6 +37,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.loot.LootTables;
 
 /**
@@ -42,6 +46,16 @@ import org.bukkit.loot.LootTables;
 public class PlayerListener implements Listener {
 
     private final InventoryManager inventoryManager = AtelierPlugin.getPlugin().getInventoryManager();
+    private static final ArrowManager arrowManager = ArrowManager.INSTANCE;
+
+    @EventHandler
+    private void readyArrow(final PlayerReadyArrowEvent e) {
+        final Player player = e.getPlayer();
+        final ItemStack item = e.getBow();
+        if (item.getType() == Material.CROSSBOW && !((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles()) {
+            e.setCancelled(arrowManager.interactCrossbow(player));
+        }
+    }
 
     @EventHandler
     private void interact(final PlayerInteractEvent e) {
@@ -63,13 +77,20 @@ public class PlayerListener implements Listener {
                 ReplaceVanillaItems.loot(player, loot);
             }
         } else if (CommonUtils.isRight(action)) {
-            if (item != null && item.hasItemMeta()) {
-                if (item.getType() == Material.WRITTEN_BOOK) {
+            if (item != null) {
+                if (item.hasItemMeta()) {
                     final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
-                    if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
-                        e.setCancelled(true);
-                        QuestBook.openQuestBook(player);
-                        return;
+                    switch (item.getType()) {
+                        case WRITTEN_BOOK:
+                            if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
+                                e.setCancelled(true);
+                                QuestBook.openQuestBook(player);
+                                return;
+                            }
+                            break;
+                        default:
+                            // alchemyMaterial
+                            break;
                     }
                 }
             }

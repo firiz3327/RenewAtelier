@@ -8,6 +8,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * @deprecated Use {@link com.destroystokyo.paper.event.player.PlayerArmorChangeEvent}, Duplicate API
+ */
+@Deprecated(forRemoval = true)
 public class PlayerArmorChangeEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 

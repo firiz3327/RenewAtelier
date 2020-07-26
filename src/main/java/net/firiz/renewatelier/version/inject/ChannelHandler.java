@@ -3,6 +3,7 @@ package net.firiz.renewatelier.version.inject;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_16_R1.*;
@@ -46,6 +47,9 @@ public class ChannelHandler extends ChannelDuplexHandler {
             if (event.isCancelled()) {
                 return;
             }
+        } else if (msg instanceof PacketPlayInBlockDig
+                && ArrowManager.INSTANCE.handleDigPacketCrossbow(player.getBukkitEntity())) {
+            return;
         }
         super.channelRead(ctx, msg);
     }

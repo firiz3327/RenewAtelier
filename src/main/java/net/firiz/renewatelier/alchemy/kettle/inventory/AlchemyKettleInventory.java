@@ -21,6 +21,7 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
+import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.ItemUtils;
@@ -630,18 +631,14 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 final List<AlchemyIngredients> ingredients = itemStatus.getIngredients();
                                 final List<Category> categories = itemStatus.getCategories();
 
-                                final List<StarEffect.EnchantEffect> enchantEffects = new ObjectArrayList<>();
-                                final List<String> activeEffects = new ObjectArrayList<>();
+//                                final List<StarEffect.EnchantEffect> enchantEffects = new ObjectArrayList<>();
+                                final List<AlchemyItemEffect> activeEffects = new ObjectArrayList<>();
                                 for (final RecipeEffect effect : recipe.getEffects()) {
                                     StarEffect activeEffect = effect.getActiveEffect(kettleUserData);
                                     if (activeEffect != null) {
                                         switch (activeEffect.getType()) {
-                                            case NAME:
-                                                activeEffects.add(activeEffect.getName());
-                                                break;
-                                            case ENCHANT:
-                                                activeEffects.add(activeEffect.getName());
-                                                enchantEffects.add(activeEffect.getEnchantEffect());
+                                            case ITEM_EFFECT:
+                                                activeEffects.add(activeEffect.getEffect());
                                                 break;
                                             default: // activeEffectを変更しない
                                                 break;
@@ -661,13 +658,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                         categories.isEmpty() ? null : categories, // カテゴリ 書き換え
                                         false
                                 );
-                                if (!enchantEffects.isEmpty()) {
-                                    final ItemMeta meta = resultItem.getItemMeta();
-                                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                                    for (final StarEffect.EnchantEffect effect : enchantEffects) {
-                                        meta.addEnchant(effect.getEnchant(), effect.getLevel(), true);
-                                    }
-                                    resultItem.setItemMeta(meta);
+                                for (final AlchemyItemEffect alchemyItemEffect : activeEffects) {
+                                    alchemyItemEffect.initialize(resultItem);
                                 }
                             } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
                                 Material material = Material.matchMaterial(result_str);

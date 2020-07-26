@@ -87,14 +87,14 @@ public class NPCObject {
                 final Villager villager = (Villager) world.spawnEntity(location, EntityType.VILLAGER, CreatureSpawnEvent.SpawnReason.CUSTOM);
                 npc = new NPC(this, villager);
                 villager.setCustomName(colorName);
-                villager.setVillagerType(CObjects.nullIf(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS));
-                villager.setProfession(CObjects.nullIf(profession, Villager.Profession::valueOf, Villager.Profession.NONE));
+                villager.setVillagerType(CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS));
+                villager.setProfession(CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE));
                 break;
             case PLAYER:
                 npc = new NPC(this, FakePlayerPacket.createEntityPlayer(
                         location.getWorld(),
                         location,
-                        CObjects.nullIf(skinUUID, UUID::fromString, null),
+                        CObjects.nullIfFunction(skinUUID, UUID::fromString, null),
                         colorName
                 ));
                 break;

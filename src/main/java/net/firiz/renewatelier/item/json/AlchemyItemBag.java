@@ -34,7 +34,7 @@ public class AlchemyItemBag {
     }
 
     public static ItemStack createBagItem() {
-        final ItemStack bagItem = ItemUtils.createCustomModelItem(Material.FLINT, 1, 1);
+        final ItemStack bagItem = ItemUtils.createCustomModelItem(Material.ARROW, 1, 1);
         final ItemMeta meta = bagItem.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + "錬金バッグ");
         final List<String> lore = new ArrayList<>();

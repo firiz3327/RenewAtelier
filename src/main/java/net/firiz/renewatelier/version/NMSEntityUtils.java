@@ -22,10 +22,6 @@ public final class NMSEntityUtils {
     private NMSEntityUtils() {
     }
 
-    public static boolean isDead(@NotNull final org.bukkit.entity.Entity entity) {
-        return entity.isDead() || (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() <= 0);
-    }
-
     @MinecraftVersion("1.16")
     public static void hurt(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager, @Nullable final DamageSource damageSource) {
         victim.playEffect(EntityEffect.HURT);
@@ -45,7 +41,7 @@ public final class NMSEntityUtils {
         ((CraftHumanEntity) player).getHandle().ew();
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static void knockBack(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
         final int i = 1;
         final Entity nmsDamager = ((CraftEntity) damager).getHandle();
@@ -68,7 +64,7 @@ public final class NMSEntityUtils {
         }
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static boolean hasRecipe(@NotNull final Player player, @NotNull final String recipeId) {
         Objects.requireNonNull(player);
         Objects.requireNonNull(recipeId);
@@ -78,6 +74,7 @@ public final class NMSEntityUtils {
         } else {
             key = recipeId;
         }
+        // recipeBook{RecipeBook.class}.a{Set<MinecraftKey>}.contains(key)
         return ((CraftPlayer) player).getHandle().B().b(MinecraftKey.a(key));
     }
 

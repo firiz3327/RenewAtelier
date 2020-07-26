@@ -3,14 +3,11 @@ package net.firiz.renewatelier.skill.item;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.skill.data.BombData;
+import net.firiz.renewatelier.utils.chores.EntityUtils;
+import net.firiz.renewatelier.version.entity.projectile.arrow.BombProjectile;
+import net.firiz.renewatelier.version.entity.projectile.arrow.IBombProjectile;
 import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
-
-import java.util.List;
 
 public class BombSkill extends ForceItemSkill<BombData> {
 
@@ -24,40 +21,39 @@ public class BombSkill extends ForceItemSkill<BombData> {
 
     @Override
     public void fire() {
-        final BombData data = getData();
-        final Player player = getPlayer();
-        final Location location = player.getLocation();
-        final Vector target = location.getDirection().multiply(10f * getForce()).normalize();
-        final Vector link = target.subtract(location.toVector());
-        final float length = (float) link.length();
-        final float pitch = (float) (4 * data.getHeight() / Math.pow(length, 2));
-        for (int i = 0; i < data.getParticles(); i++) {
-            final Vector v = link.clone().normalize().multiply(length * i / data.getParticles());
-            final float x = ((float) i / data.getParticles()) * length - length / 2;
-            final float y = (float) (-pitch * Math.pow(x, 2) + data.getHeight());
-            effect(location.clone().add(v).add(0, y, 0));
-        }
+        final Location location = getPlayer().getLocation();
+        final IBombProjectile bomb = BombProjectile.spawn(this::effect, location.clone().add(0, 0.5, 0));
+        final float force = getForce();
+        bomb.setVelocity(location.getDirection().setY(0.5 + (force * 0.2)).multiply(0.5 + (force / 2)));
     }
 
-    private void effect(Location location) {
-        if (!location.getBlock().getType().isAir()) {
-            hit(location);
+    private void effect(final IBombProjectile bombProjectile) {
+        final Location location = bombProjectile.getLocation();
+        if (bombProjectile.isGround() || !location.getBlock().getType().isAir()) {
+            hit(bombProjectile, location);
         } else {
-            final List<LivingEntity> entities = (List<LivingEntity>) location.getNearbyLivingEntities(1);
-            entities.remove(getPlayer());
-            if (entities.isEmpty()) {
+            final long mobCount = EntityUtils.rangeCreatures(
+                    location,
+                    1,
+                    1
+            ).count();
+            if (mobCount == 0) {
                 getData().getEffect().effect(location);
             } else {
-                hit(location);
+                hit(bombProjectile, location);
             }
         }
     }
 
-    public void hit(Location location) {
+    private void hit(final IBombProjectile bombProjectile, final Location location) {
+        bombProjectile.remove();
         final BombData data = getData();
         data.getEffect().hit(location);
-        final World world = location.getWorld();
-        world.getNearbyLivingEntities(location, data.getRadius()).forEach(entity -> damageUtilV2.itemDamage(
+        EntityUtils.rangeCreatures(
+                location,
+                data.getRadius(),
+                6
+        ).forEach(entity -> damageUtilV2.itemDamage(
                 getItemStatus(),
                 getPlayer(),
                 entity,

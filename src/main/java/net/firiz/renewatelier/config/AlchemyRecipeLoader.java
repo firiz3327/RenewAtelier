@@ -16,9 +16,9 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.StarEffect;
+import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.enchantments.Enchantment;
 
 /**
  * @author firiz
@@ -120,34 +120,11 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
     private StarEffect getStarEffect(ConfigurationSection starEffect) {
         StarEffect se = null;
         if (starEffect.contains("ingredient")) {
-            se = new StarEffect(AlchemyIngredients.searchName(starEffect.getString("ingredient")));
+            se = new StarEffect(AlchemyIngredients.searchName(Objects.requireNonNull(starEffect.getString("ingredient"))));
         } else if (starEffect.contains("category")) {
-            se = new StarEffect(Category.searchName(starEffect.getString("category")));
-        } else if (starEffect.contains("name")) {
-            se = new StarEffect(starEffect.getString("name"));
-        } else if (starEffect.contains("enchant")) { // enchantKey,level,name
-            final String str = starEffect.getString("enchant");
-            final String[] data = Objects.requireNonNull(str).split(",");
-            if (data.length == 3) {
-                Enchantment enchantType = null;
-                for (final Enchantment enchant : Enchantment.values()) {
-                    if (data[0].equalsIgnoreCase(enchant.getKey().getKey())) {
-                        enchantType = enchant;
-                    }
-                }
-                if (enchantType == null) {
-                    throw new IllegalStateException("not found enchant type. " + data[0]);
-                } else {
-                    final StarEffect.EnchantEffect enchantEffect = new StarEffect.EnchantEffect(
-                            enchantType,
-                            Integer.parseInt(data[1]),
-                            data[2]
-                    );
-                    se = new StarEffect(enchantEffect);
-                }
-            } else {
-                throw new IllegalStateException("Not enough length.");
-            }
+            se = new StarEffect(Category.searchName(Objects.requireNonNull(starEffect.getString("category"))));
+        } else if (starEffect.contains("effect")) {
+            se = new StarEffect(AlchemyItemEffect.search(Objects.requireNonNull(starEffect.getString("effect"))));
         }
         return se;
     }

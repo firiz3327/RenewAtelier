@@ -27,7 +27,7 @@ public class AsyncPlayerInteractEntityEvent extends PlayerEvent implements Cance
         this.entityId = entityId;
         this.isRightClick = isRightClick;
         this.hand = hand;
-        this.entity = CObjects.nullIf(
+        this.entity = CObjects.nullIfFunction(
                 ((CraftWorld) player.getWorld()).getHandle().getEntity(entityId),
                 net.minecraft.server.v1_16_R1.Entity::getBukkitEntity,
                 null

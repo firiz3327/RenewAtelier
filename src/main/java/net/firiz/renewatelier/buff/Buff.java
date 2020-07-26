@@ -15,31 +15,38 @@ import java.util.Objects;
 
 public class Buff {
 
-    private EntityStatus status;
-    private final BuffValueType buffValueType;
-    private final int level;
-    private final BuffType type;
-    private final int limitDuration;
-    private final int x;
-    @Nullable
-    private final String y;
+    private static final LoopManager loopManager = LoopManager.INSTANCE;
+
+    private final BuffData buffData;
     private final Runnable timer;
 
-    private static final LoopManager loopManager = LoopManager.INSTANCE;
+    private EntityStatus status;
     private int duration;
-
     private boolean end;
     private Runnable endHandler;
 
+    public Buff(EntityStatus status, BuffData buffData, int duration) {
+        this.status = status;
+        this.buffData = buffData;
+        this.duration = duration;
+        this.timer = () -> {
+            if (incrementTimer() || status.getEntity().isDead()) {
+                stopTimer();
+            }
+        };
+    }
+
     public Buff(EntityStatus status, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x, @Nullable String y) {
         this.status = status;
-        this.buffValueType = buffValueType;
-        this.level = level;
-        this.type = type;
+        this.buffData = new BuffData(
+                buffValueType,
+                level,
+                type,
+                limitDuration,
+                x,
+                y
+        );
         this.duration = duration;
-        this.limitDuration = limitDuration;
-        this.x = x;
-        this.y = y;
         this.timer = () -> {
             if (incrementTimer() || status.getEntity().isDead()) {
                 stopTimer();
@@ -52,24 +59,24 @@ public class Buff {
     }
 
     public BuffValueType getBuffValueType() {
-        return buffValueType;
+        return buffData.buffValueType;
     }
 
     public int getLevel() {
-        return level;
+        return buffData.level;
     }
 
     public BuffType getType() {
-        return type;
+        return buffData.type;
     }
 
     public int getX() {
-        return x;
+        return buffData.x;
     }
 
     @Nullable
     public String getY() {
-        return y;
+        return buffData.y;
     }
 
     public boolean isEnd() {
@@ -90,7 +97,7 @@ public class Buff {
         if (entity instanceof LivingEntity) {
             final Location eyeLocation = ((LivingEntity) entity).getEyeLocation();
             boolean dot = false;
-            switch (type) {
+            switch (buffData.type) {
                 case POISON:
                     dot = true;
                     eyeLocation.getWorld().spawnParticle(Particle.SPELL_WITCH, eyeLocation, 2);
@@ -105,17 +112,17 @@ public class Buff {
                     break;
                 case AUTO_HEAL:
                     eyeLocation.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, eyeLocation, 2);
-                    DamageUtilV2.INSTANCE.abnormalDamage(status, -x);
+                    DamageUtilV2.INSTANCE.abnormalDamage(status, -buffData.x);
                     break;
                 default: // 想定しない
                     break;
             }
             if (dot) {
                 entity.playEffect(EntityEffect.HURT);
-                DamageUtilV2.INSTANCE.abnormalDamage(status, x);
+                DamageUtilV2.INSTANCE.abnormalDamage(status, buffData.x);
             }
         }
-        return limitDuration <= duration;
+        return buffData.limitDuration <= duration;
     }
 
     public void stopTimer() {

@@ -15,12 +15,22 @@ public class AddAttackData implements CharacteristicData {
     private final int percent;
     private final AttackCategory attackCategory;
     private final AddAttackX x;
+    private final boolean ignoreDefense;
 
     public AddAttackData(@NotNull AddAttackType addAttackType, int percent, @NotNull AttackCategory attackCategory, @NotNull AddAttackX x) {
         this.addAttackType = Objects.requireNonNull(addAttackType);
         this.percent = percent;
         this.attackCategory = Objects.requireNonNull(attackCategory);
         this.x = Objects.requireNonNull(x);
+        this.ignoreDefense = false;
+    }
+
+    public AddAttackData(AddAttackType addAttackType, int percent, AttackCategory attackCategory, AddAttackX x, boolean ignoreDefense) {
+        this.addAttackType = addAttackType;
+        this.percent = percent;
+        this.attackCategory = attackCategory;
+        this.x = x;
+        this.ignoreDefense = ignoreDefense;
     }
 
     public AddAttackType getAddAttackType() {
@@ -37,6 +47,10 @@ public class AddAttackData implements CharacteristicData {
 
     public AddAttackX getX() {
         return x;
+    }
+
+    public boolean isIgnoreDefense() {
+        return ignoreDefense;
     }
 
     public enum AttackCategory {

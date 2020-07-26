@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.damage;
 
+import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.arrow.AtelierArrow;
@@ -9,6 +10,7 @@ import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.chores.EntityUtils;
 import net.firiz.renewatelier.version.NMSEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
@@ -19,6 +21,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+
+import java.util.StringJoiner;
 
 public final class HandleDamage {
 
@@ -47,7 +51,7 @@ public final class HandleDamage {
                     vanillaItemDamage,
                     1
             );
-            if (!NMSEntityUtils.isDead(victim)) {
+            if (!EntityUtils.isDead(victim)) {
                 NMSEntityUtils.hurt(victim, player, null);
                 percentKnockBack(victim, player);
             }
@@ -57,22 +61,24 @@ public final class HandleDamage {
     private void sweepAttack(CharStats charStats, Location location, double vanillaItemDamage) {
         final Player player = charStats.getPlayer();
         NMSEntityUtils.sweepParticle(player);
-        location.getNearbyLivingEntities(1.5).stream()
-                .filter(entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity))
-                .limit(6) // 6 mob hit
-                .forEach(entity -> {
-                    damageUtilV2.normalDamage(
-                            AttackAttribute.SLASH,
-                            charStats,
-                            entity,
-                            vanillaItemDamage,
-                            1
-                    );
-                    if (!NMSEntityUtils.isDead(entity)) {
-                        NMSEntityUtils.hurt(entity, player, null);
-                        percentKnockBack(entity, player);
-                    }
-                });
+        EntityUtils.rangeCreatures(
+                location,
+                1.5,
+                6,
+                entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity)
+        ).forEach(entity -> {
+            damageUtilV2.normalDamage(
+                    AttackAttribute.SLASH,
+                    charStats,
+                    entity,
+                    vanillaItemDamage,
+                    1
+            );
+            if (!EntityUtils.isDead(entity)) {
+                NMSEntityUtils.hurt(entity, player, null);
+                percentKnockBack(entity, player);
+            }
+        });
     }
 
     public void arrowAttack(LivingEntity victim, Entity damager, double damage) {
@@ -95,7 +101,7 @@ public final class HandleDamage {
                 force == 1 && arrow.isCritical(),
                 force
         );
-        if (!NMSEntityUtils.isDead(victim)) {
+        if (!EntityUtils.isDead(victim)) {
             NMSEntityUtils.hurt(victim, damager, null);
             NMSEntityUtils.knockBackArrow(victim, damager);
         }
@@ -130,7 +136,7 @@ public final class HandleDamage {
                 damager,
                 damage
         );
-        if (!NMSEntityUtils.isDead(victim)) {
+        if (!EntityUtils.isDead(victim)) {
             NMSEntityUtils.hurt(victim, damager, null);
             NMSEntityUtils.knockBack(victim, damager);
         }
@@ -149,7 +155,17 @@ public final class HandleDamage {
                 damager.sendMessage("LV: " + stats.getLevel());
                 damager.sendMessage("HP: " + stats.getHp() + " / " + stats.getMaxHp());
                 damager.sendMessage("ATK: " + stats.getAtk() + " DEF: " + stats.getDef() + " SPD: " + stats.getSpeed());
-                damager.sendMessage("Buffs: " + stats.getBuffs());
+                damager.sendMessage("Buffs: ");
+                for (Buff buff : stats.getBuffs()) {
+                    final StringJoiner joiner = new StringJoiner(" ");
+                    joiner.add("-")
+                            .add(buff.getBuffValueType().toString())
+                            .add(buff.getType().toString())
+                            .add(String.valueOf(buff.getLevel()))
+                            .add(String.valueOf(buff.getX()))
+                            .add(buff.getY());
+                    damager.sendMessage(joiner.toString());
+                }
             }
         }
     }

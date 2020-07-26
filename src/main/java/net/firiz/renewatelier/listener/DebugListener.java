@@ -1,7 +1,15 @@
 package net.firiz.renewatelier.listener;
 
+import java.util.List;
 import java.util.UUID;
 
+import com.destroystokyo.paper.event.entity.EndermanAttackPlayerEvent;
+import com.destroystokyo.paper.event.entity.EntityPathfindEvent;
+import com.destroystokyo.paper.event.entity.PlayerNaturallySpawnCreaturesEvent;
+import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
+import com.destroystokyo.paper.event.server.ServerTickEndEvent;
+import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
@@ -15,8 +23,10 @@ import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.event.*;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerStatisticIncrementEvent;
@@ -34,14 +44,11 @@ public class DebugListener implements Listener {
     private final DebugManager debug = new DebugManager(this);
     private boolean nonBreak = true;
     private boolean logHandle = false;
+    private List<Class<? extends Event>> ignoreAlarmEvents = new ObjectArrayList<>();
     private final RegisteredListener alarmListener = new RegisteredListener(
             this,
             (listener, event) -> {
-                if (logHandle && !(event instanceof PlayerStatisticIncrementEvent
-                        || event instanceof EntityAirChangeEvent
-                        || event instanceof VehicleUpdateEvent
-                        || event instanceof VehicleBlockCollisionEvent
-                )) {
+                if (logHandle && !ignoreAlarmEvents.contains(event.getClass())) {
                     CommonUtils.log(event.getEventName());
                 }
             },
@@ -49,6 +56,20 @@ public class DebugListener implements Listener {
             AtelierPlugin.getPlugin(),
             false
     );
+
+    public DebugListener() {
+        ignoreAlarmEvents.add(PlayerStatisticIncrementEvent.class);
+        ignoreAlarmEvents.add(EntityAirChangeEvent.class);
+        ignoreAlarmEvents.add(VehicleUpdateEvent.class);
+        ignoreAlarmEvents.add(VehicleBlockCollisionEvent.class);
+        ignoreAlarmEvents.add(EndermanAttackPlayerEvent.class);
+        ignoreAlarmEvents.add(PreCreatureSpawnEvent.class);
+        ignoreAlarmEvents.add(ServerTickStartEvent.class);
+        ignoreAlarmEvents.add(ServerTickEndEvent.class);
+        ignoreAlarmEvents.add(CreatureSpawnEvent.class);
+        ignoreAlarmEvents.add(EntityPathfindEvent.class);
+        ignoreAlarmEvents.add(PlayerNaturallySpawnCreaturesEvent.class);
+    }
 
     public boolean changeAllHandles() {
         logHandle = !logHandle;

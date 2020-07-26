@@ -7,7 +7,6 @@ import net.firiz.renewatelier.script.conversation.NPCConversation;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.pair.NonNullPair;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
@@ -53,7 +52,7 @@ public enum NPCManager {
                         (double) objects.get(5),
                         (double) objects.get(6),
                         (double) objects.get(7),
-                        CObjects.nullIf((String) objects.get(8), UUID::fromString, null),
+                        CObjects.nullIfFunction((String) objects.get(8), UUID::fromString, null),
                         (String) objects.get(9),
                         (String) objects.get(10)
                 ).spawnEntity()

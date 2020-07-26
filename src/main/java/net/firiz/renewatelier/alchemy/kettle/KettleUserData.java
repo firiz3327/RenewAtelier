@@ -95,7 +95,7 @@ public class KettleUserData {
     }
 
     public void initializeKettleBox() {
-        final Catalyst catalyst = CObjects.nullIf(
+        final Catalyst catalyst = CObjects.nullIfFunction(
                 getCatalystItem(),
                 item -> Objects.requireNonNullElse(AlchemyMaterial.getMaterial(item).getCatalyst(), Catalyst.getDefaultCatalyst()),
                 Catalyst.getDefaultCatalyst()

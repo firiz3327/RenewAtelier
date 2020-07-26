@@ -12,6 +12,7 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
@@ -58,7 +59,7 @@ public class AlchemyItemStatus {
     private final List<Characteristic> characteristics;
     @Expose
     @NotNull
-    private final List<String> activeEffects;
+    private final List<AlchemyItemEffect> activeEffects;
     @Expose
     private int hp;
     @Expose
@@ -76,11 +77,11 @@ public class AlchemyItemStatus {
     @NotNull
     private final Map<String, String> dataContainer;
 
-    private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<String> activeEffects, int hp, int mp, int atk, int def, int speed) {
+    private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed) {
         this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
     }
 
-    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<String> activeEffects, int hp, int mp, int atk, int def, int speed, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
+    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
         this.alchemyMaterial = alchemyMaterial;
         this.customModel = customModel;
         this.size = size;
@@ -127,7 +128,7 @@ public class AlchemyItemStatus {
     }
 
     @NotNull
-    public List<String> getActiveEffects() {
+    public List<AlchemyItemEffect> getActiveEffects() {
         return activeEffects;
     }
 
@@ -372,25 +373,25 @@ public class AlchemyItemStatus {
         return getItem(am, overIngs, item, over_quality, overSize, null, overCharacteristics, overCategory, notVisibleCatalyst);
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final boolean notVisibleCatalyst) {
         return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, new VisibleFlags(true, true, true, true, !notVisibleCatalyst, true, true, true));
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<String> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibles) {
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibles) {
         return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibles, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed());
     }
 
     private static void addLore(List<String> lore, String name, String value) {
-        lore.add(ChatColor.GRAY + name + ": " + ChatColor.RESET + value);
+        lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
     }
 
     private static void addLore(List<String> lore, String name, int value) {
-        lore.add(ChatColor.GRAY + name + ": " + ChatColor.RESET + value);
+        lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
     }
 
     private static void addLoreStatus(List<String> lore, String name, int value) {
         if (value != 0) {
-            lore.add(ChatColor.GRAY + name + ": " + ChatColor.RESET + value);
+            lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
         }
     }
 
@@ -401,7 +402,7 @@ public class AlchemyItemStatus {
             @Nullable ItemStack item,
             final int overQuality,
             final int[] overSize,
-            @Nullable final List<String> activeEffects,
+            @Nullable final List<AlchemyItemEffect> activeEffects,
             @Nullable final List<Characteristic> overrideCharacteristics,
             @Nullable final List<Category> overrideCategory,
             @NotNull final VisibleFlags visibleFlags,
@@ -421,7 +422,7 @@ public class AlchemyItemStatus {
             @Nullable ItemStack item,
             final int overQuality,
             final int[] overSize,
-            @Nullable final List<String> activeEffects,
+            @Nullable final List<AlchemyItemEffect> activeEffects,
             @Nullable final List<Characteristic> overrideCharacteristics,
             @Nullable final List<Category> overrideCategory,
             @NotNull final VisibleFlags visibleFlags,
@@ -505,10 +506,10 @@ public class AlchemyItemStatus {
             final List<AlchemyAttribute> maxTypes = getMaxTypes(levels.getRight());
             // 錬金成分・設定
             final StringBuilder ingredientStringBuilder = new StringBuilder();
-            ingredientStringBuilder.append("§7錬金成分: §r").append(allLevel).append(" ");
+            ingredientStringBuilder.append(ChatColor.GRAY).append("錬金成分: ").append(ChatColor.WHITE).append(allLevel).append(" ");
             maxTypes.forEach(type -> ingredientStringBuilder.append(type.getColor()).append("●"));
             lore.add(ingredientStringBuilder.toString());
-            ingredients.forEach(i -> lore.add("§r- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
+            ingredients.forEach(i -> lore.add(ChatColor.WHITE + "- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
         }
         // サイズ
         if (visibleFlags.size) {
@@ -571,17 +572,17 @@ public class AlchemyItemStatus {
         // 効果
         if (activeEffects != null && !activeEffects.isEmpty()) {
             lore.add("§7効果: ");
-            activeEffects.forEach(effect -> lore.add("§r- " + effect));
+            activeEffects.forEach(effect -> lore.add(ChatColor.WHITE + "- " + effect.getName()));
         }
         // 特性
         if (!characteristics.isEmpty()) {
             lore.add("§7特性:");
-            characteristics.forEach(c -> lore.add("§r- " + c.getName()));
+            characteristics.forEach(c -> lore.add(ChatColor.WHITE + "- " + c.getName()));
         }
         // カテゴリ
         if (visibleFlags.category && !categories.isEmpty()) {
             lore.add("§7カテゴリ:");
-            categories.forEach(category -> lore.add("§r- " + category.getName()));
+            categories.forEach(category -> lore.add(ChatColor.WHITE + "- " + category.getName()));
         }
         // Lore終了
         if (visibleFlags.end) {
@@ -720,26 +721,26 @@ public class AlchemyItemStatus {
 
     @Nullable
     public static AlchemyMaterial getMaterial(@Nullable ItemStack item) {
-        return CObjects.nullIf(load(item), AlchemyItemStatus::getAlchemyMaterial, null);
+        return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getAlchemyMaterial, null);
     }
 
     public static int getQuality(@Nullable ItemStack item) {
-        return CObjects.nullIf(load(item), AlchemyItemStatus::getQuality, 0);
+        return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getQuality, 0);
     }
 
     @NotNull
     public static List<Category> getCategories(@Nullable ItemStack item) {
-        return CObjects.nullIf(load(item), AlchemyItemStatus::getCategories, Collections.emptyList());
+        return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getCategories, Collections.emptyList());
     }
 
     @NotNull
     public static List<Characteristic> getCharacteristics(@Nullable ItemStack item) {
-        return CObjects.nullIf(load(item), AlchemyItemStatus::getCharacteristics, Collections.emptyList());
+        return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getCharacteristics, Collections.emptyList());
     }
 
     @NotNull
     public static List<AlchemyIngredients> getIngredients(@Nullable ItemStack item) {
-        return CObjects.nullIf(load(item), AlchemyItemStatus::getIngredients, Collections.emptyList());
+        return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getIngredients, Collections.emptyList());
     }
 
 
