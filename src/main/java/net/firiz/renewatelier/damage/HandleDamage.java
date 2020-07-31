@@ -3,7 +3,7 @@ package net.firiz.renewatelier.damage;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.entity.arrow.AtelierArrow;
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
@@ -82,7 +82,7 @@ public final class HandleDamage {
     }
 
     public void arrowAttack(LivingEntity victim, Entity damager, double damage) {
-        final AtelierArrow arrow = (AtelierArrow) damager;
+        final AtelierAbstractArrow arrow = (AtelierAbstractArrow) damager;
         EntityStatus status = null;
         float force = arrow.getForce();
         if (arrow.getSource() instanceof Player) {
@@ -92,7 +92,7 @@ public final class HandleDamage {
             force = 1f; // プレイヤー以外が放つ矢のforce値はデフォルトだと0.7 (1.15で確認)
         }
         damageUtilV2.arrowDamage(
-                damager,
+                arrow,
                 AlchemyItemStatus.load(arrow.getBow()),
                 AlchemyItemStatus.load(arrow.getArrow()),
                 status,

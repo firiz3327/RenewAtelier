@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
-import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
+import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
 import org.bukkit.Bukkit;
@@ -94,7 +94,7 @@ public enum ArrowManager {
 
     public void shootCrossbow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow) {
         removeArrow(baseArrow);
-        shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1);
+        shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1, false);
     }
 
     public boolean shootBow(@NotNull LivingEntity entity, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
@@ -118,11 +118,11 @@ public enum ArrowManager {
                 return shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
             } else {
                 removeArrow(baseArrow);
-                shootAtelierArrow(entity, bow, baseArrow, consumeArrow, true, force);
+                shootAtelierArrow(entity, bow, baseArrow, consumeArrow, true, force, false);
             }
         } else if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
             removeArrow(baseArrow);
-            shootAtelierArrow(entity, bow, baseArrow, new ItemStack(Material.ARROW), true, force);
+            shootAtelierArrow(entity, bow, baseArrow, new ItemStack(Material.ARROW), true, force, false);
         }
         return false;
     }
@@ -135,21 +135,25 @@ public enum ArrowManager {
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
-    private void shootAtelierArrow(@NotNull LivingEntity entity, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force) {
+    public AtelierAbstractArrow shootSkillArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final float force) {
+        return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, false, force, true).getAtelierArrowEntity();
+    }
+
+    private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isSkill) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
         IAtelierArrow cloneArrow;
         switch (consumeArrow.getType()) {
             case ARROW:
-                cloneArrow = new NMSAtelierArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
+                cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
                 break;
             case TIPPED_ARROW:
-                cloneArrow = new NMSAtelierArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
+                cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
                 final PotionMeta potionMeta = (PotionMeta) consumeArrow.getItemMeta();
                 assert potionMeta != null;
 
-                final NMSAtelierArrow arrow = (NMSAtelierArrow) cloneArrow;
+                final NMSAtelierTippedArrow arrow = (NMSAtelierTippedArrow) cloneArrow;
                 arrow.setBasePotionData(potionMeta.getBasePotionData());
                 potionMeta.getCustomEffects().forEach(potionEffect -> arrow.addCustomEffect(potionEffect, true));
                 if (potionMeta.hasColor() && potionMeta.getColor() != null) {
@@ -157,7 +161,7 @@ public enum ArrowManager {
                 }
                 break;
             case SPECTRAL_ARROW:
-                cloneArrow = new NMSAtelierSpectralArrow(entity.getEyeLocation(), bow, oneArrow, entity, force);
+                cloneArrow = new NMSAtelierSpectralArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
                 break;
             default:
                 throw new IllegalStateException("consumeArrow is not arrow.");
@@ -169,7 +173,7 @@ public enum ArrowManager {
         cloneArrow.setDamage(baseArrow.getDamage());
         cloneArrow.setCritical(baseArrow.isCritical());
 
-        if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
+        if (!(shooter instanceof Player) || ((Player) shooter).getGameMode() == GameMode.CREATIVE) {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         } else if (!Objects.requireNonNull(bow.getItemMeta()).hasEnchant(Enchantment.ARROW_INFINITE)) {
             if (isConsumeArrow) {
@@ -179,8 +183,9 @@ public enum ArrowManager {
         } else {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         }
-        soundArrow(entity);
+        soundArrow(shooter);
         cloneArrow.shoot(baseArrow.getVelocity());
+        return cloneArrow;
     }
 
     private boolean shootNextArrow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {
@@ -194,7 +199,7 @@ public enum ArrowManager {
             );
             return true;
         }
-        shootAtelierArrow(player, bow == null ? new ItemStack(Material.BOW) : bow, baseArrow, nextConsumeArrow, true, force);
+        shootAtelierArrow(player, bow == null ? new ItemStack(Material.BOW) : bow, baseArrow, nextConsumeArrow, true, force, false);
         final int consumeArrowAmount = consumeArrow.getAmount();
         Bukkit.getScheduler().scheduleSyncDelayedTask(
                 AtelierPlugin.getPlugin(),
@@ -226,7 +231,7 @@ public enum ArrowManager {
         return new ImmutableNullablePair<>(consumeArrow, nextConsumeArrow);
     }
 
-    private class InteractCrossbowResult {
+    private static class InteractCrossbowResult {
         final ImmutableNullablePair<ItemStack, ItemStack> arrows;
         final boolean result;
 

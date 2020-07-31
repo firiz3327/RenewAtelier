@@ -42,7 +42,7 @@ public enum CharacteristicType {
     STATS_AVO_QUALITY, // . 回避率強化 品質で上下
     RESISTANCE, // 耐性（用途不明）
     CONSUME_MP, // 消費MP％
-    SKILL_DAMAGE, // スキル威力％
+    SKILL_DAMAGE, // . スキル威力％
     CRITICAL_RACE, // . クリティカル率％<確率, 種族(Race class)>
     CHASING, // 追い打ち強化
     CHARACTERISTIC_POWER, // . 特性強化 威力値が[(付与されている特性レベル合計値の0.7乗)+x]％上昇
@@ -54,7 +54,7 @@ public enum CharacteristicType {
     USE_SPEED, // アイテム待機時間 アイテム使用のクールタイムx％増減
     USE_SPEED_POWER, // 待機時間強化 威力値が[アイテム使用時の待機時間*x]％増減
     SIZE, // サイズ増減
-    SIZE_POWER, // サイズで強化 威力値が[アイテムのサイズ*x]％上昇
+    SIZE_POWER, // . サイズで強化 威力値が[アイテムのサイズ*x]％上昇
     BREAK_DAMAGE, // ブレイク耐性にxダメージ貫通効果
     TAKEN_DAMAGE_REDUCTION, // 被ダメージのx％分回復
     CLEAR_DEBUFF, // 使用：状態異常を解除、武具：状態異常を無効化 <Debuff名>
@@ -67,7 +67,7 @@ public enum CharacteristicType {
     SUPPORT_ATTACK, // サポートアタック効果％
     SUPPORT_GUARD, // サポートガード効果％
     ACTION_HEAL_MP, // 行動時MP回復％
-    SKILL_POWER_FIXED, // スキル威力値強化
+    SKILL_POWER_FIXED, // . スキル威力値強化
     ADD_ATTACK, // . 追加攻撃 <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
     BUFF, // . バフ・デバフ <BuffType, 確率, 時間, 値>
     ADD_WAIT_TIME, // 待機時間％

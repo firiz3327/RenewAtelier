@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.listener;
 
 import net.firiz.renewatelier.damage.HandleDamage;
-import net.firiz.renewatelier.entity.arrow.AtelierArrow;
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -46,7 +46,7 @@ public class DamageListener implements Listener {
             if (damager instanceof Player) {
                 e.setCancelled(true);
                 handleDamage.playerAttack(victim, damager);
-            } else if (damager instanceof AtelierArrow) {
+            } else if (damager instanceof AtelierAbstractArrow) {
                 e.setCancelled(true);
                 handleDamage.arrowAttack(victim, damager, damage);
             } else if (victim instanceof Player) {

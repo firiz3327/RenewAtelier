@@ -26,7 +26,7 @@ public enum AlchemyItemEffect {
     FIRE_1("火傷を負わせる", "", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 1, BuffType.BURN, 10, 1))),
     FIRE_2("大火傷を負わせる", "", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 2, BuffType.BURN, 10, 5))),
     DEF_DOWN_1("防御力ダウン・小", "対象の防御力の値を少しだけ低下させる", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 2, BuffType.STATS_DEF, 30, -5))),
-    BLUE_FIRE("青い炎", "通常のフラムより高温の炎を発生させ、大きな防御無視の追加ダメージを与える", new AddAttackData(AddAttackType.ATTRIBUTE_DAMAGE, 100, AddAttackData.AttackCategory.ITEM_ONLY, new AttributeAddAttack(AttackAttribute.FIRE, 10), true)),
+    BLUE_FIRE("青い炎", "通常のフラムより高温の炎を発生させ、大きな防御無視の追加ダメージを与える", new AddAttackData(AddAttackType.ATTRIBUTE_DAMAGE, 100, AddAttackData.AttackLimitCategory.ITEM_ONLY, new AttributeAddAttack(AttackAttribute.FIRE, 10), true)),
     DIG_SPEED_1("採掘強化・小", "", new EnchantInitialize(new StarEffect.EnchantEffect(Enchantment.DIG_SPEED, 1))),
     DIG_SPEED_2("採掘強化・中", "", new EnchantInitialize(new StarEffect.EnchantEffect(Enchantment.DIG_SPEED, 2))),
     DURABILITY_1("耐久力・小", "", new EnchantInitialize(new StarEffect.EnchantEffect(Enchantment.DURABILITY, 1))),
@@ -35,7 +35,7 @@ public enum AlchemyItemEffect {
     ;
 
     private final String name;
-    private final String description;
+    private final String description; // 未使用
 
     @Nullable
     private final ItemInitialize initialize;
@@ -48,15 +48,6 @@ public enum AlchemyItemEffect {
 
     @Nullable
     private final RaisePower raisePower;
-
-    AlchemyItemEffect(String name, String description) {
-        this.name = name;
-        this.description = description;
-        this.initialize = null;
-        this.mobHitEffect = null;
-        this.addAttackData = null;
-        this.raisePower = null;
-    }
 
     AlchemyItemEffect(String name, String description, @NotNull ItemInitialize initialize) {
         this.name = name;

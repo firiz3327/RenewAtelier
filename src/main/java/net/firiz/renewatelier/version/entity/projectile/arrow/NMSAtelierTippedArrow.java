@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
 import com.google.common.base.Preconditions;
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.arrow.AtelierTippedArrow;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
@@ -25,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelierArrow {
+public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IAtelierArrow {
 
     private CraftEntity bukkitEntity;
     private final Location location;
@@ -33,24 +34,26 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
     private final VItemStack arrow;
     private final LivingEntity source;
     private final float force;
+    private final boolean isSkill;
     private Vector velocity;
 
     /**
      * 使用アイテム（弓）データを保持した矢を生成します
-     *
-     * @param location 発射地点
+     *  @param location 発射地点
      * @param bow      使用アイテム(弓)
      * @param arrow    使用アイテム(矢)
      * @param source   射撃者
      * @param force    弓のチャージ
+     * @param isSkill  スキルであるか
      */
-    public NMSAtelierArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force) {
+    public NMSAtelierTippedArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force, boolean isSkill) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
         this.bow = VersionUtils.asVItemCopy(bow);
         this.arrow = VersionUtils.asVItemCopy(arrow);
         this.source = source;
         this.force = force;
+        this.isSkill = isSkill;
     }
 
     @Override
@@ -184,11 +187,17 @@ public final class NMSAtelierArrow extends EntityTippedArrow implements IAtelier
                     source,
                     bow.getItem(),
                     arrow.getItem(),
-                    force
+                    force,
+                    isSkill
             );
         }
 
         return bukkitEntity;
+    }
+
+    @Override
+    public AtelierAbstractArrow getAtelierArrowEntity() {
+        return (AtelierAbstractArrow) getBukkitEntity();
     }
 
     @Override

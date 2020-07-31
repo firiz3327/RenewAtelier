@@ -108,6 +108,10 @@ public class AlchemyItemStatus {
         return size;
     }
 
+    public int getSizeCount() {
+        return (int) Arrays.stream(size).filter(i -> i != 0).count();
+    }
+
     @NotNull
     public List<Category> getCategories() {
         return categories;
@@ -182,6 +186,7 @@ public class AlchemyItemStatus {
 
     /**
      * 一部のアイテムで使用するscript用メソッド
+     *
      * @return prefix
      */
     @NotNull
@@ -191,6 +196,7 @@ public class AlchemyItemStatus {
 
     /**
      * 一部のアイテムで使用するscript用メソッド
+     *
      * @param prefix prefixに追加する文字列
      * @return add
      */
@@ -200,6 +206,7 @@ public class AlchemyItemStatus {
 
     /**
      * 一部のアイテムで使用するscript用メソッド
+     *
      * @param key アイテムのキー
      * @return get
      */
@@ -209,7 +216,8 @@ public class AlchemyItemStatus {
 
     /**
      * 一部のアイテムで使用するscript用メソッド
-     * @param key 登録したいアイテムのキー
+     *
+     * @param key   登録したいアイテムのキー
      * @param value 登録したい文字列データ
      */
     public void addDataContainer(@NotNull String key, @NotNull String value) {
@@ -218,7 +226,8 @@ public class AlchemyItemStatus {
 
     /**
      * 一部のアイテムで使用するscript用メソッド
-     * @param key　アイテムのキー
+     *
+     * @param key 　アイテムのキー
      * @return containsKey
      */
     public boolean hasDataContainer(@NotNull String key) {
@@ -306,14 +315,7 @@ public class AlchemyItemStatus {
     }
 
     public static int getSizeCount(final ItemStack item) {
-        final int[] size = getSize(item);
-        int i = 0;
-        for (int j : size) {
-            if (j != 0) {
-                i++;
-            }
-        }
-        return i;
+        return (int) Arrays.stream(getSize(item)).filter(i -> i != 0).count();
     }
 
     public static void setSize(final ItemStack item, final int[] size) {

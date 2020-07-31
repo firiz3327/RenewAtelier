@@ -6,25 +6,28 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftSpectralArrow;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.SpectralArrow;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierArrow {
+public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierAbstractArrow, SpectralArrow {
 
     private final Spigot spigot = new Spigot();
     private final LivingEntity source;
     private final ItemStack bow;
     private final ItemStack arrow;
     private final float force;
+    private final boolean isSkill;
 
-    public AtelierSpectralArrow(CraftServer server, NMSAtelierSpectralArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow, float force) {
+    public AtelierSpectralArrow(CraftServer server, NMSAtelierSpectralArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow, float force, boolean isSkill) {
         super(server, entity);
         this.source = source;
         this.bow = bow;
         this.arrow = arrow;
         this.force = force;
+        this.isSkill = isSkill;
     }
 
     @NotNull
@@ -57,6 +60,41 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     }
 
     @Override
+    public boolean isInWater() {
+        return false;
+    }
+
+    @Override
+    public boolean isInRain() {
+        return false;
+    }
+
+    @Override
+    public boolean isInBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrRain() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrRainOrBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInLava() {
+        return false;
+    }
+
+    @Override
     public LivingEntity getSource() {
         return source;
     }
@@ -75,6 +113,11 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     @Override
     public float getForce() {
         return force;
+    }
+
+    @Override
+    public boolean isSkill() {
+        return isSkill;
     }
 
     @NotNull

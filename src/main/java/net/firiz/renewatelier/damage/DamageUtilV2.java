@@ -12,6 +12,7 @@ import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackData;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
@@ -44,7 +45,7 @@ public enum DamageUtilV2 {
     private final double defaultCriticalMag = 150;
 
     public void itemDamage(final AlchemyItemStatus itemStatus, final Player damager, @NotNull final LivingEntity victim, float force, double power, AttackAttribute attackAttribute) {
-        final CalcDamageData data = calcData(itemStatus, getEntityStatus(damager), victim, power, force, false);
+        final CalcDamageData data = calcData(itemStatus, getEntityStatus(damager), victim, power, force, false, AttackCategory.ITEM);
         final ImmutablePair<Double, Double> def = getDef(victim, data.victimStatus, data.buffs, attackAttribute);
         final double damage = meruruCalcDamage.itemDamage(
                 data.powerValue,
@@ -60,18 +61,20 @@ public enum DamageUtilV2 {
             final DamageComponent damageComponent = addAttack.getAddAttackType().applyDamage(addAttack, damagerStatus, victim, baseDamageComponent);
             if (damageComponent != null) {
                 // とりあえず攻撃属性によるパーセント減少のみ
-                final double defense;
-                if (addAttack.isIgnoreDefense()) {
-                    defense = 0;
-                } else {
-                    final ImmutablePair<Double, Double> def2 = getDef(victim, data.victimStatus, data.buffs, damageComponent.getAttackAttribute());
-                    defense = def2.getRight();
-                }
+                final double defense = getAddAttackDefense(addAttack, data, victim, damageComponent);
                 damageComponent.setDamage(damageComponent.getDamage() * ((100 - defense) / 100));
                 damageComponents.add(damageComponent);
             }
         }
         holo.holoDamage(victim, damager, damageComponents);
+    }
+
+    private double getAddAttackDefense(final AddAttackData addAttack, final CalcDamageData data, final LivingEntity victim, final DamageComponent damageComponent) {
+        if (!addAttack.isIgnoreDefense()) {
+            final ImmutablePair<Double, Double> def2 = getDef(victim, data.victimStatus, data.buffs, damageComponent.getAttackAttribute());
+            return def2.getRight();
+        }
+        return 0;
     }
 
     public void abnormalDamage(@NotNull final EntityStatus victimStatus, double damage) {
@@ -109,7 +112,8 @@ public enum DamageUtilV2 {
                 1,
                 attackAttribute,
                 false,
-                false
+                false,
+                AttackCategory.NORMAL
         );
     }
 
@@ -144,13 +148,13 @@ public enum DamageUtilV2 {
             if (baseDamage == 0) {
                 return;
             }
-            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, baseDamage, force, attribute, isMinecraftCritical, false);
+            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, baseDamage, force, attribute, isMinecraftCritical, false, AttackCategory.NORMAL);
         } else {
-            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, normalDamage * 1.5, force, attribute, isMinecraftCritical, false);
+            calcDamage(weaponStats, charStats, player, victim, normalAttackPower, normalDamage * 1.5, force, attribute, isMinecraftCritical, false, AttackCategory.NORMAL);
         }
     }
 
-    public void arrowDamage(@Nullable Entity damager, @Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, @Nullable EntityStatus status, @NotNull LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
+    public void arrowDamage(@Nullable AtelierAbstractArrow arrowEntity, @Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, @Nullable EntityStatus status, @NotNull LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
         double normalAttackPower = Randomizer.rand(63, 70);
         double baseDamage = damage;
         if (bow == null && arrow == null) {
@@ -165,26 +169,63 @@ public enum DamageUtilV2 {
                 baseDamage += Math.max(0D, Randomizer.rand(arrowAlchemyMaterial.getBaseDamageMin(), arrowAlchemyMaterial.getBaseDamageMax())) * calcQualityCorrection(arrow.getQuality());
             }
         }
-        final double resultDamage = calcDamage(bow, status, status == null ? null : status.getEntity(), victim, normalAttackPower, baseDamage, force, AttackAttribute.THRUST, isMinecraftCritical, true);
-        if (damager != null && resultDamage > 0) {
-            damager.remove(); // Pierceエンチャントの効果は考慮していない
+        final boolean arrowEntityNonNull = arrowEntity != null;
+        final double resultDamage = calcDamage(
+                bow,
+                status,
+                status == null ? null : status.getEntity(),
+                victim,
+                normalAttackPower,
+                baseDamage,
+                force,
+                AttackAttribute.THRUST,
+                isMinecraftCritical,
+                true,
+                arrowEntityNonNull && arrowEntity.isSkill() ? AttackCategory.SKILL : AttackCategory.NORMAL
+        );
+        if (arrowEntityNonNull && resultDamage > 0) {
+            arrowEntity.remove(); // Pierceエンチャントの効果は考慮していない
         }
     }
 
-    private CalcDamageData calcData(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @NotNull LivingEntity victim, double power, double force, boolean arrow) {
+    private CalcDamageData calcData(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @NotNull LivingEntity victim, double power, double force, boolean arrow, AttackCategory attackCategory) {
         final boolean hasItemStatus = itemStatus != null;
+        final boolean isSkill = attackCategory == AttackCategory.SKILL;
+        final boolean isItem = attackCategory == AttackCategory.ITEM;
         @Nullable final EntityStatus victimStatus = getEntityStatus(victim);
         int criticalRate = 0;
         final List<Buff> buffs = new ObjectArrayList<>();
         final List<AddAttackData> addAttacks = new ObjectArrayList<>();
         int characteristicLevel = 0;
         int characteristicCPower = 0;
-        double characteristicPowers = 0;
+        int characteristicPowers = 0;
+        int characteristicPowersFixed = 0;
         if (hasItemStatus) {
             for (final Characteristic c : itemStatus.getCharacteristics()) {
                 characteristicLevel += c.getLevel();
                 characteristicPowers += c.hasData(CharacteristicType.POWER) ? c.getIntData(CharacteristicType.POWER) : 0;
                 characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? c.getIntData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
+                if (isSkill) {
+                    if (c.hasData(CharacteristicType.SKILL_DAMAGE)) { // SKILL_POWER 記載が威力なので
+                        characteristicPowers += c.getIntData(CharacteristicType.SKILL_DAMAGE);
+                    }
+                    if (c.hasData(CharacteristicType.SKILL_POWER_FIXED)) {
+                        characteristicPowersFixed += c.getIntData(CharacteristicType.SKILL_POWER_FIXED);
+                    }
+                } else if (isItem) {
+                    if (c.hasData(CharacteristicType.SIZE_POWER)) { // 現時点ではアイテムでしか使われていないので
+                        final int sizeCount = itemStatus.getSizeCount();
+                        characteristicPowers += sizeCount * c.getIntData(CharacteristicType.SIZE_POWER);
+                    }
+                    // COUNT_POWER アイテムの使用回数実装後、記載
+                    // USE_UP 同様
+                    // USE_ONE 同様
+                    // USE_SPEED_POWER アイテムのクールタイムを実装後、記載
+                }
+                // MULTIPLE_BONUS どうしよう
+                // SINGULAR_BONUS どうしよう
+                // CHASING 追い打ちとは
+                // DEATH 忘れてた
                 criticalRate = calcCriticalRate(victim.getType(), damagerStatus, criticalRate, c);
 
                 if (victimStatus != null) {
@@ -218,9 +259,8 @@ public enum DamageUtilV2 {
                 final AddAttackData addAttack = (AddAttackData) c.getData(CharacteristicType.ADD_ATTACK);
                 if (addAttack != null) {
                     final int percent = addAttack.getPercent();
-                    final AddAttackData.AttackCategory attackCategory = addAttack.getAttackCategory();
-                    // 攻撃カテゴリの制限が設けられてない
-                    if (percent >= 100 || Randomizer.percent(percent)) {
+                    final AddAttackData.AttackLimitCategory addAttackLimitCategory = addAttack.getAttackLimitCategory();
+                    if (addAttackLimitCategory.isAvailableAttack(attackCategory) && percent >= 100 || Randomizer.percent(percent)) {
                         addAttacks.add(addAttack);
                     }
                 }
@@ -238,6 +278,7 @@ public enum DamageUtilV2 {
             powerValue *= calcQualityCorrection(itemStatus.getQuality()); // 品質による威力値上昇
         }
         powerValue *= characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01); // 特性による威力値上昇
+        powerValue += characteristicPowersFixed;
         if (hasItemStatus) {
             for (final AlchemyItemEffect effect : itemStatus.getActiveEffects()) {
                 powerValue = effect.raisePower(powerValue);
@@ -268,8 +309,8 @@ public enum DamageUtilV2 {
         return new CalcDamageData(victimStatus, criticalRate, buffs, addAttacks, powerValue);
     }
 
-    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow) {
-        final CalcDamageData data = calcData(itemStatus, damagerStatus, victim, power, force, arrow);
+    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow, AttackCategory attackCategory) {
+        final CalcDamageData data = calcData(itemStatus, damagerStatus, victim, power, force, arrow, attackCategory);
         final double damage = damage(
                 baseDamage,
                 data.powerValue,
@@ -288,13 +329,7 @@ public enum DamageUtilV2 {
             final DamageComponent damageComponent = addAttack.getAddAttackType().applyDamage(addAttack, damagerStatus, victim, baseDamageComponent);
             if (damageComponent != null) {
                 // とりあえず攻撃属性によるパーセント減少のみ
-                final double defense;
-                if (addAttack.isIgnoreDefense()) {
-                    defense = 0;
-                } else {
-                    final ImmutablePair<Double, Double> def2 = getDef(victim, data.victimStatus, data.buffs, damageComponent.getAttackAttribute());
-                    defense = def2.getRight();
-                }
+                final double defense = getAddAttackDefense(addAttack, data, victim, damageComponent);
                 damageComponent.setDamage(damageComponent.getDamage() * ((100 - defense) / 100));
                 damageComponents.add(damageComponent);
                 allDamage += damageComponent.getDamage();

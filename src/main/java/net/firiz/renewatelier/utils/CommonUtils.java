@@ -11,6 +11,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.text.NumberFormat;
@@ -123,9 +125,17 @@ public final class CommonUtils {
         log.log(level, str, throwable);
     }
 
-    public static boolean isNumMatch(String number) {
-        final Pattern pattern = Pattern.compile("^[0-9]*$");
-        final Matcher matcher = pattern.matcher(number);
+    public static boolean isNumMatch(@NotNull String number) {
+        return isMatch("^[0-9]*$", Objects.requireNonNull(number));
+    }
+
+    public static boolean isDoubleMatch(@NotNull String number) {
+        return isMatch("[+-]?\\d+(?:\\.\\d+)?", Objects.requireNonNull(number));
+    }
+
+    private static boolean isMatch(@NonNls @NotNull String regex, @NotNull String text) {
+        final Pattern pattern = Pattern.compile(regex);
+        final Matcher matcher = pattern.matcher(text);
         return matcher.matches();
     }
 

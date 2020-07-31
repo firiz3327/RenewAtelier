@@ -7,14 +7,10 @@ import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicCategory;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicBuff;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
+import net.firiz.renewatelier.characteristic.datas.*;
 import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackData;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
 import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackType;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +65,7 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
                                 break;
                             case ADD_ATTACK:
                                 final AddAttackType addAttackType = AddAttackType.valueOf(split[0]);
-                                data = new AddAttackData(addAttackType, Integer.parseInt(split[1]), AddAttackData.AttackCategory.search(Integer.parseInt(split[2])), addAttackType.createAddAttackX(split));
+                                data = new AddAttackData(addAttackType, Integer.parseInt(split[1]), AddAttackData.AttackLimitCategory.search(Integer.parseInt(split[2])), addAttackType.createAddAttackX(split));
                                 break;
                             default:
                                 data = new CharacteristicArray(split);

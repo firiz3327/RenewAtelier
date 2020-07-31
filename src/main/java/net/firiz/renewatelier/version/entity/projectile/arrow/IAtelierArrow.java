@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
@@ -23,5 +24,7 @@ public interface IAtelierArrow extends IAtelierProjectile {
     void setDamage(double damage);
 
     void setCritical(boolean critical);
+
+    AtelierAbstractArrow getAtelierArrowEntity();
 
 }

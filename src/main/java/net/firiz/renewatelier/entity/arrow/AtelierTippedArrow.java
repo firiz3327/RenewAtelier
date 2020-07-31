@@ -1,30 +1,33 @@
 package net.firiz.renewatelier.entity.arrow;
 
-import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierArrow;
+import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftTippedArrow;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AtelierTippedArrow extends CraftTippedArrow implements AtelierArrow {
+public class AtelierTippedArrow extends CraftTippedArrow implements AtelierAbstractArrow, Arrow {
 
     private final Spigot spigot = new Spigot();
     private final LivingEntity source;
     private final ItemStack bow;
     private final ItemStack arrow;
     private final float force;
+    private final boolean isSkill;
 
-    public AtelierTippedArrow(CraftServer server, NMSAtelierArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow, float force) {
+    public AtelierTippedArrow(CraftServer server, NMSAtelierTippedArrow entity, LivingEntity source, ItemStack bow, ItemStack arrow, float force, boolean isSkill) {
         super(server, entity);
         this.source = source;
         this.bow = bow;
         this.arrow = arrow;
         this.force = force;
+        this.isSkill = isSkill;
     }
 
     @NotNull
@@ -47,13 +50,48 @@ public class AtelierTippedArrow extends CraftTippedArrow implements AtelierArrow
     @NotNull
     @Override
     public Chunk getChunk() {
-        return ((NMSAtelierArrow) entity).getLocation().getChunk();
+        return ((NMSAtelierTippedArrow) entity).getLocation().getChunk();
     }
 
     @NotNull
     @Override
     public CreatureSpawnEvent.SpawnReason getEntitySpawnReason() {
         return CreatureSpawnEvent.SpawnReason.CUSTOM;
+    }
+
+    @Override
+    public boolean isInWater() {
+        return false;
+    }
+
+    @Override
+    public boolean isInRain() {
+        return false;
+    }
+
+    @Override
+    public boolean isInBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrRain() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInWaterOrRainOrBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInLava() {
+        return false;
     }
 
     @Override
@@ -75,6 +113,11 @@ public class AtelierTippedArrow extends CraftTippedArrow implements AtelierArrow
     @Override
     public float getForce() {
         return force;
+    }
+
+    @Override
+    public boolean isSkill() {
+        return isSkill;
     }
 
     @NotNull

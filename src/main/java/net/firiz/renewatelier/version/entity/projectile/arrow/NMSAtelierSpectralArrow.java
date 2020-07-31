@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
 import com.google.common.base.Preconditions;
+import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.arrow.AtelierSpectralArrow;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
@@ -28,24 +29,26 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     private final VItemStack arrow;
     private final LivingEntity source;
     private final float force;
+    private final boolean isSkill;
     private Vector velocity;
 
     /**
      * 使用アイテム（弓）データを保持した矢を生成します
-     *
-     * @param location 発射地点
+     *  @param location 発射地点
      * @param bow      使用アイテム(弓)
      * @param arrow    使用アイテム(矢)
      * @param source   射撃者
      * @param force    弓のチャージ
+     * @param isSkill  スキルであるか
      */
-    public NMSAtelierSpectralArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force) {
+    public NMSAtelierSpectralArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force, boolean isSkill) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
         this.bow = VersionUtils.asVItemCopy(bow);
         this.arrow = VersionUtils.asVItemCopy(arrow);
         this.source = source;
         this.force = force;
+        this.isSkill = isSkill;
     }
 
     @Override
@@ -60,7 +63,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
         if (velocity == null) {
             super.shoot(x, y, z, pitch, yaw);
         } else {
-            NMSAtelierArrow.s(this, velocity);
+            NMSAtelierTippedArrow.s(this, velocity);
         }
     }
 
@@ -141,11 +144,17 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
                     source,
                     bow.getItem(),
                     arrow.getItem(),
-                    force
+                    force,
+                    isSkill
             );
         }
 
         return bukkitEntity;
+    }
+
+    @Override
+    public AtelierAbstractArrow getAtelierArrowEntity() {
+        return (AtelierAbstractArrow) getBukkitEntity();
     }
 
     @Override

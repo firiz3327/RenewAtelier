@@ -21,7 +21,16 @@ public class BombEffect implements IEffect {
 
     public void hit(Location location) {
         vanillaSound(location);
-        location.getWorld().spawnParticle(large ? Particle.EXPLOSION_LARGE : Particle.EXPLOSION_NORMAL, location, 1);
+        final Particle particle;
+        final int i;
+        if (large) {
+            particle = Particle.EXPLOSION_LARGE;
+            i = 10;
+        } else {
+            particle = Particle.EXPLOSION_NORMAL;
+            i = 30;
+        }
+        location.getWorld().spawnParticle(particle, location, i);
     }
 
     private void vanillaSound(Location location) {
