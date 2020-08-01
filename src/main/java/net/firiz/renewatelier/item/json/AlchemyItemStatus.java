@@ -658,7 +658,7 @@ public class AlchemyItemStatus {
                 alchemyMaterial.getCharas().forEach(obj -> {
                     if (obj instanceof CharacteristicTemplate) {
                         cs.addAll(((CharacteristicTemplate) obj).getCs());
-                    } else {
+                    } else if (obj instanceof ImmutablePair) {
                         cs.add(CommonUtils.cast(obj));
                     }
                 });

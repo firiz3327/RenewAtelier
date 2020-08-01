@@ -7,6 +7,7 @@ import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
+import net.minecraft.server.v1_16_R1.EntityArrow;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -94,7 +95,7 @@ public enum ArrowManager {
 
     public void shootCrossbow(@NotNull Player player, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow) {
         removeArrow(baseArrow);
-        shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1, false);
+        shootAtelierArrow(player, bow, baseArrow, consumeArrow, false, 1, true, false);
     }
 
     public boolean shootBow(@NotNull LivingEntity entity, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, float force) {
@@ -135,11 +136,15 @@ public enum ArrowManager {
         source.getWorld().playSound(source.getLocation(), Sound.ENTITY_ARROW_SHOOT, 1, 1);
     }
 
-    public AtelierAbstractArrow shootSkillArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final float force) {
-        return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, false, force, true).getAtelierArrowEntity();
+    public AtelierAbstractArrow shootSkillArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final float force, final boolean isCrossbow) {
+        return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, false, force, isCrossbow, true).getAtelierArrowEntity();
     }
 
     private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isSkill) {
+        return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, isConsumeArrow, force, false, isSkill);
+    }
+
+    private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isCrossbow, final boolean isSkill) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
@@ -172,6 +177,7 @@ public enum ArrowManager {
         cloneArrow.setKnockbackStrength(baseArrow.getKnockbackStrength());
         cloneArrow.setDamage(baseArrow.getDamage());
         cloneArrow.setCritical(baseArrow.isCritical());
+        ((EntityArrow) cloneArrow).setShotFromCrossbow(isCrossbow);
 
         if (!(shooter instanceof Player) || ((Player) shooter).getGameMode() == GameMode.CREATIVE) {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);

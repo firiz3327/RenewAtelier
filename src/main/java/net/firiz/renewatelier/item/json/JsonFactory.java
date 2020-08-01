@@ -44,7 +44,7 @@ public class JsonFactory implements TypeAdapterFactory {
             return CommonUtils.cast(StringTypeAdapter.createAdapter(
                     gson,
                     Characteristic::getId,
-                    Characteristic::search
+                    Characteristic::getCharacteristic
             ));
         } else if (rawType == Material.class) {
             return CommonUtils.cast(ItemTypeAdapter.createAdapter(

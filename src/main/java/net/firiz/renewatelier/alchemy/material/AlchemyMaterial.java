@@ -32,6 +32,7 @@ public final class AlchemyMaterial {
     private final String name;
     private final boolean defaultName;
     private final CustomModelMaterial material;
+    private final AlchemyMaterialCategory materialCategory;
     private final int qualityMin;
     private final int qualityMax;
     private final int price;
@@ -65,7 +66,7 @@ public final class AlchemyMaterial {
             String name,
             boolean defaultName,
             CustomModelMaterial material,
-            int qualityMin,
+            AlchemyMaterialCategory materialCategory, int qualityMin,
             int qualityMax,
             int price,
             int hp,
@@ -95,6 +96,7 @@ public final class AlchemyMaterial {
         this.name = name;
         this.defaultName = defaultName;
         this.material = material;
+        this.materialCategory = materialCategory;
         this.qualityMin = qualityMin;
         this.qualityMax = qualityMax;
         this.price = price;
@@ -176,6 +178,10 @@ public final class AlchemyMaterial {
 
     public CustomModelMaterial getMaterial() {
         return material;
+    }
+
+    public AlchemyMaterialCategory getMaterialCategory() {
+        return materialCategory;
     }
 
     public int getQualityMin() {

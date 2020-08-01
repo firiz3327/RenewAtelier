@@ -11,7 +11,7 @@ import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.chores.EntityUtils;
-import net.firiz.renewatelier.version.NMSEntityUtils;
+import net.firiz.renewatelier.version.nms.NMSEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.EntityEffect;
@@ -156,7 +156,7 @@ public final class HandleDamage {
                 damager.sendMessage("HP: " + stats.getHp() + " / " + stats.getMaxHp());
                 damager.sendMessage("ATK: " + stats.getAtk() + " DEF: " + stats.getDef() + " SPD: " + stats.getSpeed());
                 damager.sendMessage("Buffs: ");
-                for (Buff buff : stats.getBuffs()) {
+                for (final Buff buff : stats.getBuffs()) {
                     final StringJoiner joiner = new StringJoiner(" ");
                     joiner.add("-")
                             .add(buff.getBuffValueType().toString())

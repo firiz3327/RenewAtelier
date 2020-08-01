@@ -15,7 +15,7 @@ import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.CommonUtils
 import net.firiz.renewatelier.utils.ItemUtils
-import net.firiz.renewatelier.version.NMSEntityUtils
+import net.firiz.renewatelier.version.nms.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem

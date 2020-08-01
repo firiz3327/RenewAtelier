@@ -1,26 +1,31 @@
 package net.firiz.renewatelier.characteristic;
 
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterialCategory;
+
 /**
- *
  * @author firiz
  */
 public enum CharacteristicCategory {
-    ALL("全種"),
-    ALCHEMY("調合"),
-    ATTACK("攻撃"),
-    HEAL("回復"),
-    WEAPON("武器"),
-    ARMOR("防具"),
-    DECORATION("装飾");
+    ALL(null),
+    ALCHEMY(AlchemyMaterialCategory.ALCHEMY),
+    ATTACK(AlchemyMaterialCategory.ATTACK),
+    HEAL(AlchemyMaterialCategory.HEAL),
+    WEAPON(AlchemyMaterialCategory.WEAPON),
+    ARMOR(AlchemyMaterialCategory.ARMOR),
+    DECORATION(AlchemyMaterialCategory.ACCESSORY);
 
-    private final String name;
+    private final AlchemyMaterialCategory materialCategory;
 
-    CharacteristicCategory(String name) {
-        this.name = name;
+    CharacteristicCategory(AlchemyMaterialCategory materialCategory) {
+        this.materialCategory = materialCategory;
     }
-    
+
     public String getName() {
-        return name;
+        return this == ALL ? "全種" : materialCategory.getName();
+    }
+
+    public boolean c(AlchemyMaterialCategory materialCategory) {
+        return this == ALL || this.materialCategory == materialCategory;
     }
 
 }

@@ -15,6 +15,8 @@ public enum CharacteristicType {
     HEAL, // 回復力増加％
     HEAL_FIXED, // 回復固定強化 <最低値, 最大値>
     POWER, // . 威力値をx％増減
+    ITEM_POWER, // . アイテムのみの威力値をx％増減
+    SKILL_POWER, // . スキル威力％
     CRITICAL, // . クリティカル率をx％増減
     DEATH, // 0=ボスを除き一撃死, 1=一部ボスを除き一撃死
     RANDOM, // 効果安定
@@ -42,9 +44,8 @@ public enum CharacteristicType {
     STATS_AVO_QUALITY, // . 回避率強化 品質で上下
     RESISTANCE, // 耐性（用途不明）
     CONSUME_MP, // 消費MP％
-    SKILL_DAMAGE, // . スキル威力％
     CRITICAL_RACE, // . クリティカル率％<確率, 種族(Race class)>
-    CHASING, // 追い打ち強化
+    CHASING, // . 追い討ち強化
     CHARACTERISTIC_POWER, // . 特性強化 威力値が[(付与されている特性レベル合計値の0.7乗)+x]％上昇
     MULTIPLE_BONUS, // 複数ボーナス 威力値が[効果範囲の対象者*x]％上昇
     SINGULAR_BONUS, // 少数ボーナス 威力値が[x/効果範囲の対象者]％上昇

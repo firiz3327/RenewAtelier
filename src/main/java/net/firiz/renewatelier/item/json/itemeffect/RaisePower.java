@@ -10,8 +10,12 @@ public class RaisePower {
         this.multiply = multiply;
     }
 
-    public double raise(double base) {
-        return multiply ? base * power : base + power;
+    public double getPower() {
+        return power;
+    }
+
+    public boolean isMultiply() {
+        return multiply;
     }
 
 }

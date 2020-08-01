@@ -23,6 +23,8 @@ public class MonsterStats extends EntityStatus {
     private int buffDef;
     private int buffSpeed;
 
+    private boolean defenseBreaking = false;
+
     private final Object2ObjectMap<AttackAttribute, AttackResistance> resistances;
 
     public MonsterStats(Entity entity, Race race, int level, int maxHp, double hp, int atk, int def, int speed) {
@@ -118,7 +120,7 @@ public class MonsterStats extends EntityStatus {
                     }
                 } else { // minus
                     final int loops = buff.getLevel() * -1;
-                    for (int i = 0; i <loops; i++) {
+                    for (int i = 0; i < loops; i++) {
                         resultResistance = resultResistance.down();
                     }
                 }
@@ -128,4 +130,11 @@ public class MonsterStats extends EntityStatus {
         return result;
     }
 
+    public void setDefenseBreaking(boolean defenseBreaking) {
+        this.defenseBreaking = defenseBreaking;
+    }
+
+    public boolean isDefenseBreaking() {
+        return defenseBreaking;
+    }
 }

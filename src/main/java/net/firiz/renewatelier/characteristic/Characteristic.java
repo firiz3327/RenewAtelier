@@ -1,13 +1,18 @@
 package net.firiz.renewatelier.characteristic;
 
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterialCategory;
 import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
 import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
 import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.CommonUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +36,19 @@ public final class Characteristic {
         this.categories = categories;
         this.reqIds = reqIds;
         this.datas = datas;
+    }
+
+    public boolean hasCategory(final AlchemyItemStatus itemStatus) {
+        return hasCategory(itemStatus.getAlchemyMaterial().getMaterialCategory());
+    }
+
+    public boolean hasCategory(final AlchemyMaterial material) {
+        return hasCategory(material.getMaterialCategory());
+    }
+
+    public boolean hasCategory(AlchemyMaterialCategory category) {
+        CommonUtils.log(Arrays.toString(categories) + " " + category);
+        return Arrays.stream(categories).anyMatch(c -> c.c(category));
     }
 
     public String getId() {

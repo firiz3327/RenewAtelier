@@ -1,7 +1,8 @@
-package net.firiz.renewatelier.version;
+package net.firiz.renewatelier.version.nms;
 
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.version.MinecraftVersion;
+import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.EntityEffect;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
@@ -27,6 +28,15 @@ public final class NMSEntityUtils {
         victim.playEffect(EntityEffect.HURT);
 
         // hurt play sound
+        /*
+        EntityLiving.class
+        protected void c(DamageSource damagesource) {
+            SoundEffect soundeffect = this.getSoundHurt(damagesource);
+            if (soundeffect != null) {
+                this.playSound(soundeffect, this.getSoundVolume(), this.dG());
+            }
+        }
+         */
         final EntityLiving victimLiving = ((CraftLivingEntity) victim).getHandle();
         final Method c = VersionUtils.getMethod(EntityLiving.class, "c", DamageSource.class);
         try {
@@ -52,14 +62,17 @@ public final class NMSEntityUtils {
         );
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static void knockBackArrow(@NotNull final LivingEntity victim, @NotNull final org.bukkit.entity.Entity damager) {
         final Entity nmsDamager = ((CraftEntity) damager).getHandle();
         if (nmsDamager instanceof EntityArrow) {
             final EntityArrow arrow = (EntityArrow) nmsDamager;
-            final Vec3D vec3d = arrow.getMot().d(1.0D, 0.0D, 1.0D).d().a((double) arrow.knockbackStrength * 0.6D);
-            if (vec3d.g() > 0.0D) {
-                ((CraftLivingEntity) victim).getHandle().h(vec3d.x, 0.1D, vec3d.z);
+            // EntityArrow.class { protected void a(MovingObjectPositionEntity movingobjectpositionentity) }
+            if (arrow.knockbackStrength > 0) {
+                final Vec3D vec3d = arrow.getMot().d(1.0D, 0.0D, 1.0D).d().a((double) arrow.knockbackStrength * 0.6D);
+                if (vec3d.g() > 0.0D) {
+                    ((CraftLivingEntity) victim).getHandle().h(vec3d.x, 0.1D, vec3d.z);
+                }
             }
         }
     }

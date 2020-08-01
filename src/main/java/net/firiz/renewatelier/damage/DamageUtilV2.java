@@ -2,6 +2,7 @@ package net.firiz.renewatelier.damage;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterialCategory;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffValueType;
@@ -17,12 +18,14 @@ import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.item.json.itemeffect.RaisePower;
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
+import net.firiz.renewatelier.version.nms.NMSEntityUtils;
 import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -44,7 +47,7 @@ public enum DamageUtilV2 {
 
     private final double defaultCriticalMag = 150;
 
-    public void itemDamage(final AlchemyItemStatus itemStatus, final Player damager, @NotNull final LivingEntity victim, float force, double power, AttackAttribute attackAttribute) {
+    public void itemDamage(@Nullable final AlchemyItemStatus itemStatus, @NotNull final Player damager, @NotNull final LivingEntity victim, final float force, final double power, @NotNull final AttackAttribute attackAttribute) {
         final CalcDamageData data = calcData(itemStatus, getEntityStatus(damager), victim, power, force, false, AttackCategory.ITEM);
         final ImmutablePair<Double, Double> def = getDef(victim, data.victimStatus, data.buffs, attackAttribute);
         final double damage = meruruCalcDamage.itemDamage(
@@ -66,10 +69,11 @@ public enum DamageUtilV2 {
                 damageComponents.add(damageComponent);
             }
         }
+        NMSEntityUtils.hurt(victim, damager, null);
         holo.holoDamage(victim, damager, damageComponents);
     }
 
-    private double getAddAttackDefense(final AddAttackData addAttack, final CalcDamageData data, final LivingEntity victim, final DamageComponent damageComponent) {
+    private double getAddAttackDefense(@NotNull final AddAttackData addAttack, @NotNull final CalcDamageData data, @NotNull final LivingEntity victim, @NotNull final DamageComponent damageComponent) {
         if (!addAttack.isIgnoreDefense()) {
             final ImmutablePair<Double, Double> def2 = getDef(victim, data.victimStatus, data.buffs, damageComponent.getAttackAttribute());
             return def2.getRight();
@@ -77,25 +81,25 @@ public enum DamageUtilV2 {
         return 0;
     }
 
-    public void abnormalDamage(@NotNull final EntityStatus victimStatus, double damage) {
+    public void abnormalDamage(@NotNull final EntityStatus victimStatus, final double damage) {
         final DamageComponent baseDamageComponent = new DamageComponent(damage, AttackAttribute.ABNORMAL);
         final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         holo.holoDamage((LivingEntity) victimStatus.getEntity(), null, damageComponents);
     }
 
-    void handlePlayerEnvironmentalDamage(@NotNull final CharStats charStats, double damage) {
+    void handlePlayerEnvironmentalDamage(@NotNull final CharStats charStats, final double damage) {
         final DamageComponent baseDamageComponent = new DamageComponent(charStats.getMaxHp() * (damage / 20), AttackAttribute.NONE);
         final List<DamageComponent> damageComponents = new ObjectArrayList<>();
         damageComponents.add(baseDamageComponent);
         holo.holoDamage(charStats.getPlayer(), null, damageComponents);
     }
 
-    void handlePlayerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage) {
+    void handlePlayerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, final double damage) {
         playerDamage(charStats, damager, damage, AttackAttribute.NONE);
     }
 
-    void playerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, double damage, @NotNull final AttackAttribute attackAttribute) {
+    void playerDamage(@NotNull final CharStats charStats, @NotNull final Entity damager, final double damage, @NotNull final AttackAttribute attackAttribute) {
         EntityStatus entityStatus = null;
         if (damager instanceof Player) {
             entityStatus = psm.getChar(damager.getUniqueId()).getCharStats();
@@ -117,12 +121,14 @@ public enum DamageUtilV2 {
         );
     }
 
-    void mobEnvironmentalDamage(@NotNull final LivingEntity victim, double damage) {
+    void mobEnvironmentalDamage(@NotNull final LivingEntity victim, final double damage) {
         if (damage > 0) {
             final DamageComponent baseDamageComponent;
             if (aEntityUtils.hasLivingData(victim) && aEntityUtils.getLivingData(victim).hasStats()) {
+                final MonsterStats stats = aEntityUtils.getLivingData(victim).getStats();
+                assert stats != null;
                 baseDamageComponent = new DamageComponent(
-                        Math.max(1, aEntityUtils.getLivingData(victim).getStats().getMaxHp() * (damage / 100)),
+                        Math.max(1, stats.getMaxHp() * (damage / 100)),
                         AttackAttribute.NONE
                 );
             } else {
@@ -135,7 +141,7 @@ public enum DamageUtilV2 {
         }
     }
 
-    public void normalDamage(AttackAttribute attribute, CharStats charStats, LivingEntity victim, double normalDamage, double force) {
+    public void normalDamage(@NotNull final AttackAttribute attribute, @NotNull final CharStats charStats, @NotNull final LivingEntity victim, final double normalDamage, final double force) {
         final AlchemyItemStatus weaponStats = charStats.getWeapon();
         final Player player = charStats.getPlayer();
         final boolean isMinecraftCritical = GameConstants.isCritical(player);
@@ -154,7 +160,7 @@ public enum DamageUtilV2 {
         }
     }
 
-    public void arrowDamage(@Nullable AtelierAbstractArrow arrowEntity, @Nullable AlchemyItemStatus bow, @Nullable AlchemyItemStatus arrow, @Nullable EntityStatus status, @NotNull LivingEntity victim, double damage, boolean isMinecraftCritical, float force) {
+    public void arrowDamage(@Nullable final AtelierAbstractArrow arrowEntity, @Nullable final AlchemyItemStatus bow, @Nullable final AlchemyItemStatus arrow, @Nullable final EntityStatus status, @NotNull final LivingEntity victim, final double damage, final boolean isMinecraftCritical, final float force) {
         double normalAttackPower = Randomizer.rand(63, 70);
         double baseDamage = damage;
         if (bow == null && arrow == null) {
@@ -188,102 +194,21 @@ public enum DamageUtilV2 {
         }
     }
 
-    private CalcDamageData calcData(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @NotNull LivingEntity victim, double power, double force, boolean arrow, AttackCategory attackCategory) {
+    private CalcDamageData calcData(@Nullable final AlchemyItemStatus itemStatus, @Nullable final EntityStatus damagerStatus, @NotNull final LivingEntity victim, final double power, final double force, final boolean arrow, @NotNull final AttackCategory attackCategory) {
         final boolean hasItemStatus = itemStatus != null;
-        final boolean isSkill = attackCategory == AttackCategory.SKILL;
-        final boolean isItem = attackCategory == AttackCategory.ITEM;
         @Nullable final EntityStatus victimStatus = getEntityStatus(victim);
-        int criticalRate = 0;
-        final List<Buff> buffs = new ObjectArrayList<>();
-        final List<AddAttackData> addAttacks = new ObjectArrayList<>();
-        int characteristicLevel = 0;
-        int characteristicCPower = 0;
-        int characteristicPowers = 0;
-        int characteristicPowersFixed = 0;
-        if (hasItemStatus) {
-            for (final Characteristic c : itemStatus.getCharacteristics()) {
-                characteristicLevel += c.getLevel();
-                characteristicPowers += c.hasData(CharacteristicType.POWER) ? c.getIntData(CharacteristicType.POWER) : 0;
-                characteristicCPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? c.getIntData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
-                if (isSkill) {
-                    if (c.hasData(CharacteristicType.SKILL_DAMAGE)) { // SKILL_POWER 記載が威力なので
-                        characteristicPowers += c.getIntData(CharacteristicType.SKILL_DAMAGE);
-                    }
-                    if (c.hasData(CharacteristicType.SKILL_POWER_FIXED)) {
-                        characteristicPowersFixed += c.getIntData(CharacteristicType.SKILL_POWER_FIXED);
-                    }
-                } else if (isItem) {
-                    if (c.hasData(CharacteristicType.SIZE_POWER)) { // 現時点ではアイテムでしか使われていないので
-                        final int sizeCount = itemStatus.getSizeCount();
-                        characteristicPowers += sizeCount * c.getIntData(CharacteristicType.SIZE_POWER);
-                    }
-                    // COUNT_POWER アイテムの使用回数実装後、記載
-                    // USE_UP 同様
-                    // USE_ONE 同様
-                    // USE_SPEED_POWER アイテムのクールタイムを実装後、記載
-                }
-                // MULTIPLE_BONUS どうしよう
-                // SINGULAR_BONUS どうしよう
-                // CHASING 追い打ちとは
-                // DEATH 忘れてた
-                criticalRate = calcCriticalRate(victim.getType(), damagerStatus, criticalRate, c);
-
-                if (victimStatus != null) {
-                    final CharacteristicBuff characteristicBuff = (CharacteristicBuff) c.getData(CharacteristicType.BUFF);
-                    if (characteristicBuff != null) {
-                        final int percent = characteristicBuff.getPercent();
-                        final double totalAbnormalResistanceMag;
-                        if (victimStatus instanceof MonsterStats) {
-                            totalAbnormalResistanceMag = ((MonsterStats) victimStatus).getBuffResistances().object2ObjectEntrySet().stream()
-                                    .filter(entry -> entry.getKey() == AttackAttribute.ABNORMAL)
-                                    .mapToDouble(entry -> entry.getValue().getMagnification()).sum();
-                        } else {
-                            totalAbnormalResistanceMag = 0;
-                        }
-                        final int abnormalPercent = (int) (100 + totalAbnormalResistanceMag);
-                        if (percent >= abnormalPercent || Randomizer.percent(percent, abnormalPercent)) {
-                            buffs.add(new Buff(
-                                    victimStatus,
-                                    BuffValueType.CHARACTERISTIC,
-                                    characteristicBuff.getX(), // level
-                                    characteristicBuff.getBuffType(),
-                                    0,
-                                    characteristicBuff.getDuration(),
-                                    (int) (characteristicBuff.getX() * calcQualityCorrection(itemStatus.getQuality())),
-                                    characteristicBuff.getY()
-                            ));
-                        }
-                    }
-                }
-
-                final AddAttackData addAttack = (AddAttackData) c.getData(CharacteristicType.ADD_ATTACK);
-                if (addAttack != null) {
-                    final int percent = addAttack.getPercent();
-                    final AddAttackData.AttackLimitCategory addAttackLimitCategory = addAttack.getAttackLimitCategory();
-                    if (addAttackLimitCategory.isAvailableAttack(attackCategory) && percent >= 100 || Randomizer.percent(percent)) {
-                        addAttacks.add(addAttack);
-                    }
-                }
-            }
-            itemStatus.getActiveEffects().forEach(effect -> {
-                effect.mobHit(victim);
-                CObjects.nonNullConsumer(effect.getAddAttackData(), addAttacks::add);
-            });
-        }
-        characteristicPowers += characteristicCPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicCPower;
-
+        final CalcItemData calcItemData = new CalcItemData();
         // 威力値
         double powerValue = (power * 0.2) + (power * 0.8 / 2) * force; // forceが0でも最低威力値２割が保証される
         if (hasItemStatus) {
             powerValue *= calcQualityCorrection(itemStatus.getQuality()); // 品質による威力値上昇
+            calcItemData.calc(victim, victimStatus, itemStatus, damagerStatus, attackCategory);
         }
-        powerValue *= characteristicPowers == 0 ? 1D : ((100D + characteristicPowers) * 0.01); // 特性による威力値上昇
-        powerValue += characteristicPowersFixed;
-        if (hasItemStatus) {
-            for (final AlchemyItemEffect effect : itemStatus.getActiveEffects()) {
-                powerValue = effect.raisePower(powerValue);
-            }
-        }
+        // 特性による％威力値上昇
+        powerValue *= calcItemData.percentPower == 0 ? 1D : ((100D + calcItemData.percentPower) * 0.01);
+        // 特性による固定値上昇
+        powerValue += calcItemData.fixedPower;
+        // 効果による上昇 (％ or 固定値)
         if (damagerStatus instanceof CharStats) {
             final CharStats charStats = (CharStats) damagerStatus;
             switch (charStats.getWeaponItem().getType()) {
@@ -302,14 +227,20 @@ public enum DamageUtilV2 {
             final List<AlchemyItemStatus> equips = charStats.getEquips();
             for (final AlchemyItemStatus equip : equips) {
                 for (final Characteristic c : equip.getCharacteristics()) {
-                    criticalRate = calcCriticalRate(victim.getType(), damagerStatus, criticalRate, c);
+                    calcItemData.criticalRate = calcCriticalRate(victim.getType(), damagerStatus, calcItemData.criticalRate, c);
                 }
             }
         }
-        return new CalcDamageData(victimStatus, criticalRate, buffs, addAttacks, powerValue);
+        return new CalcDamageData(
+                victimStatus,
+                calcItemData.criticalRate,
+                calcItemData.buffs,
+                calcItemData.addAttacks,
+                powerValue
+        );
     }
 
-    private double calcDamage(@Nullable AlchemyItemStatus itemStatus, @Nullable EntityStatus damagerStatus, @Nullable Entity damager, @NotNull LivingEntity victim, double power, double baseDamage, double force, AttackAttribute baseAttribute, boolean isMinecraftCritical, boolean arrow, AttackCategory attackCategory) {
+    private double calcDamage(@Nullable final AlchemyItemStatus itemStatus, @Nullable final EntityStatus damagerStatus, @Nullable final Entity damager, @NotNull final LivingEntity victim, final double power, final double baseDamage, final double force, @NotNull final AttackAttribute baseAttribute, final boolean isMinecraftCritical, final boolean arrow, @NotNull final AttackCategory attackCategory) {
         final CalcDamageData data = calcData(itemStatus, damagerStatus, victim, power, force, arrow, attackCategory);
         final double damage = damage(
                 baseDamage,
@@ -340,14 +271,14 @@ public enum DamageUtilV2 {
     }
 
     private double damage(
-            double baseDamage,
-            double powerValue,
-            EntityStatus damagerStatus,
-            LivingEntity victim,
-            EntityStatus victimStatus,
-            AttackAttribute baseAttribute,
-            List<Buff> buffs,
-            boolean isCritical
+            final double baseDamage,
+            final double powerValue,
+            @Nullable final EntityStatus damagerStatus,
+            @NotNull final LivingEntity victim,
+            @Nullable final EntityStatus victimStatus,
+            @NotNull final AttackAttribute baseAttribute,
+            @NotNull final List<Buff> buffs,
+            final boolean isCritical
     ) {
         final boolean isPhysicalAttack = AttackAttribute.isPhysicalAttack(baseAttribute);
         final ImmutablePair<Double, Double> def = getDef(victim, victimStatus, buffs, baseAttribute);
@@ -375,7 +306,7 @@ public enum DamageUtilV2 {
     /**
      * @return def, percentDef
      */
-    private ImmutablePair<Double, Double> getDef(Entity victim, EntityStatus victimStatus, List<Buff> buffs, AttackAttribute attackAttribute) {
+    private ImmutablePair<Double, Double> getDef(@NotNull final Entity victim, @Nullable final EntityStatus victimStatus, @NotNull final List<Buff> buffs, @NotNull final AttackAttribute attackAttribute) {
         double victimDef = 0;
         double victimPercentDef = 0;
         if (victimStatus != null) {
@@ -384,7 +315,7 @@ public enum DamageUtilV2 {
                         .filter(entry -> entry.getKey() == attackAttribute)
                         .mapToDouble(entry -> entry.getValue().getMagnification())
                         .sum();
-            } else if (((Player) victim).isBlocking()) {
+            } else if (victim instanceof Player && ((Player) victim).isBlocking()) {
                 victimDef = victimStatus.getDef();
                 victimDef *= 1.2; // 盾で守っている時は、防御力を20％上昇
             }
@@ -394,19 +325,21 @@ public enum DamageUtilV2 {
     }
 
     @Nullable
-    private EntityStatus getEntityStatus(LivingEntity entity) {
-        if (aEntityUtils.hasLivingData(entity)) {
-            final LivingData livingData = aEntityUtils.getLivingData(entity);
-            if (livingData.hasStats()) {
-                return livingData.getStats();
+    private EntityStatus getEntityStatus(@Nullable final LivingEntity entity) {
+        if (entity != null) {
+            if (aEntityUtils.hasLivingData(entity)) {
+                final LivingData livingData = aEntityUtils.getLivingData(entity);
+                if (livingData.hasStats()) {
+                    return livingData.getStats();
+                }
+            } else if (entity instanceof Player) {
+                return psm.getChar(entity.getUniqueId()).getCharStats();
             }
-        } else if (entity instanceof Player) {
-            return psm.getChar(entity.getUniqueId()).getCharStats();
         }
         return null;
     }
 
-    private int calcCriticalRate(@NotNull EntityType type, @Nullable EntityStatus status, int criticalRate, Characteristic c) {
+    private int calcCriticalRate(@NotNull final EntityType type, @Nullable final EntityStatus status, int criticalRate, final Characteristic c) {
         criticalRate += c.hasData(CharacteristicType.CRITICAL) ? c.getIntData(CharacteristicType.CRITICAL) : 0;
         if (c.hasData(CharacteristicType.CRITICAL_RACE)) {
             final String[] data = c.getArrayData(CharacteristicType.CRITICAL_RACE);
@@ -444,5 +377,141 @@ public enum DamageUtilV2 {
             this.addAttacks = addAttacks;
             this.powerValue = powerValue;
         }
+    }
+
+    private static class CalcItemData {
+        int criticalRate = 0;
+        final List<Buff> buffs = new ObjectArrayList<>();
+        final List<AddAttackData> addAttacks = new ObjectArrayList<>();
+        int characteristicLevel = 0;
+        int characteristicPower = 0;
+        int percentPower = 0;
+        int fixedPower = 0;
+        boolean death = false;
+
+        void calc(
+                @NotNull final LivingEntity victim,
+                @Nullable final EntityStatus victimStatus,
+                @NotNull final AlchemyItemStatus itemStatus,
+                @Nullable final EntityStatus damagerStatus,
+                @NotNull final AttackCategory attackCategory
+        ) {
+            calcCharacteristics(victim, victimStatus, itemStatus, damagerStatus, attackCategory);
+            calcActiveEffect(victim, itemStatus);
+            percentPower += characteristicPower == 0 ? 0D : Math.pow(characteristicLevel, 0.7) + characteristicPower;
+        }
+
+        void calcCharacteristics(
+                @NotNull final LivingEntity victim,
+                @Nullable final EntityStatus victimStatus,
+                @NotNull final AlchemyItemStatus itemStatus,
+                @Nullable final EntityStatus damagerStatus,
+                @NotNull final AttackCategory attackCategory
+        ) {
+            itemStatus.getCharacteristics().stream().filter(c -> c.hasCategory(itemStatus)).forEach(c -> {
+                characteristicLevel += c.getLevel();
+                percentPower += c.hasData(CharacteristicType.POWER) ? c.getIntData(CharacteristicType.POWER) : 0;
+                if (attackCategory == AttackCategory.SKILL) {
+                    skill(c);
+                } else if (attackCategory == AttackCategory.ITEM) {
+                    item(c, itemStatus, victimStatus);
+                }
+
+                criticalRate = INSTANCE.calcCriticalRate(victim.getType(), damagerStatus, criticalRate, c);
+
+                if (victimStatus != null) {
+                    final CharacteristicBuff characteristicBuff = (CharacteristicBuff) c.getData(CharacteristicType.BUFF);
+                    if (characteristicBuff != null) {
+                        final int percent = characteristicBuff.getPercent();
+                        final double totalAbnormalResistanceMag;
+                        if (victimStatus instanceof MonsterStats) {
+                            totalAbnormalResistanceMag = ((MonsterStats) victimStatus).getBuffResistances().object2ObjectEntrySet().stream()
+                                    .filter(entry -> entry.getKey() == AttackAttribute.ABNORMAL)
+                                    .mapToDouble(entry -> entry.getValue().getMagnification()).sum();
+                        } else {
+                            totalAbnormalResistanceMag = 0;
+                        }
+                        final int abnormalPercent = (int) (100 + totalAbnormalResistanceMag);
+                        if (percent >= abnormalPercent || Randomizer.percent(percent, abnormalPercent)) {
+                            buffs.add(new Buff(
+                                    victimStatus,
+                                    BuffValueType.CHARACTERISTIC,
+                                    characteristicBuff.getX(), // level
+                                    characteristicBuff.getBuffType(),
+                                    0,
+                                    characteristicBuff.getDuration(),
+                                    (int) (characteristicBuff.getX() * INSTANCE.calcQualityCorrection(itemStatus.getQuality())),
+                                    characteristicBuff.getY()
+                            ));
+                        }
+                    }
+                }
+
+                final AddAttackData addAttack = (AddAttackData) c.getData(CharacteristicType.ADD_ATTACK);
+                if (addAttack != null) {
+                    final int percent = addAttack.getPercent();
+                    final AddAttackData.AttackLimitCategory addAttackLimitCategory = addAttack.getAttackLimitCategory();
+                    if (addAttackLimitCategory.isAvailableAttack(attackCategory) && percent >= 100 || Randomizer.percent(percent)) {
+                        addAttacks.add(addAttack);
+                    }
+                }
+            });
+        }
+
+        void calcActiveEffect(@NotNull final LivingEntity victim, @NotNull final AlchemyItemStatus itemStatus) {
+            itemStatus.getActiveEffects().forEach(effect -> {
+                effect.mobHit(victim);
+                CObjects.nonNullConsumer(effect.getAddAttackData(), addAttacks::add);
+                if (effect.getRaisePower() != null) {
+                    final RaisePower raisePower = effect.getRaisePower();
+                    if (raisePower.isMultiply()) {
+                        percentPower += raisePower.getPower();
+                    } else {
+                        fixedPower += raisePower.getPower();
+                    }
+                }
+            });
+        }
+
+        void skill(@NotNull final Characteristic c) {
+            if (c.hasData(CharacteristicType.SKILL_POWER)) {
+                percentPower += c.getIntData(CharacteristicType.SKILL_POWER);
+            }
+            if (c.hasData(CharacteristicType.SKILL_POWER_FIXED)) {
+                fixedPower += c.getIntData(CharacteristicType.SKILL_POWER_FIXED);
+            }
+        }
+
+        void item(@NotNull final Characteristic c, @NotNull final AlchemyItemStatus itemStatus, @Nullable final EntityStatus victimStatus) {
+            final AlchemyMaterialCategory materialCategory = itemStatus.getAlchemyMaterial().getMaterialCategory();
+            percentPower += c.hasData(CharacteristicType.ITEM_POWER) ? c.getIntData(CharacteristicType.ITEM_POWER) : 0;
+            characteristicPower += c.hasData(CharacteristicType.CHARACTERISTIC_POWER) ? c.getIntData(CharacteristicType.CHARACTERISTIC_POWER) : 0;
+            if (c.hasData(CharacteristicType.SIZE_POWER)) {
+                final int sizeCount = itemStatus.getSizeCount();
+                percentPower += sizeCount * c.getIntData(CharacteristicType.SIZE_POWER);
+            }
+            switch (materialCategory) {
+                case ATTACK:
+                    if (c.hasData(CharacteristicType.CHASING) && victimStatus instanceof MonsterStats && ((MonsterStats) victimStatus).isDefenseBreaking()) {
+                        percentPower += c.getIntData(CharacteristicType.CHASING);
+                    }
+                    // DEATH どうしよう 0=ボスを除き一撃死, 1=一部ボスを除き一撃死
+                    break;
+                case HEAL:
+                    percentPower += c.hasData(CharacteristicType.HEAL) ? c.getIntData(CharacteristicType.HEAL) : 0;
+                    fixedPower += c.hasData(CharacteristicType.HEAL_FIXED) ? c.getIntData(CharacteristicType.HEAL_FIXED) : 0;
+                    break;
+                default:
+                    // nothing
+                    break;
+            }
+            // COUNT_POWER アイテムの使用回数実装後、記載
+            // USE_UP 同様
+            // USE_ONE 同様
+            // USE_SPEED_POWER アイテムのクールタイムを実装後、記載
+            // MULTIPLE_BONUS どうしよう
+            // SINGULAR_BONUS どうしよう
+        }
+
     }
 }

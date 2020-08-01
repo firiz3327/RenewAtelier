@@ -19,10 +19,10 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum AlchemyItemEffect {
-    FIRE_DAMAGE_1("炎ダメージ・弱", "炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(1.2, true)),
-    FIRE_DAMAGE_2("炎ダメージ・中", "中程度炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(1.4, true)),
-    FIRE_DAMAGE_3("炎ダメージ・強", "強い炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(1.6, true)),
-    FIRE_DAMAGE_4("炎ダメージ・超", "非常に強力な炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(1.8, true)),
+    FIRE_DAMAGE_1("炎ダメージ・弱", "炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(20, true)),
+    FIRE_DAMAGE_2("炎ダメージ・中", "中程度炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(40, true)),
+    FIRE_DAMAGE_3("炎ダメージ・強", "強い炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(60, true)),
+    FIRE_DAMAGE_4("炎ダメージ・超", "非常に強力な炎属性のダメージを与える\n炎属性のダメージは、対象の炎耐性によって変動する", new RaisePower(80, true)),
     FIRE_1("火傷を負わせる", "", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 1, BuffType.BURN, 10, 1))),
     FIRE_2("大火傷を負わせる", "", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 2, BuffType.BURN, 10, 5))),
     DEF_DOWN_1("防御力ダウン・小", "対象の防御力の値を少しだけ低下させる", new BuffMobHitEffect(new BuffData(BuffValueType.ITEM, 2, BuffType.STATS_DEF, 30, -5))),
@@ -115,7 +115,8 @@ public enum AlchemyItemEffect {
         return addAttackData;
     }
 
-    public double raisePower(double base) {
-        return CObjects.nullIfFunction(raisePower, rp -> rp.raise(base), base);
+    @Nullable
+    public RaisePower getRaisePower() {
+        return raisePower;
     }
 }

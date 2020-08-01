@@ -36,7 +36,9 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     private static final List<String> notFounds = new ObjectArrayList<>();
     private static final String PREFIX = "MaterialLoader: ";
+    private static final String ALL_KEY_ALCHEMY_MATERIAL_CATEGORY = "allAlchemyMaterialCategory";
     private static final String KEY_MATERIAL = "material";
+    private static final String KEY_ALCHEMY_MATERIAL_CATEGORY = "alchemyMaterialCategory";
     private static final String KEY_QUALITY_MIN = "quality_min";
     private static final String KEY_QUALITY_MAX = "quality_max";
     private static final String KEY_CATEGORIES = "categories";
@@ -57,8 +59,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     protected void loadConfig(final FileConfiguration config) {
         notFounds.clear();
         final AtomicInteger errorCount = new AtomicInteger(0);
+        final AlchemyMaterialCategory allAlchemyMaterialCategory;
+        if (config.contains(ALL_KEY_ALCHEMY_MATERIAL_CATEGORY)) {
+            allAlchemyMaterialCategory = AlchemyMaterialCategory.search(Objects.requireNonNull(config.getString(ALL_KEY_ALCHEMY_MATERIAL_CATEGORY)));
+        } else {
+            allAlchemyMaterialCategory = null;
+        }
         final Set<String> keys = config.getKeys(false);
-        keys.forEach(key -> {
+        keys.stream().filter(key -> !(key.equals(ALL_KEY_ALCHEMY_MATERIAL_CATEGORY))).forEach(key -> {
             try {
                 final ConfigurationSection item = config.getConfigurationSection(key);
                 assert item != null;
@@ -66,6 +74,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final CustomModelMaterial materialData = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
                 final String name = getName(item, defaultName, materialData); // *
+                final AlchemyMaterialCategory materialCategory = allAlchemyMaterialCategory == null ? getAlchemyMaterialCategory(item) : null; // *
                 final int quality_min = getQualityMin(item); // *
                 final int quality_max = getQualityMax(item); // *
                 final int price = item.contains("price") ? item.getInt("price") : 1;
@@ -82,6 +91,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             name,
                             defaultName,
                             materialData,
+                            materialCategory,
                             quality_min,
                             quality_max,
                             price,
@@ -174,6 +184,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             }
         }
         return name;
+    }
+
+    @Nullable
+    private AlchemyMaterialCategory getAlchemyMaterialCategory(ConfigurationSection item) {
+        if (item.contains(KEY_ALCHEMY_MATERIAL_CATEGORY)) {
+            return AlchemyMaterialCategory.search(Objects.requireNonNull(item.getString(KEY_ALCHEMY_MATERIAL_CATEGORY)));
+        }
+        notFounds.add(KEY_ALCHEMY_MATERIAL_CATEGORY);
+        return null;
     }
 
     private int getQualityMin(ConfigurationSection item) {
