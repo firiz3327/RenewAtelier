@@ -4,11 +4,9 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 import com.destroystokyo.paper.loottable.LootableBlockInventory;
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
@@ -77,12 +75,30 @@ public class PlayerListener implements Listener {
                 ReplaceVanillaItems.loot(player, loot);
             }
         } else if (CommonUtils.isRight(action)) {
+            if (hasBlock) {
+                switch (block.getType()) {
+                    case LECTERN:
+                        if (QuestBook.lectern(player, block, item)) {
+                            return;
+                        }
+                        break;
+                    case CAULDRON:
+                        final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
+                        if (type != null) {
+                            e.setCancelled(type.run(action, item, block, player));
+                            inventoryManager.getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
+                            return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
             if (item != null) {
                 if (item.hasItemMeta()) {
-                    final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
                     switch (item.getType()) {
                         case WRITTEN_BOOK:
-                            if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
+                            if (QuestBook.getQuestBookMaterial(item) != null) {
                                 e.setCancelled(true);
                                 QuestBook.openQuestBook(player);
                                 return;
@@ -92,15 +108,6 @@ public class PlayerListener implements Listener {
                             // alchemyMaterial
                             break;
                     }
-                }
-            }
-
-            if (hasBlock) {
-                final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
-                if (type != null) {
-                    e.setCancelled(type.run(action, item, block, player));
-                    inventoryManager.getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
-                    return;
                 }
             }
             // use_item -------
