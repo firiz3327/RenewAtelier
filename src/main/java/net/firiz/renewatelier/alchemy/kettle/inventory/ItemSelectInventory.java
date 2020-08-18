@@ -4,8 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
-import net.firiz.renewatelier.alchemy.kettle.inventory.CatalystSelectInventory;
-import net.firiz.renewatelier.alchemy.kettle.inventory.KettleConstants;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -14,10 +12,11 @@ import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -87,7 +86,7 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
                 break;
             case CATEGORY:
                 final Category c = requireMaterial.getCategory();
-                name = "§r" + c.getName();
+                name = ChatColor.WHITE + c.getName();
                 material = c.getMaterial();
                 break;
             default:

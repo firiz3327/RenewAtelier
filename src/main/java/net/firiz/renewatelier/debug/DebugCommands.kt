@@ -14,7 +14,7 @@ import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.CommonUtils
-import net.firiz.renewatelier.utils.ItemUtils
+import net.firiz.renewatelier.utils.chores.ItemUtils
 import net.firiz.renewatelier.version.nms.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
@@ -468,6 +468,17 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
+            desc = ["Quest ID"],
+            examples = ["questClear flam_tutorial_0"],
+            text = "クエストをクリアします"
+    )
+    fun questClear(sender: Player, args: ArrayList<Any>) {
+        if (args.size != 0) {
+            PlayerSaveManager.INSTANCE.getChar(sender.uniqueId).questClear(args[0].toString(), true)
+        }
+    }
+
+    @Cmd(
             desc = ["Test"],
             examples = ["test"],
             text = "・・・"
@@ -500,6 +511,11 @@ class DebugCommands(private val debugListener: DebugListener) {
                     }
                     "h" -> {
                         sender.sendMessage("hasRecipe: ${NMSEntityUtils.hasRecipe(sender, "cauldron")}")
+                    }
+                    "l" -> {
+                        ItemUtils.addItem(sender, ItemUtils.ci(Material.ACACIA_BOAT, 0, "${ChatColor.RESET}RESET", arrayListOf(
+                                "${ChatColor.RESET}RESET"
+                        )));
                     }
                 }
             }

@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.text.NumberFormat;
@@ -56,7 +57,7 @@ public final class CommonUtils {
         dataHolder.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, value);
     }
 
-    public static String intCcolor(int i) {
+    public static String intCColor(int i) {
         switch (i) {
             case 0:
                 return ChatColor.GRAY.toString();
@@ -80,6 +81,10 @@ public final class CommonUtils {
     @SuppressWarnings("unchecked")
     public static <T> T cast(Object obj) {
         return (T) obj;
+    }
+
+    public static int castInt(@Nullable final Object obj) {
+        return obj == null ? 0 : (Integer) obj;
     }
 
     public static void log(final Object obj) {
@@ -126,11 +131,11 @@ public final class CommonUtils {
     }
 
     public static boolean isNumMatch(@NotNull String number) {
-        return isMatch("^[0-9]*$", Objects.requireNonNull(number));
+        return isMatch("^[+-]?\\d*$", Objects.requireNonNull(number));
     }
 
     public static boolean isDoubleMatch(@NotNull String number) {
-        return isMatch("[+-]?\\d+(?:\\.\\d+)?", Objects.requireNonNull(number));
+        return isMatch("^[+-]?\\d+(?:\\.\\d+)?$", Objects.requireNonNull(number));
     }
 
     private static boolean isMatch(@NonNls @NotNull String regex, @NotNull String text) {

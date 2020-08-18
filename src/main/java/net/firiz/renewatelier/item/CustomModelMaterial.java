@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.item;
 
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 

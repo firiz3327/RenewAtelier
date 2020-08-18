@@ -3,8 +3,8 @@ package net.firiz.renewatelier.inventory.shop;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
-import net.firiz.renewatelier.utils.ItemUtils;
-import net.firiz.renewatelier.utils.pair.Pair;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -84,7 +84,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
      */
     @NotNull
     private ShopResult createShopResult(@NotNull ItemStack item, @NotNull Player player) {
-        final Pair<Integer, String> shopItem = ShopItem.loadShopItem(item);
+        final ImmutableNullablePair<Integer, String> shopItem = ShopItem.loadShopItem(item);
         final int price = Objects.requireNonNull(shopItem.getLeft());
         if (shopItem.getRight() == null) {
             final int mode = psm.getChar(player.getUniqueId()).hasMoney(price) ? 1 : -1;

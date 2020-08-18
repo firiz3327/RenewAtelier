@@ -11,12 +11,19 @@ import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
+import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.StarEffect;
+import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -40,8 +47,9 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
     protected void loadConfig(final FileConfiguration config) {
         config.getKeys(false).forEach(key -> {
             final ConfigurationSection item = config.getConfigurationSection(key);
+            assert item != null;
             // リザルトマテリアル (material: AlchemyMaterial, なし: Material) *
-            final String result = item.getString("result");
+            final ARecipeResult<?> result = getResult(item);
             // リザルト・初期アイテム数 *
             final int amount = item.getInt("amount");
             // 必要素材 *
@@ -111,6 +119,20 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
                 ideaRecipes.add(recipe);
             }
         });
+    }
+
+    private ARecipeResult<?> getResult(ConfigurationSection item) {
+        final String resultData = item.getString("result");
+        if (resultData != null) {
+            if (resultData.startsWith("material:")) {
+                return new AlchemyMaterialRecipeResult(AlchemyMaterial.getMaterial(resultData.substring(9)));
+            } else if (resultData.startsWith("minecraft:")) {
+                ItemUtils.getMaterial(resultData);
+                final String[] result = resultData.contains(",") ? resultData.split(",") : new String[]{resultData};
+                return new MinecraftMaterialRecipeResult(new CustomModelMaterial(ItemUtils.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0));
+            }
+        }
+        throw new IllegalStateException("The value of the result could not load. " + resultData);
     }
 
     public List<AlchemyRecipe> getIdeaRecipes() {

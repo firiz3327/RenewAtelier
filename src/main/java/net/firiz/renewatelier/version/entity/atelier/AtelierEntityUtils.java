@@ -3,7 +3,6 @@ package net.firiz.renewatelier.version.entity.atelier;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.Location;

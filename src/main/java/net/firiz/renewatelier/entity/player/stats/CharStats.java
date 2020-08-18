@@ -7,7 +7,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -75,20 +75,20 @@ public class CharStats extends EntityStatus {
         this.lastAttackTime = System.currentTimeMillis();
     }
 
-    public long getAttackSpeed() {
-        return getAttackSpeed(player.getInventory().getItemInMainHand().getType());
+    public long getAttackSpeedMillis() {
+        return getAttackSpeedMillis(player.getInventory().getItemInMainHand().getType());
     }
 
-    public long getAttackSpeed(@NotNull final Material material) {
+    public long getAttackSpeedMillis(@NotNull final Material material) {
         return Math.max(250, GameConstants.getCoolTimeMillis(material) - (long) getSpeed()); // 素手より早くなることはない
     }
 
     public boolean attack(@NotNull final Material material) {
-        final long coolTimeMillis = getAttackSpeed(material);
+        final long coolTimeMillis = getAttackSpeedMillis(material);
         final boolean canAttack = System.currentTimeMillis() - lastAttackTime >= coolTimeMillis;
         if (canAttack) {
             updateLastAttack();
-            player.setCooldown(material, (int) (coolTimeMillis * 0.02)); // 速度の違い武器がわからりにくくなるため使用しない
+            player.setCooldown(material, player.getCooldown(material) + (int) (coolTimeMillis * 0.02));
         }
         return canAttack;
     }

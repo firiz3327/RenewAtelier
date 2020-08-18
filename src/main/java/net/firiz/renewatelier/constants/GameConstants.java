@@ -89,6 +89,8 @@ public final class GameConstants {
             {"左右反転： ON", "上下反転： ON"}
     };
 
+    public static final Material USABLE_MATERIAL = Material.BAT_SPAWN_EGG;
+
     /**
      * クリティカルハック及びフライハック対策
      * <p>
@@ -235,6 +237,35 @@ public final class GameConstants {
                 return 10;
             default:
                 return 1;
+        }
+    }
+
+    public static boolean isArmor(Material material) {
+        switch (material) {
+            case TURTLE_HELMET:
+            case LEATHER_HELMET:
+            case LEATHER_CHESTPLATE:
+            case LEATHER_LEGGINGS:
+            case LEATHER_BOOTS:
+            case CHAINMAIL_HELMET:
+            case CHAINMAIL_CHESTPLATE:
+            case CHAINMAIL_LEGGINGS:
+            case CHAINMAIL_BOOTS:
+            case IRON_HELMET:
+            case IRON_CHESTPLATE:
+            case IRON_LEGGINGS:
+            case IRON_BOOTS:
+            case GOLDEN_HELMET:
+            case GOLDEN_CHESTPLATE:
+            case GOLDEN_LEGGINGS:
+            case GOLDEN_BOOTS:
+            case DIAMOND_HELMET:
+            case DIAMOND_CHESTPLATE:
+            case DIAMOND_LEGGINGS:
+            case DIAMOND_BOOTS:
+                return true;
+            default:
+                return false;
         }
     }
 

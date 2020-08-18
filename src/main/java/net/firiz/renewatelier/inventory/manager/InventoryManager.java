@@ -26,11 +26,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class InventoryManager {
+public enum InventoryManager {
+    INSTANCE;
 
     private final Map<Class<?>, CustomInventory> inventories = new Object2ObjectLinkedOpenHashMap<>();
 
-    public InventoryManager() {
+    InventoryManager() {
         inventories.put(Appraisal.class, new Appraisal());
         inventories.put(RecipeSelectInventory.class, new RecipeSelectInventory(this));
         inventories.put(ItemSelectInventory.class, new ItemSelectInventory(this));

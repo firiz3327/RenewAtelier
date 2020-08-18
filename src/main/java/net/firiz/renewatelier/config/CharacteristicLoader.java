@@ -3,13 +3,10 @@ package net.firiz.renewatelier.config;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicCategory;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.characteristic.datas.*;
-import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackData;
-import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackType;
 import net.firiz.renewatelier.utils.CommonUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class CharacteristicLoader extends ConfigLoader<Characteristic> {
@@ -41,55 +39,37 @@ public class CharacteristicLoader extends ConfigLoader<Characteristic> {
             }
             final List<List<String>> reqs = getReqs(item);
             final List<String> itemStringList = item.getStringList("datas");
-            final Map<CharacteristicType, CharacteristicData> datas = new Object2ObjectOpenHashMap<>();
+            final Map<CharacteristicType, ChData> dataMap = new Object2ObjectOpenHashMap<>();
             itemStringList.forEach(str -> {
                 if (str.contains(",")) {
                     final int i = str.indexOf(',');
                     final CharacteristicType type = CharacteristicType.valueOf(str.substring(0, i));
                     final String dataStr = str.substring(i + 1).trim();
-                    final CharacteristicData data;
-                    if (CommonUtils.isNumMatch(dataStr)) {
-                        data = new CharacteristicInt(Integer.parseInt(dataStr));
-                    } else {
-                        final String[] split = dataStr.split(",");
-                        for (int j = 0; j < split.length; j++) {
-                            split[j] = split[j].trim();
-                        }
-                        switch (type) {
-                            case BUFF:
-                                if (split.length == 4) {
-                                    data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
-                                } else {
-                                    data = new CharacteristicBuff(BuffType.valueOf(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]), split[4]);
-                                }
-                                break;
-                            case ADD_ATTACK:
-                                final AddAttackType addAttackType = AddAttackType.valueOf(split[0]);
-                                data = new AddAttackData(addAttackType, Integer.parseInt(split[1]), AddAttackData.AttackLimitCategory.search(Integer.parseInt(split[2])), addAttackType.createAddAttackX(split));
-                                break;
-                            default:
-                                data = new CharacteristicArray(split);
-                                break;
-                        }
+                    final String[] split = dataStr.split(",");
+                    for (int j = 0; j < split.length; j++) {
+                        split[j] = split[j].trim();
                     }
-                    datas.put(type, data);
+                    try {
+                        dataMap.put(type, type.newInstance(split));
+                    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                        CommonUtils.logWarning(str, e);
+                    }
                 } else {
-                    datas.put(CharacteristicType.valueOf(str), null);
+                    final CharacteristicType type = CharacteristicType.valueOf(str);
+                    if (type.isType(ChNone.class)) {
+                        dataMap.put(type, ChNone.newInstance(null));
+                    } else {
+                        CommonUtils.logWarning(type + " is not ChNone class.");
+                    }
                 }
             });
-            add(new Characteristic(key, lv, name, desc, categories, reqs, datas));
+            add(new Characteristic(key, lv, name, desc, categories, reqs, dataMap));
         });
     }
 
     @Override
     protected void loadEnd() {
-        getList().stream().flatMap(c -> c.getReqIds().stream()).flatMap(Collection::stream).forEach(r -> {
-            try {
-                Characteristic.getCharacteristic(r);
-            } catch (IllegalArgumentException e) {
-                CommonUtils.logWarning(e);
-            }
-        });
+        getList().forEach(Characteristic::loadCombine);
     }
 
     @NotNull

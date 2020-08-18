@@ -10,11 +10,12 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
+import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -71,17 +72,21 @@ public class AlchemyItemStatus {
     @Expose
     private int speed;
     @Expose
+    private int usableCount;
+    @Expose
+    private int consumedCount;
+    @Expose
     @NotNull
     private final List<String> prefix;
     @Expose
     @NotNull
     private final Map<String, String> dataContainer;
 
-    private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed) {
-        this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
+    private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, int usableCount) {
+        this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed, usableCount, 0, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
     }
 
-    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
+    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, int usableCount, int consumedCount, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
         this.alchemyMaterial = alchemyMaterial;
         this.customModel = customModel;
         this.size = size;
@@ -95,6 +100,8 @@ public class AlchemyItemStatus {
         this.atk = atk;
         this.def = def;
         this.speed = speed;
+        this.usableCount = usableCount;
+        this.consumedCount = consumedCount;
         this.prefix = prefix;
         this.dataContainer = dataContainer;
     }
@@ -184,6 +191,34 @@ public class AlchemyItemStatus {
         this.speed = speed;
     }
 
+    public int getUsableCount() {
+        return usableCount;
+    }
+
+    public void setUsableCount(int usableCount) {
+        this.usableCount = usableCount;
+    }
+
+    public int getConsumedCount() {
+        return consumedCount;
+    }
+
+    public void setConsumedCount(int consumedCount) {
+        this.consumedCount = consumedCount;
+    }
+
+    public void incrementConsumedCount() {
+        if (characteristics.stream().anyMatch(c -> c.hasData(CharacteristicType.USE_ONE))) {
+            consumedCount = usableCount;
+        } else {
+            consumedCount++;
+        }
+    }
+
+    public boolean canUse() {
+        return usableCount > consumedCount;
+    }
+
     /**
      * 一部のアイテムで使用するscript用メソッド
      *
@@ -257,6 +292,8 @@ public class AlchemyItemStatus {
                 atk,
                 def,
                 speed,
+                usableCount,
+                consumedCount,
                 prefix,
                 dataContainer
         ));
@@ -379,8 +416,12 @@ public class AlchemyItemStatus {
         return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, new VisibleFlags(true, true, true, true, !notVisibleCatalyst, true, true, true));
     }
 
-    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibles) {
-        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibles, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed());
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibleFlags) {
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed(), am.getUsableCount());
+    }
+
+    public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final int usableCount, final VisibleFlags visibleFlags) {
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed(), am.getUsableCount());
     }
 
     private static void addLore(List<String> lore, String name, String value) {
@@ -412,9 +453,10 @@ public class AlchemyItemStatus {
             final int mp,
             final int atk,
             final int def,
-            final int speed
+            final int speed,
+            final int usableCount
     ) {
-        return getItem(alchemyMaterial, overrideIngredients, item, overQuality, overSize, activeEffects, overrideCharacteristics, overrideCategory, visibleFlags, hp, mp, atk, def, speed, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
+        return getItem(alchemyMaterial, overrideIngredients, item, overQuality, overSize, activeEffects, overrideCharacteristics, overrideCategory, visibleFlags, hp, mp, atk, def, speed, usableCount, 0, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
     }
 
     @Nullable
@@ -433,6 +475,8 @@ public class AlchemyItemStatus {
             final int atk,
             final int def,
             final int speed,
+            final int usableCount,
+            final int consumedCount,
             final List<String> prefix,
             final Map<String, String> dataContainer
     ) {
@@ -453,6 +497,8 @@ public class AlchemyItemStatus {
                 atk,
                 def,
                 speed,
+                usableCount,
+                consumedCount,
                 prefix,
                 dataContainer
         );
@@ -472,6 +518,7 @@ public class AlchemyItemStatus {
         if (!alchemyMaterial.isDefaultName()) {
             meta.setDisplayName(alchemyMaterial.getName());
         }
+
         final PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
         dataContainer.forEach((key, value) -> persistentDataContainer.set(
                 new NamespacedKey(AtelierPlugin.getPlugin(), key),
@@ -485,6 +532,9 @@ public class AlchemyItemStatus {
         }
         if (visibleFlags.id) {
             lore.add("");
+        }
+        if (usableCount != 0) {
+            addLore(lore, "回数", usableCount - consumedCount);
         }
         if (visibleFlags.quality) {
             addLore(lore, "品質", quality);
@@ -520,9 +570,9 @@ public class AlchemyItemStatus {
             int cSize = 0;
             for (final int i : size) {
                 if (i == 0) {
-                    str.append(CommonUtils.intCcolor(i)).append(GameConstants.W_W);
+                    str.append(CommonUtils.intCColor(i)).append(GameConstants.W_W);
                 } else {
-                    str.append(CommonUtils.intCcolor(i)).append(GameConstants.W_B);
+                    str.append(CommonUtils.intCColor(i)).append(GameConstants.W_B);
                 }
                 if (cSize >= 2) {
                     lore.add(str.toString());
@@ -560,9 +610,9 @@ public class AlchemyItemStatus {
                     for (int j = 1; j <= rotate_value; j++) {
                         final int value = allCS.getInt(count);
                         if (value == 0) {
-                            sb.append(CommonUtils.intCcolor(value)).append(GameConstants.W_W);
+                            sb.append(CommonUtils.intCColor(value)).append(GameConstants.W_W);
                         } else {
-                            sb.append(CommonUtils.intCcolor(value)).append(GameConstants.W_B);
+                            sb.append(CommonUtils.intCColor(value)).append(GameConstants.W_B);
                         }
                         count++;
                     }
@@ -722,8 +772,22 @@ public class AlchemyItemStatus {
     }
 
     @Nullable
-    public static AlchemyMaterial getMaterial(@Nullable ItemStack item) {
+    public static AlchemyMaterial getMaterialNullable(@Nullable ItemStack item) {
         return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getAlchemyMaterial, null);
+    }
+
+    @NotNull
+    public static Optional<AlchemyMaterial> getMaterialOptional(@Nullable ItemStack item) {
+        return CObjects.nullIfOptional(load(item), AlchemyItemStatus::getAlchemyMaterial);
+    }
+
+    @NotNull
+    public static AlchemyMaterial getMaterialNonNull(@Nullable final ItemStack item) {
+        final Optional<AlchemyMaterial> material = getMaterialOptional(item);
+        if (material.isPresent()) {
+            return material.get();
+        }
+        throw new IllegalArgumentException("item is not AlchemyMaterial.");
     }
 
     public static int getQuality(@Nullable ItemStack item) {

@@ -9,7 +9,6 @@ import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.CalcStatType;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.Race;
-import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.entity.Entity;
 
 public class MonsterStats extends EntityStatus {

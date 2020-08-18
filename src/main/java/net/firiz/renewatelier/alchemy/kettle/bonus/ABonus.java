@@ -52,7 +52,6 @@ public class ABonus {
     }
 
     public String getBar() {
-//        if (dataMap.containsKey(uuid)) {
         final StringBuilder sb = new StringBuilder();
         final int bar = (int) ((double) bpd.getBar() / bpd.getReq() * 10);
         for (int i = 0; i < 10; i++) {
@@ -65,13 +64,11 @@ public class ABonus {
                     }
                 });
             } else {
-                sb.append(ChatColor.RESET).append("||||||");
+                sb.append(ChatColor.WHITE).append("||||||");
             }
         }
-        sb.append(ChatColor.RESET).append(" [").append(bpd.getLevel()).append("] ").append(bpd.getBar()).append("/").append(bpd.getReq()).append("        ");
+        sb.append(ChatColor.WHITE).append(" [").append(bpd.getLevel()).append("] ").append(bpd.getBar()).append("/").append(bpd.getReq()).append("        ");
         return sb.toString();
-//        }
-//        return ChatColor.RESET + "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| [0] 0/" + req + "        ";
     }
 
     public void addBar(int plus, AlchemyAttribute[] aas) {

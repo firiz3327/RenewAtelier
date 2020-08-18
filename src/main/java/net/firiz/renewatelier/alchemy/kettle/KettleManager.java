@@ -3,7 +3,7 @@ package net.firiz.renewatelier.alchemy.kettle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

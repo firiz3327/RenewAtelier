@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.alchemy.kettle;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -99,7 +99,7 @@ public enum AlchemyCircle {
         throw new IllegalArgumentException(value + " not found.");
     }
 
-    public static AlchemyCircle sertchData(final int data) {
+    public static AlchemyCircle searchData(final int data) {
         for (final AlchemyCircle ai : AlchemyCircle.values()) {
             if (ai.data == data) {
                 return ai;
@@ -114,7 +114,7 @@ public enum AlchemyCircle {
 
     public static ItemStack getCircle(final int value, final ItemStack sitem) {
         if (ItemUtils.getType(sitem) == Material.DIAMOND_AXE) {
-            final AlchemyCircle ai = sertchData(ItemUtils.getCustomModelData(sitem));
+            final AlchemyCircle ai = searchData(ItemUtils.getCustomModelData(sitem));
             if (ai != null && !String.valueOf(ai.value).substring(1, 2).equals("0")) {
                 final int v2 = Integer.parseInt(String.valueOf(ai.value).substring(0, 1));
                 return i(value, v2, sitem);

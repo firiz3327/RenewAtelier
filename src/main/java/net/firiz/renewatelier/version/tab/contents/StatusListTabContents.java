@@ -3,7 +3,6 @@ package net.firiz.renewatelier.version.tab.contents;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.tab.TabListItem;
 import net.minecraft.server.v1_16_R1.EntityPlayer;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;

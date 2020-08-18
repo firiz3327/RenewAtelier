@@ -16,7 +16,7 @@ import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.skill.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -74,16 +74,18 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                 final CustomModelMaterial materialData = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
                 final String name = getName(item, defaultName, materialData); // *
-                final AlchemyMaterialCategory materialCategory = allAlchemyMaterialCategory == null ? getAlchemyMaterialCategory(item) : null; // *
+                final AlchemyMaterialCategory materialCategory = allAlchemyMaterialCategory == null ? getAlchemyMaterialCategory(item) : allAlchemyMaterialCategory; // *
                 final int quality_min = getQualityMin(item); // *
                 final int quality_max = getQualityMax(item); // *
-                final int price = item.contains("price") ? item.getInt("price") : 1;
+                final int price = item.getInt("price", 1);
                 final List<Category> categories = getCategories(item); // *
                 final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = getIngredients(item); // *
                 final MaterialSizeTemplate sizeTemplate = getSize(item);
                 final List<Object> characteristics = getCharacteristics(item);
                 final Catalyst catalyst = getCatalyst(item);
                 final EnumItemSkill itemSkill = getItemSkill(item);
+                final int usableCount = item.getInt("usableCount", 0);
+                final double itemCooldown = item.getDouble("itemCooldown", 0);
 
                 if (notFounds.isEmpty()) {
                     final AlchemyMaterial material = new AlchemyMaterial(
@@ -110,6 +112,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             catalyst,
                             item.getString("script"),
                             itemSkill,
+                            usableCount,
+                            itemCooldown,
                             getBoolean(item, "unbreaking"),
                             getBoolean(item, "hideAttribute"),
                             getBoolean(item, "hideDestroy"),
@@ -310,8 +314,8 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
     @Nullable
     private EnumItemSkill getItemSkill(ConfigurationSection item) {
-        if (item.contains("item_skill")) {
-            return EnumItemSkill.valueOf(Objects.requireNonNull(item.getString("item_skill")).toUpperCase());
+        if (item.contains("itemSkill")) {
+            return EnumItemSkill.valueOf(Objects.requireNonNull(item.getString("itemSkill")).toUpperCase());
         }
         return null;
     }

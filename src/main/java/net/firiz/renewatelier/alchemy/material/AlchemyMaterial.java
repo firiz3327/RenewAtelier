@@ -8,12 +8,10 @@ import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.skill.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +51,8 @@ public final class AlchemyMaterial {
     private final String script;
     @Nullable
     private final EnumItemSkill itemSkill; // usable item
+    private final int usableCount;
+    private final double itemCooldown; // usable item
     private final boolean unbreaking;
     private final boolean hideAttribute;
     private final boolean hideDestroy;
@@ -66,7 +66,8 @@ public final class AlchemyMaterial {
             String name,
             boolean defaultName,
             CustomModelMaterial material,
-            AlchemyMaterialCategory materialCategory, int qualityMin,
+            AlchemyMaterialCategory materialCategory,
+            int qualityMin,
             int qualityMax,
             int price,
             int hp,
@@ -84,7 +85,7 @@ public final class AlchemyMaterial {
             Catalyst catalyst,
             @Nullable String script,
             @Nullable EnumItemSkill itemSkill,
-            boolean unbreaking,
+            int usableCount, double itemCooldown, boolean unbreaking,
             boolean hideAttribute,
             boolean hideDestroy,
             boolean hideEnchant,
@@ -115,6 +116,8 @@ public final class AlchemyMaterial {
         this.catalyst = catalyst;
         this.script = script;
         this.itemSkill = itemSkill;
+        this.usableCount = usableCount;
+        this.itemCooldown = itemCooldown;
         this.unbreaking = unbreaking;
         this.hideAttribute = hideAttribute;
         this.hideDestroy = hideDestroy;
@@ -148,20 +151,6 @@ public final class AlchemyMaterial {
             }
         }
         throw new IllegalArgumentException(id.concat(" not found."));
-    }
-
-    @Nullable
-    public static AlchemyMaterial getMaterialOrNull(@NotNull final ItemStack item) {
-        return AlchemyItemStatus.getMaterial(item);
-    }
-
-    @NotNull
-    public static AlchemyMaterial getMaterial(@NotNull final ItemStack item) {
-        final AlchemyMaterial material = getMaterialOrNull(item);
-        if (material == null) {
-            throw new IllegalArgumentException("item is not AlchemyMaterial.");
-        }
-        return material;
     }
 
     public String getId() {
@@ -256,6 +245,14 @@ public final class AlchemyMaterial {
     @Nullable
     public EnumItemSkill getItemSkill() {
         return itemSkill;
+    }
+
+    public int getUsableCount() {
+        return usableCount;
+    }
+
+    public double getItemCooldown() {
+        return itemCooldown;
     }
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {

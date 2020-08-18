@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.PacketUtils;

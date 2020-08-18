@@ -1,12 +1,13 @@
 package net.firiz.renewatelier.listener;
 
 import com.destroystokyo.paper.loottable.LootableEntityInventory;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
+import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -24,17 +25,29 @@ public class EntityListener implements Listener {
     private static final ArrowManager arrowManager = ArrowManager.INSTANCE;
 
     @EventHandler
-    private void spawnCreature(final CreatureSpawnEvent e) {
+    private void spawnMob(final CreatureSpawnEvent e) {
         final Entity entity = e.getEntity();
         if (!aEntityUtils.hasLivingData(entity)) {
             final TargetEntityTypes type = TargetEntityTypes.search(entity.getType());
             if (type != null) {
-                e.setCancelled(true);
+                final boolean cancel;
                 final boolean spawnEgg = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG;
+                switch (e.getSpawnReason()) {
+                    case BUILD_IRONGOLEM:
+                    case BUILD_SNOWMAN:
+                    case BUILD_WITHER:
+                        cancel = false;
+                        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), entity::remove, 1);
+                        break;
+                    default:
+                        cancel = !spawnEgg;
+                        e.setCancelled(true);
+                        break;
+                }
                 final Entity atelierEntity = aEntityUtils.spawn(
                         type,
                         e.getLocation(),
-                        !spawnEgg
+                        cancel
                 );
                 if (spawnEgg && atelierEntity != null) {
                     atelierEntity.setCustomName("spawnEgg");
@@ -52,24 +65,9 @@ public class EntityListener implements Listener {
                     final CrossbowMeta itemMeta = (CrossbowMeta) bow.getItemMeta();
                     assert itemMeta != null;
                     arrowManager.shootCrossbow((Player) e.getEntity(), bow, (AbstractArrow) e.getProjectile(), itemMeta.getChargedProjectiles().get(0));
-                } else {
-                    if (AlchemyItemStatus.has(bow)) {
-                        final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(bow);
-                        assert itemStatus != null;
-                        if (itemStatus.getAlchemyMaterial().getItemSkill() != null) {
-                            e.setCancelled(true);
-                            itemStatus.getAlchemyMaterial().getItemSkill().createSkill(
-                                    (Player) e.getEntity(),
-                                    itemStatus,
-                                    e.getForce()
-                            ).fire();
-                            return;
-                        }
-                    }
-                    if (arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce())) {
-                        e.setCancelled(true);
-                        ((Player) e.getEntity()).updateInventory();
-                    }
+                } else if (arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce())) {
+                    e.setCancelled(true);
+                    ((Player) e.getEntity()).updateInventory();
                 }
             } else {
                 e.setCancelled(arrowManager.shootBow(e.getEntity(), bow, (AbstractArrow) e.getProjectile(), e.getForce()));
@@ -77,17 +75,18 @@ public class EntityListener implements Listener {
         }
     }
 
+    /*
     @EventHandler
     private void vehicleDamage(final VehicleDamageEvent e) {
         if (e.getVehicle() instanceof LootableEntityInventory && ((LootableEntityInventory) e.getVehicle()).hasLootTable()) {
             ReplaceVanillaItems.loot(e.getAttacker(), (LootableEntityInventory) e.getVehicle());
         }
     }
+     */
 
     @EventHandler
     private void itemMerge(final ItemMergeEvent e) {
-        if (e.getEntity().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM
-                || e.getTarget().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM) {
+        if (PlayerDropItem.isPlayerDrop(e.getEntity()) || PlayerDropItem.isPlayerDrop(e.getTarget())) {
             e.setCancelled(true);
         }
     }

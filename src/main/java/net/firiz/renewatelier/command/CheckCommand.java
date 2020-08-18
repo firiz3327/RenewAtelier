@@ -4,7 +4,6 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -85,7 +84,7 @@ public class CheckCommand implements CommandExecutor {
     @NotNull
     private String attSpd(CharStats stats) {
         return "AttSpd: "
-                + BigDecimal.valueOf(stats.getAttackSpeed())
+                + BigDecimal.valueOf(stats.getAttackSpeedMillis())
                 .divide(BigDecimal.valueOf(250), 2, RoundingMode.DOWN)
                 .stripTrailingZeros()
                 .toPlainString();

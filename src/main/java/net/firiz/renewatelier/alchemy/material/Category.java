@@ -24,6 +24,7 @@ public enum Category {
     STRING("糸素材", Material.STRING),
     POTION_MATERIAL("薬の材料", Material.SPIDER_EYE),
     POISON("毒の材料", Material.POISONOUS_POTATO),
+    POTION("薬品", Material.SPLASH_POTION),
     MAGIC_ITEM("魔法の道具", new CustomModelMaterial(Material.DIAMOND_AXE, 1524)),
     MYSTERY("神秘の力", new CustomModelMaterial(Material.DIAMOND_AXE, 0)), // 竜核画像
     AN_ELIXIR("エリキシル", new CustomModelMaterial(Material.DIAMOND_AXE, 0)), // 竜のウロコ画像

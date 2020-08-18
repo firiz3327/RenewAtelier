@@ -31,6 +31,7 @@ public enum NPCManager {
     private final Map<UUID, NonNullPair<NPCConversation, Long>> scriptPlayers = new Object2ObjectOpenHashMap<>();
 
     public void load() {
+        npcList.stream().filter(npc -> !npc.isPlayer()).forEach(npc -> npc.getEntity().remove());
         SQLManager.INSTANCE.select("npcs", new String[]{
                 "id", // 0
                 "name", // 1
@@ -85,10 +86,6 @@ public enum NPCManager {
         });
     }
 
-//    public void createNPCEntity(NPCObject npcObject) {
-//        npcList.add(npcObject.spawnEntity());
-//    }
-
     public void stop() {
         final Map<World, List<VEntityPlayer>> worldFakePlayers = new Object2ObjectOpenHashMap<>();
         npcList.forEach(npc -> {
@@ -134,35 +131,47 @@ public enum NPCManager {
         return false;
     }
 
+    public boolean canAction(@NotNull Player player) {
+        final UUID uuid = player.getUniqueId();
+        if (scriptPlayers.containsKey(uuid)) {
+            return canAction(System.currentTimeMillis(), scriptPlayers.get(uuid));
+        }
+        return true;
+    }
+
+    private boolean canAction(long now, NonNullPair<NPCConversation, Long> scriptPlayerValue) {
+        return now - scriptPlayerValue.getRight() >= 100;
+    }
+
     public boolean action(@NotNull Player player, int entityId) {
         final boolean sneaking = player.isSneaking();
         final Optional<NPC> optionalNPC = npcList.stream().filter(npc -> entityId == npc.getEntityId()).findFirst();
         if (optionalNPC.isPresent()) {
-            Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                final UUID uuid = player.getUniqueId();
-                final NPC npc = optionalNPC.get();
-                final String script = npc.getNpcObject().getScript();
-                if (scriptPlayers.containsKey(uuid)) {
-                    final NonNullPair<NPCConversation, Long> scriptPlayerValue = scriptPlayers.get(uuid);
-                    final long now = System.currentTimeMillis();
-                    final boolean canAction = now - scriptPlayerValue.getRight() >= 100;
-                    if (canAction) {
-                        scriptPlayerValue.setRight(now);
+            final UUID uuid = player.getUniqueId();
+            final NPC npc = optionalNPC.get();
+            final String script = npc.getNpcObject().getScript();
+
+            if (scriptPlayers.containsKey(uuid)) {
+                final NonNullPair<NPCConversation, Long> scriptPlayerValue = scriptPlayers.get(uuid);
+                final long now = System.currentTimeMillis();
+                final boolean canAction = canAction(now, scriptPlayerValue);
+                if (canAction) {
+                    scriptPlayerValue.setRight(now);
+                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
                         try {
                             Objects.requireNonNull(scriptPlayers.get(uuid).getLeft().getIv()).invokeFunction("action", sneaking);
                         } catch (ScriptException ex) {
                             CommonUtils.logWarning(ex);
                         } catch (NoSuchMethodException ignored) {
-                            // ignored
                         }
-                    }
-                } else {
-                    final String scriptFile = "npc/".concat(script);
-                    final NPCConversation conversation = new NPCConversation(npc, scriptFile, player);
-                    ScriptManager.INSTANCE.start(scriptFile, player, conversation, "action", sneaking);
-                    scriptPlayers.put(uuid, new NonNullPair<>(conversation, System.currentTimeMillis()));
+                    });
                 }
-            });
+            } else {
+                final String scriptFile = "npc/".concat(script);
+                final NPCConversation conversation = new NPCConversation(npc, scriptFile, player);
+                Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> ScriptManager.INSTANCE.start(scriptFile, player, conversation, "action", sneaking));
+                scriptPlayers.put(uuid, new NonNullPair<>(conversation, System.currentTimeMillis()));
+            }
             return true;
         }
         return false;

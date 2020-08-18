@@ -56,62 +56,66 @@ public class ChannelHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-//        System.out.println("[WRITE] " + msg.getClass().getSimpleName());
-        /*
-        if (msg instanceof PacketPlayOutEntity) {
-            final Field entityIdField = VersionUtils.getField(PacketPlayOutEntity.class, "a");
-            final Entity entity = player.world.getEntity((Integer) VersionUtils.getFieldValue(entityIdField, msg));
-            if (entity instanceof Puni) {
-                final Entity block = ((Puni) entity).getBlock();
-                if (msg instanceof PacketPlayOutEntity.PacketPlayOutEntityLook) {
-                    player.playerConnection.sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(
-                            block.getId(),
-                            (byte) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "e"),
-                            (byte) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "f"),
-                            (boolean) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "g")
-                    ));
-                } else if (msg instanceof PacketPlayOutEntity.PacketPlayOutRelEntityMove) {
-                    player.playerConnection.sendPacket(new PacketPlayOutEntity.PacketPlayOutRelEntityMove(
-                            block.getId(),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "b"),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "c"),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "d"),
-                            (boolean) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "g")
-                    ));
-                } else if (msg instanceof PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook) {
-                    player.playerConnection.sendPacket(new PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook(
-                            block.getId(),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "b"),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "c"),
-                            (short) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "d"),
-                            (byte) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "e"),
-                            (byte) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "f"),
-                            (boolean) VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "g")
-                    ));
-                } else if (msg.getClass() == PacketPlayOutEntity.class) {
-                    final PacketPlayOutEntity packetEntity = new PacketPlayOutEntity(block.getId());
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "b", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "b"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "c", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "c"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "d", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "d"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "e", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "e"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "f", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "f"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "g", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "g"));
-                    VersionUtils.setFieldValue(PacketPlayOutEntity.class, packetEntity, "h", VersionUtils.getFieldValue(PacketPlayOutEntity.class, msg, "h"));
-                    player.playerConnection.sendPacket(packetEntity);
-                }
-            }
-        } else if (msg instanceof PacketPlayOutEntityVelocity) {
-            final Entity entity = player.world.getEntity((Integer) VersionUtils.getFieldValue(PacketPlayOutEntityVelocity.class, msg, "a"));
-            if (entity instanceof Puni) {
-                final EntityFallingBlock block = ((Puni) entity).getBlock();
-                final PacketPlayOutEntityVelocity packetEntity = new PacketPlayOutEntityVelocity(block);
-                VersionUtils.setFieldValue(PacketPlayOutEntityVelocity.class, packetEntity, "b", VersionUtils.getFieldValue(PacketPlayOutEntityVelocity.class, msg, "b"));
-                VersionUtils.setFieldValue(PacketPlayOutEntityVelocity.class, packetEntity, "c", VersionUtils.getFieldValue(PacketPlayOutEntityVelocity.class, msg, "c"));
-                VersionUtils.setFieldValue(PacketPlayOutEntityVelocity.class, packetEntity, "d", VersionUtils.getFieldValue(PacketPlayOutEntityVelocity.class, msg, "d"));
-                player.playerConnection.sendPacket(packetEntity);
-            }
-        }
-        */
+//        if (!(msg instanceof PacketPlayOutUpdateAttributes
+//                || msg instanceof PacketPlayOutEntityHeadRotation
+//                || msg instanceof PacketPlayOutEntity.PacketPlayOutRelEntityMove
+//                || msg instanceof PacketPlayOutEntityVelocity
+//                || msg instanceof PacketPlayOutEntity.PacketPlayOutRelEntityMoveLook
+//                || msg instanceof PacketPlayOutEntityTeleport
+//                || msg instanceof PacketPlayOutUpdateTime
+//                || msg instanceof PacketPlayOutLightUpdate
+//                || msg instanceof PacketPlayOutSpawnEntityLiving
+//                || msg instanceof PacketPlayOutEntityDestroy
+//                || msg instanceof PacketPlayOutMapChunk
+//                || msg instanceof PacketPlayOutWorldEvent)) {
+//            System.out.println("[WRITE] " + msg.getClass().getSimpleName());
+//        }
+//        if (msg instanceof PacketPlayOutWindowItems) {
+//            final int windowId = CommonUtils.castInt(VersionUtils.getFieldValue(PacketPlayOutWindowItems.class, msg, "a"));
+//            final List<net.minecraft.server.v1_16_R1.ItemStack> items = CommonUtils.cast(VersionUtils.getFieldValue(PacketPlayOutWindowItems.class, msg, "b"));
+//            System.out.println(windowId + " " + player.activeContainer.windowId);
+//            if (items != null
+//                    && windowId == player.activeContainer.windowId
+//                    && player.activeContainer instanceof ContainerLectern
+//                    && items.size() == 1) {
+//                final ItemStack item = VersionUtils.asItem(items.get(0)).clone();
+//                final AlchemyMaterial material = QuestBook.getQuestBookMaterial(item);
+//                if (material != null) {
+//                    final BookMeta meta = (BookMeta) item.getItemMeta();
+//                    QuestBook.changeMeta(player.getBukkitEntity(), meta);
+//                    item.setItemMeta(meta);
+//                }
+//                items.set(0, VersionUtils.asNMSCopy(item));
+//                System.out.println(VersionUtils.asItem(items.get(0)));
+//            }
+//        } else if (msg instanceof PacketPlayOutSetSlot) {
+//            final int windowId = CommonUtils.castInt(VersionUtils.getFieldValue(PacketPlayOutSetSlot.class, msg, "a"));
+//            final int slot = CommonUtils.castInt(VersionUtils.getFieldValue(PacketPlayOutSetSlot.class, msg, "b"));
+//            final ItemStack item = VersionUtils.asItem((net.minecraft.server.v1_16_R1.ItemStack) VersionUtils.getFieldValue(PacketPlayOutSetSlot.class, msg, "c")).clone();
+////            System.out.println(windowId + " " + player.activeContainer.windowId);
+////            System.out.println(slot);
+////            System.out.println(item);
+//            if (windowId == player.activeContainer.windowId
+//                    && player.activeContainer instanceof ContainerLectern
+//                    && slot == 0
+//                    && item.getType() == Material.WRITTEN_BOOK) {
+//                final AlchemyMaterial material = QuestBook.getQuestBookMaterial(item);
+//                if (material != null) {
+//                    final BookMeta meta = (BookMeta) item.getItemMeta();
+//                    QuestBook.changeMeta(player.getBukkitEntity(), meta);
+//                    item.setItemMeta(meta);
+//                    VersionUtils.setFieldValue(PacketPlayOutSetSlot.class, msg, "c", VersionUtils.asNMSCopy(item));
+//                }
+//            }
+//        }
+//        if(msg instanceof PacketPlayOutTileEntityData) {
+//            final BlockPosition pos = (BlockPosition) VersionUtils.getFieldValue(PacketPlayOutTileEntityData.class, msg, "a");
+//            final int b = CommonUtils.castInt(VersionUtils.getFieldValue(PacketPlayOutTileEntityData.class, msg, "b"));
+//            final NBTTagCompound nbt = (NBTTagCompound) VersionUtils.getFieldValue(PacketPlayOutTileEntityData.class, msg, "c");
+//            CommonUtils.log(pos);
+//            CommonUtils.log(b);
+//            CommonUtils.log(nbt);
+//        }
         super.write(ctx, msg, promise);
     }
 

@@ -14,6 +14,9 @@ import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBoxCircleData;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.alchemy.recipe.*;
+import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.Char;
@@ -24,7 +27,7 @@ import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
 import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.utils.chores.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.Pair;
 import net.md_5.bungee.api.ChatColor;
@@ -51,6 +54,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
     private static final NamespacedKey centerKey = CommonUtils.createKey("center");
     private static final NamespacedKey turn1Key = CommonUtils.createKey("turn1");
     private static final NamespacedKey turn2Key = CommonUtils.createKey("turn2");
+    private static final NamespacedKey characteristicKey = CommonUtils.createKey("characteristic");
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
@@ -79,8 +83,9 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                 if (itemPos >= 36) {
                     itemPos = 3;
                 }
+                final KettleCharacteristicManager kettleCharacteristicManager = kettleUserData.getKettleCharacteristicManager();
                 for (final ItemStack item : pageItems) {
-                    AlchemyItemStatus.getCharacteristics(item).forEach(c -> kettleUserData.getKettleCharacteristicManager().addCharacteristic(c, false));
+                    AlchemyItemStatus.getCharacteristics(item).forEach(kettleCharacteristicManager::addCharacteristic);
                     playerInv.setItem(itemPos, item.clone());
                     itemPos++;
                 }
@@ -117,7 +122,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         }
         final ItemStack centerDisplay = ItemUtils.ci(Material.BARRIER, 0, ChatColor.WHITE + "中心点", lore);
         player.getInventory().setItem(19, centerDisplay);
-        setResultSlot(inv, player);
+        setResultSlot(inv, player, true);
         player.openInventory(inv);
     }
 
@@ -171,7 +176,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         item.setItemMeta(meta);
     }
 
-    private void setResultSlot(final Inventory inv, final Player player) {
+    private void setResultSlot(final Inventory inv, final Player player, final boolean resetCharacteristic) {
         final UUID uuid = player.getUniqueId();
         final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(uuid);
         final ABonus bonusManager = kettleUserData.getBonusManager();
@@ -195,7 +200,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         // 触媒追加効果 評価
         // 確認・設定
         final ItemStack catalystItem = kettleUserData.getCatalystItem();
-        final Catalyst catalyst = catalystItem != null ? AlchemyMaterial.getMaterial(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
+        final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
         final List<CatalystBonus> catalystBonuses = catalyst.getBonus();
         final int size = catalystBonuses.get(0).getCS().length;
         final int defSlot = (size == 36 || size == 25 ? 3 : 13);
@@ -215,8 +220,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                         if (customModel == defCustomModelData) {
                             stop = true;
                         } else {
-                            final AlchemyCircle circle = AlchemyCircle.sertchData(defCustomModelData);
-                            if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.sertchData(customModel).getCircleType()) {
+                            final AlchemyCircle circle = AlchemyCircle.searchData(defCustomModelData);
+                            if (circle != AlchemyCircle.WHITE && circle.getCircleType() != AlchemyCircle.searchData(customModel).getCircleType()) {
                                 stop = true;
                             }
                         }
@@ -227,11 +232,10 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     case CHARACTERISTIC: {
                                         final Characteristic cdata = (Characteristic) data.getY();
                                         kettleCharacteristicManager.removeCatalystCharacteristic(cdata);
-                                        kettleCharacteristicManager.setActiveCharacteristic(cdata, false);
                                         break;
                                     }
                                     case INHERITING: {
-                                        kettleCharacteristicManager.resetActiveCharacteristic();
+                                        kettleCharacteristicManager.clearActiveCharacteristics();
                                         break;
                                     }
                                     default:
@@ -316,10 +320,10 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         allQuality += Math.round(allQuality * (bonusQualityPercent * 0.01)); // +品質％値
 
         ItemStack resultItem = null;
-        final String result_str = recipe.getResult();
+        final ARecipeResult<?> resultData = recipe.getResult();
         final int add_amount = recipeEffects.getInt(RecipeLevelEffect.RecipeLEType.ADD_AMOUNT);
-        if (result_str.startsWith("material:")) {
-            final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
+        if (resultData instanceof AlchemyMaterialRecipeResult) {
+            final AlchemyMaterial result = ((AlchemyMaterialRecipeResult) resultData).getResult();
 
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
             final List<Category> categories = new ObjectArrayList<>(result.getCategories());
@@ -374,11 +378,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                     result.getCategories().equals(categories) ? new ObjectArrayList<>() : categories, // カテゴリ 書き換え
                     true
             );
-        } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
-            Material material = Material.matchMaterial(result_str);
-            if (material == null) {
-                material = Material.matchMaterial(result_str, true);
-            }
+        } else if (resultData instanceof MinecraftMaterialRecipeResult) { // 基本想定しない
+            final Material material = ((MinecraftMaterialRecipeResult) resultData).getResult();
             resultItem = new ItemStack(
                     material,
                     recipe.getAmount() + add_amount
@@ -401,12 +402,12 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
             lore.add(4, ChatColor.GRAY + "効果:");
             int loreslot = 5;
             if (recipe.getEffects().isEmpty()) {
-                lore.add(loreslot, ChatColor.RESET + "なし");
+                lore.add(loreslot, ChatColor.WHITE + "なし");
                 loreslot++;
             } else {
                 for (final RecipeEffect effect : recipe.getEffects()) {
                     final String name = effect.getName(kettleUserData);
-                    lore.add(loreslot, effect.getAttribute().getColor().concat("・") + (name == null ? ChatColor.RESET + "なし" : name));
+                    lore.add(loreslot, effect.getAttribute().getColor().concat("・") + (name == null ? ChatColor.WHITE + "なし" : name));
                     lore.add(loreslot + 1, "  ".concat(effect.getStar(kettleUserData)));
                     loreslot += 2;
                 }
@@ -421,7 +422,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                 }
             } else {
                 loreslot++;
-                lore.add(loreslot, ChatColor.RESET + "なし");
+                lore.add(loreslot, ChatColor.WHITE + "なし");
             }
 
             // 特性項目
@@ -429,26 +430,27 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
             lore.add(lore.size() - 1, ChatColor.GRAY + "特性:");
             final int cSlot = Math.min(3, inheriting + bonusInheriting);
             if (cSlot == 0) {
-                lore.add(lore.size() - 1, ChatColor.RESET + "特性引継ぎスロットなし");
+                lore.add(lore.size() - 1, ChatColor.WHITE + "特性引継ぎスロットなし");
             } else {
-                final Set<Characteristic> cs = kettleCharacteristicManager.getCharacteristics();
+                final List<Characteristic> cs = kettleCharacteristicManager.getActiveCharacteristics();
                 int count = 0;
                 if (cs != null) {
                     for (final Characteristic c : cs) {
-                        if (kettleCharacteristicManager.isActiveCharacteristic(c)) {
-                            lore.add(lore.size() - 1, ChatColor.RESET + "- " + c.getName());
-                            count++;
-                        }
+                        lore.add(lore.size() - 1, ChatColor.WHITE + "- " + c.getName());
+                        count++;
                     }
                 }
                 for (int i = count; i < cSlot; i++) {
-                    lore.add(lore.size() - 1, ChatColor.RESET + "- なし");
+                    lore.add(lore.size() - 1, ChatColor.WHITE + "- なし");
                 }
             }
 
             meta.setLore(lore);
             resultItem.setItemMeta(meta);
             inv.setItem(46, resultItem);
+            if (resetCharacteristic) {
+                kettleCharacteristicManager.clearActiveCharacteristics();
+            }
             setCharacteristicPage(inv, player, 0);
         }
     }
@@ -461,7 +463,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         if (catalystItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
         } else {
-            catalyst = AlchemyMaterial.getMaterial(catalystItem).getCatalyst();
+            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst();
         }
         catalyst.setInv(inv, true);
 
@@ -515,18 +517,21 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
     }
 
     private void setCharacteristicPage(final Inventory inv, final Player player, final int move) {
-        final int page = getCharacteristicPage(inv);
-        final int nextPage = Math.max(1, page + move);
         final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(player.getUniqueId());
         final KettleCharacteristicManager kettleCharacteristicManager = kettleUserData.getKettleCharacteristicManager();
-        final Set<Characteristic> cs = kettleCharacteristicManager.getCharacteristics();
-        if (cs == null) {
+        final List<Characteristic> characteristics = kettleCharacteristicManager.getCharacteristics();
+        final ARecipeResult<?> resultData = kettleUserData.getRecipe().getResult();
+        if (characteristics == null || !(resultData instanceof AlchemyMaterialRecipeResult)) {
             return;
         }
+        final AlchemyMaterialCategory materialCategory = ((AlchemyMaterial) resultData.getResult()).getMaterialCategory();
+        final Set<Characteristic> combinedCharacteristics = Characteristic.combine(materialCategory, characteristics);
+        final int page = getCharacteristicPage(inv);
+        final int nextPage = Math.max(1, page + move);
         final List<List<Characteristic>> lists = new ObjectArrayList<>();
         final List<Characteristic> list = new ObjectArrayList<>();
         int i = 0;
-        for (final Characteristic c : cs) {
+        for (final Characteristic c : combinedCharacteristics) {
             if (i % 6 == 0) {
                 lists.add(new ObjectArrayList<>(list));
                 list.clear();
@@ -544,28 +549,31 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                 setCharacteristicPage(inv, nextPage);
             }
 
-            final int startslot = 8;
+            final int startSlot = 8;
             int delSlot = 1;
             for (int j = 0; j < 3; j++) {
                 for (int l = 0; l < 2; l++) {
-                    inv.setItem(startslot + delSlot, null);
+                    inv.setItem(startSlot + delSlot, null);
                     delSlot++;
                 }
-                delSlot += startslot - 1;
+                delSlot += startSlot - 1;
             }
 
             int slot = 1;
             int count = 0;
             for (final Characteristic c : lists.get(check ? nextPage : page)) {
                 final List<String> bookLore = new ObjectArrayList<>();
-                final boolean on = kettleCharacteristicManager.isActiveCharacteristic(c);
+                final boolean on = kettleCharacteristicManager.hasActiveCharacteristic(c);
                 bookLore.add(ChatColor.GRAY + (on ? "削除" : "追加"));
                 bookLore.add(ChatColor.GRAY + c.getDesc());
-                inv.setItem(startslot + slot, ItemUtils.ci(on ? Material.ENCHANTED_BOOK : Material.BOOK, 0, ChatColor.RESET + c.getName(), bookLore));
+
+                final ItemStack item = ItemUtils.ci(on ? Material.ENCHANTED_BOOK : Material.BOOK, 0, ChatColor.RESET + c.getName(), bookLore);
+                ItemUtils.setSetting(item, characteristicKey, c.getId());
+                inv.setItem(startSlot + slot, item);
 
                 if (count > 0) {
                     count = 0;
-                    slot += startslot;
+                    slot += startSlot;
                 } else {
                     slot++;
                     count++;
@@ -623,9 +631,9 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                             final int quality = itemStatus.getQuality();
 
                             ItemStack resultItem = null;
-                            final String result_str = recipe.getResult();
-                            if (result_str.startsWith("material:")) {
-                                final AlchemyMaterial result = AlchemyMaterial.getMaterial(result_str.substring(9));
+                            final ARecipeResult<?> resultData = recipe.getResult();
+                            if (resultData instanceof AlchemyMaterialRecipeResult) {
+                                final AlchemyMaterial result = ((AlchemyMaterialRecipeResult) resultData).getResult();
 
                                 final List<Characteristic> characteristics = kettleCharacteristicManager.getActiveCharacteristics();
                                 final List<AlchemyIngredients> ingredients = itemStatus.getIngredients();
@@ -646,6 +654,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     }
                                 }
 
+
                                 // アイテムの作成
                                 resultItem = AlchemyItemStatus.getItem(
                                         result,
@@ -661,11 +670,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 for (final AlchemyItemEffect alchemyItemEffect : activeEffects) {
                                     alchemyItemEffect.initialize(resultItem);
                                 }
-                            } else if (result_str.startsWith("minecraft:")) { // 基本想定しない
-                                Material material = Material.matchMaterial(result_str);
-                                if (material == null) {
-                                    material = Material.matchMaterial(result_str, true);
-                                }
+                            } else if (resultData instanceof MinecraftMaterialRecipeResult) { // 基本想定しない
+                                final Material material = ((MinecraftMaterialRecipeResult) resultData).getResult();
                                 resultItem = new ItemStack(
                                         Objects.requireNonNull(material),
                                         resultSlotItem.getAmount()
@@ -810,7 +816,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     }
                                 }
                                 bonusManager.back();
-                                setResultSlot(inv, player);
+                                setResultSlot(inv, player, true);
                                 player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                                 break;
                             }
@@ -853,8 +859,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe.getId()));
                                     final List<RecipeLevelEffect> effects = recipe.getLevels().get(recipeStatus.getLevel());
                                     if (effects != null) {
-                                        final Characteristic c = Characteristic.search(item.getItemMeta().getDisplayName().substring(2));
-                                        final boolean nonActive = !kettleCharacteristicManager.isActiveCharacteristic(c);
+                                        final Characteristic c = Characteristic.getCharacteristic(ItemUtils.getSetting(item, characteristicKey));
+                                        final boolean nonActive = !kettleCharacteristicManager.hasActiveCharacteristic(c);
                                         if (nonActive) {
                                             int inheriting = 0;
                                             inheriting = effects.stream().filter(effect -> (effect.getType() == RecipeLevelEffect.RecipeLEType.ADD_INHERITING)).map(RecipeLevelEffect::getCount).reduce(inheriting, Integer::sum);
@@ -866,8 +872,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                             final int count = scs != null ? scs.size() : 0;
                                             if (count < Math.min(3, inheriting)) {
                                                 CommonUtils.log("特性 追加");
-                                                player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.1f, nonActive ? 0.5f : 1);
-                                                kettleCharacteristicManager.setActiveCharacteristic(c, true);
+                                                player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.1f, 0.5f);
+                                                kettleCharacteristicManager.addActiveCharacteristic(c);
                                                 CommonUtils.log(kettleCharacteristicManager.getCharacteristics());
                                             } else {
                                                 player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
@@ -875,9 +881,10 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                             }
                                         } else {
                                             CommonUtils.log("特性 削除");
-                                            kettleCharacteristicManager.setActiveCharacteristic(c, false);
+                                            player.playSound(player.getEyeLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.1f, 1f);
+                                            kettleCharacteristicManager.removeActiveCharacteristic(c);
                                         }
-                                        setResultSlot(inv, player);
+                                        setResultSlot(inv, player, false);
                                         return;
                                     }
                                 }
@@ -902,7 +909,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     };
 
                                     final ItemStack catalystItem = kettleUserData.getCatalystItem();
-                                    final Catalyst catalyst = catalystItem != null ? AlchemyMaterial.getMaterial(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
+                                    final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
                                     final int cSize = catalyst.getBonus().get(0).getCS().length;
                                     Int2IntMap rslots = new Int2IntOpenHashMap();
                                     for (int i = 0; i < size.length; i++) {
@@ -962,7 +969,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                         final int turn1 = getTurn1(inv);
                                         final int turn2 = getTurn2(inv);
                                         kettleUserData.getKettleBox().addItem(clone, rslots, turn1, turn2);
-                                        setResultSlot(inv, player);
+                                        setResultSlot(inv, player, true);
                                     }
                                 }
                                 //</editor-fold>

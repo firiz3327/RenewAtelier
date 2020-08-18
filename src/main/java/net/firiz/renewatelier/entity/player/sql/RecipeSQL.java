@@ -5,7 +5,11 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.constants.GameConstants;
+import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.chores.ArrayUtils;
@@ -169,14 +173,11 @@ public class RecipeSQL {
         Notification.recipeNotification(player, Material.CAULDRON);
 
         String name = "unknown";
-        final String resultStr = recipe.getResult();
-        if (resultStr.startsWith("material:")) {
-            name = AlchemyMaterial.getMaterial(resultStr.substring(9)).getName();
-        } else if (resultStr.startsWith("minecraft:")) { // 基本想定しない
-            Material material = Material.matchMaterial(resultStr);
-            if (material == null) {
-                material = Material.matchMaterial(resultStr, true);
-            }
+        final ARecipeResult<?> resultData = recipe.getResult();
+        if (resultData instanceof AlchemyMaterialRecipeResult) {
+            name = ((AlchemyMaterialRecipeResult) resultData).getResult().getName();
+        } else if (resultData instanceof MinecraftMaterialRecipeResult) { // 基本想定しない
+            final Material material = ((MinecraftMaterialRecipeResult) resultData).getResult();
             name = LanguageItemUtil.getLocalizeName(new ItemStack(material));
         }
         player.sendMessage("レシピ【" + ChatColor.GREEN + name + ChatColor.RESET + "】を開放しました。");

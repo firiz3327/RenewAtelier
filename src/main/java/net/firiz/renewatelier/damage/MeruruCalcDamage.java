@@ -24,7 +24,18 @@ class MeruruCalcDamage {
             boolean isCritical
     ) {
         final double baseDamage = Math.pow(Math.abs(atk - 35.5), 1.927) / 185.6 + atk - 2;
-        return ((baseDamage * power / 100) * (100 - victimAttributeDef) / 100) * (isCritical ? criticalMag * 0.01 : 1);
+        return attributeDamage(baseDamage, atk, power, victimAttributeDef, criticalMag, isCritical);
+    }
+
+    public double attributeDamage(
+            double baseDamage, // 基礎ダメージ
+            double atk, // 攻撃者の攻撃力
+            double power, // 威力値
+            double victimAttributeDef, // 被害者の属性耐性
+            double criticalMag, // クリティカル倍率 150~
+            boolean isCritical
+    ) {
+        return ((baseDamage * power / 100) * ((100 - victimAttributeDef) / 100)) * (isCritical ? criticalMag * 0.01 : 1);
     }
 
     public double itemDamage(

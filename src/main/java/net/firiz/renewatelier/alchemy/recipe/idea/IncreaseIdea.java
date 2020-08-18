@@ -2,6 +2,7 @@ package net.firiz.renewatelier.alchemy.recipe.idea;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import org.bukkit.inventory.ItemStack;
 
 public class IncreaseIdea {
@@ -10,7 +11,7 @@ public class IncreaseIdea {
     private final AlchemyRecipe recipe;
 
     public IncreaseIdea(ItemStack item) {
-        this.material = AlchemyMaterial.getMaterialOrNull(item);
+        this.material = AlchemyItemStatus.getMaterialNullable(item);
         this.item = material == null ? item : null;
         this.recipe = null;
     }

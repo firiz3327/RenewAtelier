@@ -3,8 +3,7 @@ package net.firiz.renewatelier.inventory.shop;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
-import net.firiz.renewatelier.utils.pair.Pair;
+import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +18,8 @@ import java.util.Objects;
 
 public class ShopItem {
 
-    private static final NamespacedKey coinTypeKey = CommonUtils.createKey("coinType");
     private static final NamespacedKey priceKey = CommonUtils.createKey("price");
+    private static final NamespacedKey coinTypeKey = CommonUtils.createKey("coinType");
 
     @NotNull
     private final ItemStack item;
@@ -50,10 +49,10 @@ public class ShopItem {
         lore.add("");
         final String sb = ChatColor.GREEN +
                 (coinType == null ? "価格" : coinType.getName()) +
-                ChatColor.RESET +
+                ChatColor.WHITE +
                 ": " +
                 price +
-                (coinType == null ? " エメラルド" : " 個");
+                (coinType == null ? " $" : " 個");
         lore.add(sb);
         meta.setLore(lore);
         clone.setItemMeta(meta);
@@ -61,9 +60,9 @@ public class ShopItem {
         return clone;
     }
 
-    public static Pair<Integer, String> loadShopItem(@NotNull final ItemStack item) {
-        return new Pair<>(
-                item.getItemMeta().getPersistentDataContainer().get(coinTypeKey, PersistentDataType.INTEGER),
+    public static ImmutableNullablePair<Integer, String> loadShopItem(@NotNull final ItemStack item) {
+        return new ImmutableNullablePair<>(
+                item.getItemMeta().getPersistentDataContainer().get(priceKey, PersistentDataType.INTEGER),
                 item.getItemMeta().getPersistentDataContainer().get(coinTypeKey, PersistentDataType.STRING)
         );
     }

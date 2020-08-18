@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.characteristic.datas.addattack;
 
-import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
+import net.firiz.renewatelier.characteristic.datas.ChData;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AddAttackX;
 import net.firiz.renewatelier.damage.AttackCategory;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AddAttackData implements CharacteristicData {
+public class AddAttackData implements ChData {
 
     // 追加攻撃 <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
     private final AddAttackType addAttackType;
@@ -32,6 +32,11 @@ public class AddAttackData implements CharacteristicData {
         this.attackLimitCategory = attackLimitCategory;
         this.x = x;
         this.ignoreDefense = ignoreDefense;
+    }
+
+    public static ChData newInstance(String[] args) {
+        final AddAttackType addAttackType = AddAttackType.valueOf(args[0]);
+        return new AddAttackData(addAttackType, Integer.parseInt(args[1]), AttackLimitCategory.search(Integer.parseInt(args[2])), addAttackType.createAddAttackX(args));
     }
 
     public AddAttackType getAddAttackType() {

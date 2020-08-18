@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.ServerConstants;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

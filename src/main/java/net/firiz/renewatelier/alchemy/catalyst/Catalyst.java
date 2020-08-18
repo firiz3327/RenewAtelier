@@ -2,12 +2,10 @@ package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.List;
 
-import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * @author firiz
@@ -32,10 +30,6 @@ public class Catalyst {
 
     public List<CatalystBonus> getBonus() {
         return bonus;
-    }
-
-    public int[] getMainCS() {
-        return mainCS;
     }
 
     public void setInv(Inventory inv, boolean kettle) {
@@ -85,24 +79,6 @@ public class Catalyst {
             }
         }
         return result;
-    }
-
-    public ItemStack getSlotItem(int cSlot) {
-        final int size = bonus.get(0).getCS().length;
-        final int defSlot = (size == 36 || size == 25 ? 3 : 13);
-        for (final CatalystBonus b : bonus) {
-            int slot = defSlot;
-            for (int c : b.getCS()) {
-                if (cSlot == slot) {
-                    short cmd = getCustomModelData(c);
-                    if (cmd != -1) {
-                        return ItemUtils.ci(Material.DIAMOND_AXE, cmd, ChatColor.RESET + b.getData().getName(), null);
-                    }
-                }
-                slot = nextSlot(slot, size);
-            }
-        }
-        return null;
     }
 
     /**

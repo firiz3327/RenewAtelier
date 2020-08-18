@@ -10,7 +10,6 @@ import net.firiz.renewatelier.inventory.delivery.DeliveryObject;
 import net.firiz.renewatelier.npc.NPC;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;
 import net.firiz.renewatelier.version.packet.PacketUtils;

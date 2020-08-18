@@ -4,7 +4,6 @@ import io.netty.channel.Channel;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.minecraft.server.v1_16_R1.*;

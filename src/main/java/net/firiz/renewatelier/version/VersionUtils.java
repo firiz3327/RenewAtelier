@@ -2,7 +2,7 @@ package net.firiz.renewatelier.version;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ArrayUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_16_R1.ChatMessage;
@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -218,6 +219,22 @@ public class VersionUtils {
         try {
             return lkp.unreflect(getMethod(clazz, method, params));
         } catch (Exception e) {
+            CommonUtils.logWarning(e);
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param clasz targetClass
+     * @param parameters require LinkedHashMap or ?2?LinkedOpenHashMap
+     * @return created instance
+     */
+    public static <T> T createNotEnclosingClass(Object parentObject, Class<?> parentClass, Class<T> clasz, Map<Object, Class<?>> parameters) {
+        try {
+            final Constructor<T> constructor = clasz.getConstructor(ArrayUtils.unshift(parameters.values().toArray(new Class[0]), parentClass));
+            return constructor.newInstance(ArrayUtils.unshift(parameters.keySet().toArray(new Object[0]), parentObject));
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             CommonUtils.logWarning(e);
         }
         return null;

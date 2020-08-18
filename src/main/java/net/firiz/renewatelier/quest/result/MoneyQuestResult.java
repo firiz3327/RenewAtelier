@@ -16,6 +16,6 @@ public class MoneyQuestResult extends IntQuestResult {
     @Override
     public void appendQuestResult(Player player, ComponentBuilder builder) {
         final int money = getResult();
-        builder.append("お金: x" + money);
+        builder.append("報酬金: " + money + " $");
     }
 }

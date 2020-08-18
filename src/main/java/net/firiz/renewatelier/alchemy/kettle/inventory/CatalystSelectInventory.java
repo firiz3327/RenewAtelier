@@ -9,7 +9,8 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -60,7 +61,7 @@ public final class CatalystSelectInventory implements BiParamInventory<AlchemyRe
         if (catalystItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
         } else {
-            catalyst = AlchemyMaterial.getMaterial(catalystItem).getCatalyst();
+            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst();
         }
         catalyst.setInv(inv, false);
         final List<String> lore = new ObjectArrayList<>();
@@ -69,15 +70,10 @@ public final class CatalystSelectInventory implements BiParamInventory<AlchemyRe
         recipe.getCatalystCategories().forEach(ct -> {
             switch (ct.getType()) {
                 case MATERIAL:
-                    lore.add(ChatColor.RESET + "- "
-                            + ct.getMaterial().getName()
-                    );
+                    lore.add(ChatColor.WHITE + "- " + ct.getMaterial().getName());
                     break;
                 case CATEGORY:
-                    lore.add(
-                            ChatColor.RESET + "- "
-                                    + ct.getCategory().getName()
-                    );
+                    lore.add(ChatColor.WHITE + "- " + ct.getCategory().getName());
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + ct.getType());
@@ -140,7 +136,7 @@ public final class CatalystSelectInventory implements BiParamInventory<AlchemyRe
     }
 
     private void setCatalystItem(Inventory inv, UUID uuid, AlchemyRecipe recipe, ItemStack item) {
-        final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterialOrNull(item);
+        final AlchemyMaterial alchemyMaterial = AlchemyItemStatus.getMaterialNullable(item);
         if (alchemyMaterial != null && alchemyMaterial.hasUsefulCatalyst(recipe)) {
             final ItemStack cloneItem = item.clone();
             cloneItem.setAmount(1);

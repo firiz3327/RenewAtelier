@@ -10,6 +10,7 @@ import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyRecipeLoader;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,7 @@ public class AlchemyRecipe {
 
     private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private final String id;
-    private final String result;
+    private final ARecipeResult<?> result;
     private final int amount;
     private final List<RequireAmountMaterial> reqMaterial;
     private final int reqAlchemyLevel;
@@ -34,7 +35,7 @@ public class AlchemyRecipe {
 
     public AlchemyRecipe(
             final String id,
-            final String result,
+            final ARecipeResult<?> result,
             final int amount,
             final List<RequireAmountMaterial> requireMaterials,
             final int reqAlchemyLevel,
@@ -77,7 +78,7 @@ public class AlchemyRecipe {
     }
 
     @NotNull
-    public String getResult() {
+    public ARecipeResult<?> getResult() {
         return result;
     }
 

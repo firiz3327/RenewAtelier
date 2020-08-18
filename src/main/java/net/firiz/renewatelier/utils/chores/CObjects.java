@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.utils.chores;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,6 +13,10 @@ public final class CObjects {
 
     public static <T, O> T nullIfFunction(O obj, Function<O, T> returnFunction, T elseValue) {
         return obj == null ? elseValue : returnFunction.apply(obj);
+    }
+
+    public static <T, O> Optional<T> nullIfOptional(O obj, Function<O, T> returnFunction) {
+        return obj == null ? Optional.empty() : Optional.ofNullable(returnFunction.apply(obj));
     }
 
     public static <O> boolean nullIfPredicate(O obj, Predicate<O> returnFunction, boolean elseValue) {

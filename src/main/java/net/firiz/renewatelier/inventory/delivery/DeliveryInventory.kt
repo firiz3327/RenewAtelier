@@ -6,7 +6,7 @@ import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.utils.CommonUtils
-import net.firiz.renewatelier.utils.ItemUtils
+import net.firiz.renewatelier.utils.chores.ItemUtils
 import net.firiz.renewatelier.version.LanguageItemUtil
 import net.firiz.renewatelier.version.packet.InventoryPacket
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType
@@ -85,7 +85,7 @@ object DeliveryInventory {
             when (i) {
                 size - 4 -> inv.setItem(i, getConfirmItem(text, inv, player))
                 size - 6 -> inv.setItem(i, ItemUtils.ci(Material.RED_WOOL, 0, ChatColor.RED.toString() + "キャンセル", null))
-                else -> inv.setItem(i, ItemUtils.ci(Material.BARRIER, 0, "§r", null))
+                else -> inv.setItem(i, ItemUtils.ci(Material.BARRIER, 0, ChatColor.RESET.toString(), null))
             }
         }
         player.openInventory(inv)
@@ -98,7 +98,7 @@ object DeliveryInventory {
         for (i in 0..inv.size - 10) {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
-                valuations[item] = checkItem(title, item, true, AlchemyMaterial.getMaterialOrNull(item)).second
+                valuations[item] = checkItem(title, item, true, AlchemyItemStatus.getMaterialNullable(item)).second
             }
         }
 
@@ -166,7 +166,7 @@ object DeliveryInventory {
         for (i in 0..inv.size - 10) {
             val item = inv.contents[i]
             if (item != null && item.type != Material.AIR) {
-                val checkItemData = checkItem(view, item, true, AlchemyMaterial.getMaterialOrNull(item))
+                val checkItemData = checkItem(view, item, true, AlchemyItemStatus.getMaterialNullable(item))
                 if (checkItemData.first) {
                     valuation.add(checkItemData.second)
                 } else {
@@ -184,7 +184,7 @@ object DeliveryInventory {
     }
 
     private fun checkItem(view: InventoryView, item: ItemStack): Boolean {
-        return checkItem(view, item, false, AlchemyMaterial.getMaterial(item)).first
+        return checkItem(view, item, false, AlchemyItemStatus.getMaterialNonNull(item)).first
     }
 
     private fun checkItem(view: InventoryView, item: ItemStack, isReqAmount: Boolean, am: AlchemyMaterial?): Pair<Boolean, DeliveryValuation> {

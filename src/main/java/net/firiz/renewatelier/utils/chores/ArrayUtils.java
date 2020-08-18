@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.utils.chores;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class ArrayUtils {
@@ -34,6 +36,21 @@ public class ArrayUtils {
             sb.append(array[i]);
         }
         return sb.toString();
+    }
+
+    public static <T> T[] push(T[] array, T object) {
+        final T[] newArray = Arrays.copyOf(array, array.length + 1);
+        newArray[newArray.length - 1] = object;
+        return newArray;
+    }
+
+    public static <T> T[] unshift(T[] array, T object) {
+        final Class<? extends Object[]> type = array.getClass();
+        final int newLength = array.length + 1;
+        @SuppressWarnings("unchecked") final T[] newArray = type == Object[].class ? (T[]) new Object[newLength] : (T[]) Array.newInstance(type.getComponentType(), newLength);
+        newArray[0] = object;
+        System.arraycopy(array, 0, newArray, 1, Math.min(array.length, newLength));
+        return newArray;
     }
 
 }

@@ -7,6 +7,9 @@ import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
+import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
+import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
@@ -16,7 +19,7 @@ import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
@@ -50,7 +53,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
     public RecipeSelectInventory(final InventoryManager manager) {
         this.manager = manager;
         recipeLore = new ObjectArrayList<>();
-        recipeLore.add(ChatColor.RESET + STRING_RECIPE);
+        recipeLore.add(ChatColor.WHITE + STRING_RECIPE);
         recipeLore.add("");
     }
 
@@ -121,17 +124,9 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
         final List<ImmutablePair<RecipeStatus, CustomModelMaterial>> recipeItems = new ObjectArrayList<>();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
         status.getRecipeStatusList().stream().filter(RecipeStatus::isAcquired).forEach(recipeStatus -> {
-            final String resultStr = recipeStatus.getRecipe().getResult();
-            final String[] result = resultStr.contains(",") ? resultStr.split(",") : new String[]{resultStr};
-            CustomModelMaterial material = null;
-            if (result[0].startsWith(STRING_MATERIAL)) {
-                material = AlchemyMaterial.getMaterial(result[0].substring(9)).getMaterial();
-            } else if (result[0].startsWith("minecraft:")) {
-                material = new CustomModelMaterial(Material.getMaterial(result[0].substring(10)), result.length > 1 ? Integer.parseInt(result[1]) : 0);
-            }
-            if (material != null) {
-                recipeItems.add(new ImmutablePair<>(recipeStatus, material));
-            }
+            final ARecipeResult<?> resultData = recipeStatus.getRecipe().getResult();
+            final CustomModelMaterial material = resultData.getCustomModelMaterial();
+            recipeItems.add(new ImmutablePair<>(recipeStatus, material));
         });
         recipeItems.sort(Comparator.comparing((ImmutablePair<RecipeStatus, CustomModelMaterial> o) -> o.getLeft().getId()));
         final int dScroll = scroll * 6;
@@ -168,12 +163,14 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
 
                 assert recipeStatus != null;
                 final ItemStack item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : material.toItemStack();
-                final AlchemyMaterial am = AlchemyMaterial.getMaterial((recipe.getResult().contains(",") ? recipe.getResult().split(",")[0] : recipe.getResult()).substring(9));
 
                 final ItemMeta meta = item.getItemMeta();
                 final List<String> lore = new ObjectArrayList<>();
                 addRecipeStatus(uuid, recipe, rs, meta, lore);
-                setNameAndFlags(meta, am);
+                if (recipe.getResult() instanceof AlchemyMaterialRecipeResult) {
+                    final AlchemyMaterial alchemyMaterial = ((AlchemyMaterialRecipeResult) recipe.getResult()).getResult();
+                    setNameAndFlags(meta, alchemyMaterial);
+                }
                 lore.add("");
                 meta.setLore(lore);
                 item.setItemMeta(meta);
@@ -259,14 +256,15 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
                             } else {
                                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                             }
-                            final String[] result = recipe.getResult().contains(",") ? recipe.getResult().split(",") : new String[]{recipe.getResult()};
-                            AlchemyMaterial am = null;
+
+                            final ARecipeResult<?> resultData = recipe.getResult();
+                            AlchemyMaterial alchemyMaterial = null;
                             CustomModelMaterial material = null;
-                            if (result[0].startsWith(STRING_MATERIAL)) {
-                                am = AlchemyMaterial.getMaterial(result[0].substring(9));
-                                material = am.getMaterial();
-                            } else if (result[0].startsWith("minecraft:")) {
-                                material = new CustomModelMaterial(Objects.requireNonNull(Material.getMaterial(result[0].substring(10))), result.length > 1 ? Integer.parseInt(result[1]) : 0);
+                            if (resultData instanceof AlchemyMaterialRecipeResult) {
+                                alchemyMaterial = ((AlchemyMaterialRecipeResult) resultData).getResult();
+                                material = alchemyMaterial.getMaterial();
+                            } else if (resultData instanceof MinecraftMaterialRecipeResult) {
+                                material = resultData.getCustomModelMaterial();
                             }
 
                             final List<String> lore = new ObjectArrayList<>();
@@ -276,7 +274,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
                                 final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : material.toItemStack();
                                 final ItemMeta meta = resultItem.getItemMeta();
                                 addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, meta, lore);
-                                setNameAndFlags(meta, am);
+                                setNameAndFlags(meta, alchemyMaterial);
                                 meta.setLore(lore);
                                 resultItem.setItemMeta(meta);
                                 inv.setItem(25, resultItem);

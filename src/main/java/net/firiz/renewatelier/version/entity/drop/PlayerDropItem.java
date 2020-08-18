@@ -4,12 +4,13 @@ import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 public class PlayerDropItem extends EntityItem {
 
-    private final EntityPlayer targetPlayer;
     private final Packet<?> despawnPacket;
 
     public PlayerDropItem(
@@ -18,15 +19,14 @@ public class PlayerDropItem extends EntityItem {
             org.bukkit.inventory.ItemStack itemStack
     ) {
         super(((CraftWorld) location.getWorld()).getHandle(), location.getX(), location.getY(), location.getZ());
-        this.targetPlayer = ((CraftPlayer) targetPlayer).getHandle();
+        this.setOwner(targetPlayer.getUniqueId());
         this.despawnPacket = EntityPacket.getDespawnPacket(this.getId());
+        this.age = 4800; // 生存時間 1分 (6000で消滅するため)
         setItemStack(VersionUtils.asNMSCopy(itemStack));
     }
 
-    private void update(EntityPlayer entityPlayer) {
-        if (entityPlayer != targetPlayer) {
-            entityPlayer.playerConnection.sendPacket(despawnPacket);
-        }
+    public static boolean isPlayerDrop(org.bukkit.entity.Item item) {
+        return ((CraftItem) item).getHandle() instanceof PlayerDropItem;
     }
 
     public void drop() {
@@ -34,13 +34,16 @@ public class PlayerDropItem extends EntityItem {
         world.addEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
         final PlayerChunkMap.EntityTracker entityTracker = world.getChunkProvider().playerChunkMap.trackedEntities.get(this.getId());
         if (entityTracker != null) {
-            entityTracker.trackedPlayers.forEach(this::update);
+            entityTracker.trackedPlayers
+                    .stream()
+                    .filter(player -> player.getUniqueID() != this.getOwner())
+                    .forEach(player -> player.playerConnection.sendPacket(despawnPacket));
         }
     }
 
     @Override
     public void pickup(EntityHuman entityhuman) {
-        if (entityhuman == targetPlayer) {
+        if (entityhuman.getUniqueID() == this.getOwner()) {
             super.pickup(entityhuman);
         }
     }

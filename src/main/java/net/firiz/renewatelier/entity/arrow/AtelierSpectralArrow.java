@@ -5,6 +5,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftSpectralArrow;
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.SpectralArrow;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -122,7 +123,7 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
 
     @NotNull
     @Override
-    public ItemStack getItemStack() {
-        return getArrow();
+    public CraftItemStack getItemStack() {
+        return CraftItemStack.asCraftCopy(getArrow());
     }
 }

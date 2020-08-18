@@ -31,10 +31,6 @@ final class HoloDamage {
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
-    final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, DamageComponent... damages) {
-        holoDamage(victim, damager, Arrays.asList(damages));
-    }
-
     final void holoDamage(@NotNull LivingEntity victim, @Nullable Entity damager, List<DamageComponent> damages) {
         final Location location = victim.getEyeLocation();
         location.setY(location.getY() + GameConstants.HOLO_DAMAGE_POS);
@@ -44,7 +40,10 @@ final class HoloDamage {
             final AttackAttribute attribute = damages.get(i).getAttackAttribute();
             final int intDamage = (int) damage;
             final String viewDamage;
-            if (intDamage <= 0) { // 1.0 ダメージ以上でないとダメージ換算なし
+            if (attribute == AttackAttribute.HEAL && intDamage < 0) {
+                viewDamage = String.valueOf(attribute.getColor()) + Math.abs(intDamage);
+                allDamage += damage;
+            } else if (intDamage <= 0) {
                 viewDamage = ChatColor.WHITE + "Miss";
             } else {
                 viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
@@ -73,11 +72,11 @@ final class HoloDamage {
                     2L * i
             );
         }
-        if (allDamage > 0) {
+        if (allDamage != 0) {
             if (aEntityUtils.hasLivingData(victim)) {
                 final LivingData livingData = aEntityUtils.getLivingData(victim);
                 livingData.damage(damager, allDamage);
-            } else if(victim instanceof Player) {
+            } else if (victim instanceof Player) {
                 final CharStats charStats = psm.getChar(victim.getUniqueId()).getCharStats();
                 charStats.damageHp(allDamage);
             } else {

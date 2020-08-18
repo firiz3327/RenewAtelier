@@ -1,25 +1,29 @@
 package net.firiz.renewatelier.quest.book;
 
 import java.util.List;
+import java.util.Optional;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.result.*;
 import net.firiz.renewatelier.utils.TellrawUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.minecraft.server.v1_16_R1.BlockLectern;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.LecternInventory;
 import org.bukkit.inventory.meta.BookMeta;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,31 +35,39 @@ public final class QuestBook {
     }
 
     @Nullable
-    public static AlchemyMaterial getQuestBookMaterial(ItemStack item) {
-        final AlchemyMaterial material = AlchemyMaterial.getMaterialOrNull(item);
-        if (material != null && material.getId().equalsIgnoreCase("quest_book")) {
-            return material;
+    public static AlchemyMaterial getQuestBookMaterial(@Nullable final ItemStack item) {
+        final Optional<AlchemyMaterial> material = AlchemyItemStatus.getMaterialOptional(item);
+        if (material.isPresent() && material.get().getId().equalsIgnoreCase("quest_book")) {
+            return material.get();
         }
         return null;
     }
 
-    public static boolean lectern(Player player, Block block, ItemStack item) {
+    public static boolean lectern(@NotNull final Cancellable e, @NotNull final Player player, @NotNull final Block block, @Nullable final ItemStack item) {
         final Lectern lectern = (Lectern) block.getState();
         final LecternInventory inv = (LecternInventory) lectern.getInventory();
         final ItemStack book = inv.getBook();
         final AlchemyMaterial bookMaterial = getQuestBookMaterial(book);
+//        if (player.isSneaking()) { // takeBook代わりに作ってみたけどhasBookが更新されないから微妙か？
+//            e.setCancelled(true);
+//            lectern.getSnapshotInventory().setItem(0, new ItemStack(Material.AIR));
+//            lectern.update();
+//            ItemUtils.addItem(player, book);
+//            return true;
+//        }
         if (bookMaterial != null) {
             assert book != null;
-            final BookMeta meta = (BookMeta) book.getItemMeta();
-            changeMeta(player, meta);
-            book.setItemMeta(meta);
-            lectern.setPage(0);
+            e.setCancelled(true);
+            openQuestBook(player); // takeBookができない代わりに、プレイヤー間で競合しない
+//            final BookMeta meta = (BookMeta) book.getItemMeta();
+//            changeMeta(player, meta);
+//            book.setItemMeta(meta);
             return true;
         }
         return getQuestBookMaterial(item) != null;
     }
 
-    public static void openQuestBook(final Player player) {
+    public static void openQuestBook(@NotNull final Player player) {
         final ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         final BookMeta meta = (BookMeta) book.getItemMeta();
         changeMeta(player, meta);
@@ -63,7 +75,7 @@ public final class QuestBook {
         player.openBook(book);
     }
 
-    private static void changeMeta(Player player, BookMeta meta) {
+    public static void changeMeta(@NotNull final Player player, @NotNull final BookMeta meta) {
         player.sendMessage(ChatColor.GRAY + "[クエストを更新中...]");
         meta.setAuthor(player.getName()); // require?
         meta.setTitle("クエストブック"); // require?
@@ -71,7 +83,7 @@ public final class QuestBook {
         meta.spigot().setPages(createPages(player));
     }
 
-    private static List<BaseComponent[]> createPages(Player player) {
+    private static List<BaseComponent[]> createPages(@NotNull final Player player) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ObjectArrayList<>();
         final List<Quest> clearQuests = new ObjectArrayList<>();
@@ -96,7 +108,7 @@ public final class QuestBook {
         return pages;
     }
 
-    private static void addSpigotPage(final List<BaseComponent[]> pages, final Quest quest, final int type, final Player player) {
+    private static void addSpigotPage(@NotNull final List<BaseComponent[]> pages, @NotNull final Quest quest, final int type, @NotNull final Player player) {
         final String flag_text;
         final ChatColor color;
         switch (type) {

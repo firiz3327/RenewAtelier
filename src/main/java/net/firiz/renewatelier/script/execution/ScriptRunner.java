@@ -10,7 +10,6 @@ import javax.script.ScriptException;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import org.bukkit.entity.Player;
 
 /**

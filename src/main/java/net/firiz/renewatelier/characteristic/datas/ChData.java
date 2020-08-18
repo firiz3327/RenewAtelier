@@ -1,4 +1,4 @@
 package net.firiz.renewatelier.characteristic.datas;
 
-public interface CharacteristicData {
+public interface ChData {
 }

@@ -61,12 +61,11 @@ public final class HandleDamage {
     private void sweepAttack(CharStats charStats, Location location, double vanillaItemDamage) {
         final Player player = charStats.getPlayer();
         NMSEntityUtils.sweepParticle(player);
-        EntityUtils.rangeCreatures(
+        EntityUtils.rangeMobs(
                 location,
                 1.5,
-                6,
-                entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity)
-        ).forEach(entity -> {
+                6
+        ).filter(entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity)).forEach(entity -> {
             damageUtilV2.normalDamage(
                     AttackAttribute.SLASH,
                     charStats,

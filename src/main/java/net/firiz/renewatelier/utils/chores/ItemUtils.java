@@ -1,15 +1,17 @@
-package net.firiz.renewatelier.utils;
+package net.firiz.renewatelier.utils.chores;
 
 import java.util.*;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
+import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.FuncBlock;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -25,10 +27,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author firiz
@@ -98,6 +97,8 @@ public final class ItemUtils {
     public static Material getMaterial(final String str) {
         if (str.equalsIgnoreCase("XXX")) {
             return Material.IRON_NUGGET;
+        } else if(str.equalsIgnoreCase("usable")) {
+            return GameConstants.USABLE_MATERIAL;
         }
 
         Material result = Material.getMaterial(str.toUpperCase());
@@ -131,7 +132,7 @@ public final class ItemUtils {
     public static boolean checkMaterial(final ItemStack content, RequireAmountMaterial material) {
         switch (material.getType()) {
             case MATERIAL:
-                return material.getMaterial().equals(AlchemyMaterial.getMaterial(content));
+                return material.getMaterial().equals(AlchemyItemStatus.getMaterialNonNull(content));
             case CATEGORY:
                 return AlchemyItemStatus.getCategories(content).contains(material.getCategory());
             default:
@@ -154,7 +155,7 @@ public final class ItemUtils {
                     case MATERIAL:
                         final AlchemyMaterial alchemyMaterial = data.getMaterial();
                         for (final ItemStack item : contents) {
-                            if (item != null && alchemyMaterial.equals(AlchemyMaterial.getMaterialOrNull(item))) {
+                            if (item != null && alchemyMaterial.equals(AlchemyItemStatus.getMaterialNullable(item))) {
                                 check.put(data, check.getInt(data) + item.getAmount());
                             }
                         }
@@ -184,7 +185,7 @@ public final class ItemUtils {
         if (contents.length != 0) {
             int amount = 0;
             for (final ItemStack item : contents) {
-                if (item != null && material.equals(AlchemyMaterial.getMaterial(item))) {
+                if (item != null && material.equals(AlchemyItemStatus.getMaterialNonNull(item))) {
                     amount += item.getAmount();
                 }
             }
@@ -213,15 +214,6 @@ public final class ItemUtils {
     public static void warp(final Player player, final Location loc) {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> player.teleport(loc));
     }
-
-//    public static String setLocXYZ(Location loc) {
-//        return createStridColor(loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
-//    }
-//
-//    public static int[] getXYZString(String str) {
-//        final String[] split = getStridColor(str).split(",");
-//        return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2])};
-//    }
 
     public static void addItem(@NotNull HumanEntity player, ItemStack item) {
         if (item != null) {
@@ -271,7 +263,7 @@ public final class ItemUtils {
         return null;
     }
 
-    public static void gainItem(@NotNull Inventory inv, @NotNull Material material, @NotNull int reduceAmount) {
+    public static void gainItem(@NotNull Inventory inv, @NotNull Material material, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
             if (i != null && i.getType() == material) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
@@ -284,7 +276,7 @@ public final class ItemUtils {
         }
     }
 
-    public static void gainItem(@NotNull Inventory inv, @NotNull ItemStack item, @NotNull int reduceAmount) {
+    public static void gainItem(@NotNull Inventory inv, @NotNull ItemStack item, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
             if (i != null && item.isSimilar(i)) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
@@ -297,9 +289,9 @@ public final class ItemUtils {
         }
     }
 
-    public static void gainItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, @NotNull int reduceAmount) {
+    public static void gainItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
-            if (i != null && material.equals(AlchemyMaterial.getMaterial(i))) {
+            if (i != null && material.equals(AlchemyItemStatus.getMaterialNonNull(i))) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
                 reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);

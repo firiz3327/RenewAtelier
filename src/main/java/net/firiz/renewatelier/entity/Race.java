@@ -31,37 +31,41 @@ public enum Race {
         return name;
     }
 
-    public boolean hasVanillaType(EntityType type) {
+    public static Race getRace(EntityType type) {
         final Race race;
         switch (type) {
             case ZOMBIE: // ゾンビ
             case ZOMBIE_VILLAGER:
-            case ZOMBIE_HORSE: // 未使用MOB
             case HUSK:
             case DROWNED:
             case GIANT: // 未使用MOB
+            case ZOMBIE_HORSE: // 未使用MOB
             case SKELETON: // スケルトン
-            case STRAY:
             case WITHER_SKELETON:
+            case STRAY:
             case SKELETON_HORSE:
-            case PHANTOM: // other
+            case CREEPER:
             case WITHER:
+            case PHANTOM: // other
             case GHAST: // バニラではアンデッドではないが、アトリエの幽霊に該当する為追加
-            case STRIDER: // v1.16 GHASTと同様
             case VEX:
-            case ZOGLIN: // v1.16
             case ZOMBIFIED_PIGLIN: // v1.16
+            case ZOGLIN: // v1.16
                 race = UNDEAD;
                 break;
             case PLAYER: // 人間
             case VILLAGER:
-            case WITCH:
             case WANDERING_TRADER:
+                race = HUMAN;
+                break;
+            case WITCH:
             case EVOKER: // 森の洋館
             case PILLAGER: // 襲撃者
             case VINDICATOR:
             case ILLUSIONER: // 未使用MOB
-                race = HUMAN;
+            case PIGLIN: // v1.16
+//            case PIGLIN_BRUTE: // v1.16.2
+                race = AJIN;
                 break;
             case SPIDER: // 虫
             case CAVE_SPIDER:
@@ -75,6 +79,7 @@ public enum Race {
             case BLAZE:
             case SNOWMAN:
             case IRON_GOLEM:
+            case STRIDER: // v1.16
                 race = MAGIC;
                 break;
             case SLIME: // プニ
@@ -107,13 +112,12 @@ public enum Race {
             case RABBIT:
             case LLAMA:
             case PANDA:
-            case HOGLIN: // v1.16
-            case PIGLIN: // v1.16
+            case BAT:
                 race = ANIMAL;
                 break;
-            case BAT: // 猛獣
-            case WOLF:
+            case WOLF: // 猛獣
             case POLAR_BEAR:
+            case HOGLIN: // v1.16
                 race = BEAST;
                 break;
             case ENDER_DRAGON: // ドラゴン
@@ -123,6 +127,10 @@ public enum Race {
                 race = UNKNOWN;
                 break;
         }
-        return this == race;
+        return race;
+    }
+
+    public boolean hasVanillaType(EntityType type) {
+        return this == getRace(type);
     }
 }

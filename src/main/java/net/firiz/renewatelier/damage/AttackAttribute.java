@@ -11,7 +11,8 @@ public enum AttackAttribute {
     FIRE("炎", "⒨", ChatColor.RED),
     ICE("氷", "⒩", ChatColor.BLUE),
     LIGHTNING("雷", "⒪", ChatColor.YELLOW),
-    ABNORMAL("状態異常", "⒫");
+    ABNORMAL("状態異常", "⒫", ChatColor.LIGHT_PURPLE),
+    HEAL("回復", "", ChatColor.GREEN);
 
     private final String name;
     private final String icon;

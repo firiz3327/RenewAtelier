@@ -3,7 +3,6 @@ package net.firiz.renewatelier.config;
 import java.util.List;
 
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**

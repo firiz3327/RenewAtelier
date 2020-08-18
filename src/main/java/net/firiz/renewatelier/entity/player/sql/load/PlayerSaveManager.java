@@ -10,7 +10,6 @@ import net.firiz.renewatelier.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

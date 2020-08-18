@@ -146,9 +146,10 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--PaperBuilderでビルド後「~/.m2/com/destroystokyo/paper/」配下をコピーして同様の環境を作る事-->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper</artifactId>
             <version>${minecraft.version}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

@@ -1,10 +1,12 @@
 package net.firiz.renewatelier.characteristic;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterialCategory;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicArray;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicData;
-import net.firiz.renewatelier.characteristic.datas.CharacteristicInt;
+import net.firiz.renewatelier.characteristic.datas.ChData;
+import net.firiz.renewatelier.characteristic.datas.ChInt;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
@@ -12,10 +14,7 @@ import net.firiz.renewatelier.utils.CommonUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Characteristic {
 
@@ -25,17 +24,73 @@ public final class Characteristic {
     private final String name;
     private final String desc;
     private final CharacteristicCategory[] categories;
-    private final List<List<String>> reqIds;
-    private final Map<CharacteristicType, CharacteristicData> datas;
+    private final List<List<String>> combineRequireIds;
+    private final List<List<Characteristic>> combineRequireCs;
+    private final Map<CharacteristicType, ChData> dataMap;
 
-    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categories, List<List<String>> reqIds, Map<CharacteristicType, CharacteristicData> datas) {
+    public Characteristic(String id, int lv, String name, String desc, CharacteristicCategory[] categories, List<List<String>> combineRequireIds, Map<CharacteristicType, ChData> dataMap) {
         this.id = id;
         this.lv = lv;
         this.name = name;
         this.desc = desc;
         this.categories = categories;
-        this.reqIds = reqIds;
-        this.datas = datas;
+        this.combineRequireIds = combineRequireIds;
+        this.combineRequireCs = new ObjectArrayList<>();
+        this.dataMap = dataMap;
+    }
+
+    public void loadCombine() {
+        combineRequireCs.clear();
+        for (final List<String> ids : this.getCombineRequireIds()) {
+            final List<Characteristic> cs = new ObjectArrayList<>();
+            for (final String recipeId : ids) {
+                final Characteristic c;
+                try {
+                    c = Characteristic.getCharacteristic(recipeId);
+                } catch (IllegalArgumentException e) {
+                    CommonUtils.logWarning(e);
+                    continue;
+                }
+                cs.add(c);
+            }
+            combineRequireCs.add(cs);
+        }
+    }
+
+    public static ObjectSet<Characteristic> combine(final AlchemyMaterialCategory category, final List<Characteristic> characteristics) {
+        final List<Characteristic> tempCharacteristics = new ArrayList<>(characteristics);
+        final ObjectLinkedOpenHashSet<Characteristic> combined = new ObjectLinkedOpenHashSet<>();
+        for (int i = 0; i < 10; i++) {
+            final ObjectLinkedOpenHashSet<Characteristic> combine = new ObjectLinkedOpenHashSet<>();
+            for (final Characteristic c : CONFIG_MANAGER.getList(CharacteristicLoader.class, Characteristic.class)) {
+                if (!c.combineRequireCs.isEmpty()) {
+                    combine(c, tempCharacteristics, combine);
+                }
+            }
+            if (combine.isEmpty()) {
+                break;
+            } else {
+                tempCharacteristics.addAll(combine);
+            }
+        }
+        tempCharacteristics.stream().filter(c -> c.hasCategory(category)).forEach(combined::add);
+        return combined;
+    }
+
+    private static void combine(Characteristic c, List<Characteristic> characteristics, Set<Characteristic> combined) {
+        final Set<Characteristic> temp = new HashSet<>();
+        for (final Characteristic s1 : new ArrayList<>(characteristics)) {
+            for (final List<Characteristic> reqs : c.combineRequireCs) {
+                if (reqs.contains(s1) && !combined.contains(c) && !temp.contains(s1)) {
+                    temp.add(s1);
+                    if (new HashSet<>(reqs).equals(temp)) {
+                        temp.forEach(characteristics::remove);
+                        temp.clear();
+                        combined.add(c);
+                    }
+                }
+            }
+        }
     }
 
     public boolean hasCategory(final AlchemyItemStatus itemStatus) {
@@ -47,7 +102,6 @@ public final class Characteristic {
     }
 
     public boolean hasCategory(AlchemyMaterialCategory category) {
-        CommonUtils.log(Arrays.toString(categories) + " " + category);
         return Arrays.stream(categories).anyMatch(c -> c.c(category));
     }
 
@@ -67,8 +121,8 @@ public final class Characteristic {
         return desc;
     }
 
-    public List<List<String>> getReqIds() {
-        return reqIds;
+    public List<List<String>> getCombineRequireIds() {
+        return combineRequireIds;
     }
 
     public CharacteristicCategory[] getCategories() {
@@ -76,39 +130,43 @@ public final class Characteristic {
     }
 
     public boolean hasData(CharacteristicType type) {
-        return datas.containsKey(type);
+        return dataMap.containsKey(type);
     }
 
     @Nullable
-    public CharacteristicData getData(CharacteristicType type) {
-        return datas.get(type);
+    public ChData getData(CharacteristicType type) {
+        return dataMap.get(type);
     }
 
     public int getIntData(CharacteristicType type) {
-        final CharacteristicData data = datas.get(type);
-        if (data instanceof CharacteristicInt) {
-            return ((CharacteristicInt) data).getX();
+        final ChData data = dataMap.get(type);
+        if (data instanceof ChInt) {
+            return ((ChInt) data).getX();
         }
-        throw new IllegalStateException("not characteristicInt class.");
+        throw new IllegalStateException("not characteristicInt class. " + data.getClass());
     }
 
-    /**
-     *
-     * @deprecated 全ての特性タイプに対してクラスを用意するため
-     * @param type
-     * @return data.x
-     */
-    @Deprecated(forRemoval = true)
-    public String[] getArrayData(CharacteristicType type) {
-        final CharacteristicData data = datas.get(type);
-        if (data instanceof CharacteristicArray) {
-            return ((CharacteristicArray) data).getX();
-        }
-        throw new IllegalStateException("not characteristicArray class.");
+    public <T> T getData(CharacteristicType type, Class<T> clasz) {
+        return CommonUtils.cast(dataMap.get(type));
     }
+
+//    /**
+//     *
+//     * @deprecated 全ての特性タイプに対してクラスを用意するため
+//     * @param type
+//     * @return data.x
+//     */
+//    @Deprecated(forRemoval = true)
+//    public String[] getArrayData(CharacteristicType type) {
+//        final ChData data = datas.get(type);
+//        if (data instanceof ChArray) {
+//            return ((ChArray) data).getX();
+//        }
+//        throw new IllegalStateException("not characteristicArray class. " + data.getClass());
+//    }
 
     public Collection<CharacteristicType> getTypes() {
-        return datas.keySet();
+        return dataMap.keySet();
     }
 
     @NotNull

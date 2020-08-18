@@ -1,21 +1,19 @@
-package net.firiz.renewatelier.skill.item;
+package net.firiz.renewatelier.skill.item.skill;
 
-import net.firiz.renewatelier.damage.DamageUtilV2;
+import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.skill.data.BombData;
+import net.firiz.renewatelier.skill.item.data.BombData;
 import net.firiz.renewatelier.utils.chores.EntityUtils;
 import net.firiz.renewatelier.version.entity.projectile.arrow.BombProjectile;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IBombProjectile;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
-public class BombSkill extends ForceItemSkill<BombData> {
+public class BombSkill extends ItemSkill<BombData> {
 
-    private static final DamageUtilV2 damageUtilV2 = DamageUtilV2.INSTANCE;
     private final double power;
 
-    public BombSkill(BombData data, Player player, AlchemyItemStatus itemStatus, float force) {
-        super(data, player, itemStatus, force);
+    public BombSkill(BombData data, Char character, AlchemyItemStatus itemStatus) {
+        super(data, character, itemStatus);
         this.power = itemStatus.getAlchemyMaterial().getPower();
     }
 
@@ -23,8 +21,7 @@ public class BombSkill extends ForceItemSkill<BombData> {
     public void fire() {
         final Location location = getPlayer().getLocation();
         final IBombProjectile bomb = BombProjectile.spawn(this::effect, location.clone().add(0, 0.5, 0));
-        final float force = getForce();
-        bomb.setVelocity(location.getDirection().setY(0.5 + (force * 0.2)).multiply(0.5 + (force / 2)));
+        bomb.setVelocity(location.getDirection().setY(0.6).multiply(0.75));
     }
 
     private void effect(final IBombProjectile bombProjectile) {
@@ -32,13 +29,13 @@ public class BombSkill extends ForceItemSkill<BombData> {
         if (bombProjectile.isGround() || !location.getBlock().getType().isAir()) {
             hit(bombProjectile, location);
         } else {
-            final long mobCount = EntityUtils.rangeCreatures(
+            final long mobCount = EntityUtils.rangeMobs(
                     location,
                     1,
                     1
             ).count();
             if (mobCount == 0) {
-                getData().getEffect().effect(location);
+                data.getEffect().effect(location);
             } else {
                 hit(bombProjectile, location);
             }
@@ -47,14 +44,13 @@ public class BombSkill extends ForceItemSkill<BombData> {
 
     private void hit(final IBombProjectile bombProjectile, final Location location) {
         bombProjectile.remove();
-        final BombData data = getData();
         data.getEffect().hit(location);
-        EntityUtils.rangeCreatures(
+        EntityUtils.rangeMobs(
                 location,
                 data.getRadius(),
                 6
         ).forEach(entity -> damageUtilV2.itemDamage(
-                getItemStatus(),
+                itemStatus,
                 getPlayer(),
                 entity,
                 1,

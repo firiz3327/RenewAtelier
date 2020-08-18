@@ -20,7 +20,7 @@ import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.ItemUtils;
+import net.firiz.renewatelier.utils.chores.ItemUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ScriptConversation {
 
-    protected final InventoryManager inventoryManager = AtelierPlugin.getPlugin().getInventoryManager();
+    protected static final InventoryManager inventoryManager = InventoryManager.INSTANCE;
     protected final String scriptName;
     protected final Player player;
     protected Invocable iv;
@@ -242,7 +242,7 @@ public class ScriptConversation {
     @NotNull
     @Export
     public AlchemyMaterial getAlchemyMaterial(final ItemStack item) {
-        return AlchemyMaterial.getMaterial(item);
+        return AlchemyItemStatus.getMaterialNonNull(item);
     }
 
     @Nullable
@@ -254,7 +254,7 @@ public class ScriptConversation {
     @Nullable
     @Export
     public AlchemyMaterial getAlchemyMaterialOrNull(final ItemStack item) {
-        return AlchemyMaterial.getMaterialOrNull(item);
+        return AlchemyItemStatus.getMaterialNullable(item);
     }
 
     @Export
