@@ -144,7 +144,7 @@ public enum TargetEntityTypes {
             (entity -> setMainHand(entity, new ItemStack(Material.BOW))),
             r(p(AttackAttribute.ABNORMAL, AttackResistance.WEAKNESS))
     ), // .
-    PIGLIN(EntityType.PIGLIN, EntityPiglin.class, Race.AJIN, null, "PIGLIN", "ゾンビピグリン",
+    PIGLIN(EntityType.PIGLIN, EntityPiglin.class, Race.AJIN, null, "PIGLIN", "ピグリン",
             (entity -> setMainHand(entity, new ItemStack(Material.CROSSBOW))),
             r(
                     p(AttackAttribute.BLOW, AttackResistance.SMALL),
@@ -153,6 +153,15 @@ public enum TargetEntityTypes {
                     p(AttackAttribute.ICE, AttackResistance.WEAKNESS)
             )
     ), // .
+    PIGLIN_BRUTE(EntityType.PIGLIN_BRUTE, EntityPiglinBrute.class, Race.AJIN, null, "PIGLIN_BRUTE", "ピグリンブルート",
+            (entity -> setMainHand(entity, new ItemStack(Material.GOLDEN_AXE))),
+            r(
+                    p(AttackAttribute.BLOW, AttackResistance.SMALL),
+                    p(AttackAttribute.ABNORMAL, AttackResistance.MEDIUM),
+                    p(AttackAttribute.FIRE, AttackResistance.LARGE),
+                    p(AttackAttribute.ICE, AttackResistance.WEAKNESS)
+            )
+    ),
     /**
      * INSECT
      */
