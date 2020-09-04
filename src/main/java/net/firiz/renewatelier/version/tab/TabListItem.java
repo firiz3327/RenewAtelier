@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R2.*;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -16,7 +16,6 @@ import java.util.*;
 
 public class TabListItem {
 
-    private static final String TEXTURES_KEY = "textures";
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
 
     @NotNull
@@ -100,17 +99,11 @@ public class TabListItem {
     }
 
     public void modifyTextures(@NotNull SkinProperty property) {
-        modifyTextures(property.getValue(), property.getSignature());
+        property.modifyTextures(this.profile);
     }
 
     public void modifyTextures(@NotNull GameProfile profile) {
-        this.profile.getProperties().removeAll(TEXTURES_KEY);
-        this.profile.getProperties().putAll(TEXTURES_KEY, profile.getProperties().get(TEXTURES_KEY));
-    }
-
-    private void modifyTextures(@NotNull String value, @NotNull String signature) {
-        this.profile.getProperties().removeAll(TEXTURES_KEY);
-        this.profile.getProperties().put(TEXTURES_KEY, new Property(TEXTURES_KEY, value, signature));
+        SkinProperty.modifyTextures(this.profile, profile);
     }
 
     public void modifyGameMode(@NotNull GameMode gameMode) {

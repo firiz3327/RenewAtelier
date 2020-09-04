@@ -3,12 +3,12 @@ package net.firiz.renewatelier.version.nms;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R2.*;
 import org.bukkit.EntityEffect;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -87,8 +87,7 @@ public final class NMSEntityUtils {
         } else {
             key = recipeId;
         }
-        // recipeBook{RecipeBook.class}.a{Set<MinecraftKey>}.contains(key)
-        return ((CraftPlayer) player).getHandle().B().b(MinecraftKey.a(key));
+        return ((CraftPlayer) player).getHandle().getRecipeBook().hasDiscoveredRecipe(MinecraftKey.a(key));
     }
 
 }

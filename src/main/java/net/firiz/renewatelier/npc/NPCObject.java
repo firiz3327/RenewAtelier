@@ -2,6 +2,7 @@ package net.firiz.renewatelier.npc;
 
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
@@ -91,10 +92,27 @@ public class NPCObject {
                 villager.setProfession(CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE));
                 break;
             case PLAYER:
+                UUID uuid;
+                if (skinUUID == null) {
+                    uuid = null;
+                } else {
+                    final SkinProperty skinProperty = SkinProperty.search(skinUUID.toUpperCase());
+                    if (skinProperty == null) {
+                        uuid = UUID.fromString(skinUUID);
+                    } else {
+                        npc = new NPC(this, FakePlayerPacket.createEntityPlayer(
+                                location.getWorld(),
+                                location,
+                                skinProperty,
+                                colorName
+                        ));
+                        break;
+                    }
+                }
                 npc = new NPC(this, FakePlayerPacket.createEntityPlayer(
                         location.getWorld(),
                         location,
-                        CObjects.nullIfFunction(skinUUID, UUID::fromString, null),
+                        uuid,
                         colorName
                 ));
                 break;

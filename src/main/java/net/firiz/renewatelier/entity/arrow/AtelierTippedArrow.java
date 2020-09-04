@@ -3,9 +3,9 @@ package net.firiz.renewatelier.entity.arrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftTippedArrow;
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftTippedArrow;
+import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -62,37 +62,37 @@ public class AtelierTippedArrow extends CraftTippedArrow implements AtelierAbstr
 
     @Override
     public boolean isInWater() {
-        return false;
+        return getHandle().isInWater();
     }
 
     @Override
     public boolean isInRain() {
-        return false;
+        return getHandle().isInRain();
     }
 
     @Override
     public boolean isInBubbleColumn() {
-        return false;
+        return getHandle().isInBubbleColumn();
     }
 
     @Override
     public boolean isInWaterOrRain() {
-        return false;
+        return getHandle().isInWaterOrRain();
     }
 
     @Override
     public boolean isInWaterOrBubbleColumn() {
-        return false;
+        return getHandle().isInWaterOrBubbleColumn();
     }
 
     @Override
     public boolean isInWaterOrRainOrBubbleColumn() {
-        return false;
+        return getHandle().isInWaterOrRainOrBubble();
     }
 
     @Override
     public boolean isInLava() {
-        return false;
+        return getHandle().isInLava();
     }
 
     @Override

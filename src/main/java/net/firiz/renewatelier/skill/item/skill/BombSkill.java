@@ -10,11 +10,8 @@ import org.bukkit.Location;
 
 public class BombSkill extends ItemSkill<BombData> {
 
-    private final double power;
-
     public BombSkill(BombData data, Char character, AlchemyItemStatus itemStatus) {
         super(data, character, itemStatus);
-        this.power = itemStatus.getAlchemyMaterial().getPower();
     }
 
     @Override
@@ -54,7 +51,6 @@ public class BombSkill extends ItemSkill<BombData> {
                 getPlayer(),
                 entity,
                 1,
-                power,
                 data.getAttackAttribute()
         ));
     }

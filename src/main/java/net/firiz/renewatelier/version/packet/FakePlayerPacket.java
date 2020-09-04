@@ -8,23 +8,24 @@ import java.util.UUID;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.MinecraftVersion;
+import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
-import net.minecraft.server.v1_16_R1.DataWatcher;
-import net.minecraft.server.v1_16_R1.DataWatcherRegistry;
-import net.minecraft.server.v1_16_R1.EntityPlayer;
-import net.minecraft.server.v1_16_R1.MinecraftServer;
-import net.minecraft.server.v1_16_R1.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_16_R1.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_16_R1.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_16_R1.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_16_R1.PlayerInteractManager;
-import net.minecraft.server.v1_16_R1.WorldServer;
+import net.minecraft.server.v1_16_R2.DataWatcher;
+import net.minecraft.server.v1_16_R2.DataWatcherRegistry;
+import net.minecraft.server.v1_16_R2.EntityPlayer;
+import net.minecraft.server.v1_16_R2.MinecraftServer;
+import net.minecraft.server.v1_16_R2.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_16_R2.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_16_R2.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_16_R2.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_16_R2.PlayerInteractManager;
+import net.minecraft.server.v1_16_R2.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_16_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_16_R2.CraftServer;
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 /**
@@ -37,9 +38,22 @@ public class FakePlayerPacket {
 
     @MinecraftVersion("1.16")
     public static VEntityPlayer createEntityPlayer(final World world, final Location location, final UUID uuid, final String name) {
+        final GameProfile profile = new GameProfile(uuid, name);
+        return createVEntityPlayer(world, location, profile, uuid, name);
+    }
+
+    @MinecraftVersion("1.16")
+    public static VEntityPlayer createEntityPlayer(final World world, final Location location, final SkinProperty skinProperty, final String name) {
+        final UUID uuid = UUID.randomUUID();
+        final GameProfile profile = new GameProfile(uuid, name);
+        skinProperty.modifyTextures(profile);
+        return createVEntityPlayer(world, location, profile, uuid, name);
+    }
+
+    @MinecraftVersion("1.16")
+    private static VEntityPlayer createVEntityPlayer(final World world, final Location location, final GameProfile profile, final UUID uuid, final String name) {
         final MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         final WorldServer nmsWorld = ((CraftWorld) world).getHandle();
-        final GameProfile profile = new GameProfile(uuid, name);
         final EntityPlayer entityPlayer = new EntityPlayer(server, nmsWorld, profile, new PlayerInteractManager(nmsWorld));
         final int fakeId = FakeId.createId();
         entityPlayer.e(fakeId); // Entity.id = fakeId (1.16)

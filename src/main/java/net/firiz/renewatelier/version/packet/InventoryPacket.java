@@ -1,20 +1,9 @@
 package net.firiz.renewatelier.version.packet;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R1.*;
-import org.bukkit.block.Lectern;
-import org.bukkit.block.TileState;
-import org.bukkit.craftbukkit.v1_16_R1.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R2.*;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.BlockInventoryHolder;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.Objects;
-import java.util.OptionalInt;
 
 /**
  * @author firiz

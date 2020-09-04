@@ -10,11 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class RangeSkill extends ItemSkill<RangeData> {
 
-    private final double power;
-
     public RangeSkill(@NotNull RangeData data, @NotNull Char character, @NotNull AlchemyItemStatus itemStatus) {
         super(data, character, itemStatus);
-        this.power = itemStatus.getAlchemyMaterial().getPower();
     }
 
     @Override
@@ -25,13 +22,13 @@ public class RangeSkill extends ItemSkill<RangeData> {
         if (data.isHeal()) {
             EntityUtils.rangePlayers(location, data.getRadius(), data.getMobCount())
                     .forEach(entity -> {
-                        damageUtilV2.heal(itemStatus, getPlayer(), entity, power);
+                        damageUtilV2.itemHeal(itemStatus, getPlayer(), entity);
                         rangeEffect.hit(entity.getLocation());
                     });
         } else if (data.getAttackAttribute() != null) {
             EntityUtils.rangeMobs(location, data.getRadius(), data.getMobCount())
                     .forEach(entity -> {
-                        damageUtilV2.itemDamage(itemStatus, getPlayer(), entity, 1, power, data.getAttackAttribute());
+                        damageUtilV2.itemDamage(itemStatus, getPlayer(), entity, 1, data.getAttackAttribute());
                         rangeEffect.hit(entity.getLocation());
                     });
         }

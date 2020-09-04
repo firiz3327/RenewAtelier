@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.event;
 
 import net.firiz.renewatelier.utils.chores.CObjects;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -29,7 +29,7 @@ public class AsyncPlayerInteractEntityEvent extends PlayerEvent implements Cance
         this.hand = hand;
         this.entity = CObjects.nullIfFunction(
                 ((CraftWorld) player.getWorld()).getHandle().getEntity(entityId),
-                net.minecraft.server.v1_16_R1.Entity::getBukkitEntity,
+                net.minecraft.server.v1_16_R2.Entity::getBukkitEntity,
                 null
         );
     }

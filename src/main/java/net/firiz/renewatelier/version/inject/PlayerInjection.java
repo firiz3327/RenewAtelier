@@ -1,18 +1,10 @@
 package net.firiz.renewatelier.version.inject;
 
 import io.netty.channel.Channel;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.event.PlayerArmorChangeEvent;
-import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.MinecraftVersion;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R1.*;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R2.*;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -52,6 +44,7 @@ public class PlayerInjection {
         }
     }
 
+    /*
     @MinecraftVersion("1.15")
     private static void injectArmorChangeEvent(EntityPlayer player) {
         try {
@@ -95,5 +88,6 @@ public class PlayerInjection {
             CommonUtils.logWarning("It may have been changed by the version upgrade.", e);
         }
     }
+     */
 
 }

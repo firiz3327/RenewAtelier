@@ -5,15 +5,15 @@ import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.arrow.AtelierTippedArrow;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R2.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R1.potion.CraftPotionUtil;
-import org.bukkit.craftbukkit.v1_16_R1.util.CraftVector;
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R2.potion.CraftPotionUtil;
+import org.bukkit.craftbukkit.v1_16_R2.util.CraftVector;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -39,7 +39,8 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
 
     /**
      * 使用アイテム（弓）データを保持した矢を生成します
-     *  @param location 発射地点
+     *
+     * @param location 発射地点
      * @param bow      使用アイテム(弓)
      * @param arrow    使用アイテム(矢)
      * @param source   射撃者
@@ -72,10 +73,13 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
         }
     }
 
+    /**
+     * EntityArrowのtickのMathHelper.sqrt(c(vec3d))辺りを参照
+     */
     protected static void s(@NotNull EntityArrow arrow, @NotNull Vector velocity) {
         final Vec3D vec3d = CraftVector.toNMS(velocity);
         arrow.setMot(vec3d);
-        float f2 = MathHelper.sqrt(b(vec3d));
+        float f2 = MathHelper.sqrt(c(vec3d));
         arrow.yaw = (float) (MathHelper.d(vec3d.x, vec3d.z) * 57.2957763671875D);
         arrow.pitch = (float) (MathHelper.d(vec3d.y, f2) * 57.2957763671875D);
         arrow.lastYaw = arrow.yaw;
@@ -120,7 +124,7 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     @Override
     public void setPickupStatus(AbstractArrow.PickupStatus status) {
         Preconditions.checkNotNull(status, "status");
-        fromPlayer = net.minecraft.server.v1_16_R1.EntityArrow.PickupStatus.a(status.ordinal());
+        fromPlayer = net.minecraft.server.v1_16_R2.EntityArrow.PickupStatus.a(status.ordinal());
     }
 
     @Override
@@ -201,7 +205,7 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     }
 
     @Override
-    protected net.minecraft.server.v1_16_R1.ItemStack getItemStack() {
-        return (net.minecraft.server.v1_16_R1.ItemStack) arrow.getNmsItem();
+    protected net.minecraft.server.v1_16_R2.ItemStack getItemStack() {
+        return (net.minecraft.server.v1_16_R2.ItemStack) arrow.getNmsItem();
     }
 }

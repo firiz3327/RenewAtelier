@@ -5,13 +5,13 @@ import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.chores.ArrayUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_16_R1.ChatMessage;
-import net.minecraft.server.v1_16_R1.EntityItem;
-import net.minecraft.server.v1_16_R1.NBTTagCompound;
+import net.minecraft.server.v1_16_R2.ChatMessage;
+import net.minecraft.server.v1_16_R2.EntityItem;
+import net.minecraft.server.v1_16_R2.NBTTagCompound;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -67,16 +67,16 @@ public class VersionUtils {
         return new VItemStack(CraftItemStack.asNMSCopy(item));
     }
 
-    public static net.minecraft.server.v1_16_R1.ItemStack asNMSCopy(final ItemStack item) {
+    public static net.minecraft.server.v1_16_R2.ItemStack asNMSCopy(final ItemStack item) {
         return CraftItemStack.asNMSCopy(item);
     }
 
     public static ItemStack asItem(final VItemStack item) {
-        final net.minecraft.server.v1_16_R1.ItemStack nms = (net.minecraft.server.v1_16_R1.ItemStack) item.getNmsItem();
+        final net.minecraft.server.v1_16_R2.ItemStack nms = (net.minecraft.server.v1_16_R2.ItemStack) item.getNmsItem();
         return CraftItemStack.asBukkitCopy(nms);
     }
 
-    public static ItemStack asItem(final net.minecraft.server.v1_16_R1.ItemStack item) {
+    public static ItemStack asItem(final net.minecraft.server.v1_16_R2.ItemStack item) {
         return CraftItemStack.asBukkitCopy(item);
     }
 

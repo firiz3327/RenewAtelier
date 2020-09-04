@@ -32,7 +32,11 @@ import java.util.Objects;
  */
 public final class AtelierPlugin extends JavaPlugin {
 
-    private TabList tabList;
+    private final TabList tabList;
+
+    public AtelierPlugin() {
+        tabList = new TabList();
+    }
 
     @Override
     public void onEnable() {
@@ -68,25 +72,12 @@ public final class AtelierPlugin extends JavaPlugin {
          */
 
         ReplaceVanillaItems.changeRecipe();
-        tabList = new TabList();
         tabList.init();
 
         LoopManager.INSTANCE.addSec(new EntityCleanUp());
         LoopManager.INSTANCE.addSec(NPCManager.INSTANCE.lookEyeLoop());
 
         TargetEntityTypes.check();
-
-        ObjectSet<Characteristic> combine = Characteristic.combine(AlchemyMaterialCategory.WEAPON, Arrays.asList(
-                Characteristic.getCharacteristic("atk_def_2"), // 攻防ブースト
-                Characteristic.getCharacteristic("spd_2"), // 素早さブースト
-                Characteristic.getCharacteristic("atk_def_2"), // 攻防ブースト
-                Characteristic.getCharacteristic("def_2"), // 防御ブースト
-                Characteristic.getCharacteristic("atk_def_1"), // 攻防強化
-                Characteristic.getCharacteristic("atk_spd_1"), // 攻速強化
-                Characteristic.getCharacteristic("atk_spd_2") // 攻速ブースト
-        ));
-        System.out.println("combined ------");
-        combine.forEach(c -> System.out.println(c.getId()));
     }
 
     public static void worldSettings(World world) {

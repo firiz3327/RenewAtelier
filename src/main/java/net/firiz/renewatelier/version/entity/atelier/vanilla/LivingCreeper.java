@@ -2,10 +2,10 @@ package net.firiz.renewatelier.version.entity.atelier.vanilla;
 
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import net.minecraft.server.v1_16_R1.DamageSource;
-import net.minecraft.server.v1_16_R1.EntityCreeper;
-import net.minecraft.server.v1_16_R1.EntityTypes;
-import net.minecraft.server.v1_16_R1.World;
+import net.minecraft.server.v1_16_R2.DamageSource;
+import net.minecraft.server.v1_16_R2.EntityCreeper;
+import net.minecraft.server.v1_16_R2.EntityTypes;
+import net.minecraft.server.v1_16_R2.World;
 
 @MinecraftVersion("1.16")
 public class LivingCreeper extends EntityCreeper implements EntitySupplier {

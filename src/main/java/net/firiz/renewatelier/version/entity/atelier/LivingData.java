@@ -11,7 +11,7 @@ import net.firiz.renewatelier.version.entity.atelier.holo.AbstractHoloHealth;
 import net.firiz.renewatelier.version.entity.atelier.holo.HoloBossHealth;
 import net.firiz.renewatelier.version.entity.atelier.holo.HoloHealth;
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R2.*;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;

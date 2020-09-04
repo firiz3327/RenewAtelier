@@ -8,9 +8,7 @@ import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.DamageComponent;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.chores.EntityUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -95,7 +93,7 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
 
     private static void heal(AddAttackCalcData addAttackCalcData, double x) {
         if (addAttackCalcData.damager instanceof LivingEntity) {
-            DamageUtilV2.INSTANCE.heal(addAttackCalcData.itemStatus, addAttackCalcData.damager, (LivingEntity) addAttackCalcData.damager, x, true);
+            DamageUtilV2.INSTANCE.healHPNonActiveEffect(addAttackCalcData.damager, (LivingEntity) addAttackCalcData.damager, x);
         }
     }
 

@@ -8,9 +8,9 @@ import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R2.*;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,7 +20,6 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -331,9 +330,9 @@ public enum TargetEntityTypes {
         this.resistances = resistances;
         this.nmsEntityType = entityType;
         if (body != null) {
-            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R1");
+            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R2");
         } else if (entityType != null) {
-            this.body = "{super(net.minecraft.server.v1_16_R1.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R1.World) $args[0]);}";
+            this.body = "{super(net.minecraft.server.v1_16_R2.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R2.World) $args[0]);}";
         } else {
             throw new IllegalStateException("not found body code.");
         }

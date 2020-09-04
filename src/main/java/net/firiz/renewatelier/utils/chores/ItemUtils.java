@@ -2,6 +2,8 @@ package net.firiz.renewatelier.utils.chores;
 
 import java.util.*;
 
+import com.destroystokyo.paper.profile.CraftPlayerProfile;
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.firiz.renewatelier.AtelierPlugin;
@@ -13,6 +15,7 @@ import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.FuncBlock;
 import net.firiz.renewatelier.version.VersionUtils;
+import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,6 +30,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -36,6 +40,17 @@ public final class ItemUtils {
 
     private ItemUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static ItemStack createHead(SkinProperty skinProperty, int amount) {
+        final ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
+        final SkullMeta meta = (SkullMeta) item.getItemMeta();
+        final UUID uuid = UUID.randomUUID();
+        final GameProfile profile = new GameProfile(uuid, uuid.toString());
+        skinProperty.modifyTextures(profile);
+        meta.setPlayerProfile(new CraftPlayerProfile(profile));
+        item.setItemMeta(meta);
+        return item;
     }
 
     public static ItemStack setSetting(final ItemStack itemStack, final NamespacedKey key, final String value) {
@@ -97,7 +112,7 @@ public final class ItemUtils {
     public static Material getMaterial(final String str) {
         if (str.equalsIgnoreCase("XXX")) {
             return Material.IRON_NUGGET;
-        } else if(str.equalsIgnoreCase("usable")) {
+        } else if (str.equalsIgnoreCase("usable")) {
             return GameConstants.USABLE_MATERIAL;
         }
 

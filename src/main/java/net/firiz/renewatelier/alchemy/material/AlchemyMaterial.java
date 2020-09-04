@@ -41,7 +41,8 @@ public final class AlchemyMaterial {
     private final int speed; // equip
     private final int baseDamageMin; // weapon
     private final int baseDamageMax; // weapon
-    private final int power; // usable item
+    private final int itemDamageMin; // usable item
+    private final int itemDamageMax; // usable item
     private final List<Category> categories;
     private final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients;
     private final MaterialSizeTemplate sizeTemplate;
@@ -77,7 +78,8 @@ public final class AlchemyMaterial {
             int speed,
             int baseDamageMin,
             int baseDamageMax,
-            int power,
+            int itemDamageMin,
+            int itemDamageMax,
             List<Category> categories,
             List<ImmutablePair<AlchemyIngredients, Integer>> ingredients,
             MaterialSizeTemplate sizeTemplate,
@@ -108,7 +110,8 @@ public final class AlchemyMaterial {
         this.speed = speed;
         this.baseDamageMin = baseDamageMin;
         this.baseDamageMax = baseDamageMax;
-        this.power = power;
+        this.itemDamageMin = itemDamageMin;
+        this.itemDamageMax = itemDamageMax;
         this.categories = categories;
         this.ingredients = ingredients;
         this.sizeTemplate = sizeTemplate;
@@ -213,8 +216,12 @@ public final class AlchemyMaterial {
         return baseDamageMax;
     }
 
-    public int getPower() {
-        return power;
+    public int getItemDamageMin() {
+        return itemDamageMin;
+    }
+
+    public int getItemDamageMax() {
+        return itemDamageMax;
     }
 
     public List<Category> getCategories() {

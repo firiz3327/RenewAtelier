@@ -53,7 +53,12 @@ public enum NPCManager {
                         (double) objects.get(5),
                         (double) objects.get(6),
                         (double) objects.get(7),
-                        CObjects.nullIfFunction((String) objects.get(8), UUID::fromString, null),
+                        CObjects.nullIfFunction((String) objects.get(8), skin -> {
+                            if (!skin.isEmpty()) {
+                                return UUID.fromString(skin);
+                            }
+                            return null;
+                        }, null),
                         (String) objects.get(9),
                         (String) objects.get(10)
                 ).spawnEntity()

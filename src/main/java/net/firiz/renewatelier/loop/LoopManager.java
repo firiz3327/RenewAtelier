@@ -119,21 +119,10 @@ public enum LoopManager {
 
         new ObjectArrayList<>(loopRuns).forEach(Runnable::run);
 
-        int maxLength = 0;
-        final List<Player> players = new ObjectArrayList<>();
-        for (final World world : Bukkit.getWorlds()) {
-            for (final Player player : world.getPlayers()) {
-                players.add(player);
-                final int length = player.getDisplayName().length();
-                if (maxLength < length) {
-                    maxLength = length;
-                }
-            }
-        }
 
-        for (final Player player : players) {
+        Bukkit.getOnlinePlayers().forEach(player -> {
             PayloadPacket.sendBrand(player);
-        }
+        });
 
         if (secPeriod % 60 == 0) {
             secPeriod = 0;

@@ -19,6 +19,7 @@ import net.firiz.renewatelier.version.nms.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
+import net.firiz.renewatelier.version.minecraft.skin.SkinProperty
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -90,8 +91,10 @@ class DebugCommands(private val debugListener: DebugListener) {
         }
         if (notFound) {
             sender.sendMessage("")
-            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${cmd
-                    ?: "${(page / 9) + 1} page"}.")
+            message.add("${ChatColor.DARK_AQUA}help: not found command${if (cmd == null) "s" else ""} for ${
+                cmd
+                        ?: "${(page / 9) + 1} page"
+            }.")
             if (cmd != null) {
                 val ccmds = arrayListOf<String>()
                 for (it in DebugCommands::class.java.methods) {
@@ -479,6 +482,17 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
+            desc = ["Head ID"],
+            examples = ["head oak_log"],
+            text = "プレイヤーヘッドを取得します"
+    )
+    fun head(sender: Player, args: ArrayList<Any>) {
+        if (args.size != 0) {
+            ItemUtils.addItem(sender, ItemUtils.createHead(SkinProperty.valueOf((args[0] as String).toUpperCase()), 1))
+        }
+    }
+
+    @Cmd(
             desc = ["Test"],
             examples = ["test"],
             text = "・・・"
@@ -515,7 +529,10 @@ class DebugCommands(private val debugListener: DebugListener) {
                     "l" -> {
                         ItemUtils.addItem(sender, ItemUtils.ci(Material.ACACIA_BOAT, 0, "${ChatColor.RESET}RESET", arrayListOf(
                                 "${ChatColor.RESET}RESET"
-                        )));
+                        )))
+                    }
+                    "getBrand" -> {
+                        sender.clientBrandName?.let { sender.sendMessage(it) }
                     }
                 }
             }
