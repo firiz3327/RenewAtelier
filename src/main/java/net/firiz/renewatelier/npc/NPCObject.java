@@ -1,15 +1,15 @@
 package net.firiz.renewatelier.npc;
 
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
+import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,18 +78,18 @@ public class NPCObject {
         return world;
     }
 
-    @NotNull
-    protected NPC spawnEntity() {
+    protected NPC createNPC() {
         final String colorName = ChatColor.translateAlternateColorCodes('&', name);
         final Location location = new Location(world, x, y, z);
         final NPC npc;
         switch (entityType) {
             case VILLAGER:
-                final Villager villager = (Villager) world.spawnEntity(location, EntityType.VILLAGER, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                npc = new NPC(this, villager);
-                villager.setCustomName(colorName);
-                villager.setVillagerType(CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS));
-                villager.setProfession(CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE));
+                npc = new NPC(this, EntityPacket.createVillager(
+                        location,
+                        colorName,
+                        CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS),
+                        CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE)
+                ));
                 break;
             case PLAYER:
                 UUID uuid;
@@ -117,25 +117,10 @@ public class NPCObject {
                 ));
                 break;
             default:
-                final Entity entity = world.spawnEntity(location, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
-                entity.setCustomName(colorName);
-                npc = new NPC(this, entity);
+                npc = new NPC(this, EntityPacket.createEntity(location, colorName, entityType));
                 break;
         }
-        if (!npc.isPlayer()) {
-            setProperty(npc.getEntity());
-        }
         return npc;
-    }
-
-    private void setProperty(@NotNull Entity entity) {
-        if (entity instanceof LivingEntity) {
-            final LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.setAI(false);
-            livingEntity.setCanPickupItems(false);
-            livingEntity.setInvulnerable(true);
-        }
-        entity.getPersistentDataContainer().set(persistentDataKey, PersistentDataType.BYTE, (byte) 0);
     }
 
 }

@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.version.inject;
 
 import io.netty.channel.Channel;
-import net.minecraft.server.v1_16_R2.*;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R3.*;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.concurrent.Executor;

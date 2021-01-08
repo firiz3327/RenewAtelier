@@ -22,8 +22,7 @@ import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
-import org.bukkit.Material;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 

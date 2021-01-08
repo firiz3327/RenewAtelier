@@ -2,7 +2,7 @@ package net.firiz.renewatelier.world;
 
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.block.Biome;

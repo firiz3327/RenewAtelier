@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.entity.player.sql;
 
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
@@ -9,10 +8,9 @@ import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.chores.ArrayUtils;
+import net.firiz.renewatelier.utils.java.ArrayUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

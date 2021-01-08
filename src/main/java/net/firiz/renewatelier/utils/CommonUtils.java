@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -37,7 +39,8 @@ public final class CommonUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NamespacedKey createKey(String key) {
+    @NotNull
+    public static NamespacedKey createKey(@NotNull String key) {
         return new NamespacedKey(plugin, key);
     }
 
@@ -146,6 +149,20 @@ public final class CommonUtils {
 
     public static String comma(Number number) {
         return commaFormatter.format(number);
+    }
+
+    public static String scaleString(float number, int scale, RoundingMode mode) {
+        return scaleString(BigDecimal.valueOf(number), scale, mode);
+    }
+
+    public static String scaleString(double number, int scale, RoundingMode mode) {
+        return scaleString(BigDecimal.valueOf(number), scale, mode);
+    }
+
+    public static String scaleString(BigDecimal number, int scale, RoundingMode mode) {
+        return number.setScale(scale, mode)
+                .stripTrailingZeros()
+                .toPlainString();
     }
 
     public static List<Location> generateSphere(Location centerBlock, int radius, boolean hollow) {

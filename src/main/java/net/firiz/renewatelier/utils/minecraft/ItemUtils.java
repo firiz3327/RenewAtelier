@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.utils.chores;
+package net.firiz.renewatelier.utils.minecraft;
 
 import java.util.*;
 
@@ -22,6 +22,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -40,6 +41,13 @@ public final class ItemUtils {
 
     private ItemUtils() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static ItemStack enchant(ItemStack item, Enchantment enchantment, int level, boolean ignoreLevelLimit) {
+        final ItemMeta meta = item.getItemMeta();
+        meta.addEnchant(enchantment, level, ignoreLevelLimit);
+        item.setItemMeta(meta);
+        return item;
     }
 
     public static ItemStack createHead(SkinProperty skinProperty, int amount) {

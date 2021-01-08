@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.alchemy.kettle;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;

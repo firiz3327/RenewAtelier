@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.utils.chores;
+package net.firiz.renewatelier.utils.minecraft;
 
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
@@ -6,6 +6,7 @@ import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -21,6 +22,10 @@ public final class EntityUtils {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
+
+    public static Object getHandle(org.bukkit.entity.Entity entity) {
+        return ((CraftEntity) entity).getHandle();
+    }
 
     public static boolean isDead(@NotNull final org.bukkit.entity.Entity entity) {
         return entity.isDead() || (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() <= 0);

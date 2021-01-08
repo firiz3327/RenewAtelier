@@ -6,7 +6,7 @@ import io.netty.channel.ChannelPromise;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.EquipmentSlot;
 

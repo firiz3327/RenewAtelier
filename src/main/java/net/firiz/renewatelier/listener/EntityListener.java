@@ -1,10 +1,9 @@
 package net.firiz.renewatelier.listener;
 
-import com.destroystokyo.paper.loottable.LootableEntityInventory;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
+import net.firiz.renewatelier.entity.horse.HorseManager;
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
-import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
 import org.bukkit.Bukkit;
@@ -13,9 +12,9 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.CrossbowMeta;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.Collections;
 
@@ -23,6 +22,21 @@ public class EntityListener implements Listener {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
     private static final ArrowManager arrowManager = ArrowManager.INSTANCE;
+    private static final HorseManager horseManager = HorseManager.INSTANCE;
+
+    @EventHandler
+    private void mount(final EntityMountEvent e) {
+        if (e.getMount() instanceof Horse && e.getEntity() instanceof Player) {
+            horseManager.onMount(e, (Horse) e.getMount(), (Player) e.getEntity());
+        }
+    }
+
+    @EventHandler
+    private void tame(final EntityTameEvent e) {
+        if (e.getOwner() instanceof Player && e.getEntity() instanceof Horse) {
+            horseManager.onTame((Player) e.getOwner(), (Horse) e.getEntity());
+        }
+    }
 
     @EventHandler
     private void spawnMob(final CreatureSpawnEvent e) {

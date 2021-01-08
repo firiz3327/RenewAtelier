@@ -1,4 +1,4 @@
-package net.firiz.renewatelier.utils.chores;
+package net.firiz.renewatelier.utils.java;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
+import net.firiz.renewatelier.utils.java.CollectionUtils;
 
 import java.util.List;
 

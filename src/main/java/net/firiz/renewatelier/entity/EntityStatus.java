@@ -2,12 +2,14 @@ package net.firiz.renewatelier.entity;
 
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffData;
+import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.buff.BuffValueType;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class EntityStatus {
@@ -68,7 +70,7 @@ public abstract class EntityStatus {
         byte add = 0;
         for (final Buff b : getBuffs()) {
             if (b.getBuffValueType() != BuffValueType.NONE && b.getType() == buff.getType()) {
-                if (b.getLevel() <= buff.getLevel()) { // よりレベルの高いバフへ上書き
+                if (/*b.getLevel() <= buff.getLevel() || */b.getX() <= buff.getX()) { // より効果の高いバフへ上書き
                     b.stopTimer();
                     buffs.remove(b);
                     add = 1;
@@ -91,6 +93,10 @@ public abstract class EntityStatus {
 
     public Set<Buff> getBuffs() {
         return Collections.unmodifiableSet(new HashSet<>(buffs));
+    }
+
+    public boolean hasAntiHeal() {
+        return getBuffs().stream().anyMatch(buff -> buff.getType() == BuffType.ANTI_HEAL);
     }
 
 }

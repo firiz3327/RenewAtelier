@@ -3,7 +3,7 @@ package net.firiz.renewatelier.inventory;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.NonParamInventory;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

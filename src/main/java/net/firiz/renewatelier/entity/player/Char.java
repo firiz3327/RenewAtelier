@@ -3,7 +3,6 @@ package net.firiz.renewatelier.entity.player;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import javax.script.ScriptEngine;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -13,7 +12,8 @@ import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.CommonUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestItem;
 import net.firiz.renewatelier.quest.QuestStatus;
@@ -22,6 +22,10 @@ import net.firiz.renewatelier.quest.result.MoneyQuestResult;
 import net.firiz.renewatelier.quest.result.RecipeQuestResult;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -51,11 +55,8 @@ public final class Char {
     private final List<QuestStatus> questStatuses;
     @NotNull
     private final CharSettings settings;
-    private boolean isEnginesUsable;
-    @Nullable
-    private ScriptEngine jsEngine;
-    @Nullable
-    private ScriptEngine py3Engine;
+    @NotNull
+    private final EngineManager engineManager;
     @NotNull
     private final Runnable autoSave;
 
@@ -79,6 +80,7 @@ public final class Char {
         this.recipeSQL = new RecipeSQL(id, recipeStatuses);
         this.questStatuses = questStatuses;
         this.settings = settings;
+        this.engineManager = new EngineManager();
 
         this.autoSave = () -> {
             this.charStats.save(this.id);
@@ -218,6 +220,26 @@ public final class Char {
         charStats.gainMoney(money, true);
     }
 
+    public void completionAlchemyKettleAdvancement(@NotNull final Location location) {
+        location.getWorld().spawnParticle(Particle.SPELL, location.add(0.5, 1, 0.5), 20, 0.2, 0.2, 0.2);
+        completionAdvancement("root");
+    }
+
+    public void completionAdvancement(@NotNull final String key) {
+        final Advancement advancement = Bukkit.getAdvancement(CommonUtils.createKey(key));
+        if (advancement != null) {
+            final AdvancementProgress progress = player.getAdvancementProgress(Objects.requireNonNull(advancement));
+            if (!progress.isDone()) {
+                progress.awardCriteria("none");
+            }
+        }
+    }
+
+    @NotNull
+    public EngineManager getEngineManager() {
+        return engineManager;
+    }
+
     @NotNull
     public CharStats getCharStats() {
         return charStats;
@@ -226,32 +248,6 @@ public final class Char {
     @NotNull
     public CharSettings getSettings() {
         return settings;
-    }
-
-    public boolean isEnginesUsable() {
-        return isEnginesUsable;
-    }
-
-    public void setEnginesUsable(boolean enginesUsable) {
-        isEnginesUsable = enginesUsable;
-    }
-
-    @Nullable
-    public ScriptEngine getJsEngine() {
-        return jsEngine;
-    }
-
-    public void setJsEngine(@Nullable ScriptEngine jsEngine) {
-        this.jsEngine = jsEngine;
-    }
-
-    @Nullable
-    public ScriptEngine getPy3Engine() {
-        return py3Engine;
-    }
-
-    public void setPy3Engine(@Nullable ScriptEngine py3Engine) {
-        this.py3Engine = py3Engine;
     }
 
 }

@@ -2,7 +2,7 @@ package net.firiz.renewatelier.item.json.itemeffect;
 
 import net.firiz.renewatelier.utils.Randomizer;
 
-public class RandValue {
+public class RandValue implements IItemEffect {
 
     private final Mode mode;
     private final int min;

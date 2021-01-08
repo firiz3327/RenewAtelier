@@ -20,7 +20,7 @@ import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

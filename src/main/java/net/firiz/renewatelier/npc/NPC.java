@@ -1,32 +1,29 @@
 package net.firiz.renewatelier.npc;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.renewatelier.version.nms.VEntity;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.List;
+import java.util.UUID;
 
-public final class NPC {
+public class NPC {
 
     @NotNull
     private final NPCObject npcObject;
-    @Nullable
-    private final Entity entity;
-    @Nullable
-    private final VEntityPlayer entityPlayer;
+    @NotNull
+    private final VEntity<?> entity;
 
-    NPC(@NotNull NPCObject npcObject, @NotNull Entity entity) {
-        this.npcObject = npcObject;
-        this.entity = Objects.requireNonNull(entity);
-        this.entityPlayer = null;
-    }
+    private final boolean isPlayer;
+    private final List<UUID> viewer = new ObjectArrayList<>();
 
-    NPC(@NotNull NPCObject npcObject, @NotNull VEntityPlayer entityPlayer) {
+    public NPC(@NotNull NPCObject npcObject, @NotNull VEntity<?> entity) {
         this.npcObject = npcObject;
-        this.entity = null;
-        this.entityPlayer = Objects.requireNonNull(entityPlayer);
+        this.entity = entity;
+        this.isPlayer = entity instanceof VEntityPlayer;
     }
 
     @NotNull
@@ -35,34 +32,43 @@ public final class NPC {
     }
 
     public boolean isPlayer() {
-        return entityPlayer != null;
+        return isPlayer;
     }
 
     public int getEntityId() {
-        return isPlayer() ? Objects.requireNonNull(entityPlayer).getEntityId() : Objects.requireNonNull(entity).getEntityId();
+        return entity.getEntityId();
     }
 
     public String getName() {
-        return isPlayer() ? Objects.requireNonNull(entityPlayer).getName() : Objects.requireNonNull(entity).getCustomName();
+        return entity.getName();
     }
 
     public Location getLocation() {
-        return isPlayer() ? Objects.requireNonNull(entityPlayer).getLocation() : Objects.requireNonNull(entity).getLocation();
+        return entity.getLocation();
     }
 
     @NotNull
-    public Entity getEntity() {
-        if (!isPlayer()) {
-            return Objects.requireNonNull(entity);
-        }
-        throw new IllegalStateException("player npc");
+    public VEntity<?> getEntity() {
+        return entity;
     }
 
     @NotNull
     public VEntityPlayer getEntityPlayer() {
-        if (isPlayer()) {
-            return Objects.requireNonNull(entityPlayer);
-        }
-        throw new IllegalStateException("entity npc");
+        return (VEntityPlayer) entity;
     }
+
+    public void addViewer(Player player) {
+//        player.sendMessage("add viewer " + getName());
+        viewer.add(player.getUniqueId());
+    }
+
+    public void removeViewer(Player player) {
+//        player.sendMessage("remove viewer " + getName());
+        viewer.remove(player.getUniqueId());
+    }
+
+    public boolean hasViewer(Player player) {
+        return viewer.contains(player.getUniqueId());
+    }
+
 }

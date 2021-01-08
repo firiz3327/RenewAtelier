@@ -3,12 +3,12 @@ package net.firiz.renewatelier.version.nms;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.EntityEffect;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +48,8 @@ public final class NMSEntityUtils {
 
     @MinecraftVersion("1.16")
     public static void sweepParticle(@NotNull final Player player) {
-        ((CraftHumanEntity) player).getHandle().ew();
+        // find EntityHuman Particles.SWEEP_ATTACK
+        ((CraftHumanEntity) player).getHandle().ex();
     }
 
     @MinecraftVersion("1.16")

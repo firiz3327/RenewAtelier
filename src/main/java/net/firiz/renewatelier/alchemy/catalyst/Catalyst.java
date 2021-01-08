@@ -2,7 +2,7 @@ package net.firiz.renewatelier.alchemy.catalyst;
 
 import java.util.List;
 
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;

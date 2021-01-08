@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.version.packet;
 
-import net.minecraft.server.v1_16_R2.DataWatcher;
-import net.minecraft.server.v1_16_R2.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_16_R3.DataWatcher;
+import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
 
 public class PEMeta {
 

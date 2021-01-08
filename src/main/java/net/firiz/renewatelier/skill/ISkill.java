@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 
 public interface ISkill<T extends SkillData> {
 
-    void fire();
+    boolean fire();
 
     Player getPlayer();
 

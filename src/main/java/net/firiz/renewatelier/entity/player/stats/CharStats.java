@@ -1,13 +1,12 @@
 package net.firiz.renewatelier.entity.player.stats;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -132,7 +131,7 @@ public class CharStats extends EntityStatus {
         updater.run();
         updateHp(oldMaxHp);
         updateMp(oldMaxMp);
-        AtelierPlugin.getPlugin().getTabList().update(player);
+//        AtelierPlugin.getPlugin().getTabList().update(player);
     }
 
     @Nullable

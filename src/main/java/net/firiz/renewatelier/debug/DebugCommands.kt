@@ -7,14 +7,18 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeStatus
 import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.config.ConfigManager
 import net.firiz.renewatelier.debug.annotations.Cmd
+import net.firiz.renewatelier.entity.horse.EnumHorseSkill
+import net.firiz.renewatelier.entity.horse.HorseTier
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
 import net.firiz.renewatelier.item.json.AlchemyItemBag
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
+import net.firiz.renewatelier.item.json.HorseSaddle
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
 import net.firiz.renewatelier.utils.CommonUtils
-import net.firiz.renewatelier.utils.chores.ItemUtils
+import net.firiz.renewatelier.utils.Randomizer
+import net.firiz.renewatelier.utils.minecraft.ItemUtils
 import net.firiz.renewatelier.version.nms.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
@@ -489,6 +493,30 @@ class DebugCommands(private val debugListener: DebugListener) {
     fun head(sender: Player, args: ArrayList<Any>) {
         if (args.size != 0) {
             ItemUtils.addItem(sender, ItemUtils.createHead(SkinProperty.valueOf((args[0] as String).toUpperCase()), 1))
+        }
+    }
+
+    @Cmd(
+            desc = ["Horse Tier Level"],
+            examples = ["horse BROWN 10"],
+            text = "馬のサドルを取得します"
+    )
+    fun horse(sender: Player, args: ArrayList<Any>) {
+        if (args.size != 0) {
+            sender.inventory.addItem(HorseSaddle.createSaddle(Randomizer.nextBoolean(), HorseTier.valueOf((args[0] as String).toUpperCase()), (args[1] as String).toInt(), 0, 0))
+        }
+    }
+
+    @Cmd(
+            desc = ["HorseSkill EnumHorseSkill Level"],
+            examples = ["horseSkill two_seater 10"],
+            text = "馬のスキルを付与します"
+    )
+    fun horseSkill(sender: Player, args: ArrayList<Any>) {
+        if (args.size != 0) {
+            val saddle = HorseSaddle.load(sender.inventory.itemInMainHand)
+            saddle?.setSkillLevel(EnumHorseSkill.valueOf((args[0] as String).toUpperCase()), (args[1] as String).toInt())
+            saddle?.writeItem(sender.inventory.itemInMainHand, true)
         }
     }
 

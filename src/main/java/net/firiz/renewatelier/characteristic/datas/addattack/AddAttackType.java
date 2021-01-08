@@ -100,7 +100,6 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
     private static DamageComponent addAttackCalc(AddAttackCalcData addAttackCalcData, int x, boolean fixed, AttackAttribute attackAttribute, @Nullable LivingEntity victim, @Nullable EntityStatus victimStatus) {
         return DamageUtilV2.INSTANCE.addAttackDamage(
                 addAttackCalcData.isItem,
-                addAttackCalcData.power,
                 x,
                 fixed,
                 addAttackCalcData.addAttack.isIgnoreDefense(),

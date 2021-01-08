@@ -3,7 +3,7 @@ package net.firiz.renewatelier.inventory.shop;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import org.bukkit.Bukkit;

@@ -6,11 +6,11 @@ import org.bukkit.Location;
 import java.util.Arrays;
 import java.util.List;
 
-public class RangeEffect implements IEffect {
+public class RangeSkillEffect implements ISkillEffect {
 
     final List<ParticleData> particleDataList;
 
-    public RangeEffect(ParticleData... particleData) {
+    public RangeSkillEffect(ParticleData... particleData) {
         particleDataList = Arrays.asList(particleData);
     }
 

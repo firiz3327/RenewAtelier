@@ -1,39 +1,27 @@
 package net.firiz.renewatelier.skill.item.data;
 
 import net.firiz.renewatelier.damage.AttackAttribute;
-import net.firiz.renewatelier.skill.effect.RangeEffect;
-import org.jetbrains.annotations.Nullable;
+import net.firiz.renewatelier.skill.effect.RangeSkillEffect;
 
 public class RangeData implements ItemSkillData {
 
-    private final RangeEffect effect;
+    private final RangeSkillEffect effect;
     private final double radius;
     private final float height;
     private final int mobCount;
     private final boolean heal;
-
-    @Nullable
     private final AttackAttribute attackAttribute;
 
-    public RangeData(RangeEffect effect, double radius, float height, int mobCount) {
+    public RangeData(RangeSkillEffect effect, double radius, float height, int mobCount, AttackAttribute attackAttribute) {
         this.effect = effect;
         this.radius = radius;
         this.height = height;
         this.mobCount = mobCount;
-        this.heal = true;
-        this.attackAttribute = null;
-    }
-
-    public RangeData(RangeEffect effect, double radius, float height, int mobCount, AttackAttribute attackAttribute) {
-        this.effect = effect;
-        this.radius = radius;
-        this.height = height;
-        this.mobCount = mobCount;
-        this.heal = false;
+        this.heal = attackAttribute == AttackAttribute.HEAL;
         this.attackAttribute = attackAttribute;
     }
 
-    public RangeEffect getEffect() {
+    public RangeSkillEffect getEffect() {
         return effect;
     }
 
@@ -53,7 +41,6 @@ public class RangeData implements ItemSkillData {
         return heal;
     }
 
-    @Nullable
     public AttackAttribute getAttackAttribute() {
         return attackAttribute;
     }

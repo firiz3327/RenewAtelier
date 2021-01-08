@@ -70,6 +70,15 @@ public final class GameConstants {
             380, 389, 398, 407, 416, 425, 434, 443, 452, 461 // 100lv
     };
 
+    public static final int[] HORSE_REQ_EXPS = {
+            0, 50, 70, 90, 120, 140, 160, 180, 200, 200, // 10lv
+            200, 210, 220, 230, 240, 250, 260, 270, 280, 290, // 20lv
+            300, 320, 340, 360, 380, 400, 420, 440, 460, 480, // 30lv
+            500, 530, 560, 590, 620, 650, 680, 710, 740, 770, // 40lv
+    };
+
+    public static final int HORSE_MAX_BOOST_COUNT = 3;
+
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     public static final int RECIPE_EXP = 25;
     public static final int[] RECIPE_REQ_EXPS = {0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
@@ -89,7 +98,7 @@ public final class GameConstants {
             {"左右反転： ON", "上下反転： ON"}
     };
 
-    public static final Material USABLE_MATERIAL = Material.BAT_SPAWN_EGG;
+    public static final Material USABLE_MATERIAL = Material.SPECTRAL_ARROW;
 
     /**
      * クリティカルハック及びフライハック対策
@@ -105,6 +114,7 @@ public final class GameConstants {
 
     /**
      * 「attackSpeed * 0.25」でクールタイムを算出できる
+     *
      * @param material
      * @return
      */
@@ -305,6 +315,22 @@ public final class GameConstants {
                 return 7;
             default:
                 return 0;
+        }
+    }
+
+    public static boolean isOre(Material material) {
+        switch (material) {
+            case COAL_ORE:
+            case IRON_ORE:
+            case GOLD_ORE:
+            case DIAMOND_ORE:
+            case EMERALD_ORE:
+            case LAPIS_ORE:
+            case REDSTONE_ORE:
+            case ANCIENT_DEBRIS:
+                return true;
+            default:
+                return false;
         }
     }
 

@@ -12,7 +12,7 @@ import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.GArray;
-import net.firiz.renewatelier.utils.chores.CollectionUtils;
+import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

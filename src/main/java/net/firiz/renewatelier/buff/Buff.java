@@ -26,14 +26,11 @@ public class Buff {
     private Runnable endHandler;
 
     public Buff(EntityStatus status, BuffData buffData, int duration) {
-        this.status = status;
-        this.buffData = buffData;
-        this.duration = duration;
-        this.timer = () -> {
-            if (incrementTimer() || status.getEntity().isDead()) {
-                stopTimer();
-            }
-        };
+        this(status, buffData.buffValueType, buffData.level, buffData.type, duration, buffData.limitDuration, buffData.x, buffData.y);
+    }
+
+    public Buff(EntityStatus status, BuffData buffData, int duration, int x) {
+        this(status, buffData.buffValueType, buffData.level, buffData.type, duration, buffData.limitDuration, x, buffData.y);
     }
 
     public Buff(EntityStatus status, BuffValueType buffValueType, int level, BuffType type, int duration, int limitDuration, int x, @Nullable String y) {

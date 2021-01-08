@@ -1,8 +1,9 @@
 package net.firiz.renewatelier.buff;
 
+import net.firiz.renewatelier.item.json.itemeffect.IItemEffect;
 import org.jetbrains.annotations.Nullable;
 
-public class BuffData {
+public class BuffData implements IItemEffect {
 
     protected final BuffValueType buffValueType;
     protected final int level;
@@ -28,5 +29,9 @@ public class BuffData {
         this.limitDuration = limitDuration;
         this.x = x;
         this.y = y;
+    }
+
+    public int getX() {
+        return x;
     }
 }

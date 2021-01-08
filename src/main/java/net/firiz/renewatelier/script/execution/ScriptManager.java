@@ -6,8 +6,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import net.firiz.renewatelier.constants.ServerConstants;
+import net.firiz.renewatelier.entity.player.EngineManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.script.conversation.ScriptConversation;
 import net.firiz.renewatelier.script.engine.GraalEngine;
 import net.firiz.renewatelier.script.engine.GraalEngine.Type;
@@ -49,13 +49,13 @@ public enum ScriptManager {
     }
 
     private ScriptEngine getEngine(final String name, final Player player) {
-        final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
-        if (status.isEnginesUsable()) {
+        final EngineManager engineManager = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getEngineManager();
+        if (engineManager.isEnginesUsable()) {
             final ScriptEngine engine;
             if (name.endsWith(".py") || name.endsWith(".PY")) {
-                engine = status.getPy3Engine();
+                engine = engineManager.getPy3Engine();
             } else {
-                engine = status.getJsEngine();
+                engine = engineManager.getJsEngine();
             }
             return engine;
         }

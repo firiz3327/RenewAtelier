@@ -7,8 +7,10 @@ import net.firiz.renewatelier.script.conversation.NPCConversation;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.java.CObjects;
+import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.NonNullPair;
+import net.firiz.renewatelier.version.nms.VEntity;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
@@ -16,7 +18,6 @@ import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,6 @@ public enum NPCManager {
     private final Map<UUID, NonNullPair<NPCConversation, Long>> scriptPlayers = new Object2ObjectOpenHashMap<>();
 
     public void load() {
-        npcList.stream().filter(npc -> !npc.isPlayer()).forEach(npc -> npc.getEntity().remove());
         SQLManager.INSTANCE.select("npcs", new String[]{
                 "id", // 0
                 "name", // 1
@@ -61,31 +61,49 @@ public enum NPCManager {
                         }, null),
                         (String) objects.get(9),
                         (String) objects.get(10)
-                ).spawnEntity()
+                ).createNPC()
         ).forEach(npcList::add);
     }
 
-    public Runnable lookEyeLoop() {
+    public Runnable npcLoop() {
         return () -> Bukkit.getServer().getOnlinePlayers().forEach(player -> {
             for (final NPC npc : npcList) {
                 final Location loc = npc.getLocation();
-                if (CommonUtils.distanceSq(loc, player.getLocation(), 15, 5)) {
-                    final Location eyeLoc = player.getLocation();
-                    if (player.isSneaking()) {
-                        eyeLoc.setY(eyeLoc.getY() - 0.5);
+                if (CommonUtils.distanceSq(loc, player.getLocation(), 150, 10)) {
+                    if (!npc.hasViewer(player)) {
+                        npc.addViewer(player);
+                        if (npc.isPlayer()) {
+                            FakePlayerPacket.sendPlayer(player, Collections.singletonList(npc.getEntityPlayer()), false);
+                            FakePlayerPacket.sendSkin(player, npc.getEntityPlayer(), (byte) 127); // 127 = sublayerBitmasks
+                        } else {
+                            EntityPacket.sendSpawnPacketLiving(player, npc.getEntity());
+                        }
                     }
-                    final org.bukkit.util.Vector target = eyeLoc.toVector();
-                    loc.setDirection(target.subtract(loc.toVector()));
-                    PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
-                            npc.getEntityId(),
-                            loc.getPitch(),
-                            loc.getYaw(),
-                            true
-                    ));
-                    PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
-                            npc.getEntityId(),
-                            loc.getYaw()
-                    ));
+                    if (CommonUtils.distanceSq(loc, player.getLocation(), 15, 5)) {
+                        final Location eyeLoc = player.getLocation();
+                        if (player.isSneaking()) {
+                            eyeLoc.setY(eyeLoc.getY() - 0.5);
+                        }
+                        final org.bukkit.util.Vector target = eyeLoc.toVector();
+                        loc.setDirection(target.subtract(loc.toVector()));
+                        PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
+                                npc.getEntityId(),
+                                loc.getPitch(),
+                                loc.getYaw(),
+                                true
+                        ));
+                        PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
+                                npc.getEntityId(),
+                                loc.getYaw()
+                        ));
+                    }
+                } else if (npc.hasViewer(player)) {
+                    npc.removeViewer(player);
+                    if (npc.isPlayer()) {
+                        FakePlayerPacket.sendLogout(player, Collections.singletonList(npc.getEntityPlayer()));
+                    } else {
+                        PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(npc.getEntityId()));
+                    }
                 }
             }
         });
@@ -93,6 +111,7 @@ public enum NPCManager {
 
     public void stop() {
         final Map<World, List<VEntityPlayer>> worldFakePlayers = new Object2ObjectOpenHashMap<>();
+        final Map<World, List<Integer>> worldFakeEntities = new Object2ObjectOpenHashMap<>();
         npcList.forEach(npc -> {
             if (npc.isPlayer()) {
                 final VEntityPlayer entityPlayer = npc.getEntityPlayer();
@@ -105,7 +124,15 @@ public enum NPCManager {
                     worldFakePlayers.put(world, list);
                 }
             } else {
-                npc.getEntity().remove();
+                final VEntity<?> entity = npc.getEntity();
+                final World world = entity.getWorld();
+                if (worldFakeEntities.containsKey(world)) {
+                    worldFakeEntities.get(world).add(entity.getEntityId());
+                } else {
+                    final List<Integer> list = new ObjectArrayList<>();
+                    list.add(entity.getEntityId());
+                    worldFakeEntities.put(world, list);
+                }
             }
         });
         Bukkit.getOnlinePlayers().forEach(player -> {
@@ -113,27 +140,11 @@ public enum NPCManager {
             if (fakePlayers != null) {
                 FakePlayerPacket.sendLogout(player, fakePlayers);
             }
+            final List<Integer> fakeEntities = worldFakeEntities.get(player.getWorld());
+            if (fakeEntities != null) {
+                PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(CollectionUtils.parseInts(fakeEntities)));
+            }
         });
-    }
-
-    public void packet(@NotNull final Player player) {
-        final List<VEntityPlayer> playerNpcs = new ObjectArrayList<>();
-        npcList.stream().filter(
-                npc -> npc.isPlayer() && player.getWorld().equals(npc.getNpcObject().getWorld())
-        ).map(NPC::getEntityPlayer).forEachOrdered(playerNpcs::add);
-        if (!playerNpcs.isEmpty()) {
-            FakePlayerPacket.sendPlayer(player, playerNpcs, false);
-            playerNpcs.forEach(ePlayer ->
-                    FakePlayerPacket.sendSkin(player, ePlayer, (byte) 127) // 127 = sublayerBitmasks
-            );
-        }
-    }
-
-    public boolean action(@NotNull Player player, @NotNull Entity entity) {
-        if (NPCObject.hasEntity(entity)) {
-            return action(player, entity.getEntityId());
-        }
-        return false;
     }
 
     public boolean canAction(@NotNull Player player) {

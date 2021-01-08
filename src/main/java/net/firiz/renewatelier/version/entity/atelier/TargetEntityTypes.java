@@ -8,9 +8,9 @@ import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -339,9 +339,9 @@ public enum TargetEntityTypes {
         this.resistances = resistances;
         this.nmsEntityType = entityType;
         if (body != null) {
-            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R2");
+            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R3");
         } else if (entityType != null) {
-            this.body = "{super(net.minecraft.server.v1_16_R2.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R2.World) $args[0]);}";
+            this.body = "{super(net.minecraft.server.v1_16_R3.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R3.World) $args[0]);}";
         } else {
             throw new IllegalStateException("not found body code.");
         }

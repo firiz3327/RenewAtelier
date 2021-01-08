@@ -1,12 +1,10 @@
 package net.firiz.renewatelier;
 
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import net.firiz.renewatelier.alchemy.material.AlchemyMaterialCategory;
-import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.command.CheckCommand;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.entity.EntityCleanUp;
 import net.firiz.renewatelier.listener.*;
+import net.firiz.renewatelier.listener.player.PlayerListener;
 import net.firiz.renewatelier.loop.LoopManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
@@ -24,7 +22,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -75,7 +72,7 @@ public final class AtelierPlugin extends JavaPlugin {
         tabList.init();
 
         LoopManager.INSTANCE.addSec(new EntityCleanUp());
-        LoopManager.INSTANCE.addSec(NPCManager.INSTANCE.lookEyeLoop());
+        LoopManager.INSTANCE.addSec(NPCManager.INSTANCE.npcLoop());
 
         TargetEntityTypes.check();
     }

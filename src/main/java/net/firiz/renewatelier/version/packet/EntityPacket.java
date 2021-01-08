@@ -1,10 +1,17 @@
 package net.firiz.renewatelier.version.packet;
 
+import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R2.*;
+import net.firiz.renewatelier.version.nms.VEntity;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+
+import java.util.UUID;
 
 /**
  * @author firiz
@@ -42,7 +49,7 @@ public class EntityPacket {
         );
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static PacketPlayOutEntityHeadRotation getHeadRotationPacket(int entityId, double yaw) {
         final PacketPlayOutEntityHeadRotation packet = new PacketPlayOutEntityHeadRotation();
         VersionUtils.setFieldValue(VersionUtils.getField(packet, "a"), packet, entityId);
@@ -80,7 +87,7 @@ public class EntityPacket {
         );
     }
 
-    @MinecraftVersion("1.15")
+    @MinecraftVersion("1.16")
     public static PacketPlayOutEntityTeleport getTeleportPacket(final int entityId, final Location location, final boolean onGround) {
         final PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport();
         VersionUtils.setFieldValue(VersionUtils.getField(packet, "a"), packet, entityId);
@@ -93,4 +100,50 @@ public class EntityPacket {
         return packet;
     }
 
+    @MinecraftVersion("1.16")
+    public static int createFakeId(Entity entity) {
+        final int fakeId = FakeId.createId();
+        entity.e(fakeId); // Entity.id = fakeId
+        return fakeId;
+    }
+
+    public static VEntity<EntityVillager> createVillager(Location location, String name, Villager.Type type, Villager.Profession profession) {
+        final CraftWorld craftWorld = (CraftWorld) location.getWorld();
+        final EntityVillager entityVillager = (EntityVillager) craftWorld.createEntity(location, Villager.class);
+        final Villager villager = (Villager) entityVillager.getBukkitEntity();
+        entityVillager.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        entityVillager.setCustomNameVisible(true);
+        villager.setCustomName(name);
+        villager.setVillagerType(type);
+        villager.setProfession(profession);
+        final int fakeId = createFakeId(entityVillager);
+        return new VEntity<>(entityVillager, fakeId, name, location);
+    }
+
+    public static VEntity<Entity> createEntity(Location location, String name, EntityType type) {
+        final CraftWorld craftWorld = (CraftWorld) location.getWorld();
+        final Entity entity = craftWorld.createEntity(location, type.getEntityClass());
+        entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        entity.setCustomNameVisible(true);
+        entity.getBukkitEntity().setCustomName(name);
+        final int fakeId = createFakeId(entity);
+        return new VEntity<>(entity, fakeId, name, location);
+    }
+
+    @MinecraftVersion("1.16")
+    public static void sendSpawnPacketLiving(Player player, VEntity<?> entity) {
+        if (!(entity.getEntity() instanceof EntityLiving)) {
+            throw new IllegalArgumentException("entity is not EntityLiving class");
+        }
+        final EntityLiving living = (EntityLiving) entity.getEntity();
+        PacketUtils.sendPackets(
+                player,
+                new PacketPlayOutSpawnEntityLiving(living),
+                new PacketPlayOutEntityMetadata(
+                        entity.getEntityId(),
+                        living.getDataWatcher(),
+                        true
+                )
+        );
+    }
 }

@@ -23,12 +23,14 @@ public enum AlchemyInventoryType {
         @Override
         public boolean check(Action action, ItemStack item, Block block, Player player) {
             final BlockData blockData = block.getBlockData();
-            if (blockData instanceof Levelled) {
+            if (blockData instanceof Levelled) { // levelled only cauldron
                 final Levelled cauldron = (Levelled) blockData;
                 boolean typeCheck;
                 switch (block.getRelative(BlockFace.DOWN).getType()) {
                     case FIRE:
                     case CAMPFIRE:
+                    case SOUL_FIRE:
+                    case SOUL_CAMPFIRE:
                         typeCheck = true;
                         break;
                     default:

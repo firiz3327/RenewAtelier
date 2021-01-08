@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.listener;
 
-import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.inventory.AnvilManager;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
@@ -10,13 +9,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.AnvilInventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author firiz
@@ -42,10 +38,7 @@ public class InventoryListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void invOpen(final InventoryOpenEvent e) {
-        final InventoryView view = e.getView();
-        if (view.getTopInventory() instanceof AnvilInventory) {
-            AnvilManager.open(e);
-        }
+        inventoryManager.onOpen(e.getView(), e);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

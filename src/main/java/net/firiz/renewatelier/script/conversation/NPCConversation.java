@@ -163,7 +163,7 @@ public final class NPCConversation extends ScriptConversation {
     }
 
     @Export
-    public void sendNpcChat(@NotNull final String msg, @NotNull final int maxStatus, @NotNull final int status) {
+    public void sendNpcChat(@NotNull final String msg, final int maxStatus, final int status) {
         final StringBuilder val = new StringBuilder();
         for (int i = 0; i < maxStatus; i++) {
             val.append(i <= status ? "●" : "○");

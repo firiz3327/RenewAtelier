@@ -2,12 +2,12 @@ package net.firiz.renewatelier.entity.arrow;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
-import net.minecraft.server.v1_16_R2.EntityArrow;
+import net.minecraft.server.v1_16_R3.EntityArrow;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -41,8 +41,13 @@ public enum ArrowManager {
             this.customModel = customModel;
         }
 
-        static boolean isFound(ItemMeta meta) {
-            return meta.hasCustomModelData() && Arrays.stream(values()).anyMatch(arrow -> arrow.customModel == meta.getCustomModelData());
+        /**
+         * @param item 検索するアイテム
+         * @return CustomArrowに該当する若しくは、光の矢でカスタムモデルデータを所持している場合 true
+         */
+        static boolean isFound(ItemStack item) {
+            final ItemMeta meta = item.getItemMeta();
+            return (item.getType() == Material.SPECTRAL_ARROW && meta.hasCustomModelData()) || (meta.hasCustomModelData() && Arrays.stream(values()).anyMatch(arrow -> arrow.customModel == meta.getCustomModelData()));
         }
     }
 
@@ -53,10 +58,7 @@ public enum ArrowManager {
             if (data.result) { // consumeArrow and nextConsumeArrow is null
                 player.updateInventory();
                 return true;
-            } else if (CObjects.nullIfPredicate(
-                    data.arrows.getLeft(),
-                    itemStack -> CustomArrow.isFound(itemStack.getItemMeta()),
-                    false)) {
+            } else if (CObjects.nullIfPredicate(data.arrows.getLeft(), CustomArrow::isFound, false)) {
                 final ItemStack nextConsumeArrow = data.arrows.getRight();
                 if (nextConsumeArrow != null) {
                     final ItemStack arrow = nextConsumeArrow.clone();
@@ -84,7 +86,7 @@ public enum ArrowManager {
         final ItemStack consumeArrow = arrows.getLeft();
         if (consumeArrow != null) {
             final ItemStack nextConsumeArrow = arrows.getRight();
-            if (CustomArrow.isFound(consumeArrow.getItemMeta()) && nextConsumeArrow == null) {
+            if (CustomArrow.isFound(consumeArrow) && nextConsumeArrow == null) {
                 player.sendMessage(STR_NO_AVAILABLE_ARROW);
             } else {
                 return new InteractCrossbowResult(arrows, false);
@@ -113,14 +115,17 @@ public enum ArrowManager {
         }
 
         if (consumeArrow != null) { // always entity is player
-            final ItemMeta meta = Objects.requireNonNull(consumeArrow.getItemMeta());
-            if (CustomArrow.isFound(meta)) {
+            final boolean result;
+            if (CustomArrow.isFound(consumeArrow)) {
                 removeArrow(baseArrow);
-                return shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
+                result = shootNextArrow((Player) entity, bow, baseArrow, consumeArrow, nextConsumeArrow, force);
             } else {
                 removeArrow(baseArrow);
                 shootAtelierArrow(entity, bow, baseArrow, consumeArrow, true, force, false);
+                result = false;
             }
+            ((Player) entity).updateInventory();
+            return result;
         } else if (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.CREATIVE) {
             removeArrow(baseArrow);
             shootAtelierArrow(entity, bow, baseArrow, new ItemStack(Material.ARROW), true, force, false);
@@ -225,10 +230,9 @@ public enum ArrowManager {
         IntStream.rangeClosed(0, 35).mapToObj(playerInventory::getItem).forEach(items::add);
         for (final ItemStack item : items) {
             if (item != null && (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW || item.getType() == Material.SPECTRAL_ARROW)) {
-                final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
                 if (consumeArrow == null) {
                     consumeArrow = item;
-                } else if (!CustomArrow.isFound(meta)) {
+                } else if (!CustomArrow.isFound(item)) {
                     nextConsumeArrow = item;
                     break;
                 }

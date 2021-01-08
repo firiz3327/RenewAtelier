@@ -6,11 +6,11 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 
-public class BombEffect implements IEffect {
+public class BombSkillEffect implements ISkillEffect {
 
     private final boolean large;
 
-    public BombEffect(boolean large) {
+    public BombSkillEffect(boolean large) {
         this.large = large;
     }
 

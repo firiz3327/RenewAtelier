@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.item.drop;
 
 import net.firiz.renewatelier.loop.LoopManager;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;

@@ -4,11 +4,10 @@ import java.util.List;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.drop.AnimatedDrop;
-import net.firiz.renewatelier.version.packet.PacketUtils;
 import net.firiz.renewatelier.version.packet.PayloadPacket;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -16,7 +15,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 
 /**
  * @author firiz
@@ -28,7 +26,6 @@ public enum LoopManager {
     private final List<AnimatedDrop> animDrops;
     private final List<Runnable> loopRuns;
     private final List<Runnable> loopHalfSecRuns;
-    private final List<Runnable> loopMiriRuns;
     private final List<Runnable> loopMinuteRuns;
     private boolean start;
     private int period = 0;
@@ -40,7 +37,6 @@ public enum LoopManager {
         animDrops = new ObjectArrayList<>();
         loopRuns = new ObjectArrayList<>();
         loopHalfSecRuns = new ObjectArrayList<>();
-        loopMiriRuns = new ObjectArrayList<>();
         loopMinuteRuns = new ObjectArrayList<>();
     }
 
@@ -76,13 +72,6 @@ public enum LoopManager {
         loopRuns.remove(run);
     }
 
-    public void addMiri(final Runnable run) {
-        loopMiriRuns.add(run);
-    }
-
-    public void removeMiri(final Runnable run) {
-        loopMiriRuns.remove(run);
-    }
 
     public void addMinutes(final Runnable run) {
         loopMinuteRuns.add(run);
@@ -96,7 +85,6 @@ public enum LoopManager {
     private void loop() {
         taskId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             new ObjectArrayList<>(animDrops).forEach(AnimatedDrop::anim);
-            new ObjectArrayList<>(loopMiriRuns).forEach(Runnable::run);
             if (period % 10 == 0) {
                 halfSecLoop();
             }
@@ -119,9 +107,12 @@ public enum LoopManager {
 
         new ObjectArrayList<>(loopRuns).forEach(Runnable::run);
 
-
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            PayloadPacket.sendBrand(player);
+        PlayerSaveManager.INSTANCE.getChars().forEach(c -> {
+            PayloadPacket.sendBrand(c.getPlayer());
+            final CharStats stats = c.getCharStats();
+            if (stats.getMp() < stats.getMaxMp()) {
+                stats.damageMp(-Math.round(Math.max(1, c.getCharStats().getMaxMp() * 0.02)));
+            }
         });
 
         if (secPeriod % 60 == 0) {

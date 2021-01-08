@@ -2,10 +2,10 @@ package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;

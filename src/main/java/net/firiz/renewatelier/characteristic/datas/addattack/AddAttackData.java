@@ -3,13 +3,14 @@ package net.firiz.renewatelier.characteristic.datas.addattack;
 import net.firiz.renewatelier.characteristic.datas.ChData;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AddAttackX;
 import net.firiz.renewatelier.damage.AttackCategory;
+import net.firiz.renewatelier.item.json.itemeffect.IItemEffect;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AddAttackData implements ChData {
+public class AddAttackData implements ChData, IItemEffect {
 
     // 追加攻撃 <AddAttackType, 確率, (-1=全ての攻撃 0=スキル以外 1=アイテムのみ　2=武器のみ 3=通常攻撃のみ), AddAttackTypeによる値...>
     private final AddAttackType addAttackType;

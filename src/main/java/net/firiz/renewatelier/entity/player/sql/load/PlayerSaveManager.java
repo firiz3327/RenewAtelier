@@ -5,6 +5,7 @@ import java.util.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.entity.player.EngineManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.script.execution.ScriptManager;
@@ -62,6 +63,10 @@ public enum PlayerSaveManager {
         }));
     }
 
+    public Collection<Char> getChars() {
+        return Collections.unmodifiableCollection(statusList.values());
+    }
+
     public Char getChar(final UUID uuid) {
         if (!statusList.containsKey(uuid)) {
             throw new IllegalStateException("PlayerStatus: ".concat(uuid.toString()).concat(" is unload"));
@@ -103,7 +108,7 @@ public enum PlayerSaveManager {
         for (final StatusLoader<?> sLoader : loaders) {
             loaderValues.add(sLoader.load(id));
         }
-        final Char status = new Char(
+        final Char character = new Char(
                 player,
                 uuid,
                 id,
@@ -130,11 +135,12 @@ public enum PlayerSaveManager {
                 CommonUtils.cast(loaderValues.get(3)) // charSettingLoader
         );
         new Thread(() -> {
-            status.setJsEngine(script.createJsEngine());
-            status.setPy3Engine(script.createPy3Engine());
-            status.setEnginesUsable(true);
+            final EngineManager engineManager = character.getEngineManager();
+            engineManager.setJsEngine(script.createJsEngine());
+            engineManager.setPy3Engine(script.createPy3Engine());
+            engineManager.setEnginesUsable(true);
         }).start();
-        statusList.put(uuid, status);
+        statusList.put(uuid, character);
     }
 
     public void unloadStatus(final UUID uuid) {

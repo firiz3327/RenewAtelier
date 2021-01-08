@@ -6,18 +6,16 @@ import net.firiz.renewatelier.alchemy.kettle.bonus.ABonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.java.CObjects;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class KettleUserData {
 

@@ -5,12 +5,12 @@ import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.arrow.AtelierSpectralArrow;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VItemStack;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R2.util.CraftVector;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R3.util.CraftVector;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -105,7 +105,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     @Override
     public void setPickupStatus(AbstractArrow.PickupStatus status) {
         Preconditions.checkNotNull(status, "status");
-        fromPlayer = net.minecraft.server.v1_16_R2.EntityArrow.PickupStatus.a(status.ordinal());
+        fromPlayer = net.minecraft.server.v1_16_R3.EntityArrow.PickupStatus.a(status.ordinal());
     }
 
     @Override
@@ -159,7 +159,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     }
 
     @Override
-    protected net.minecraft.server.v1_16_R2.ItemStack getItemStack() {
-        return (net.minecraft.server.v1_16_R2.ItemStack) arrow.getNmsItem();
+    protected net.minecraft.server.v1_16_R3.ItemStack getItemStack() {
+        return (net.minecraft.server.v1_16_R3.ItemStack) arrow.getNmsItem();
     }
 }

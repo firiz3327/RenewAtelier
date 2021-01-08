@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.item.json.itemeffect;
 
-public class RaisePower {
+public class RaisePower implements IItemEffect {
 
     private final double power;
     private final boolean multiply;

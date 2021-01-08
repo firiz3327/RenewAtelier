@@ -33,4 +33,9 @@ public class Pair<L, R> implements PairInterface<L, R> {
         this.right = right;
     }
 
+    @Override
+    public String toString() {
+        return info();
+    }
+
 }

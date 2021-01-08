@@ -5,7 +5,7 @@ import java.util.List;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.sql.SQLManager;
-import net.firiz.renewatelier.utils.chores.ArrayUtils;
+import net.firiz.renewatelier.utils.java.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**

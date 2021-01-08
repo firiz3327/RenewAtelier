@@ -4,11 +4,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_16_R2.*;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
 
-@MinecraftVersion("1.15")
+@MinecraftVersion("1.16")
 public enum AtelierEntityUtils {
     INSTANCE;
 
@@ -212,19 +212,19 @@ public enum AtelierEntityUtils {
             // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
             // booleanを返すとBooleanになるので、booleanValue()でbooleanへ変換
             // Entity.class
-            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_16_R2.DamageSource damagesource, float f) {" +
+            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_16_R3.DamageSource damagesource, float f) {" +
                     "return ((Boolean) damageEntity0001.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
             final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody, clasz);
             clasz.addMethod(overrideDamageEntity);
 
             // EntityLiving.class
-            final String dieBody = "public void die(net.minecraft.server.v1_16_R2.DamageSource damagesource) {" +
+            final String dieBody = "public void die(net.minecraft.server.v1_16_R3.DamageSource damagesource) {" +
                     "die0001.invoke(livingData, new Object[]{damagesource});}";
             final CtMethod overrideDie = CtNewMethod.make(dieBody, clasz);
             clasz.addMethod(overrideDie);
 
             // EntityLiving.class
-            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_16_R2.DamageSource damagesource, int i, boolean flag) {" +
+            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_16_R3.DamageSource damagesource, int i, boolean flag) {" +
                     "drop0001.invoke(livingData, new Object[]{damagesource, Integer.valueOf(i), Boolean.valueOf(flag)});}";
             final CtMethod overrideDrop = CtNewMethod.make(dropBody, clasz);
             clasz.addMethod(overrideDrop);

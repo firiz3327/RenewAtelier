@@ -6,7 +6,7 @@ import net.firiz.renewatelier.characteristic.Characteristic
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.utils.CommonUtils
-import net.firiz.renewatelier.utils.chores.ItemUtils
+import net.firiz.renewatelier.utils.minecraft.ItemUtils
 import net.firiz.renewatelier.version.LanguageItemUtil
 import net.firiz.renewatelier.version.packet.InventoryPacket
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType

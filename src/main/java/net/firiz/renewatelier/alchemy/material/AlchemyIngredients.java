@@ -256,7 +256,11 @@ public enum AlchemyIngredients {
     I239R15("火薬臭", AlchemyAttribute.RED, 15),
     I240R10("わずかな熱", AlchemyAttribute.RED, 10),
     I241P25("奇妙な香り", AlchemyAttribute.PURPLE, 25),
-    I242R35("高純度", AlchemyAttribute.RED, 35);
+    I242R35("高純度", AlchemyAttribute.RED, 35),
+    I243Y15("角が丸い", AlchemyAttribute.YELLOW, 15),
+    I244G20("個別包装", AlchemyAttribute.GREEN, 20),
+    I245B45("気化する", AlchemyAttribute.BLUE, 45),
+    I246B20("隙間に入る", AlchemyAttribute.BLUE, 20);
 
     private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
     private final String name;

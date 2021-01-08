@@ -15,8 +15,8 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.item.CustomModelMaterial;
 import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.chores.ItemUtils;
-import net.firiz.renewatelier.utils.chores.CObjects;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
+import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.md_5.bungee.api.ChatColor;
@@ -143,6 +143,10 @@ public class AlchemyItemStatus {
         return activeEffects;
     }
 
+    public boolean hasActiveEffect(AlchemyItemEffect effect) {
+        return activeEffects.contains(effect);
+    }
+
     public void setSize(@NotNull int[] size) {
         this.size = size;
     }
@@ -213,6 +217,10 @@ public class AlchemyItemStatus {
         } else {
             consumedCount++;
         }
+    }
+
+    public void decrementConsumedCount() {
+        consumedCount--;
     }
 
     public boolean canUse() {
