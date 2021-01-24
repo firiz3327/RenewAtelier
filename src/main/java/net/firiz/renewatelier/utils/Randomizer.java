@@ -52,4 +52,8 @@ public final class Randomizer {
         return Randomizer.nextInt(max) < percent;
     }
 
+    public static boolean percent(final double percent) {
+        return Randomizer.nextDouble() < percent;
+    }
+
 }

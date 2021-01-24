@@ -3,6 +3,7 @@ package net.firiz.renewatelier.entity.horse;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.entity.horse.NMSAtelierHorse;
@@ -14,6 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.spigotmc.event.entity.EntityMountEvent;
+
+import java.util.Optional;
 
 public enum HorseManager {
     INSTANCE;
@@ -89,6 +92,49 @@ public enum HorseManager {
                 }
             }
         }
+    }
+
+    public ItemStack mating(ItemStack femaleItem, HorseSaddle female, HorseSaddle male) {
+        final HorseTier femaleTier = female.getTier();
+        final HorseTier maleTier = male.getTier();
+
+        final HorseSkillList highSkillList;
+        final HorseTier highTier;
+        final HorseSaddle saddle;
+        if (femaleTier == maleTier) {
+            saddle = Randomizer.nextDouble() > 0.6 ? female : male;
+            highTier = saddle.getTier();
+        } else {
+            saddle = femaleTier.getTier() > maleTier.getTier() ? female : male;
+            highTier = femaleTier.getTier() > maleTier.getTier() ? femaleTier : maleTier;
+        }
+        highSkillList = saddle.getHorseSkills();
+        int rank = highTier.getTier();
+        if (Randomizer.percent(highTier.getRankUpPercent())) {
+            rank++;
+        } else if (Randomizer.percent(highTier.getRankDownPercent())) {
+            rank--;
+        }
+
+        final HorseSkillList skillList = new HorseSkillList();
+        highSkillList.entrySet().forEach(entry -> {
+            if (Randomizer.percent(80)) {
+                skillList.put(entry.getSkill(), (int) (entry.getLevel() / Math.max(0.1, Randomizer.nextDouble() * 3)));
+            }
+        });
+
+        female.setMatingCount(female.getMatingCount() + 1);
+        female.refreshMatingTime();
+        female.writeItem(femaleItem, true);
+        final Optional<HorseTier> nextTier = HorseTier.searchTier(rank);
+        return HorseSaddle.createSaddle(
+                Randomizer.nextBoolean(),
+                nextTier.orElse(highTier),
+                0,
+                CollectionUtils.getRandomValue(Horse.Color.values()).ordinal(),
+                CollectionUtils.getRandomValue(Horse.Style.values()).ordinal(),
+                skillList
+        );
     }
 
     public void swap(PlayerSwapHandItemsEvent event, Player player, ItemStack saddle) {

@@ -10,6 +10,8 @@ import net.firiz.renewatelier.debug.annotations.Cmd
 import net.firiz.renewatelier.entity.horse.EnumHorseSkill
 import net.firiz.renewatelier.entity.horse.HorseTier
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
+import net.firiz.renewatelier.inventory.MatingHorseInventory
+import net.firiz.renewatelier.inventory.manager.InventoryManager
 import net.firiz.renewatelier.item.json.AlchemyItemBag
 import net.firiz.renewatelier.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.item.json.HorseSaddle
@@ -517,6 +519,17 @@ class DebugCommands(private val debugListener: DebugListener) {
             val saddle = HorseSaddle.load(sender.inventory.itemInMainHand)
             saddle?.setSkillLevel(EnumHorseSkill.valueOf((args[0] as String).toUpperCase()), (args[1] as String).toInt())
             saddle?.writeItem(sender.inventory.itemInMainHand, true)
+        }
+    }
+
+    @Cmd(
+            desc = ["HorseMating"],
+            examples = ["horseMating"],
+            text = "馬の交配画面を表示"
+    )
+    fun horseMating(sender: Player, args: ArrayList<Any>) {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin()) {
+            InventoryManager.INSTANCE.getInventory(MatingHorseInventory::class.java).open(sender)
         }
     }
 

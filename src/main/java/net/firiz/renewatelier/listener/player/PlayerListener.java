@@ -2,6 +2,7 @@ package net.firiz.renewatelier.listener.player;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
+import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
@@ -39,6 +40,18 @@ public class PlayerListener implements Listener {
         final ItemStack item = e.getBow();
         if (item.getType() == Material.CROSSBOW && !((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles()) {
             e.setCancelled(ArrowManager.INSTANCE.interactCrossbow(player));
+        }
+    }
+
+    @EventHandler
+    private void loadCrossbow(final EntityLoadCrossbowEvent e) {
+        if (e.getEntity() instanceof Player) {
+            final Player player = (Player) e.getEntity();
+            final ItemStack item = e.getCrossbow();
+            if (item.getType() == Material.CROSSBOW && !((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles()) {
+                e.setCancelled(ArrowManager.INSTANCE.interactCrossbow(player));
+                player.updateInventory();
+            }
         }
     }
 

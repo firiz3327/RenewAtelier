@@ -17,6 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +41,8 @@ public class HorseSaddle {
 
     @Expose
     private int matingCount;
+    @Expose
+    private long matingTime;
 
     @Expose
     private int color; // Horse.Color.original
@@ -52,6 +59,16 @@ public class HorseSaddle {
         this.exp = exp;
         this.color = color;
         this.style = style;
+    }
+
+    public HorseSaddle(boolean female, HorseTier tier, int level, int exp, int color, int style, HorseSkillList horseSkills) {
+        this.female = female;
+        this.tier = tier;
+        this.level = level;
+        this.exp = exp;
+        this.color = color;
+        this.style = style;
+        horseSkills.entrySet().forEach(entry -> horseSkills.put(entry.getSkill(), entry.getLevel()));
     }
 
     public boolean isFemale() {
@@ -96,6 +113,18 @@ public class HorseSaddle {
         return levelUp;
     }
 
+    public int getMatingCount() {
+        return matingCount;
+    }
+
+    public void setMatingCount(int matingCount) {
+        this.matingCount = matingCount;
+    }
+
+    public long getMatingTime() {
+        return matingTime;
+    }
+
     public int getColor() {
         return color;
     }
@@ -126,6 +155,10 @@ public class HorseSaddle {
         } else {
             horseSkills.remove(skill);
         }
+    }
+
+    public HorseSkillList getHorseSkills() {
+        return horseSkills;
     }
 
     private void levelUp(ItemStack saddle, Player player, int oldLevel) {
@@ -186,6 +219,13 @@ public class HorseSaddle {
                         entry -> lore.add(ChatColor.WHITE + "- " + entry.getSkill().getName() + " : " + ChatColor.GREEN + entry.getLevel() + " / " + entry.getSkill().getMaxLevel())
                 );
             }
+            if (female && matingCount > 0) {
+                lore.add("");
+                lore.add(ChatColor.GRAY + "交配回数: " + ChatColor.WHITE + matingCount + " / " + GameConstants.HORSE_MATING_MAX_COUNT);
+                if (matingCount < GameConstants.HORSE_MATING_MAX_COUNT) {
+                    lore.add(ChatColor.GRAY + "次回交配可能日時: " + ChatColor.WHITE + matingTimeString() + " 以降");
+                }
+            }
             meta.setLore(lore);
         }
         final String json = JsonFactory.toJson(this);
@@ -197,8 +237,28 @@ public class HorseSaddle {
         item.setItemMeta(meta);
     }
 
+    public void refreshMatingTime() {
+        this.matingTime = LocalDateTime.now().withSecond(0).toEpochSecond(ZoneOffset.UTC);
+    }
+
+    private String matingTimeString() {
+        final LocalDateTime time = LocalDateTime.ofEpochSecond(matingTime, 0, ZoneOffset.UTC).plusHours(GameConstants.HORSE_MATING_REQUIRE_HOUR);
+        final ZonedDateTime zonedTime = time.atZone(ZoneId.of("Asia/Tokyo"));
+        return DateTimeFormatter.ofPattern("MM/dd HH:mm").format(zonedTime);
+    }
+
+    public boolean availableMatingTime() {
+        final LocalDateTime now = LocalDateTime.now().withSecond(0);
+        final LocalDateTime time = LocalDateTime.ofEpochSecond(matingTime, 0, ZoneOffset.UTC).plusHours(GameConstants.HORSE_MATING_REQUIRE_HOUR);
+        return now.isAfter(time);
+    }
+
     public static ItemStack createSaddle(boolean female, HorseTier tier, int level, int color, int style) {
         return createSaddle(new HorseSaddle(female, tier, level, 0, color, style));
+    }
+
+    public static ItemStack createSaddle(boolean female, HorseTier tier, int level, int color, int style, HorseSkillList skillList) {
+        return createSaddle(new HorseSaddle(female, tier, level, 0, color, style, skillList));
     }
 
     public static ItemStack createSaddle(HorseSaddle saddle) {
@@ -208,7 +268,7 @@ public class HorseSaddle {
     }
 
     public static boolean has(@Nullable final ItemStack item) {
-        return item != null && item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(
+        return item != null && item.getType() != Material.AIR && item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(
                 persistentDataKey,
                 PersistentDataType.STRING
         );

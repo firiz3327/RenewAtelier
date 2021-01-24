@@ -51,32 +51,6 @@ public enum ArrowManager {
         }
     }
 
-    public boolean handleDigPacketCrossbow(@NotNull Player player) {
-        final ItemStack mainHand = player.getInventory().getItemInMainHand();
-        if (mainHand.getType() == Material.CROSSBOW) {
-            final InteractCrossbowResult data = ArrowManager.INSTANCE.interactCrossbow2(player);
-            if (data.result) { // consumeArrow and nextConsumeArrow is null
-                player.updateInventory();
-                return true;
-            } else if (CObjects.nullIfPredicate(data.arrows.getLeft(), CustomArrow::isFound, false)) {
-                final ItemStack nextConsumeArrow = data.arrows.getRight();
-                if (nextConsumeArrow != null) {
-                    final ItemStack arrow = nextConsumeArrow.clone();
-                    arrow.setAmount(1);
-                    final CrossbowMeta meta = (CrossbowMeta) mainHand.getItemMeta();
-                    meta.addChargedProjectile(arrow);
-                    mainHand.setItemMeta(meta);
-                    if (player.getGameMode() != GameMode.CREATIVE) {
-                        nextConsumeArrow.setAmount(nextConsumeArrow.getAmount() - 1);
-                    }
-                }
-                player.updateInventory();
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean interactCrossbow(@NotNull Player player) {
         return interactCrossbow2(player).result;
     }

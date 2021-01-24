@@ -17,6 +17,10 @@ public class CollectionUtils {
         return get(collection, Randomizer.nextInt(collection.size()));
     }
 
+    public static <T> T getRandomValue(@NotNull final T[] array) {
+        return array[Randomizer.nextInt(array.length)];
+    }
+
     public static <T> Collection<T> add(@NotNull final Collection<T> collection, final T... values) {
         collection.addAll(Arrays.asList(values));
         return collection;

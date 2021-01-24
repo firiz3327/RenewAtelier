@@ -47,9 +47,6 @@ public class ChannelHandler extends ChannelDuplexHandler {
             if (event.isCancelled()) {
                 return;
             }
-        } else if (msg instanceof PacketPlayInBlockDig
-                && ArrowManager.INSTANCE.handleDigPacketCrossbow(player.getBukkitEntity())) {
-            return;
         }
         super.channelRead(ctx, msg);
     }

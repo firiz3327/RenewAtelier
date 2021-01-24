@@ -5,10 +5,7 @@ import net.firiz.renewatelier.alchemy.kettle.inventory.AlchemyKettleInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.CatalystSelectInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.ItemSelectInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
-import net.firiz.renewatelier.inventory.AnvilManager;
-import net.firiz.renewatelier.inventory.Appraisal;
-import net.firiz.renewatelier.inventory.BagInventory;
-import net.firiz.renewatelier.inventory.ConfirmInventory;
+import net.firiz.renewatelier.inventory.*;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
 import net.firiz.renewatelier.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.utils.CommonUtils;
@@ -40,6 +37,7 @@ public enum InventoryManager {
         inventories.put(ConfirmInventory.class, new ConfirmInventory());
         inventories.put(ShopInventory.class, new ShopInventory());
         inventories.put(BagInventory.class, new BagInventory());
+        inventories.put(MatingHorseInventory.class, new MatingHorseInventory());
     }
 
     @Nullable

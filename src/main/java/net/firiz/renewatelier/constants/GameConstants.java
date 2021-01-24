@@ -78,6 +78,8 @@ public final class GameConstants {
     };
 
     public static final int HORSE_MAX_BOOST_COUNT = 3;
+    public static final long HORSE_MATING_MAX_COUNT = 2;
+    public static final long HORSE_MATING_REQUIRE_HOUR = 48;
 
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     public static final int RECIPE_EXP = 25;
