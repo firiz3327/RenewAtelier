@@ -3,7 +3,7 @@ package net.firiz.renewatelier.inventory.delivery
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial
 import net.firiz.renewatelier.characteristic.Characteristic
-import net.firiz.renewatelier.item.json.AlchemyItemStatus
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus
 import net.firiz.renewatelier.npc.NPCManager
 import net.firiz.renewatelier.utils.CommonUtils
 import net.firiz.renewatelier.utils.minecraft.ItemUtils

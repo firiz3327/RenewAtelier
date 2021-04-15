@@ -26,6 +26,10 @@ public abstract class ConfigLoader<T> {
     protected void initClear() {
     }
 
+    protected boolean hasFile() {
+        return file.exists();
+    }
+
     public final void load() {
         if (folder) {
             final File[] files = file.listFiles();

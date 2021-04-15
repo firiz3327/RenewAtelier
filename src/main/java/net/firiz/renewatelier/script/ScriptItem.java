@@ -1,12 +1,11 @@
 package net.firiz.renewatelier.script;
 
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.script.conversation.ItemConversation;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**

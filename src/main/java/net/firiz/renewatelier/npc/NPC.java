@@ -47,6 +47,14 @@ public class NPC {
         return entity.getLocation();
     }
 
+    public Location getEyeLocation() {
+        return entity.getEyeLocation();
+    }
+
+    public Location getMessageLocation() {
+        return entity.getEyeLocation().add(0, 0.4, 0);
+    }
+
     @NotNull
     public VEntity<?> getEntity() {
         return entity;

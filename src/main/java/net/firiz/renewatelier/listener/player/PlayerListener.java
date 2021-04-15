@@ -113,7 +113,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void death(final PlayerDeathEvent e) {
-        e.setDeathMessage(null);
+        e.setReviveHealth(1);
     }
 
     @EventHandler

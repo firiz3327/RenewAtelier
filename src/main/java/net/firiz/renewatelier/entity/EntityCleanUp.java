@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.entity;
 
+import net.firiz.ateliercommonapi.loop.TickRunnable;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
@@ -10,7 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Collection;
 
-public final class EntityCleanUp implements Runnable {
+public final class EntityCleanUp implements TickRunnable {
 
     private static final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
 

@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.version.entity.atelier.vanilla;
 
 import net.firiz.renewatelier.version.MinecraftVersion;
+import net.firiz.renewatelier.version.entity.atelier.EntitySupplier;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.minecraft.server.v1_16_R3.DamageSource;
 import net.minecraft.server.v1_16_R3.EntityCreeper;

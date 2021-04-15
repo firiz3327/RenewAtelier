@@ -13,11 +13,10 @@ import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResul
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
@@ -43,6 +42,7 @@ import java.util.*;
  */
 public final class RecipeSelectInventory implements ParamInventory<Location> {
 
+    private static final String TITLE = "KETTLE_SELECT_RECIPE";
     private static final NamespacedKey locationKey = CommonUtils.createKey("location");
     private static final NamespacedKey recipeKey = CommonUtils.createKey("recipe");
     private static final String STRING_RECIPE = "レシピを選択してください。";
@@ -59,12 +59,12 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
+        return view.getTitle().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull final Player player, @NotNull final Location loc) {
-        final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_RECIPE.getCheck());
+        final Inventory inv = Bukkit.createInventory(player, 54, TITLE);
         inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, 1522, "", recipeLore)); // 外見上
         inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, 1562, "", null)); // 外見下
         inv.setItem(43, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null)); // 鑑定ボタン
@@ -84,7 +84,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
         int addAmount = 0; // 熟練度による作成個数増加
         final int level = recipeStatus.getLevel();
         if (level != 0) {
-            lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RANK_RECIPE[level]));
+            lore.add(ChatColor.GRAY + "熟練度: ".concat(GameConstants.RECIPE_RANK_NAME[level]));
             lore.add(getRecipeExpBar(recipeStatus));
 
             final List<RecipeLevelEffect> recipeLevelEffects = recipe.getLevels().get(recipeStatus.getLevel());

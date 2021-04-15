@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.entity.horse;
 
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.item.json.HorseSaddle;
+import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;

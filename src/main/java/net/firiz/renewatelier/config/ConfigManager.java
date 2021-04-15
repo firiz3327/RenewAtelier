@@ -1,5 +1,6 @@
 package net.firiz.renewatelier.config;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.firiz.renewatelier.utils.CommonUtils;
@@ -19,9 +20,7 @@ public enum ConfigManager {
     };
 
     public void reloadConfigs() {
-        for (final ConfigLoader<?> loader : loaders) {
-            loader.load();
-        }
+        Arrays.stream(loaders).filter(ConfigLoader::hasFile).forEach(ConfigLoader::load);
     }
 
     @NotNull

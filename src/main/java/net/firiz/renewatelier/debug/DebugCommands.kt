@@ -12,9 +12,9 @@ import net.firiz.renewatelier.entity.horse.HorseTier
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager
 import net.firiz.renewatelier.inventory.MatingHorseInventory
 import net.firiz.renewatelier.inventory.manager.InventoryManager
-import net.firiz.renewatelier.item.json.AlchemyItemBag
-import net.firiz.renewatelier.item.json.AlchemyItemStatus
-import net.firiz.renewatelier.item.json.HorseSaddle
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus
+import net.firiz.renewatelier.inventory.item.json.HorseSaddle
 import net.firiz.renewatelier.listener.DebugListener
 import net.firiz.renewatelier.notification.Notification
 import net.firiz.renewatelier.quest.book.QuestBook
@@ -24,6 +24,7 @@ import net.firiz.renewatelier.utils.minecraft.ItemUtils
 import net.firiz.renewatelier.version.nms.NMSEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
+import net.firiz.renewatelier.version.entity.atelier.test.TestBoss
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
 import net.firiz.renewatelier.version.minecraft.skin.SkinProperty
 import net.md_5.bungee.api.ChatColor
@@ -574,6 +575,9 @@ class DebugCommands(private val debugListener: DebugListener) {
                     }
                     "getBrand" -> {
                         sender.clientBrandName?.let { sender.sendMessage(it) }
+                    }
+                    "boss" -> {
+                        TestBoss(sender.location).spawn()
                     }
                 }
             }

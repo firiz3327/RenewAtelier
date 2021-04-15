@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.skill.character;
 
 import net.firiz.renewatelier.entity.player.Char;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.skill.ISkill;
 import net.firiz.renewatelier.skill.character.data.CharSkillData;
 import org.bukkit.entity.Player;

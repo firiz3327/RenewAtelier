@@ -26,7 +26,7 @@ public class StatusListTabContents implements TabContents {
                 item.modifyTextures(entityPlayer.getProfile());
                 break;
             case 2:
-                item.modifyListName(whiteSpace("所持金:", formatMoney(player.getMoney())));
+                item.modifyListName(whiteSpace("所持金:", formatMoney(player.getMoney())) + " E");
                 break;
             case 4:
                 item.modifyListName(whiteSpace("錬金LV:", stats.getAlchemyLevel() + " "));

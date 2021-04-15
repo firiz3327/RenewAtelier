@@ -13,7 +13,8 @@ import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.PotionMaterial;
 import net.firiz.renewatelier.skill.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
@@ -22,6 +23,7 @@ import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -158,16 +160,28 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     private CustomModelMaterial getMaterial(ConfigurationSection item, String key) {
         final CustomModelMaterial result;
         if (item.contains(KEY_MATERIAL)) {
-            final String mat_str = item.getString(KEY_MATERIAL);
-            assert mat_str != null;
-            if (!mat_str.contains(",")) {
-                if (mat_str.equalsIgnoreCase("XXX")) {
+            final String materialStr = item.getString(KEY_MATERIAL);
+            assert materialStr != null;
+            if (materialStr.contains(",")) {
+                final String[] matSplit = materialStr.split(",");
+                if (matSplit[0].equalsIgnoreCase("potion")) {
+                    result = new PotionMaterial(
+                            PotionMaterial.Type.valueOf("HIDE_" + matSplit[1].toUpperCase()),
+                            Integer.parseInt(matSplit[2]),
+                            Color.fromRGB(
+                                    Integer.parseInt(matSplit[3]),
+                                    Integer.parseInt(matSplit[4]),
+                                    Integer.parseInt(matSplit[5])
+                            )
+                    );
+                } else {
+                    result = new CustomModelMaterial(ItemUtils.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+                }
+            } else {
+                if (materialStr.equalsIgnoreCase("xxx")) {
                     CommonUtils.logWhiteWarning(PREFIX.concat(key).concat(" -> No customModelData value has been set for XXX."));
                 }
-                result = new CustomModelMaterial(ItemUtils.getMaterial(mat_str), 0);
-            } else {
-                final String[] matSplit = mat_str.split(",");
-                result = new CustomModelMaterial(ItemUtils.getMaterial(matSplit[0]), Integer.parseInt(matSplit[1]));
+                result = new CustomModelMaterial(ItemUtils.getMaterial(materialStr), 0);
             }
         } else {
             result = null;

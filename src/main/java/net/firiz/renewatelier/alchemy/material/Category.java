@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import org.bukkit.Material;
 
 import java.util.Map;
@@ -56,11 +56,8 @@ public enum Category {
     private final CustomModelMaterial material;
 
     static {
-        Category[] var3 = values();
-        int var2 = var3.length;
-
-        for (int var1 = 0; var1 < var2; ++var1) {
-            final Category c = var3[var1];
+        final Category[] var3 = values();
+        for (final Category c : var3) {
             BY_NAME.put(c.name(), c);
         }
     }

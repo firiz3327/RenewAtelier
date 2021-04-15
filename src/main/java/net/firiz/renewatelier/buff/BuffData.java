@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.buff;
 
-import net.firiz.renewatelier.item.json.itemeffect.IItemEffect;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.IItemEffect;
 import org.jetbrains.annotations.Nullable;
 
 public class BuffData implements IItemEffect {

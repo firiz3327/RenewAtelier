@@ -5,7 +5,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.skill.effect.RangeSkillEffect;
 import net.firiz.renewatelier.skill.item.data.BombData;
 import net.firiz.renewatelier.skill.item.data.InteractData;

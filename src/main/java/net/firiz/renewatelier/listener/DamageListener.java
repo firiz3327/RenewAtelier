@@ -41,7 +41,7 @@ public class DamageListener implements Listener {
             return;
         }
         final Entity damager = e.getDamager();
-        if (e.getCause() != EntityDamageEvent.DamageCause.CUSTOM && e.getEntity() instanceof LivingEntity) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.CUSTOM && e.getEntity() instanceof LivingEntity && !(e.getEntity() instanceof ArmorStand)) {
             final LivingEntity victim = (LivingEntity) e.getEntity();
             if (damager instanceof Player) {
                 e.setCancelled(true);

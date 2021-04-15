@@ -5,7 +5,7 @@ import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.kettle.bonus.ABonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.java.CObjects;
 import org.bukkit.Location;
 import org.bukkit.Material;

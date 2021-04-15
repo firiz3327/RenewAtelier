@@ -11,7 +11,7 @@ import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.constants.GameConstants;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.FuncBlock;
 import net.firiz.renewatelier.version.VersionUtils;
@@ -90,6 +90,26 @@ public final class ItemUtils {
         item.setItemMeta(meta);
         return item;
     }
+
+    public static ItemStack createCustomModelItem(final Material material, int amount, int value, String name) {
+        final ItemStack item = new ItemStack(material, amount);
+        final ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        meta.setCustomModelData(value);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemStack createCustomModelItem(final Material material, int amount, int value, String name, List<String> lore) {
+        final ItemStack item = new ItemStack(material, amount);
+        final ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        meta.setLore(lore);
+        meta.setCustomModelData(value);
+        item.setItemMeta(meta);
+        return item;
+    }
+
 
     public static int getCustomModelData(final ItemStack item) {
         return item.getItemMeta().getCustomModelData();

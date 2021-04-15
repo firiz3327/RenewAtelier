@@ -2,7 +2,7 @@ package net.firiz.renewatelier.alchemy.recipe;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 

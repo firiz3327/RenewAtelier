@@ -28,7 +28,8 @@ public enum EnumHorseSkill {
         public List<String> getDescription(int level) {
             return Arrays.asList(
                     ChatColor.GRAY + "止まっている状態から動き始めた時、加速します。",
-                    ChatColor.WHITE + "移動速度上昇: " + ChatColor.GREEN + (2 + (level * 0.5)) + " 秒"
+                    ChatColor.WHITE + "移動速度上昇: " + ChatColor.GREEN + (2 + (level * 0.5)) + " 秒",
+                    ChatColor.WHITE + "クールタイム: " + ChatColor.GREEN + "30 秒"
             );
         }
     },
@@ -40,10 +41,23 @@ public enum EnumHorseSkill {
         public List<String> getDescription(int level) {
             return Arrays.asList(
                     ChatColor.GRAY + "サドルを持って右クリックすると加速します。",
+                    ChatColor.WHITE + "移動速度上昇: " + ChatColor.GREEN + "2 秒",
                     ChatColor.WHITE + "クールタイム: " + ChatColor.GREEN + (20 - level) + " 秒"
             );
         }
-    };
+    },
+    ACCELERATION(
+            "加速",
+                    10
+    ) {
+        @Override
+        public List<String> getDescription(int level) {
+            return Arrays.asList(
+                    ChatColor.GRAY + "加速しきるまでにかかる時間が早くなります。",
+                    ChatColor.WHITE + "移動速度上昇: " + ChatColor.GREEN + (2 + (level * 0.1)) + " ％"
+            );
+        }
+    },;
 
     private final String name;
     private final int maxLevel;
@@ -52,8 +66,14 @@ public enum EnumHorseSkill {
     private static final List<EnumHorseSkill> rareHorseSkills = new ObjectArrayList<>();
 
     static {
-        CollectionUtils.add(normalHorseSkills, START_BOOST, BOOST);
-        CollectionUtils.add(rareHorseSkills, TWO_SEATER, START_BOOST, BOOST);
+        CollectionUtils.add(
+                normalHorseSkills,
+                START_BOOST, BOOST, ACCELERATION
+        );
+        CollectionUtils.add(
+                rareHorseSkills,
+                TWO_SEATER, START_BOOST, BOOST, ACCELERATION
+        );
     }
 
     EnumHorseSkill(String name, int maxLevel) {

@@ -58,7 +58,7 @@ public final class GameConstants {
 
     public static final int ALCHEMY_LEVEL_CAP = 99;
     public static final int[] ALCHEMY_REQ_EXPS = {
-            0, 20, 20, 20, 20, 20, 20, 20, 20, 20, // 10lv
+            0, 4, 6, 8, 10, 12, 14, 16, 18, 20, // 10lv
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, // 20lv
             30, 32, 34, 36, 38, 40, 42, 44, 46, 48, // 30lv
             50, 53, 56, 59, 62, 65, 68, 71, 74, 77, // 40lv
@@ -70,6 +70,9 @@ public final class GameConstants {
             380, 389, 398, 407, 416, 425, 434, 443, 452, 461 // 100lv
     };
 
+    public static final int HORSE_MAX_BOOST_COUNT = 3;
+    public static final long HORSE_MATING_MAX_COUNT = 2;
+    public static final long HORSE_MATING_REQUIRE_HOUR = 48;
     public static final int[] HORSE_REQ_EXPS = {
             0, 50, 70, 90, 120, 140, 160, 180, 200, 200, // 10lv
             200, 210, 220, 230, 240, 250, 260, 270, 280, 290, // 20lv
@@ -77,14 +80,10 @@ public final class GameConstants {
             500, 530, 560, 590, 620, 650, 680, 710, 740, 770, // 40lv
     };
 
-    public static final int HORSE_MAX_BOOST_COUNT = 3;
-    public static final long HORSE_MATING_MAX_COUNT = 2;
-    public static final long HORSE_MATING_REQUIRE_HOUR = 48;
-
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     public static final int RECIPE_EXP = 25;
     public static final int[] RECIPE_REQ_EXPS = {0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
-    public static final String[] RANK_RECIPE = {
+    public static final String[] RECIPE_RANK_NAME = {
             "熟練度なし",
             ChatColor.GRAY + "ブロンズ",
             ChatColor.WHITE + "シルバー",
@@ -111,7 +110,8 @@ public final class GameConstants {
      * @return 実際にクリティカルしているかどうか
      */
     public static boolean isCritical(@NotNull final Player player) {
-        return !player.isOnGround() && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784);
+        final boolean isOnGround = player.isOnGround(); // 非推奨の理由は問題ない
+        return !isOnGround && (player.getLocation().getY() % 1 != 0 || player.getVelocity().getY() < -0.0784);
     }
 
     /**

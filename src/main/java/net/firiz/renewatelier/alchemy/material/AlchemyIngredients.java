@@ -2,7 +2,7 @@ package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
@@ -260,7 +260,18 @@ public enum AlchemyIngredients {
     I243Y15("角が丸い", AlchemyAttribute.YELLOW, 15),
     I244G20("個別包装", AlchemyAttribute.GREEN, 20),
     I245B45("気化する", AlchemyAttribute.BLUE, 45),
-    I246B20("隙間に入る", AlchemyAttribute.BLUE, 20);
+    I246B20("隙間に入る", AlchemyAttribute.BLUE, 20),
+    I247R20("臙脂の力", AlchemyAttribute.RED, 20), // 中和剤 赤
+    I248B20("紺青の力", AlchemyAttribute.BLUE, 20), // 中和剤 青
+    I249Y20("藤黄の力", AlchemyAttribute.YELLOW, 20), // 中和剤 黄
+    I250G20("翡翠の力", AlchemyAttribute.GREEN, 20), // 中和剤 緑
+    I251Y20("白磁の力", AlchemyAttribute.YELLOW, 20), // 中和剤 白
+    I252P20("紫黒の力", AlchemyAttribute.PURPLE, 20), // 中和剤 紫
+    I253R20("虹の神秘", AlchemyAttribute.RED, 20), // 万能中和剤・虹 赤
+    I254P20("変質促進", AlchemyAttribute.PURPLE, 20), // 万能中和剤・虹 紫
+    I255R20("渋み", AlchemyAttribute.GREEN, 20), // 万能中和剤・虹 緑
+    I256Y20("無数の輝き", AlchemyAttribute.YELLOW, 20), // 万能中和剤・虹 黄
+    ;
 
     private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
     private final String name;

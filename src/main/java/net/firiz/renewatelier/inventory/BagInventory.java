@@ -3,7 +3,7 @@ package net.firiz.renewatelier.inventory;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
-import net.firiz.renewatelier.item.json.AlchemyItemBag;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Bukkit;

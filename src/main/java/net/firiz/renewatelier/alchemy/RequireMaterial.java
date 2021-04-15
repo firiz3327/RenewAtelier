@@ -54,7 +54,7 @@ public class RequireMaterial {
         if (req.startsWith("material:")) {
             material = new RequireMaterial(AlchemyMaterial.getMaterial(req.substring(9)));
         } else if (req.startsWith("category:")) {
-            material = new RequireMaterial(Category.valueOf(req.substring(9)));
+            material = new RequireMaterial(Category.searchName(req.substring(9)));
         } else if (req.startsWith("recipe:")) {
             material = new RequireMaterial(AlchemyRecipe.search(req.substring(7)));
         }

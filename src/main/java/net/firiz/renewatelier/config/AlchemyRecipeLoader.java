@@ -17,11 +17,12 @@ import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeEffect;
 import net.firiz.renewatelier.alchemy.recipe.RecipeLevelEffect;
 import net.firiz.renewatelier.alchemy.recipe.StarEffect;
+import net.firiz.renewatelier.alchemy.recipe.idea.RequireRecipeIdea;
 import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
-import net.firiz.renewatelier.item.CustomModelMaterial;
-import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -54,7 +55,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             // 必要素材 *
             final List<RequireAmountMaterial> reqMaterials = RequireAmountMaterial.loadAmount(item.getStringList("req_materials"));
             // 必要錬金レベル
-            final int requireAlchemyLevel = item.contains("req_alchemylevel") ? item.getInt("req_alchemylevel") : 1;
+            final int requireAlchemyLevel = item.contains("alchemy_level") ? item.getInt("alchemy_level") : 1;
             // 初期錬金属性 *
             final List<String> defaultIngredientsStr = item.getStringList("default_ingredients");
             final List<AlchemyIngredients> defaultIngredients = new ObjectArrayList<>();
@@ -90,14 +91,14 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             }
             // 熟練度 *
             final Int2ObjectMap<List<RecipeLevelEffect>> levels = new Int2ObjectOpenHashMap<>();
-            final ConfigurationSection levelsec = item.getConfigurationSection("levels");
+            final ConfigurationSection levelSec = item.getConfigurationSection("levels");
             for (int i = 1; i <= 4; i++) {
-                final List<String> levelEffectStr = levelsec.getStringList("level_" + i);
+                final List<String> levelEffectStr = levelSec.getStringList("level_" + i);
                 final List<RecipeLevelEffect> levelEffects = new ObjectArrayList<>();
                 levelEffectStr.stream()
                         .map(effect -> effect.split(","))
                         .forEachOrdered(effectSplit -> levelEffects.add(new RecipeLevelEffect(
-                                RecipeLevelEffect.RecipeLEType.valueOf(effectSplit[0].trim()),
+                                RecipeLevelEffect.RecipeLEType.search(effectSplit[0].trim()),
                                 Integer.parseInt(effectSplit[1].trim())
                         )));
                 levels.put(i, levelEffects);
@@ -105,12 +106,7 @@ public class AlchemyRecipeLoader extends ConfigLoader<AlchemyRecipe> {
             // 使用可能触媒 *
             final List<RequireMaterial> catalystCategories = RequireMaterial.load(item.getStringList("usable_catalysts_categories"));
             // アイデア
-            final List<RequireAmountMaterial> ideaRequires;
-            if (item.contains("idea")) {
-                ideaRequires = RequireAmountMaterial.loadAmount(item.getStringList("idea"));
-            } else {
-                ideaRequires = Collections.emptyList();
-            }
+            final RequireRecipeIdea ideaRequires = new RequireRecipeIdea(item.getStringList("idea"));
             // リストに追加
             final AlchemyRecipe recipe = new AlchemyRecipe(key, result, amount, reqMaterials, requireAlchemyLevel, defaultIngredients, req_bar, effects, levels, catalystCategories, ideaRequires);
             add(recipe);

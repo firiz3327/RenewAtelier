@@ -7,7 +7,7 @@ import net.firiz.renewatelier.alchemy.kettle.inventory.ItemSelectInventory;
 import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.inventory.*;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
-import net.firiz.renewatelier.item.json.AlchemyItemBag;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
 import org.bukkit.entity.Player;

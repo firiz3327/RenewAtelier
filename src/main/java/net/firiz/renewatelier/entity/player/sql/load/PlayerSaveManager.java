@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.EngineManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.item.json.AlchemyItemBag;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;

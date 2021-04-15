@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
@@ -125,5 +126,14 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     @Override
     public CraftItemStack getItemStack() {
         return CraftItemStack.asCraftCopy(getArrow());
+    }
+
+    @Override
+    public @Nullable Component customName() {
+        return null;
+    }
+
+    @Override
+    public void customName(@Nullable Component component) {
     }
 }

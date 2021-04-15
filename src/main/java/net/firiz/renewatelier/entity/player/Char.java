@@ -5,12 +5,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.loop.LoopManager;
+import net.firiz.ateliercommonapi.loop.TickRunnable;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.loop.LoopManager;
+import net.firiz.renewatelier.npc.MessageObjectRun;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
@@ -58,7 +60,11 @@ public final class Char {
     @NotNull
     private final EngineManager engineManager;
     @NotNull
-    private final Runnable autoSave;
+    private final TickRunnable autoSave;
+    private final int taskIdMinute;
+    @NotNull
+    private final MessageObjectRun messageObjectRun;
+    private final int taskIdTick;
 
     public Char(
             @NotNull Player player,
@@ -86,11 +92,14 @@ public final class Char {
             this.charStats.save(this.id);
             this.settings.save(this.id);
         };
-        LoopManager.INSTANCE.addMinutes(this.autoSave);
+        this.taskIdMinute = LoopManager.INSTANCE.addMinutes(this.autoSave);
+        this.messageObjectRun = new MessageObjectRun();
+        this.taskIdTick = LoopManager.INSTANCE.addTicks(messageObjectRun);
     }
 
     public void unload() {
-        LoopManager.INSTANCE.removeMinutes(this.autoSave);
+        LoopManager.INSTANCE.removeMinutes(this.taskIdMinute);
+        LoopManager.INSTANCE.removeTicks(this.taskIdTick);
         autoSave.run();
     }
 
@@ -202,17 +211,25 @@ public final class Char {
 
     public void increaseIdea(@NotNull final ItemStack item) {
         Objects.requireNonNull(item);
-        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new IncreaseIdea(item));
+        recipeSQL.increaseIdea(Objects.requireNonNull(Bukkit.getPlayer(uuid)), new IncreaseIdea(item));
     }
 
     public void increaseIdea(@NotNull final AlchemyRecipe recipe) {
         Objects.requireNonNull(recipe);
-        recipeSQL.increaseIdea(Bukkit.getPlayer(uuid), new IncreaseIdea(recipe));
+        recipeSQL.increaseIdea(Objects.requireNonNull(Bukkit.getPlayer(uuid)), new IncreaseIdea(recipe));
     }
 
-    public void gainMoney(long money) {
-        if (!charStats.gainMoney(money, false)) { // 0以下になることは想定しない
-            charStats.getPlayer().sendMessage("所持金が上限を超えるため受け取れませんでした。");
+    public boolean gainMoney(long money) {
+        final int result = charStats.gainMoney(money, false);
+        switch (result) {
+            case 0:
+                charStats.getPlayer().sendMessage("所持金が上限を超えるため受け取れませんでした。");
+                return false;
+            case 1:
+                charStats.getPlayer().sendMessage("所持金が足りません。");
+                return false;
+            default:
+                return true;
         }
     }
 
@@ -250,4 +267,8 @@ public final class Char {
         return settings;
     }
 
+    @NotNull
+    public MessageObjectRun getMessageObjectRun() {
+        return messageObjectRun;
+    }
 }

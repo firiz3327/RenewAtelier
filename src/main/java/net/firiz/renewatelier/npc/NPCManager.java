@@ -2,6 +2,7 @@ package net.firiz.renewatelier.npc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.loop.TickRunnable;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.script.conversation.NPCConversation;
 import net.firiz.renewatelier.script.execution.ScriptManager;
@@ -22,6 +23,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import javax.script.Invocable;
 import javax.script.ScriptException;
 import java.util.*;
 
@@ -65,10 +67,10 @@ public enum NPCManager {
         ).forEach(npcList::add);
     }
 
-    public Runnable npcLoop() {
+    public TickRunnable npcLoop() {
         return () -> Bukkit.getServer().getOnlinePlayers().forEach(player -> {
             for (final NPC npc : npcList) {
-                final Location loc = npc.getLocation();
+                final Location loc = npc.getLocation().clone();
                 if (CommonUtils.distanceSq(loc, player.getLocation(), 150, 10)) {
                     if (!npc.hasViewer(player)) {
                         npc.addViewer(player);
@@ -174,11 +176,18 @@ public enum NPCManager {
                 if (canAction) {
                     scriptPlayerValue.setRight(now);
                     Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                        try {
-                            Objects.requireNonNull(scriptPlayers.get(uuid).getLeft().getIv()).invokeFunction("action", sneaking);
-                        } catch (ScriptException ex) {
-                            CommonUtils.logWarning(ex);
-                        } catch (NoSuchMethodException ignored) {
+                        final NonNullPair<NPCConversation, Long> value = scriptPlayers.get(uuid);
+                        if (value != null) {
+                            final Invocable iv = value.getLeft().getIv();
+                            if (iv != null) {
+                                try {
+                                    iv.invokeFunction("action", sneaking);
+                                } catch (ScriptException ex) {
+                                    CommonUtils.logWarning(ex);
+                                } catch (NoSuchMethodException ignored) {
+                                    // ignored
+                                }
+                            }
                         }
                     });
                 }

@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.skill.item.skill;
 
 import net.firiz.renewatelier.entity.player.Char;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.skill.effect.RangeSkillEffect;
 import net.firiz.renewatelier.skill.item.data.RangeData;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;

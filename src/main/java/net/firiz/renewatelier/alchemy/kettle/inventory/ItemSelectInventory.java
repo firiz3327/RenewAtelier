@@ -7,10 +7,9 @@ import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
@@ -38,6 +37,7 @@ import java.util.UUID;
 public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
     private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
+    private static final String TITLE = "KETTLE_SELECT_ITEM";
     private final InventoryManager manager;
     private final List<UUID> openUsers = new ObjectArrayList<>();
 
@@ -47,12 +47,12 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
+        return view.getTitle().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull Player player, @NotNull AlchemyRecipe recipe, @NotNull Inventory recipeInv) {
-        final Inventory inv = Bukkit.createInventory(player, 45, AlchemyInventoryType.KETTLE_SELECT_ITEM.getCheck());
+        final Inventory inv = Bukkit.createInventory(player, 45, TITLE);
         inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, 1508, "", null));
         inv.setItem(36, ItemUtils.ci(Material.DIAMOND_AXE, 1562, "", null));
         inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), KettleConstants.scrollKey, 0)); // ページ番号

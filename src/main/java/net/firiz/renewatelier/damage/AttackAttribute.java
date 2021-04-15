@@ -38,6 +38,10 @@ public enum AttackAttribute {
         return icon;
     }
 
+    public boolean hasIcon() {
+        return !icon.isEmpty();
+    }
+
     public ChatColor getColor() {
         return color;
     }

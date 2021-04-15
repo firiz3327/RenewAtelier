@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.damage;
 
+import net.firiz.ateliercommonapi.FakeId;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.CharSettings;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -45,7 +45,11 @@ final class HoloDamage {
             } else if (intDamage <= 0) {
                 viewDamage = ChatColor.WHITE + "Miss";
             } else {
-                viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
+                if (attribute.hasIcon()) {
+                    viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
+                } else {
+                    viewDamage = String.valueOf(attribute.getColor()) + intDamage;
+                }
                 allDamage += damage;
             }
             final FakeEntity fakeEntity = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);

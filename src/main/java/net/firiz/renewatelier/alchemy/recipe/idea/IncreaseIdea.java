@@ -2,7 +2,7 @@ package net.firiz.renewatelier.alchemy.recipe.idea;
 
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import org.bukkit.inventory.ItemStack;
 
 public class IncreaseIdea {

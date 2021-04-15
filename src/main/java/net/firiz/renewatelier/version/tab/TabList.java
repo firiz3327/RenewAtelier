@@ -2,7 +2,7 @@ package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.loop.LoopManager;
+import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.VersionUtils;
@@ -53,7 +53,7 @@ public class TabList {
             }
             tabItems.add(item);
         }
-        LoopManager.INSTANCE.addSec(() -> {
+        LoopManager.INSTANCE.addSeconds(() -> {
             if (updateTime < 3) { // 3秒に１回
                 updateTime++;
                 return;

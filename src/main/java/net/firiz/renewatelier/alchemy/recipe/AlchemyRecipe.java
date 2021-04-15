@@ -9,7 +9,7 @@ import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
-import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.alchemy.recipe.idea.RequireRecipeIdea;
 import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyRecipeLoader;
@@ -31,7 +31,7 @@ public class AlchemyRecipe {
     private final List<RecipeEffect> effects;
     private final Int2ObjectMap<List<RecipeLevelEffect>> levels;
     private final List<RequireMaterial> catalystCategories;
-    private final List<RequireAmountMaterial> ideaRequires;
+    private final RequireRecipeIdea ideaRequires;
 
     public AlchemyRecipe(
             final String id,
@@ -44,7 +44,7 @@ public class AlchemyRecipe {
             final List<RecipeEffect> effects,
             final Int2ObjectMap<List<RecipeLevelEffect>> levels,
             final List<RequireMaterial> catalystCategories,
-            final List<RequireAmountMaterial> ideaRequires
+            final RequireRecipeIdea ideaRequires
     ) {
         this.id = id;
         this.result = result;
@@ -120,7 +120,7 @@ public class AlchemyRecipe {
     }
 
     @NotNull
-    public List<RequireAmountMaterial> getIdeaRequires() {
+    public RequireRecipeIdea getIdeaRequires() {
         return ideaRequires;
     }
 
@@ -133,27 +133,7 @@ public class AlchemyRecipe {
             throw new IllegalStateException("There are no ideas for this recipe.");
         }
         Objects.requireNonNull(idea);
-        if (idea.getMaterial() != null) {
-            for (final RequireAmountMaterial requireMaterial : ideaRequires) {
-                if ((
-                        requireMaterial.getType() == RequireMaterial.RequireType.MATERIAL
-                                && requireMaterial.getMaterial() == idea.getMaterial()
-                ) || (
-                        requireMaterial.getType() == RequireMaterial.RequireType.CATEGORY
-                                && idea.getMaterial().getCategories().contains(requireMaterial.getCategory())
-                )) {
-                    return true;
-                }
-            }
-        } else if (idea.getRecipe() != null) {
-            for (final RequireAmountMaterial requireMaterial : ideaRequires) {
-                if (requireMaterial.getType() == RequireMaterial.RequireType.RECIPE
-                        && requireMaterial.getRecipe() == idea.getRecipe()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ideaRequires.hasIdeaRequire(idea);
     }
 
 }

@@ -21,11 +21,10 @@ import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
-import net.firiz.renewatelier.item.drop.AlchemyResultDrop;
-import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.drop.AlchemyResultDrop;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
@@ -51,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
     private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
+    private static final String TITLE = "KETTLE_MAIN_MENU";
     private static final NamespacedKey centerKey = CommonUtils.createKey("center");
     private static final NamespacedKey turn1Key = CommonUtils.createKey("turn1");
     private static final NamespacedKey turn2Key = CommonUtils.createKey("turn2");
@@ -58,12 +58,12 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().equals(AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
+        return view.getTitle().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull final Player player, @NotNull final AlchemyRecipe recipe, @NotNull final Inventory catalystInv) {
-        final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_MAIN_MENU.getCheck());
+        final Inventory inv = Bukkit.createInventory(player, 54, TITLE);
         final UUID uuid = player.getUniqueId();
         final KettleUserData kettleUserData = KETTLE_MANAGER.getUserData(uuid);
         final PlayerInventory playerInv = player.getInventory();
@@ -683,6 +683,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
                                 status.increaseIdea(recipe);
                                 status.addRecipeExp(false, recipe, status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
+                                status.getCharStats().addAlchemyExp(Math.max(1, recipe.getReqAlchemyLevel() / 2));
                                 new AlchemyResultDrop(loc, resultItem).start();
                             }
                         }

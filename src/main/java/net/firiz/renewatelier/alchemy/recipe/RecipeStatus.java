@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.alchemy.recipe;
 
-import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdeaStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,24 +18,24 @@ public class RecipeStatus {
     private int exp;
 
     @Nullable
-    private final RecipeIdea idea;
+    private final RecipeIdeaStatus idea;
 
     public RecipeStatus(final String id) {
         this.recipe = Objects.requireNonNull(AlchemyRecipe.search(id));
         this.level = 0;
         this.exp = 0;
-        this.idea = new RecipeIdea(recipe);
+        this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires());
     }
 
     public RecipeStatus(final AlchemyRecipe recipe, final boolean acquired) {
         this.recipe = Objects.requireNonNull(recipe);
         this.acquired = acquired;
-        this.idea = new RecipeIdea(recipe);
+        this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires());
     }
 
     public RecipeStatus(final AlchemyRecipe recipe) {
         this.recipe = Objects.requireNonNull(recipe);
-        this.idea = new RecipeIdea(recipe);
+        this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires());
     }
 
     public RecipeStatus(final String id, final int level, final int exp) {
@@ -46,19 +46,19 @@ public class RecipeStatus {
         this.idea = null;
     }
 
-    public RecipeStatus(final String id, final int level, final int exp, final int[] idea) {
+    public RecipeStatus(final String id, final int level, final int exp, final String idea) {
         this.recipe = Objects.requireNonNull(AlchemyRecipe.search(id));
         this.level = level;
         this.exp = exp;
-        if (idea == null) {
+        if (idea == null || idea.isEmpty()) {
             if (recipe.isIdeaRequired()) {
-                this.idea = new RecipeIdea(recipe);
+                this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires());
             } else {
                 this.acquired = true;
                 this.idea = null;
             }
         } else {
-            this.idea = new RecipeIdea(recipe, idea);
+            this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires(), idea);
         }
     }
 
@@ -96,7 +96,7 @@ public class RecipeStatus {
     }
 
     @Nullable
-    public RecipeIdea getIdea() {
+    public RecipeIdeaStatus getIdea() {
         return idea;
     }
 }

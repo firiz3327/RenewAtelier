@@ -9,7 +9,7 @@ import net.firiz.renewatelier.characteristic.datas.ChData;
 import net.firiz.renewatelier.characteristic.datas.ChInt;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.CharacteristicLoader;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.alchemy.recipe.result;
 
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 
 public abstract class ARecipeResult<T> {
 

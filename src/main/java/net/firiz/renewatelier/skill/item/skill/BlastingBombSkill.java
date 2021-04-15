@@ -2,8 +2,8 @@ package net.firiz.renewatelier.skill.item.skill;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.firiz.renewatelier.entity.player.Char;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.item.json.itemeffect.AlchemyItemEffect;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
 import net.firiz.renewatelier.skill.item.data.BombData;
 import net.firiz.renewatelier.utils.GArray;
 import net.firiz.renewatelier.utils.minecraft.BlockUtils;

@@ -3,11 +3,13 @@ package net.firiz.renewatelier.entity.player.sql;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
-import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdea;
+import net.firiz.renewatelier.alchemy.recipe.idea.RecipeIdeaStatus;
 import net.firiz.renewatelier.alchemy.recipe.result.ARecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.AlchemyMaterialRecipeResult;
 import net.firiz.renewatelier.alchemy.recipe.result.MinecraftMaterialRecipeResult;
 import net.firiz.renewatelier.constants.GameConstants;
+import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.java.ArrayUtils;
@@ -120,8 +122,10 @@ public class RecipeSQL {
         return first;
     }
 
-    public void increaseIdea(@Nullable final Player player, @NotNull IncreaseIdea item) {
+    public void increaseIdea(@NotNull final Player player, @NotNull IncreaseIdea item) {
+        Objects.requireNonNull(player);
         Objects.requireNonNull(item);
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         AlchemyRecipe.getIdeaRecipeList().stream()
                 .filter(ideaRecipe -> ideaRecipe.hasIdeaRequire(item))
                 .forEach(ideaRecipe -> {
@@ -135,12 +139,12 @@ public class RecipeSQL {
                         recipeStatus = new RecipeStatus(ideaRecipe);
                         addRecipe(recipeStatus); // レシピを無効状態で追加する
                     }
-                    if (!recipeStatus.isAcquired()
-                            && recipeStatus.getIdea() != null
-                            && recipeStatus.getIdea().increaseIdea(item)) {
-                        recipeStatus.setAcquired(true); // レシピを有効にする
-                        insert(recipeStatus);
-                        if (player != null) {
+                    final RecipeIdeaStatus ideaStatus = recipeStatus.getIdea();
+                    if (!recipeStatus.isAcquired() && ideaStatus != null) {
+                        ideaStatus.increaseIdea(item);
+                        if (ideaStatus.isAvailable(character)) {
+                            recipeStatus.setAcquired(true); // レシピを有効にする
+                            insert(recipeStatus);
                             notification(player, ideaRecipe);
                         }
                     }
@@ -148,7 +152,7 @@ public class RecipeSQL {
     }
 
     private void insert(final RecipeStatus recipeStatus) {
-        final RecipeIdea idea = recipeStatus.getIdea();
+        final RecipeIdeaStatus idea = recipeStatus.getIdea();
         String ideaString = null;
         if (!recipeStatus.isAcquired() && idea != null) {
             ideaString = ArrayUtils.splitString(idea.getRequires());

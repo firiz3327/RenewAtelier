@@ -1,11 +1,18 @@
 package net.firiz.renewatelier.inventory;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.HorseManager;
+import net.firiz.renewatelier.entity.player.Char;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.NonParamInventory;
-import net.firiz.renewatelier.item.json.HorseSaddle;
+import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,15 +21,18 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class MatingHorseInventory implements NonParamInventory {
 
     private static final String TITLE = "馬の交配";
     private static final ItemStack PANEL_ITEM = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-    private static final ItemStack CHECK_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 1);
-    private static final ItemStack CROSS_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 2);
+    private static final ItemStack CHECK_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 1, ChatColor.GREEN + "交配可能です");
+    private static final ItemStack CROSS_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 2, ChatColor.RED + "交配ができる状態にありません");
 
     private static final int INV_SIZE = 36;
     private static final int MALE_SLOT = 11;
@@ -75,7 +85,7 @@ public class MatingHorseInventory implements NonParamInventory {
         if (HorseSaddle.has(current)) {
             final HorseSaddle saddle = HorseSaddle.load(current);
             final int slot = saddle.isFemale() ? FEMALE_SLOT : MALE_SLOT;
-            if (view.getItem(slot) == null) {
+            if (saddle.getLevel() >= 5 && view.getItem(slot) == null) {
                 view.setItem(raw, null);
                 view.setItem(slot, current);
             }
@@ -104,7 +114,7 @@ public class MatingHorseInventory implements NonParamInventory {
         final ItemStack resultItem = view.getItem(RESULT_SLOT);
         if (CHECK_ITEM.isSimilar(resultItem) && HorseSaddle.has(femaleItem) && HorseSaddle.has(maleItem)) {
             final HorseSaddle femaleSaddle = HorseSaddle.load(femaleItem);
-            if (availableMating(femaleSaddle)) {
+            if (availableMating(player, femaleSaddle)) {
                 view.setItem(RESULT_SLOT, HorseManager.INSTANCE.mating(femaleItem, femaleSaddle, HorseSaddle.load(maleItem)));
             }
         } else if (resultItem != null && resultItem.getType() == Material.SADDLE) {
@@ -117,20 +127,49 @@ public class MatingHorseInventory implements NonParamInventory {
         final ItemStack femaleItem = view.getItem(FEMALE_SLOT);
         final ItemStack maleItem = view.getItem(MALE_SLOT);
         if (HorseSaddle.has(femaleItem) && HorseSaddle.has(maleItem)) {
-            final HorseSaddle femaleSaddle = HorseSaddle.load(femaleItem);
-            if (availableMating(femaleSaddle)) {
-                view.setItem(RESULT_SLOT, CHECK_ITEM.clone());
-            } else {
-                view.setItem(RESULT_SLOT, CROSS_ITEM);
-            }
+            view.setItem(RESULT_SLOT, availableMatingItem(player, HorseSaddle.load(femaleItem)));
         } else {
-            view.setItem(RESULT_SLOT, CROSS_ITEM);
+            view.setItem(RESULT_SLOT, CROSS_ITEM.clone());
         }
         player.updateInventory();
     }
 
-    private boolean availableMating(@NotNull final HorseSaddle femaleSaddle) {
-        return femaleSaddle.isFemale() && femaleSaddle.getMatingCount() < GameConstants.HORSE_MATING_MAX_COUNT && femaleSaddle.availableMatingTime();
+    private boolean availableMating(@NotNull Player player, @NotNull final HorseSaddle femaleSaddle) {
+        return femaleSaddle.isFemale()
+                && femaleSaddle.getMatingCount() < GameConstants.HORSE_MATING_MAX_COUNT
+                && femaleSaddle.availableMatingTime()
+                && PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).gainMoney(-femaleSaddle.getTier().getRequireMoney());
+    }
+
+    private ItemStack availableMatingItem(@NotNull Player player, @NotNull final HorseSaddle femaleSaddle) {
+        final boolean female = femaleSaddle.isFemale();
+        final boolean matingCount = femaleSaddle.getMatingCount() < GameConstants.HORSE_MATING_MAX_COUNT;
+        final boolean matingTime = femaleSaddle.availableMatingTime();
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final int requireMoney = femaleSaddle.getTier().getRequireMoney();
+        final boolean hasMoney = character.gainMoney(-requireMoney);
+
+        final ItemStack item;
+        final List<Component> lore = new ObjectArrayList<>();
+        if (female && matingCount && matingTime && hasMoney) {
+            item = CHECK_ITEM.clone();
+            lore.add(Component.text(String.format("%d E 消費して交配を開始します。", requireMoney), NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+        } else {
+            item = CROSS_ITEM.clone();
+        }
+        if (!matingCount) {
+            lore.add(Component.text("交配回数が既に最大です。", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        }
+        if (!matingTime) {
+            lore.add(Component.text("交配から時間が経過していません。", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        }
+        if (!hasMoney) {
+            lore.add(Component.text(String.format("所持金が %d E 足りません。", requireMoney - character.getMoney()), NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        }
+        final ItemMeta meta = item.getItemMeta();
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
     }
 
     @Override

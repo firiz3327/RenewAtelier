@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.version.packet;
 
-import net.firiz.renewatelier.utils.FakeId;
+import net.firiz.ateliercommonapi.FakeId;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.nms.VEntity;
@@ -10,8 +10,6 @@ import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-
-import java.util.UUID;
 
 /**
  * @author firiz

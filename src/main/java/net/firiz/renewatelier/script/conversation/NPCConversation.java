@@ -1,23 +1,17 @@
 package net.firiz.renewatelier.script.conversation;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.delivery.DeliveryInventory;
 import net.firiz.renewatelier.inventory.delivery.DeliveryObject;
+import net.firiz.renewatelier.npc.MessageObject;
 import net.firiz.renewatelier.npc.NPC;
 import net.firiz.renewatelier.npc.NPCManager;
-import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakeEntity;
-import net.firiz.renewatelier.version.packet.PacketUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.graalvm.polyglot.HostAccess.Export;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,12 +26,12 @@ import java.util.UUID;
 public final class NPCConversation extends ScriptConversation {
 
     private final NPC npc;
-    private FakeEntity fakeEntity;
-    private BukkitTask runTaskLater;
+    private final MessageObject messageObject;
 
     public NPCConversation(@NotNull NPC npc, @NotNull String scriptName, @NotNull Player player) {
         super(scriptName, player);
         this.npc = npc;
+        this.messageObject = new MessageObject(player, npc.getMessageLocation());
     }
 
     @Nullable
@@ -153,13 +147,8 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void sendNext(@NotNull final String prefix, @NotNull final String suffix, @NotNull final String text) {
-        sendNext(prefix, suffix, text, 60); // 3 sec
-    }
-
-    @Export
-    public void sendNext(@NotNull final String prefix, @NotNull final String suffix, @NotNull final String text, final int time) {
         player.sendMessage(prefix + text + suffix);
-        messagePacket(chatColor(text), time);
+        messageObject.messagePacket(chatColor(text));
     }
 
     @Export
@@ -172,63 +161,6 @@ public final class NPCConversation extends ScriptConversation {
                 chatColor(val.insert(0, "&7[").append("] &2").append(getNPCName()).append(" ").toString()),
                 chatColor("&a" + msg)
         );
-    }
-
-    private void messagePacket(@NotNull final String text, final int time) {
-        final Location balloonLoc = getLocation();
-        balloonLoc.setY(balloonLoc.getY() + 0.25);
-
-        MessageType.FAKE_ENTITY.broadcast(
-                this,
-                FakeEntity.FakeEntityType.ARMOR_STAND,
-                balloonLoc,
-                text
-        );
-        if (runTaskLater != null) {
-            Bukkit.getScheduler().cancelTask(runTaskLater.getTaskId());
-        }
-        runTaskLater = Bukkit.getScheduler().runTaskLater(
-                AtelierPlugin.getPlugin(),
-                () -> MessageType.DESTROY_FAKE_ENTITY.broadcast(this),
-                time
-        );
-    }
-
-    private enum MessageType {
-        FAKE_ENTITY {
-            /**
-             *　アーマースタンドのパケットを生成し、Scriptの対象プレイヤーへ送信します。
-             *
-             * @param conversation
-             * @param args EntityType, Location, Stringを引数とします
-             */
-            @Override
-            void run(NPCConversation conversation, Object... args) {
-                try {
-                    final FakeEntity fakeEntity = new FakeEntity(-1, (FakeEntity.FakeEntityType) args[0], 0);
-                    conversation.fakeEntity = fakeEntity;
-                    PacketUtils.sendPacket(conversation.player, EntityPacket.getSpawnPacket(
-                            fakeEntity,
-                            (Location) args[1]
-                    ));
-                    PacketUtils.sendPacket(conversation.player, EntityPacket.getMessageStandMeta(conversation.player.getWorld(), (String) args[2]).compile(fakeEntity.getEntityId()));
-                } catch (Exception e) {
-                    CommonUtils.logWarning(e);
-                }
-            }
-        },
-        DESTROY_FAKE_ENTITY {
-            @Override
-            void run(NPCConversation conversation, Object... args) {
-                PacketUtils.sendPacket(conversation.player, EntityPacket.getDespawnPacket(conversation.fakeEntity.getEntityId()));
-            }
-        };
-
-        abstract void run(NPCConversation conversation, Object... args);
-
-        public void broadcast(@NotNull final NPCConversation conversation, @NotNull final Object... args) {
-            run(conversation, args);
-        }
     }
 
 }

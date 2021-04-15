@@ -43,7 +43,11 @@ public class VEntity<T extends Entity> {
     }
 
     public Location getLocation() {
-        return location;
+        return location.clone();
+    }
+
+    public Location getEyeLocation() {
+        return getLocation().add(0, entity.getHeadHeight(), 0);
     }
 
     public World getWorld() {

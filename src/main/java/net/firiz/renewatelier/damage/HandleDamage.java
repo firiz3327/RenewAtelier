@@ -7,7 +7,7 @@ import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;

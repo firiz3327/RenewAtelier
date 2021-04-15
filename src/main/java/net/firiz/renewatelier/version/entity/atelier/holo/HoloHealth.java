@@ -1,11 +1,11 @@
 package net.firiz.renewatelier.version.entity.atelier.holo;
 
+import net.firiz.ateliercommonapi.FakeId;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
-import net.firiz.renewatelier.utils.FakeId;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakeEntity;

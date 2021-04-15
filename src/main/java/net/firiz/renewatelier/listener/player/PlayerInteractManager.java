@@ -6,10 +6,9 @@ import net.firiz.renewatelier.alchemy.kettle.inventory.RecipeSelectInventory;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.HorseManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.item.json.HorseSaddle;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.quest.book.QuestBook;
 import net.firiz.renewatelier.script.ScriptItem;
@@ -20,6 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
@@ -96,10 +96,10 @@ class PlayerInteractManager {
             return;
         }
 
-        if (block != null && interactBlock(e, player, action, block, item) == Result.RETURN) {
+        if (block != null && interactBlock(e, player, action, block, item)) {
             return;
         }
-        if (item != null && interactItem(e, player, item, null) == Result.RETURN) {
+        if (item != null && interactItem(e, player, item, null)) {
             return;
         }
         if (ScriptItem.start(e, player, item)) {
@@ -107,32 +107,49 @@ class PlayerInteractManager {
         }
     }
 
-    private Result interactBlock(Cancellable e, Player player, Action action, Block block, ItemStack item) {
+    private boolean interactBlock(Cancellable e, Player player, Action action, Block block, ItemStack item) {
         switch (block.getType()) {
             case LECTERN:
                 if (QuestBook.lectern(e, player, block, item)) {
-                    return Result.RETURN;
+                    return true;
                 }
                 break;
             case ENCHANTING_TABLE:
                 e.setCancelled(true);
                 // スキル管理GUIでも作ろうかな
-                return Result.RETURN;
+                return true;
             case CAULDRON:
-                final AlchemyInventoryType type = AlchemyInventoryType.search(action, item, block, player);
-                if (type != null) {
-                    e.setCancelled(type.run(action, item, block, player));
-                    InventoryManager.INSTANCE.getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
-                    return Result.RETURN;
+                final BlockData blockData = block.getBlockData();
+                if (blockData instanceof Levelled) { // levelled only cauldron
+                    final Levelled cauldron = (Levelled) blockData;
+                    boolean typeCheck;
+                    switch (block.getRelative(BlockFace.DOWN).getType()) {
+                        case FIRE:
+                        case CAMPFIRE:
+                        case SOUL_FIRE:
+                        case SOUL_CAMPFIRE:
+                            typeCheck = true;
+                            break;
+                        default:
+                            typeCheck = false;
+                            break;
+                    }
+                    if (block.getType() == Material.CAULDRON
+                            && !player.isSneaking()
+                            && CommonUtils.isRightOnly(action, true)
+                            && cauldron.getLevel() == cauldron.getMaximumLevel()
+                            && typeCheck) {
+                        InventoryManager.INSTANCE.getInventory(RecipeSelectInventory.class).open(player, block.getLocation());
+                    }
                 }
                 break;
             default:
                 break;
         }
-        return Result.NONE;
+        return false;
     }
 
-    private Result interactItem(Cancellable e, Player player, ItemStack item, @Nullable Entity entity) {
+    private boolean interactItem(Cancellable e, Player player, ItemStack item, @Nullable Entity entity) {
         if (item.getType() == GameConstants.USABLE_MATERIAL) {
             e.setCancelled(true);
         }
@@ -156,19 +173,19 @@ class PlayerInteractManager {
                     } else {
                         player.sendMessage("残り使用回数がありません");
                     }
-                    return Result.RETURN;
+                    return true;
                 }
             } else if (item.getType() == Material.WRITTEN_BOOK && QuestBook.getQuestBookMaterial(item) != null) {
                 e.setCancelled(true);
                 QuestBook.openQuestBook(player);
-                return Result.RETURN;
+                return true;
             } else if (item.getType() == Material.SADDLE && HorseSaddle.has(item)) {
                 e.setCancelled(true);
                 HorseManager.INSTANCE.interactSaddle(player, player.getLocation(), item);
-                return Result.RETURN;
+                return true;
             }
         }
-        return Result.NONE;
+        return false;
     }
 
     void interactEntity(Cancellable e, Player player, Entity entity, EquipmentSlot hand, boolean isRightClick, int entityId) {
@@ -191,10 +208,5 @@ class PlayerInteractManager {
                 HorseManager.INSTANCE.interactHorse(player, (Horse) entity);
             }
         }
-    }
-
-    private enum Result {
-        RETURN,
-        NONE
     }
 }

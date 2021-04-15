@@ -32,12 +32,11 @@ class RecipeStatusLoader implements StatusLoader<List<RecipeStatus>> {
                 ));
             } else {
                 final Object ideaObject = objectList.get(5);
-                final int[] idea = ideaObject == null ? null : ArrayUtils.convertToInt(((String) ideaObject).split(","));
                 recipeStatuses.add(new RecipeStatus(
                         (String) objectList.get(1), // recipe_id
                         (int) objectList.get(3), // level
                         (int) objectList.get(4), // exp
-                        idea
+                        (String) ideaObject
                 ));
             }
         });

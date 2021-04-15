@@ -7,19 +7,18 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.quest.Quest;
 import net.firiz.renewatelier.quest.result.*;
-import net.firiz.renewatelier.utils.TellrawUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.LecternInventory;
 import org.bukkit.inventory.meta.BookMeta;
@@ -80,10 +79,10 @@ public final class QuestBook {
         meta.setAuthor(player.getName()); // require?
         meta.setTitle("クエストブック"); // require?
         meta.setGeneration(BookMeta.Generation.ORIGINAL); // require?
-        meta.spigot().setPages(createPages(player));
+        meta.addPages(createPages(player));
     }
 
-    private static List<BaseComponent[]> createPages(@NotNull final Player player) {
+    private static Component[] createPages(@NotNull final Player player) {
         final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
         final List<Quest> progressQuests = new ObjectArrayList<>();
         final List<Quest> clearQuests = new ObjectArrayList<>();
@@ -98,48 +97,51 @@ public final class QuestBook {
                 progressQuests.add(quest);
             }
         });
-        final List<BaseComponent[]> pages = new ObjectArrayList<>();
+        final List<Component> pages = new ObjectArrayList<>();
         // 進行中クエスト
-        progressQuests.forEach(quest -> addSpigotPage(pages, quest, 0, player));
+        progressQuests.forEach(quest -> addSpigotPageKyori(pages, quest, 0, player));
         // 重要クエスト
-        importantQuests.forEach(quest -> addSpigotPage(pages, quest, 2, player));
+        importantQuests.forEach(quest -> addSpigotPageKyori(pages, quest, 2, player));
         // クリア済みクエスト
-        clearQuests.forEach(quest -> addSpigotPage(pages, quest, 1, player));
-        return pages;
+        clearQuests.forEach(quest -> addSpigotPageKyori(pages, quest, 1, player));
+        return pages.toArray(Component[]::new);
     }
 
-    private static void addSpigotPage(@NotNull final List<BaseComponent[]> pages, @NotNull final Quest quest, final int type, @NotNull final Player player) {
-        final String flag_text;
-        final ChatColor color;
+    private static void addSpigotPageKyori(@NotNull final List<Component> pages, @NotNull final Quest quest, final int type, @NotNull final Player player) {
+        final String flagText;
+        final NamedTextColor color;
         switch (type) {
             case 0:
-                flag_text = "進行中";
-                color = ChatColor.BLUE;
+                flagText = "進行中";
+                color = NamedTextColor.BLUE;
                 break;
             case 1:
-                flag_text = "クリア済み";
-                color = ChatColor.GREEN;
+                flagText = "クリア済み";
+                color = NamedTextColor.GREEN;
                 break;
             default:
-                flag_text = "未受注";
-                color = ChatColor.RED;
+                flagText = "未受注";
+                color = NamedTextColor.RED;
                 break;
         }
-        final ComponentBuilder builder = new ComponentBuilder("【")
-                .append(quest.getName())
-                .color(color)
-                .event(TellrawUtils.createHoverEvent(flag_text))
-                .append("】\n\n")
-                .reset();
+        final TextComponent.Builder builder = Component.text().append(
+                Component.text("【")
+                        .append(
+                                Component.text(quest.getName())
+                                        .color(color)
+                                        .hoverEvent(Component.text(flagText))
+                        )
+                        .append(Component.text("】\n\n"))
+        );
         for (final String line : quest.getDescription()) {
-            builder.append(line + "\n");
+            builder.append(Component.text(line + "\n"));
         }
-        builder.append("\n【報酬】\n");
+        builder.append(Component.text("\n【報酬】\n"));
         for (final QuestResult questResult : quest.getResults()) {
             questResult.appendQuestResult(player, builder);
-            builder.append("\n").reset();
+            builder.append(Component.newline());
         }
-        pages.add(builder.create());
+        pages.add(builder.asComponent());
     }
 
 }

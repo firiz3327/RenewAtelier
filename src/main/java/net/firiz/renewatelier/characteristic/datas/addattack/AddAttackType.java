@@ -8,7 +8,7 @@ import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.DamageComponent;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;

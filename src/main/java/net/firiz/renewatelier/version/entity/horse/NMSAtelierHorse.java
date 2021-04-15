@@ -3,7 +3,7 @@ package net.firiz.renewatelier.version.entity.horse;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.EnumHorseSkill;
 import net.firiz.renewatelier.entity.horse.HorseTier;
-import net.firiz.renewatelier.item.json.HorseSaddle;
+import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_16_R3.*;
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class NMSAtelierHorse extends EntityHorse {
 
     private static final net.minecraft.server.v1_16_R3.ItemStack NMS_SADDLE = CraftItemStack.asNMSCopy(new ItemStack(Material.SADDLE));
-    private static final PotionEffect BOOST_POTION = new PotionEffect(PotionEffectType.SPEED, 40, 1); // 2sec
+    private static final PotionEffect BOOST_POTION = new PotionEffect(PotionEffectType.SPEED, 40, 0); // 2sec
     private static final NamespacedKey key = CommonUtils.createKey("nmsAtelierHorse");
 
     private final ItemStack saddle;
@@ -42,6 +42,10 @@ public class NMSAtelierHorse extends EntityHorse {
     private long boostTime;
     private int boostCount;
     private long lastStartBoostTime = 0;
+    private double acceleration = 100;
+    private double accelerationUp = 1;
+
+    private static final float MIN_ACCELERATION = 40;
 
     public NMSAtelierHorse(Player player, org.bukkit.World world, ItemStack saddle) {
         super(EntityTypes.HORSE, ((CraftWorld) world).getHandle());
@@ -71,6 +75,10 @@ public class NMSAtelierHorse extends EntityHorse {
             speed *= 0.8 + (skillLevel * 0.01);
             jump *= 0.8 + (skillLevel * 0.01);
         }
+        if(horseSaddle.hasSkill(EnumHorseSkill.ACCELERATION)) {
+            accelerationUp = 2 + (horseSaddle.getSkillLevel(EnumHorseSkill.ACCELERATION) * 0.1);
+        }
+        speed *= (int) acceleration * 0.01;
         getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(speed);
         getAttributeInstance(GenericAttributes.JUMP_STRENGTH).setValue(jump);
     }
@@ -115,23 +123,28 @@ public class NMSAtelierHorse extends EntityHorse {
         }
     }
 
-    private void startBoost(final long nowTime) {
-        if (nowTime - lastStartBoostTime > 10000) { // coolTime 10sec
-            final Vec3D nowVector = getRider().getMot();
-            if (oldVector != null && oldVector.x == 0 && oldVector.z == 0 && nowVector.x != 0 && nowVector.z != 0) {
-                playSound(Sound.ENTITY_HORSE_GALLOP, 1, 0.3f);
-                getBukkitLivingEntity().addPotionEffect(
-                        new PotionEffect(PotionEffectType.SPEED, 40 + (horseSaddle.getSkillLevel(EnumHorseSkill.START_BOOST) * 10), 1)
-                );
-                lastStartBoostTime = nowTime;
-            }
-            oldVector = nowVector;
+    private boolean startBoost(final long nowTime) {
+        if (nowTime - lastStartBoostTime > 30000) { // coolTime 30sec
+            playSound(Sound.ENTITY_HORSE_GALLOP, 1, 0.3f);
+            getBukkitLivingEntity().addPotionEffect(
+                    new PotionEffect(PotionEffectType.SPEED, 40 + (horseSaddle.getSkillLevel(EnumHorseSkill.START_BOOST) * 10), 0)
+            );
+            lastStartBoostTime = nowTime;
+            return true;
         }
+        return false;
+    }
+
+    private boolean isStartMovement() {
+        final Vec3D nowVector = getRider().getMot();
+        final boolean result = oldVector != null && oldVector.x == 0 && oldVector.z == 0 && nowVector.x != 0 && nowVector.z != 0;
+        oldVector = nowVector;
+        return result;
     }
 
     private boolean checkBoostTime(final long nowTime) {
         final int skillLevel = horseSaddle.getSkillLevel(EnumHorseSkill.BOOST);
-        if (nowTime - boostTime > 20000 - (skillLevel * 1000)) { // 19sec ~ 10sec
+        if (nowTime - boostTime > 20000L - (skillLevel * 1000L)) { // 19sec ~ 10sec
             boostTime = nowTime;
             return true;
         }
@@ -171,23 +184,27 @@ public class NMSAtelierHorse extends EntityHorse {
     @Override
     public void movementTick() {
         super.movementTick();
-        final boolean hasStartBoost = horseSaddle.hasSkill(EnumHorseSkill.START_BOOST);
-        final boolean hasBoost = horseSaddle.hasSkill(EnumHorseSkill.BOOST);
-        if (hasStartBoost || hasBoost) {
-            final long nowTime = System.currentTimeMillis();
-            if (hasStartBoost) {
-                startBoost(nowTime);
+        boolean refreshHorseStats = false;
+        if (horseSaddle.hasSkill(EnumHorseSkill.BOOST) && GameConstants.HORSE_MAX_BOOST_COUNT > boostCount && checkBoostTime(System.currentTimeMillis())) {
+            changeBoostCount(true);
+        }
+        if (isStartMovement()) {
+            if (horseSaddle.hasSkill(EnumHorseSkill.START_BOOST) && startBoost(System.currentTimeMillis())) {
+                acceleration = 50;
+            } else {
+                acceleration = MIN_ACCELERATION;
             }
-            if (hasBoost && GameConstants.HORSE_MAX_BOOST_COUNT > boostCount && checkBoostTime(nowTime)) {
-                changeBoostCount(true);
-            }
+        }
+        if (acceleration < 100) {
+            acceleration += accelerationUp;
+            refreshHorseStats = true;
         }
         boolean hasTwoSeater = twoSeater != null;
         if (hasTwoSeater && !twoSeater.hasRider()) {
             twoSeater.die();
             twoSeater = null;
             hasTwoSeater = false;
-            refreshHorseStats();
+            refreshHorseStats = true;
         }
         if (!passengers.isEmpty()) {
             final Entity entity = passengers.get(0);
@@ -202,12 +219,15 @@ public class NMSAtelierHorse extends EntityHorse {
                     if (Math.abs(x - oldX) > 10 || Math.abs(z - oldZ) > 10) {
                         oldX = x;
                         oldZ = z;
-                        if (horseSaddle.addExp(100, saddle, ((EntityPlayer) entity).getBukkitEntity())) {
-                            refreshHorseStats();
+                        if (horseSaddle.addExp(1, saddle, ((EntityPlayer) entity).getBukkitEntity())) {
+                            refreshHorseStats = true;
                         }
                     }
                 }
             }
+        }
+        if (refreshHorseStats) {
+            refreshHorseStats();
         }
     }
 

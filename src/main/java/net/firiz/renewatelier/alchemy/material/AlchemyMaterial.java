@@ -8,7 +8,7 @@ import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
-import net.firiz.renewatelier.item.CustomModelMaterial;
+import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.skill.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import org.bukkit.Material;

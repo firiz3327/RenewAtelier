@@ -1,8 +1,9 @@
 package net.firiz.renewatelier.buff;
 
+import net.firiz.ateliercommonapi.loop.LoopManager;
+import net.firiz.ateliercommonapi.loop.TickRunnable;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.loop.LoopManager;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -18,7 +19,8 @@ public class Buff {
     private static final LoopManager loopManager = LoopManager.INSTANCE;
 
     private final BuffData buffData;
-    private final Runnable timer;
+    private final TickRunnable timer;
+    private int taskId;
 
     private EntityStatus status;
     private int duration;
@@ -85,7 +87,7 @@ public class Buff {
     }
 
     public void startTimer() {
-        loopManager.addSec(timer);
+        taskId = loopManager.addSeconds(timer);
     }
 
     private boolean incrementTimer() {
@@ -123,7 +125,7 @@ public class Buff {
     }
 
     public void stopTimer() {
-        loopManager.removeSec(timer);
+        loopManager.removeSeconds(taskId);
         end = true;
         endHandler.run();
     }

@@ -3,7 +3,7 @@ package net.firiz.renewatelier.characteristic.datas.addattack;
 import net.firiz.renewatelier.characteristic.datas.ChData;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AddAttackX;
 import net.firiz.renewatelier.damage.AttackCategory;
-import net.firiz.renewatelier.item.json.itemeffect.IItemEffect;
+import net.firiz.renewatelier.inventory.item.json.itemeffect.IItemEffect;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

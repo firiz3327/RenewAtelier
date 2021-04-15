@@ -4,9 +4,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
@@ -262,7 +264,7 @@ public class CharStats extends EntityStatus {
         if (GameConstants.PLAYER_LEVEL_CAP <= level) {
             return false;
         }
-        player.sendActionBar(ChatColor.GREEN + "xp " + exp);
+        player.sendActionBar(Component.text("xp " + exp, NamedTextColor.GREEN));
         this.exp += exp;
         boolean levelUp = false;
         while (true) {
@@ -297,7 +299,7 @@ public class CharStats extends EntityStatus {
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
         player.sendTitle(
                 ChatColor.GREEN + "LEVEL UP",
-                "Level: " + this.level,
+                "プレイヤーレベル: " + this.level,
                 10,
                 70,
                 20
@@ -315,6 +317,7 @@ public class CharStats extends EntityStatus {
         if (GameConstants.ALCHEMY_LEVEL_CAP <= alchemyLevel) {
             return false;
         }
+        player.sendActionBar(Component.text("xp " + exp, NamedTextColor.YELLOW));
         this.alchemyExp += alchemyExp;
         boolean levelUp = false;
         while (true) {
@@ -325,6 +328,16 @@ public class CharStats extends EntityStatus {
             this.alchemyExp += alchemyExp - reqExp;
             this.alchemyLevel++;
             levelUp = true;
+        }
+        if (levelUp) {
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
+            player.sendTitle(
+                    ChatColor.YELLOW + "LEVEL UP",
+                    "錬金レベル: " + this.alchemyLevel,
+                    10,
+                    70,
+                    20
+            );
         }
         return levelUp;
     }
@@ -340,19 +353,22 @@ public class CharStats extends EntityStatus {
     /**
      * @param money      お金
      * @param compulsion 強制的にお金を所持制限最大もしくは最低になるまで変動させるかどうか
-     * @return 無事に所持金を変動させられたか
+     * @return 0 所持金の上限を超えている, 1 所持金の下限を超えている, 2 所持金の変更に成功している
      */
-    public boolean gainMoney(long money, boolean compulsion) {
+    public int gainMoney(long money, boolean compulsion) {
         final long tempMoney = (this.money + money);
         if (compulsion) {
             this.money = Math.max(0, Math.min(tempMoney, GameConstants.PLAYER_MONEY_CAP));
         } else {
-            if (tempMoney > GameConstants.PLAYER_MONEY_CAP || tempMoney < 0) {
-                return false;
+            if (tempMoney > GameConstants.PLAYER_MONEY_CAP) {
+                return 0;
+            }
+            if (tempMoney < 0) {
+                return 1;
             }
             this.money += money;
         }
-        return true;
+        return 2;
     }
 
     public void heal(double heal) {

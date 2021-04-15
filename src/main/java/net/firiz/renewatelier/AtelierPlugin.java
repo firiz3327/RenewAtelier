@@ -1,11 +1,12 @@
 package net.firiz.renewatelier;
 
+import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.renewatelier.command.CheckCommand;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.entity.EntityCleanUp;
 import net.firiz.renewatelier.listener.*;
 import net.firiz.renewatelier.listener.player.PlayerListener;
-import net.firiz.renewatelier.loop.LoopManager;
+import net.firiz.renewatelier.loop.AnimatedDropManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
@@ -58,7 +59,6 @@ public final class AtelierPlugin extends JavaPlugin {
         MyRoomManager.INSTANCE.setup();
         ConfigManager.INSTANCE.reloadConfigs();
         SQLManager.INSTANCE.setup();
-        LoopManager.INSTANCE.start();
         NPCManager.INSTANCE.load();
         PlayerSaveManager.INSTANCE.loadPlayers();
         /*
@@ -71,8 +71,9 @@ public final class AtelierPlugin extends JavaPlugin {
         ReplaceVanillaItems.changeRecipe();
         tabList.init();
 
-        LoopManager.INSTANCE.addSec(new EntityCleanUp());
-        LoopManager.INSTANCE.addSec(NPCManager.INSTANCE.npcLoop());
+        AnimatedDropManager.INSTANCE.start();
+        LoopManager.INSTANCE.addSeconds(new EntityCleanUp());
+        LoopManager.INSTANCE.addSeconds(NPCManager.INSTANCE.npcLoop());
 
         TargetEntityTypes.check();
     }
@@ -88,7 +89,6 @@ public final class AtelierPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        LoopManager.INSTANCE.stopLoop();
         SQLManager.INSTANCE.close();
         NPCManager.INSTANCE.stop();
         resetEntities();

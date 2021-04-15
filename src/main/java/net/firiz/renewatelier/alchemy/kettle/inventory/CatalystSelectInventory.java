@@ -6,10 +6,9 @@ import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
-import net.firiz.renewatelier.inventory.AlchemyInventoryType;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -32,6 +31,7 @@ import java.util.UUID;
 public final class CatalystSelectInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
     private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
+    private static final String TITLE = "KETTLE_SELECT_CATALYST";
     private final InventoryManager manager;
     private final List<UUID> openUsers = new ObjectArrayList<>();
 
@@ -41,12 +41,12 @@ public final class CatalystSelectInventory implements BiParamInventory<AlchemyRe
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().equals(AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
+        return view.getTitle().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull final Player player, @NotNull final AlchemyRecipe recipe, @NotNull final Inventory itemInv) {
-        final Inventory inv = Bukkit.createInventory(player, 54, AlchemyInventoryType.KETTLE_SELECT_CATALYST.getCheck());
+        final Inventory inv = Bukkit.createInventory(player, 54, TITLE);
         setCatalystSlot(player.getUniqueId(), inv, recipe);
         player.openInventory(inv);
     }

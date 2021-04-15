@@ -3,7 +3,7 @@ package net.firiz.renewatelier.skill.item.skill;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.skill.ISkill;
 import net.firiz.renewatelier.skill.item.data.ItemSkillData;
 import org.bukkit.entity.Player;

@@ -1,14 +1,9 @@
 package net.firiz.renewatelier.version.entity.atelier.holo;
 
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import org.bukkit.Bukkit;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -19,21 +14,20 @@ public final class HoloBossHealth extends AbstractHoloHealth {
 
     public HoloBossHealth(@NotNull LivingEntity entity, @NotNull LivingData livingData, @NotNull String customName) {
         super(entity, Objects.requireNonNull(livingData), customName);
-        this.bossBar = Bukkit.createBossBar(customName, BarColor.RED, BarStyle.SOLID, BarFlag.PLAY_BOSS_MUSIC);
+        this.bossBar = BossBar.bossBar(Component.text(customName), 0, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
     }
 
     @Override
     public void holo() {
         assert livingData != null;
-        final Object2DoubleMap<Player> damageSources = livingData.getDamageSources();
-        bossBar.getPlayers().stream().filter(player -> !damageSources.containsKey(player)).forEach(bossBar::removePlayer);
-        damageSources.forEach((player, damage) -> bossBar.addPlayer(player));
-        bossBar.setProgress(getPercentHealth());
+        bossBar.progress((float) getPercentHealth());
+        livingData.getDamageSources().keySet().forEach(player -> player.showBossBar(bossBar));
     }
 
     @Override
     public void die() {
-        bossBar.removeAll();
+        assert livingData != null;
+        livingData.getDamageSources().keySet().forEach(player -> player.hideBossBar(bossBar));
     }
 
 }
