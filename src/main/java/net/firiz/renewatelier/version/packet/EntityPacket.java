@@ -14,7 +14,7 @@ import org.bukkit.entity.Villager;
 /**
  * @author firiz
  */
-public class EntityPacket {
+public final class EntityPacket {
 
     private EntityPacket() {
     }
@@ -77,6 +77,7 @@ public class EntityPacket {
         armorStand.setCustomName(new ChatComponentText(name));
         armorStand.setCustomNameVisible(true);
         armorStand.setInvisible(true);
+        armorStand.setInvulnerable(true);
         armorStand.setSmall(small);
         armorStand.setMarker(true); // 当たり判定がなくなる
         return new PEMeta(

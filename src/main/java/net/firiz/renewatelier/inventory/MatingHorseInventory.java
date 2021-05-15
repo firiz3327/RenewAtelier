@@ -1,6 +1,8 @@
 package net.firiz.renewatelier.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.HorseManager;
 import net.firiz.renewatelier.entity.player.Char;
@@ -29,10 +31,10 @@ import java.util.List;
 
 public class MatingHorseInventory implements NonParamInventory {
 
-    private static final String TITLE = "馬の交配";
+    private static final Text TITLE = new Text("馬の交配");
     private static final ItemStack PANEL_ITEM = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-    private static final ItemStack CHECK_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 1, ChatColor.GREEN + "交配可能です");
-    private static final ItemStack CROSS_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 2, ChatColor.RED + "交配ができる状態にありません");
+    private static final ItemStack CHECK_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 1, new Text("交配可能です").color(C.FLAT_GREEN1));
+    private static final ItemStack CROSS_ITEM = ItemUtils.createCustomModelItem(Material.BARRIER, 1, 2, new Text("交配ができる状態にありません").color(C.FLAT_RED1));
 
     private static final int INV_SIZE = 36;
     private static final int MALE_SLOT = 11;
@@ -41,7 +43,7 @@ public class MatingHorseInventory implements NonParamInventory {
 
     @Override
     public boolean check(@NotNull InventoryView view) {
-        return view.getTitle().equals(TITLE);
+        return view.title().equals(TITLE);
     }
 
     @Override
@@ -153,18 +155,18 @@ public class MatingHorseInventory implements NonParamInventory {
         final List<Component> lore = new ObjectArrayList<>();
         if (female && matingCount && matingTime && hasMoney) {
             item = CHECK_ITEM.clone();
-            lore.add(Component.text(String.format("%d E 消費して交配を開始します。", requireMoney), NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false));
+            lore.add(new Text(String.format("%d E 消費して交配を開始します。", requireMoney), true).color(C.FLAT_GREEN1));
         } else {
             item = CROSS_ITEM.clone();
         }
         if (!matingCount) {
-            lore.add(Component.text("交配回数が既に最大です。", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+            lore.add(new Text("交配回数が既に最大です。", true).color(C.FLAT_SILVER1));
         }
         if (!matingTime) {
-            lore.add(Component.text("交配から時間が経過していません。", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+            lore.add(new Text("交配から時間が経過していません。", true).color(C.FLAT_SILVER1));
         }
         if (!hasMoney) {
-            lore.add(Component.text(String.format("所持金が %d E 足りません。", requireMoney - character.getMoney()), NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+            lore.add(new Text(String.format("所持金が %d E 足りません。", requireMoney - character.getMoney()), true).color(C.FLAT_SILVER1));
         }
         final ItemMeta meta = item.getItemMeta();
         meta.lore(lore);

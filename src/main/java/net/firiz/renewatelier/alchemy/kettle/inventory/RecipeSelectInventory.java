@@ -67,7 +67,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
         final Inventory inv = Bukkit.createInventory(player, 54, TITLE);
         inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, 1522, "", recipeLore)); // 外見上
         inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, 1562, "", null)); // 外見下
-        inv.setItem(43, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null)); // 鑑定ボタン
+//        inv.setItem(43, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null)); // 鑑定ボタン
         inv.setItem(1, ItemUtils.setSetting(ItemUtils.ci(Material.BARRIER, 0, "", null), KettleConstants.scrollKey, 0)); // スクロール
         setLocation(inv, loc);
 
@@ -162,7 +162,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
                 final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
 
                 assert recipeStatus != null;
-                final ItemStack item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP) : material.toItemStack();
+                final ItemStack item = recipeStatus.getLevel() == 0 ? new ItemStack(Material.MAP) : material.toItemStack();
 
                 final ItemMeta meta = item.getItemMeta();
                 final List<String> lore = new ObjectArrayList<>();
@@ -218,10 +218,10 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
             final ItemStack item = e.getCurrentItem();
 
             switch (raw) {
-                case 43:
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
-                    manager.getInventory(Appraisal.class).open(player);
-                    break;
+//                case 43:
+//                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
+//                    manager.getInventory(Appraisal.class).open(player);
+//                    break;
                 case 46:
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                     setRecipeScroll(player.getUniqueId(), inv, Math.max(0, scroll - 1));
@@ -271,7 +271,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
                             lore.add(ChatColor.WHITE + "  を作成します。");
                             final RecipeStatus recipeStatus = status.getRecipeStatus(recipe.getId());
                             if (recipeStatus != null && material != null) {
-                                final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.FILLED_MAP, recipe.getAmount()) : material.toItemStack();
+                                final ItemStack resultItem = recipeStatus.getLevel() == 0 ? new ItemStack(Material.MAP, recipe.getAmount()) : material.toItemStack();
                                 final ItemMeta meta = resultItem.getItemMeta();
                                 addRecipeStatus(player.getUniqueId(), recipe, recipeStatus, meta, lore);
                                 setNameAndFlags(meta, alchemyMaterial);

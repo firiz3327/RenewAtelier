@@ -64,10 +64,8 @@ public class CustomConfig {
             config = new CConfiguration(configFile);
             try {
                 config.load(reader);
-            } catch (IOException var3) {
+            } catch (IOException | InvalidConfigurationException var3) {
                 Bukkit.getLogger().log(Level.SEVERE, "Cannot load configuration from stream", var3);
-            } catch (InvalidConfigurationException var4) {
-                Bukkit.getLogger().log(Level.SEVERE, "Cannot load configuration from stream", var4);
             }
             final InputStream defConfigStream = plugin.getResource(file);
             if (defConfigStream == null) {
@@ -101,7 +99,6 @@ public class CustomConfig {
 
         private final File configFile;
         private final DumperOptions yamlOptions = new DumperOptions();
-        private final Representer yamlRepresenter = new YamlRepresenter();
         private final Yaml overYaml;
 
         CConfiguration(File configFile) {
@@ -110,7 +107,8 @@ public class CustomConfig {
             a.setAllowDuplicateKeys(false);
             final LoaderOptions b = new LoaderOptions();
             b.setAllowDuplicateKeys(false);
-            overYaml = new Yaml(a, this.yamlRepresenter, this.yamlOptions, b);
+            Representer yamlRepresenter = new YamlRepresenter();
+            overYaml = new Yaml(a, yamlRepresenter, this.yamlOptions, b);
         }
 
         public File getConfigFile() {

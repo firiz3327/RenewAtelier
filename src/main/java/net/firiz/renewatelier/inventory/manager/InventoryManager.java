@@ -11,10 +11,7 @@ import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +35,8 @@ public enum InventoryManager {
         inventories.put(ShopInventory.class, new ShopInventory());
         inventories.put(BagInventory.class, new BagInventory());
         inventories.put(MatingHorseInventory.class, new MatingHorseInventory());
+        inventories.put(InfoInventory.class, new InfoInventory(this));
+        inventories.put(SettingInventory.class, new SettingInventory(this));
     }
 
     @Nullable
@@ -50,12 +49,33 @@ public enum InventoryManager {
         return null;
     }
 
+    @NotNull
+    public <T> T getInventory(@NotNull Class<T> clasz) {
+        return CommonUtils.cast(Objects.requireNonNull(inventories.get(clasz)));
+    }
+
     public void onClick(@NotNull InventoryView view, @NotNull InventoryClickEvent event) {
         if (AlchemyItemBag.has(event.getCurrentItem())) {
             event.setCancelled(true);
+            final Player player = (Player) event.getWhoClicked();
+
             // プレイヤーインベントリの時だけ
             if (event.getInventory() instanceof CraftingInventory && ((CraftingInventory) event.getInventory()).getMatrix().length == 4) {
-                getInventory(BagInventory.class).open((Player) view.getPlayer(), event.getCurrentItem());
+                // バッグをシフトクリックした際、プレイヤーインベントリのクイックバーに
+                // 空きスロットがあった場合、バッグが増殖するバグがある
+                // 上記バグはクリエイティブ時限定
+                switch (event.getClick()) {
+                    case LEFT:
+                    case SHIFT_LEFT:
+                        getInventory(BagInventory.class).open(player);
+                        break;
+                    case RIGHT:
+                    case SHIFT_RIGHT:
+                        getInventory(InfoInventory.class).open(player);
+                        break;
+                    default:
+                        break;
+                }
             }
             return;
         }
@@ -90,12 +110,6 @@ public enum InventoryManager {
 
     public void onClose(@NotNull InventoryView view, @NotNull InventoryCloseEvent event) {
         CObjects.nonNullConsumer(getInventory(view), inv -> inv.onClose(event));
-    }
-
-    @NotNull
-    public <T> T getInventory(@NotNull Class<T> clasz) {
-        final Object obj = Objects.requireNonNull(inventories.get(clasz));
-        return CommonUtils.cast(obj);
     }
 
 }

@@ -9,6 +9,7 @@ import net.firiz.renewatelier.listener.player.PlayerListener;
 import net.firiz.renewatelier.loop.AnimatedDropManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.firiz.renewatelier.sql.SQLManager;
@@ -38,7 +39,9 @@ public final class AtelierPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        CommonUtils.log("0 onEnable [Done]");
         removePlayerNPCStands();
+        CommonUtils.log("1 remove player npc [Done]");
 
         // registerEvents
         final PluginManager pluginManager = getServer().getPluginManager();
@@ -49,33 +52,41 @@ public final class AtelierPlugin extends JavaPlugin {
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new DamageListener(), this);
         pluginManager.registerEvents(new InventoryListener(), this);
+        CommonUtils.log("2 register events [Done]");
 
         Objects.requireNonNull(getCommand("check")).setExecutor(new CheckCommand());
+        CommonUtils.log("3 command set executor [Done]");
 
         // setup worlds
         Bukkit.getWorlds().forEach(AtelierPlugin::worldSettings);
+        CommonUtils.log("4 setup world [Done]");
 
         // setup managers and singleton classes
         MyRoomManager.INSTANCE.setup();
+        CommonUtils.log("5 setup my room manager [Done]");
         ConfigManager.INSTANCE.reloadConfigs();
+        CommonUtils.log("6 load config [Done]");
         SQLManager.INSTANCE.setup();
+        CommonUtils.log("7 setup sql [Done]");
         NPCManager.INSTANCE.load();
+        CommonUtils.log("8 load npc [Done]");
         PlayerSaveManager.INSTANCE.loadPlayers();
-        /*
-        AtelierEntityUtils.INSTANCE
-        KettleItemManager.INSTANCE
-        KettleBonusManager.INSTANCE
-        ScriptManager.INSTANCE
-         */
+        CommonUtils.log("9 load players [Done]");
 
         ReplaceVanillaItems.changeRecipe();
+        CommonUtils.log("10 change recipe [Done]");
         tabList.init();
+        CommonUtils.log("11 init tab list [Done]");
 
         AnimatedDropManager.INSTANCE.start();
+        CommonUtils.log("12 start animated drop [Done]");
         LoopManager.INSTANCE.addSeconds(new EntityCleanUp());
+        CommonUtils.log("13 add loop entity clean up [Done]");
         LoopManager.INSTANCE.addSeconds(NPCManager.INSTANCE.npcLoop());
+        CommonUtils.log("14 add loop npc loop [Done]");
 
         TargetEntityTypes.check();
+        CommonUtils.log("15 target entity type check [Done]");
     }
 
     public static void worldSettings(World world) {

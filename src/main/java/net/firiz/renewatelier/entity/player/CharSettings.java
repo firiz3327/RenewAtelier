@@ -4,8 +4,8 @@ import net.firiz.renewatelier.sql.SQLManager;
 
 public class CharSettings {
 
-    private final boolean showDamage;
-    private final boolean showOthersDamage;
+    private boolean showDamage;
+    private boolean showOthersDamage;
 
     public CharSettings(boolean damage, boolean showOthersDamage) {
         this.showDamage = damage;
@@ -24,7 +24,15 @@ public class CharSettings {
         return showDamage;
     }
 
+    public void setShowDamage(boolean showDamage) {
+        this.showDamage = showDamage;
+    }
+
     public boolean isShowOthersDamage() {
         return showOthersDamage;
+    }
+
+    public void setShowOthersDamage(boolean showOthersDamage) {
+        this.showOthersDamage = showOthersDamage;
     }
 }

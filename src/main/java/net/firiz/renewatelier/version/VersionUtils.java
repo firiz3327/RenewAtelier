@@ -47,6 +47,7 @@ public class VersionUtils {
             implLookup.setAccessible(false);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             CommonUtils.logWarning(e);
+            CommonUtils.logWarning("Exit Error Lookup");
             System.exit(1);
         }
     }

@@ -12,6 +12,7 @@ import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
 import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.npc.MessageObjectRun;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
@@ -65,6 +66,8 @@ public final class Char {
     @NotNull
     private final MessageObjectRun messageObjectRun;
     private final int taskIdTick;
+    @NotNull
+    private final AlchemyItemBag bag;
 
     public Char(
             @NotNull Player player,
@@ -75,7 +78,8 @@ public final class Char {
             @NotNull final CharStats charStats,
             @NotNull final List<RecipeStatus> recipeStatuses,
             @NotNull final List<QuestStatus> questStatuses,
-            @NotNull final CharSettings settings
+            @NotNull final CharSettings settings,
+            @NotNull final AlchemyItemBag bag
     ) {
         this.player = player;
         this.uuid = uuid;
@@ -87,10 +91,12 @@ public final class Char {
         this.questStatuses = questStatuses;
         this.settings = settings;
         this.engineManager = new EngineManager();
+        this.bag = bag;
 
         this.autoSave = () -> {
             this.charStats.save(this.id);
             this.settings.save(this.id);
+            this.bag.save(this.id);
         };
         this.taskIdMinute = LoopManager.INSTANCE.addMinutes(this.autoSave);
         this.messageObjectRun = new MessageObjectRun();
@@ -106,6 +112,10 @@ public final class Char {
     public void respawn() {
         charStats.clearBuffs();
         charStats.heal(charStats.getMaxHp());
+    }
+
+    public int getId() {
+        return id;
     }
 
     @NotNull
@@ -270,5 +280,10 @@ public final class Char {
     @NotNull
     public MessageObjectRun getMessageObjectRun() {
         return messageObjectRun;
+    }
+
+    @NotNull
+    public AlchemyItemBag getBag() {
+        return bag;
     }
 }

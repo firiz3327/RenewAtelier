@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.listener;
 
-import io.papermc.paper.event.entity.EntityLoadCrossbowEvent;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.entity.horse.HorseManager;

@@ -168,31 +168,36 @@ public enum NPCManager {
             final UUID uuid = player.getUniqueId();
             final NPC npc = optionalNPC.get();
             final String script = npc.getNpcObject().getScript();
+            final String scriptFile = "npc/".concat(script);
 
+            boolean start = true;
             if (scriptPlayers.containsKey(uuid)) {
                 final NonNullPair<NPCConversation, Long> scriptPlayerValue = scriptPlayers.get(uuid);
-                final long now = System.currentTimeMillis();
-                final boolean canAction = canAction(now, scriptPlayerValue);
-                if (canAction) {
-                    scriptPlayerValue.setRight(now);
-                    Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                        final NonNullPair<NPCConversation, Long> value = scriptPlayers.get(uuid);
-                        if (value != null) {
-                            final Invocable iv = value.getLeft().getIv();
-                            if (iv != null) {
-                                try {
-                                    iv.invokeFunction("action", sneaking);
-                                } catch (ScriptException ex) {
-                                    CommonUtils.logWarning(ex);
-                                } catch (NoSuchMethodException ignored) {
-                                    // ignored
+                if (scriptFile.equals(scriptPlayerValue.getLeft().getScriptName())) {
+                    start = false;
+                    final long now = System.currentTimeMillis();
+                    final boolean canAction = canAction(now, scriptPlayerValue);
+                    if (canAction) {
+                        scriptPlayerValue.setRight(now);
+                        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
+                            final NonNullPair<NPCConversation, Long> value = scriptPlayers.get(uuid);
+                            if (value != null) {
+                                final Invocable iv = value.getLeft().getIv();
+                                if (iv != null) {
+                                    try {
+                                        iv.invokeFunction("action", sneaking);
+                                    } catch (ScriptException ex) {
+                                        CommonUtils.logWarning(ex);
+                                    } catch (NoSuchMethodException ignored) {
+                                        // ignored
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-            } else {
-                final String scriptFile = "npc/".concat(script);
+            }
+            if (start) {
                 final NPCConversation conversation = new NPCConversation(npc, scriptFile, player);
                 Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> ScriptManager.INSTANCE.start(scriptFile, player, conversation, "action", sneaking));
                 scriptPlayers.put(uuid, new NonNullPair<>(conversation, System.currentTimeMillis()));

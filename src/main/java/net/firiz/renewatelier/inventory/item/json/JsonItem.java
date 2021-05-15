@@ -13,7 +13,7 @@ public final class JsonItem {
     @Expose
     private final Material material;
     @Expose
-    private final int amount;
+    private int amount;
     @Expose
     private final int customModel;
     @Expose
@@ -41,6 +41,18 @@ public final class JsonItem {
         this.jsonItemStatus = itemStatus.toJson();
     }
 
+    public Material getMaterial() {
+        return material;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
     public ItemStack toItemStack() {
         final ItemStack result = new ItemStack(material, amount);
         final ItemMeta meta = result.getItemMeta();
@@ -54,6 +66,10 @@ public final class JsonItem {
         }
         AlchemyItemStatus.loadJson(jsonItemStatus).updateItem(result);
         return result;
+    }
+
+    public boolean isSimulator(final JsonItem item) {
+        return material == item.material && customModel == item.customModel && Objects.equals(jsonItemStatus, item.jsonItemStatus);
     }
 
 }

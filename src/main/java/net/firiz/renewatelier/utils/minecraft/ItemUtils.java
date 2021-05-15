@@ -6,6 +6,8 @@ import com.destroystokyo.paper.profile.CraftPlayerProfile;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -15,7 +17,6 @@ import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.FuncBlock;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -50,17 +51,6 @@ public final class ItemUtils {
         return item;
     }
 
-    public static ItemStack createHead(SkinProperty skinProperty, int amount) {
-        final ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
-        final SkullMeta meta = (SkullMeta) item.getItemMeta();
-        final UUID uuid = UUID.randomUUID();
-        final GameProfile profile = new GameProfile(uuid, uuid.toString());
-        skinProperty.modifyTextures(profile);
-        meta.setPlayerProfile(new CraftPlayerProfile(profile));
-        item.setItemMeta(meta);
-        return item;
-    }
-
     public static ItemStack setSetting(final ItemStack itemStack, final NamespacedKey key, final String value) {
         final ItemMeta meta = itemStack.getItemMeta();
         CommonUtils.setSetting(meta, key, value);
@@ -91,25 +81,14 @@ public final class ItemUtils {
         return item;
     }
 
-    public static ItemStack createCustomModelItem(final Material material, int amount, int value, String name) {
+    public static ItemStack createCustomModelItem(final Material material, int amount, int value, Text name) {
         final ItemStack item = new ItemStack(material, amount);
         final ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
+        meta.displayName(name);
         meta.setCustomModelData(value);
         item.setItemMeta(meta);
         return item;
     }
-
-    public static ItemStack createCustomModelItem(final Material material, int amount, int value, String name, List<String> lore) {
-        final ItemStack item = new ItemStack(material, amount);
-        final ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        meta.setLore(lore);
-        meta.setCustomModelData(value);
-        item.setItemMeta(meta);
-        return item;
-    }
-
 
     public static int getCustomModelData(final ItemStack item) {
         return item.getItemMeta().getCustomModelData();
@@ -367,13 +346,6 @@ public final class ItemUtils {
         }
     }
 
-    public static String getName(ItemStack i) {
-        if (i.hasItemMeta() && i.getItemMeta().hasDisplayName()) {
-            return i.getItemMeta().getDisplayName();
-        }
-        return null;
-    }
-
     public static Material getType(ItemStack i) {
         if (i == null) {
             return Material.AIR;
@@ -388,6 +360,39 @@ public final class ItemUtils {
     }
 
     @NotNull
+    public static ItemStack unavailableItem(Material m, int customModel, Text name, Lore lore) {
+        final ItemStack item = createCustomModelItem(m, 1, customModel);
+        item.setItemMeta(unavailableItem(item.getItemMeta(), name, lore));
+        return item;
+    }
+
+    @NotNull
+    public static ItemStack unavailableItem(Material m, Text name) {
+        return unavailableItem(m, name, null);
+    }
+
+    @NotNull
+    public static ItemStack unavailableItem(Material m, Text name, Lore lore) {
+        final ItemStack item = new ItemStack(m);
+        item.setItemMeta(unavailableItem(item.getItemMeta(), name, lore));
+        return item;
+    }
+
+    private static ItemMeta unavailableItem(ItemMeta meta, Text name, Lore lore) {
+        if (name != null) {
+            meta.displayName(name);
+        }
+        if (lore != null && !lore.isEmpty()) {
+            meta.lore(lore);
+        }
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        return meta;
+    }
+
+    @Deprecated
+    @NotNull
     public static ItemStack ci(Material m, int d, String name, List<String> lore) {
         final ItemStack item = createCustomModelItem(m, 1, d);
         final ItemMeta meta = item.getItemMeta();
@@ -400,17 +405,6 @@ public final class ItemUtils {
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    @NotNull
-    public static ItemStack loreItem(Material m, List<String> lore) {
-        final ItemStack item = new ItemStack(m, 1);
-        final ItemMeta meta = item.getItemMeta();
-        if (lore != null && !lore.isEmpty()) {
-            meta.setLore(lore);
-        }
         item.setItemMeta(meta);
         return item;
     }

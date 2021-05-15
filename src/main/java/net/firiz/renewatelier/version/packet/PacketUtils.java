@@ -1,10 +1,15 @@
 package net.firiz.renewatelier.version.packet;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class PacketUtils {
 
@@ -41,9 +46,25 @@ public class PacketUtils {
         }
     }
 
+    public static void sendPackets(final Player player, final Collection<Packet<?>> packets) {
+        final PlayerConnection playerConnection = ((CraftPlayer) player).getHandle().playerConnection;
+        for (final Packet<?> packet : packets) {
+            playerConnection.sendPacket(packet);
+        }
+    }
+
     public static void broadcast(final org.bukkit.entity.Entity entity, Packet<?> packet) {
         final Entity nmsEntity = ((CraftEntity) entity).getHandle();
         ((WorldServer) nmsEntity.world).getChunkProvider().broadcast(nmsEntity, packet);
+    }
+
+    public static Collection<Player> trackPlayer(final org.bukkit.entity.Entity entity) {
+        final Entity nmsEntity = ((CraftEntity) entity).getHandle();
+        final PlayerChunkMap.EntityTracker entityTracker = ((WorldServer) nmsEntity.world).getChunkProvider().playerChunkMap.trackedEntities.get(nmsEntity.getId());
+        return new ObjectOpenHashSet<>(entityTracker.trackedPlayers)
+                .stream()
+                .map(entityPlayer -> (Player) entityPlayer.getBukkitEntity())
+                .collect(Collectors.toCollection(ObjectOpenHashSet::new));
     }
 
     public static int getPing(final Player player) {

@@ -94,6 +94,12 @@ public class CharStats extends EntityStatus {
         return canAttack;
     }
 
+    public void updateExp() {
+        final BigDecimal decimal = BigDecimal.valueOf(this.exp)
+                .divide(BigDecimal.valueOf(GameConstants.PLAYER_REQ_EXPS[level]), 2, RoundingMode.DOWN);
+        player.setExp(decimal.floatValue());
+    }
+
     public void updateEquip() {
         update(() -> {
             equipStats.updateEquip();
@@ -276,9 +282,7 @@ public class CharStats extends EntityStatus {
             levelUp();
             levelUp = true;
         }
-        final BigDecimal decimal = BigDecimal.valueOf(this.exp)
-                .divide(BigDecimal.valueOf(GameConstants.PLAYER_REQ_EXPS[level]), 2, RoundingMode.DOWN);
-        player.setExp(decimal.floatValue());
+        updateExp();
         return levelUp;
     }
 
@@ -387,6 +391,8 @@ public class CharStats extends EntityStatus {
                 player.setHealth(0D);
             }
             return;
+        } else if (damage > 0) {
+            player.playEffect(EntityEffect.HURT);
         }
         updateHp();
     }

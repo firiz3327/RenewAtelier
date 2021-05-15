@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.SkinProperty;
 import net.firiz.renewatelier.version.MinecraftVersion;
-import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.minecraft.server.v1_16_R3.DataWatcher;
 import net.minecraft.server.v1_16_R3.DataWatcherRegistry;

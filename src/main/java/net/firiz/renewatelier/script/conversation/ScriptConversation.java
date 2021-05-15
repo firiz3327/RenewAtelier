@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
+import net.firiz.renewatelier.inventory.Appraisal;
 import net.firiz.renewatelier.inventory.ConfirmInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.shop.ShopInventory;
@@ -55,6 +56,10 @@ public class ScriptConversation {
     public void debug(final Object str) {
         CommonUtils.log(str);
         player.sendMessage(str.toString());
+    }
+
+    public String getScriptName() {
+        return scriptName;
     }
 
     @Export
@@ -231,6 +236,11 @@ public class ScriptConversation {
             throw new IllegalArgumentException("No more than 29 shop items can be placed.");
         }
         inventoryManager.getInventory(ShopInventory.class).open(player, title, isNull ? new ObjectArrayList<>() : shopItems);
+    }
+
+    @Export
+    public void openAppraisal() {
+        inventoryManager.getInventory(Appraisal.class).open(player);
     }
 
     @NotNull

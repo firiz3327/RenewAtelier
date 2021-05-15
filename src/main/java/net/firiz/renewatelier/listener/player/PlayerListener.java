@@ -9,10 +9,12 @@ import net.firiz.renewatelier.entity.arrow.ArrowManager;
 import net.firiz.renewatelier.entity.horse.HorseManager;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
+import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.npc.NPCManager;
 import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
+import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import net.firiz.renewatelier.version.packet.PayloadPacket;
 import org.bukkit.Bukkit;
@@ -114,6 +116,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void death(final PlayerDeathEvent e) {
         e.setReviveHealth(1);
+        e.setKeepLevel(true);
     }
 
     @EventHandler
@@ -124,9 +127,11 @@ public class PlayerListener implements Listener {
     @EventHandler
     private void pickup(final PlayerAttemptPickupItemEvent e) {
         final Char player = PlayerSaveManager.INSTANCE.getChar(e.getPlayer().getUniqueId());
+        final ItemStack item = e.getItem().getItemStack();
         if (e.getItem().getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.CUSTOM) {
-            player.increaseIdea(e.getItem().getItemStack());
+            player.increaseIdea(item);
         }
+        e.setCancelled(player.getBag().add(player.getPlayer(), e.getItem()));
         Bukkit.getScheduler().scheduleSyncDelayedTask(
                 AtelierPlugin.getPlugin(),
                 () -> player.getCharStats().updateWeapon(),

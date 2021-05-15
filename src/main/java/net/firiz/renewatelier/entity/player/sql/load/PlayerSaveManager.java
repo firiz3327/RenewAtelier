@@ -51,6 +51,7 @@ public enum PlayerSaveManager {
         loaders.add(new QuestStatusLoader());
         loaders.add(new BuffLoader());
         loaders.add(new CharSettingLoader());
+        loaders.add(new BagLoader());
     }
 
     public void loadPlayers() {
@@ -77,9 +78,7 @@ public enum PlayerSaveManager {
 
     public void loadStatus(final Player player) {
         final PlayerInventory inv = player.getInventory();
-        if (!AlchemyItemBag.has(inv.getItem(9))) {
-            inv.setItem(9, AlchemyItemBag.createBagItem());
-        }
+        inv.setItem(9, AlchemyItemBag.bag());
         final UUID uuid = player.getUniqueId();
         final Object[] wheres = new Object[]{uuid.toString()};
         final String tableName = "accounts";
@@ -132,7 +131,8 @@ public enum PlayerSaveManager {
                 ),
                 CommonUtils.cast(loaderValues.get(0)), // recipeStatusLoader
                 CommonUtils.cast(loaderValues.get(1)), // questStatusLoader
-                CommonUtils.cast(loaderValues.get(3)) // charSettingLoader
+                CommonUtils.cast(loaderValues.get(3)), // charSettingLoader
+                CommonUtils.cast(loaderValues.get(4)) // bagLoader
         );
         new Thread(() -> {
             final EngineManager engineManager = character.getEngineManager();

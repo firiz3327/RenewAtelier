@@ -2,11 +2,11 @@ package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.SkinProperty;
 import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import net.firiz.renewatelier.version.tab.contents.FriendListTabContents;
 import net.firiz.renewatelier.version.tab.contents.PartyListTabContents;

@@ -87,7 +87,7 @@ public final class NPCConversation extends ScriptConversation {
             final int line_size,
             @NotNull final List<DeliveryObject> deliveryObjects
     ) {
-        DeliveryInventory.INSTANCE.openInventory(player, title, line_size, deliveryObjects);
+        DeliveryInventory.openInventory(player, title, line_size, deliveryObjects);
     }
 
     @Export
@@ -155,10 +155,10 @@ public final class NPCConversation extends ScriptConversation {
     public void sendNpcChat(@NotNull final String msg, final int maxStatus, final int status) {
         final StringBuilder val = new StringBuilder();
         for (int i = 0; i < maxStatus; i++) {
-            val.append(i <= status ? "●" : "○");
+            val.append(i <= status ? "&a●" : "&7●");
         }
         sendNext(
-                chatColor(val.insert(0, "&7[").append("] &2").append(getNPCName()).append(" ").toString()),
+                chatColor(val.insert(0, "&7[").append("&7] &2").append(getNPCName()).append(" ").toString()),
                 chatColor("&a" + msg)
         );
     }

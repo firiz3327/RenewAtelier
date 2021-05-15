@@ -189,6 +189,7 @@ class PlayerInteractManager {
     }
 
     void interactEntity(Cancellable e, Player player, Entity entity, EquipmentSlot hand, boolean isRightClick, int entityId) {
+        /*
         if (entity instanceof LootableEntityInventory) { // エンティティ(チェストマインカートなど)でのアイテムルート時、アイテム更新とデバッグ
             final LootableEntityInventory loot = (LootableEntityInventory) entity;
             if (player.isOp() && player.getInventory().getItemInMainHand().getType() == Material.STICK) { // デバッグ用
@@ -201,9 +202,12 @@ class PlayerInteractManager {
                     player.sendMessage("set lootTable " + loot.hasLootTable());
                 }
             }
-        } else if (isRightClick && hand == EquipmentSlot.HAND) {
+        }
+         */
+        if (isRightClick && hand == EquipmentSlot.HAND) {
             if (entityId < 0) { // fakeEntity
-                e.setCancelled(NPCManager.INSTANCE.action(player, entityId));
+                NPCManager.INSTANCE.action(player, entityId);
+                e.setCancelled(true);
             } else if (entity instanceof Horse) {
                 HorseManager.INSTANCE.interactHorse(player, (Horse) entity);
             }

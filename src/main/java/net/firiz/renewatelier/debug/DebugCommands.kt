@@ -26,7 +26,6 @@ import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes
 import net.firiz.renewatelier.version.entity.atelier.test.TestBoss
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem
-import net.firiz.renewatelier.version.minecraft.skin.SkinProperty
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -489,17 +488,6 @@ class DebugCommands(private val debugListener: DebugListener) {
     }
 
     @Cmd(
-            desc = ["Head ID"],
-            examples = ["head oak_log"],
-            text = "プレイヤーヘッドを取得します"
-    )
-    fun head(sender: Player, args: ArrayList<Any>) {
-        if (args.size != 0) {
-            ItemUtils.addItem(sender, ItemUtils.createHead(SkinProperty.valueOf((args[0] as String).toUpperCase()), 1))
-        }
-    }
-
-    @Cmd(
             desc = ["Horse Tier Level"],
             examples = ["horse BROWN 10"],
             text = "馬のサドルを取得します"
@@ -557,21 +545,8 @@ class DebugCommands(private val debugListener: DebugListener) {
                             CommonUtils.log(item.toJson())
                         }
                     }
-                    "t" -> {
-                        val bag = ItemStack(Material.STICK)
-                        val aib = AlchemyItemBag()
-                        aib.writeItem(bag)
-                        val b = AlchemyItemBag.load(bag)
-                        println(b.items)
-                        sender.inventory.addItem(bag)
-                    }
                     "h" -> {
                         sender.sendMessage("hasRecipe: ${NMSEntityUtils.hasRecipe(sender, "cauldron")}")
-                    }
-                    "l" -> {
-                        ItemUtils.addItem(sender, ItemUtils.ci(Material.ACACIA_BOAT, 0, "${ChatColor.RESET}RESET", arrayListOf(
-                                "${ChatColor.RESET}RESET"
-                        )))
                     }
                     "getBrand" -> {
                         sender.clientBrandName?.let { sender.sendMessage(it) }

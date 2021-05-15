@@ -1,8 +1,8 @@
 package net.firiz.renewatelier.npc;
 
+import net.firiz.ateliercommonapi.SkinProperty;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
-import net.firiz.renewatelier.version.minecraft.skin.SkinProperty;
 import net.firiz.renewatelier.version.packet.EntityPacket;
 import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.md_5.bungee.api.ChatColor;

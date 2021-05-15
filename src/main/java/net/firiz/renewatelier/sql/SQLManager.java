@@ -55,10 +55,15 @@ public enum SQLManager {
         } catch (IOException ex) {
             CommonUtils.logWarning(ex);
         }
+        CommonUtils.log("load properties file [SQL]");
         try {
+            CommonUtils.log("connection... [SQL]");
+            CommonUtils.log(url);
             conn = DriverManager.getConnection(url, user, password);
+            CommonUtils.log("successful connection [SQL]");
         } catch (SQLException ex) {
             CommonUtils.logWarning(ex);
+            CommonUtils.logWarning("Exit Error SQL");
             System.exit(1);
         }
     }
@@ -158,8 +163,8 @@ public enum SQLManager {
      * <tr><td>John</td><td>john@example.com</td></tr>
      * </table></blockquote>
      *
-     * @param table       String 参照するテーブル名
-     * @param columns     String[] {@code table}から参照するカラム名配列
+     * @param table           String 参照するテーブル名
+     * @param columns         String[] {@code table}から参照するカラム名配列
      * @param columnDataArray Object[] {@code columns}に対しての値
      * @return List&lt;List&lt;Object&gt;&gt; 列&lt;行&lt;値&gt;&gt;
      * @since 2018-12-10 / firiz
@@ -187,10 +192,10 @@ public enum SQLManager {
      * <tr><td>John</td><td>john@example.com</td></tr>
      * </table></blockquote>
      *
-     * @param table       String 参照するテーブル名
-     * @param columns     String[] {@code table}から参照するカラム名配列
+     * @param table           String 参照するテーブル名
+     * @param columns         String[] {@code table}から参照するカラム名配列
      * @param columnDataArray Object[] {@code columns}に対しての値
-     * @param select_size int 選択範囲
+     * @param select_size     int 選択範囲
      * @return List&lt;List&lt;Object&gt;&gt; 列&lt;行&lt;値&gt;&gt;
      * @since 2018-12-10 / firiz
      */
@@ -279,17 +284,17 @@ public enum SQLManager {
      * <tr><td>John</td><td>john@example.com</td></tr>
      * </table></blockquote>
      *
-     * @param table       String 参照するテーブル名
-     * @param columns     String[] {@code table}から参照するカラム名の配列
+     * @param table           String 参照するテーブル名
+     * @param columns         String[] {@code table}から参照するカラム名の配列
      * @param columnDataArray Object[] {@code columns}に対しての値の配列
      * @since 2018-12-10 / firiz
      */
-    public void insert(final String table, final String[] columns, final Object[] columnDataArray) {
+    public String insert(final String table, final String[] columns, final Object[] columnDataArray) {
         if (columns.length != columnDataArray.length) {
-            return;
+            return null;
         }
+        final StringBuilder sb = new StringBuilder();
         try (final Statement stmt = conn.createStatement()) {
-            final StringBuilder sb = new StringBuilder();
             sb.append("insert into ").append(table).append(" (");
             for (int i = 0; i < columns.length; i++) {
                 if (i > 0) {
@@ -317,6 +322,7 @@ public enum SQLManager {
         } catch (SQLException ex) {
             CommonUtils.logWarning(ex);
         }
+        return sb.toString();
     }
 
     /**
@@ -350,8 +356,8 @@ public enum SQLManager {
      * <strong>example - code</strong></p>
      * <blockquote><pre>{@code delete("mail", new String[]("name"), new Object[]("John"))}</pre></blockquote>
      *
-     * @param table       String 参照するテーブル名
-     * @param columns     String[] {@code table}から参照するカラム名の配列
+     * @param table           String 参照するテーブル名
+     * @param columns         String[] {@code table}から参照するカラム名の配列
      * @param columnDataArray Object[] {@code columns}に対しての値の配列
      * @since 2018-12-10 / firiz
      */
@@ -384,14 +390,15 @@ public enum SQLManager {
      * ObjectがStringの場合は変換し、 それ以外の場合はStringBuilderに変換せずに追加します。
      * </p>
      *
-     * @param sb    StringBuilder オブジェクトを文字列として追加する
-     * @param obj   Object 対象オブジェクト
+     * @param sb  StringBuilder オブジェクトを文字列として追加する
+     * @param obj Object 対象オブジェクト
      * @since 2018-12-10 / firiz
      */
     private void addObject(final StringBuilder sb, final Object obj) {
         if (obj instanceof String) {
             sb.append("'").append(
-                    ((String) obj).replace("'", "\"").replace("\\", "/")
+                    ((String) obj).replace("'", "\"")
+                            .replace("\\", "\\\\")//.replace("\\", "/")
             ).append("'");
         } else {
             sb.append(obj);
