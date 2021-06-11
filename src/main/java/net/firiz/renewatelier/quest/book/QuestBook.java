@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.Char;
@@ -13,7 +15,6 @@ import net.firiz.renewatelier.quest.result.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Lectern;
@@ -36,7 +37,7 @@ public final class QuestBook {
     @Nullable
     public static AlchemyMaterial getQuestBookMaterial(@Nullable final ItemStack item) {
         final Optional<AlchemyMaterial> material = AlchemyItemStatus.getMaterialOptional(item);
-        if (material.isPresent() && material.get().getId().equalsIgnoreCase("quest_book")) {
+        if (material.isPresent() && material.get().id().equalsIgnoreCase("quest_book")) {
             return material.get();
         }
         return null;
@@ -75,7 +76,7 @@ public final class QuestBook {
     }
 
     public static void changeMeta(@NotNull final Player player, @NotNull final BookMeta meta) {
-        player.sendMessage(ChatColor.GRAY + "[クエストを更新中...]");
+        player.sendMessage(Text.of("[クエストを更新中...]", C.GRAY));
         meta.setAuthor(player.getName()); // require?
         meta.setTitle("クエストブック"); // require?
         meta.setGeneration(BookMeta.Generation.ORIGINAL); // require?
@@ -83,7 +84,7 @@ public final class QuestBook {
     }
 
     private static Component[] createPages(@NotNull final Player player) {
-        final Char status = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final Char status = PlayerSaveManager.INSTANCE.getChar(player);
         final List<Quest> progressQuests = new ObjectArrayList<>();
         final List<Quest> clearQuests = new ObjectArrayList<>();
         final List<Quest> importantQuests = Quest.getImportantQuests();

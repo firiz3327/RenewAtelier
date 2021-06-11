@@ -2,6 +2,7 @@ package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 
 import java.util.Map;
@@ -53,6 +54,7 @@ public enum Category {
 
     private static final Map<String, Category> BY_NAME = Maps.newHashMap();
     private final String name;
+    private final Component nameComponent;
     private final CustomModelMaterial material;
 
     static {
@@ -64,16 +66,22 @@ public enum Category {
 
     Category(String name, Material material) {
         this.name = name;
+        this.nameComponent = Component.text(name);
         this.material = new CustomModelMaterial(material, 0);
     }
 
     Category(String name, CustomModelMaterial material) {
         this.name = name;
+        this.nameComponent = Component.text(name);
         this.material = material;
     }
 
     public String getName() {
         return "(".concat(name).concat(")");
+    }
+
+    public Component getNameComponent() {
+        return nameComponent;
     }
 
     public CustomModelMaterial getMaterial() {

@@ -36,10 +36,11 @@ public class SettingInventory implements NonParamInventory {
     @Override
     public void open(@NotNull Player player) {
         final Inventory inv = Bukkit.createInventory(player, 9, title);
-        final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getSettings();
+        final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player).getSettings();
         inv.setItem(0, backItem.clone());
         inv.setItem(2, lantern(0, settings.isShowDamage()));
         inv.setItem(3, lantern(1, settings.isShowOthersDamage()));
+        inv.setItem(4, lantern(2, settings.isShowPlayerChat()));
         player.openInventory(inv);
     }
 
@@ -47,10 +48,13 @@ public class SettingInventory implements NonParamInventory {
         final String msg;
         switch (i) {
             case 0:
-                msg = "ダメージ描画";
+                msg = "ダメージ描画は";
                 break;
             case 1:
                 msg = "他プレイヤーのダメージ描画は";
+                break;
+            case 2:
+                msg = "他プレイヤーのチャットは";
                 break;
             default: // ignored
                 throw new IllegalArgumentException("illegal index.");
@@ -70,7 +74,7 @@ public class SettingInventory implements NonParamInventory {
     public void onClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
         final Player player = (Player) event.getWhoClicked();
-        final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getSettings();
+        final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player).getSettings();
         switch (event.getRawSlot()) {
             case 0:
                 manager.getInventory(InfoInventory.class).open(player);
@@ -84,6 +88,11 @@ public class SettingInventory implements NonParamInventory {
                 final boolean next1 = !settings.isShowOthersDamage();
                 settings.setShowOthersDamage(next1);
                 event.setCurrentItem(lantern(1, next1));
+                break;
+            case 4:
+                final boolean next2 = !settings.isShowPlayerChat();
+                settings.setShowPlayerChat(next2);
+                event.setCurrentItem(lantern(2, next2));
                 break;
             default: // ignored
                 break;

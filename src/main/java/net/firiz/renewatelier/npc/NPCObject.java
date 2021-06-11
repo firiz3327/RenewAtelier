@@ -83,15 +83,13 @@ public class NPCObject {
         final Location location = new Location(world, x, y, z);
         final NPC npc;
         switch (entityType) {
-            case VILLAGER:
-                npc = new NPC(this, EntityPacket.createVillager(
-                        location,
-                        colorName,
-                        CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS),
-                        CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE)
-                ));
-                break;
-            case PLAYER:
+            case VILLAGER -> npc = new NPC(this, EntityPacket.createVillager(
+                    location,
+                    colorName,
+                    CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS),
+                    CObjects.nullIfFunction(profession, Villager.Profession::valueOf, Villager.Profession.NONE)
+            ));
+            case PLAYER -> {
                 UUID uuid;
                 if (skinUUID == null) {
                     uuid = null;
@@ -115,10 +113,8 @@ public class NPCObject {
                         uuid,
                         colorName
                 ));
-                break;
-            default:
-                npc = new NPC(this, EntityPacket.createEntity(location, colorName, entityType));
-                break;
+            }
+            default -> npc = new NPC(this, EntityPacket.createEntity(location, colorName, entityType));
         }
         return npc;
     }

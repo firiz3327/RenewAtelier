@@ -37,6 +37,7 @@ public enum InventoryManager {
         inventories.put(MatingHorseInventory.class, new MatingHorseInventory());
         inventories.put(InfoInventory.class, new InfoInventory(this));
         inventories.put(SettingInventory.class, new SettingInventory(this));
+        inventories.put(SkillTreeInventory.class, new SkillTreeInventory());
     }
 
     @Nullable
@@ -100,9 +101,6 @@ public enum InventoryManager {
     }
 
     public void onOpen(@NotNull InventoryView view, @NotNull InventoryOpenEvent event) {
-        if (view.getTopInventory() instanceof AnvilInventory) {
-            AnvilManager.open(event);
-        }
         if (view.getTopInventory() instanceof AbstractHorseInventory) {
             event.setCancelled(true);
         }

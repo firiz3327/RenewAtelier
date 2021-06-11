@@ -1,6 +1,8 @@
 package net.firiz.renewatelier.alchemy.kettle.bonus;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.box.KettleBox;
@@ -8,7 +10,7 @@ import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +43,7 @@ public class ABonus {
             final List<BonusItem> kettleSelects = kettleBox.getResultItems();
             kettleSelects.stream().filter(bonusItem -> bonusItem.getItem() != null).forEach(bonusItem -> {
                 final ItemStack item = bonusItem.getItem();
-                for (final AlchemyAttribute aa : Objects.requireNonNull(AlchemyIngredients.getMaxTypes(item).getRight())) {
+                for (final AlchemyAttribute aa : Objects.requireNonNull(AlchemyIngredients.getMaxTypes(item).right())) {
                     if (aa == type && AlchemyIngredients.getLevel(item, type) != 0) {
                         sizes.addAndGet(AlchemyItemStatus.getSizeCount(item));
                     }
@@ -51,8 +53,8 @@ public class ABonus {
         return (int) Math.pow(sizes.intValue(), 2);
     }
 
-    public String getBar() {
-        final StringBuilder sb = new StringBuilder();
+    public Component getBar() {
+        final Text text = new Text();
         final int bar = (int) ((double) bpd.getBar() / bpd.getReq() * 10);
         for (int i = 0; i < 10; i++) {
             if (i < bar) {
@@ -60,15 +62,15 @@ public class ABonus {
                 final int color = 6 / aas.length; //錬金成分３つまで想定
                 Arrays.stream(aas).forEach(aa -> {
                     for (int j = 0; j < color; j++) {
-                        sb.append(aa.getColor()).append("|");
+                        text.append("|").color(aa.getColor());
                     }
                 });
             } else {
-                sb.append(ChatColor.WHITE).append("||||||");
+                text.append("||||||").color(C.WHITE);
             }
         }
-        sb.append(ChatColor.WHITE).append(" [").append(bpd.getLevel()).append("] ").append(bpd.getBar()).append("/").append(bpd.getReq()).append("        ");
-        return sb.toString();
+        text.append(String.format(" [%d] %d/%d        ", bpd.getLevel(), bpd.getBar(), bpd.getReq())).color(C.WHITE);
+        return text;
     }
 
     public void addBar(int plus, AlchemyAttribute[] aas) {

@@ -1,11 +1,13 @@
 package net.firiz.renewatelier.utils.java;
 
+import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.IntConsumer;
 
 public class CollectionUtils {
@@ -21,13 +23,14 @@ public class CollectionUtils {
         return array[Randomizer.nextInt(array.length)];
     }
 
+    @SafeVarargs
     public static <T> Collection<T> add(@NotNull final Collection<T> collection, final T... values) {
         collection.addAll(Arrays.asList(values));
         return collection;
     }
 
     public static <T> T get(@NotNull final Collection<T> collection, final int index) {
-        return (T) collection.toArray()[index];
+        return CommonUtils.cast(collection.toArray()[index]);
     }
 
     public static IntConsumer intConsumer(IntConsumer c) {
@@ -40,5 +43,29 @@ public class CollectionUtils {
             result[i] = list.get(i);
         }
         return result;
+    }
+
+    @SafeVarargs
+    public static <T> Collection<T> addAll(Collection<T> origin, @NotNull final Collection<? extends T>... targets) {
+        for (final Collection<? extends T> target : targets) {
+            origin.addAll(target);
+        }
+        return origin;
+    }
+
+    @SafeVarargs
+    public static <T> Set<T> addAll(Set<T> origin, @NotNull final Collection<? extends T>... targets) {
+        for (final Collection<? extends T> target : targets) {
+            origin.addAll(target);
+        }
+        return origin;
+    }
+
+    @SafeVarargs
+    public static <T> List<T> addAll(List<T> origin, @NotNull final Collection<? extends T>... targets) {
+        for (final Collection<? extends T> target : targets) {
+            origin.addAll(target);
+        }
+        return origin;
     }
 }

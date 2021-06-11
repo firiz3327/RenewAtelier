@@ -2,7 +2,7 @@ package net.firiz.renewatelier.entity.monster;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.IBuff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.AttackResistance;
@@ -109,7 +109,7 @@ public class MonsterStats extends EntityStatus {
 
     public Object2ObjectMap<AttackAttribute, AttackResistance> getBuffResistances() {
         final Object2ObjectMap<AttackAttribute, AttackResistance> result = new Object2ObjectOpenHashMap<>(resistances);
-        for (final Buff buff : buffs) {
+        for (final IBuff buff : buffs) {
             if (buff.getType() == BuffType.RESISTANCE) {
                 final AttackAttribute attribute = AttackAttribute.valueOf(buff.getY());
                 AttackResistance resultResistance = result.getOrDefault(attribute, AttackResistance.NONE);

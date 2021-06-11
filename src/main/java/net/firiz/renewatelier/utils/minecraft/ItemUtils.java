@@ -17,7 +17,7 @@ import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.FuncBlock;
 import net.firiz.renewatelier.version.VersionUtils;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -73,6 +73,14 @@ public final class ItemUtils {
         return CommonUtils.getSettingInt(itemStack.getItemMeta(), key);
     }
 
+    public static boolean hasSettingString(final ItemStack itemStack, final NamespacedKey key) {
+        return itemStack != null && itemStack.hasItemMeta() && CommonUtils.hasSettingString(itemStack.getItemMeta(), key);
+    }
+
+    public static boolean hasSettingInt(final ItemStack itemStack, final NamespacedKey key) {
+        return itemStack != null && itemStack.hasItemMeta() && CommonUtils.hasSettingInt(itemStack.getItemMeta(), key);
+    }
+
     public static ItemStack createCustomModelItem(final Material material, int amount, int value) {
         final ItemStack item = new ItemStack(material, amount);
         final ItemMeta meta = item.getItemMeta();
@@ -88,6 +96,10 @@ public final class ItemUtils {
         meta.setCustomModelData(value);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static boolean hasCustomModelData(final ItemStack item) {
+        return item.getItemMeta().hasCustomModelData();
     }
 
     public static int getCustomModelData(final ItemStack item) {
@@ -152,14 +164,11 @@ public final class ItemUtils {
     }
 
     public static boolean checkMaterial(final ItemStack content, RequireAmountMaterial material) {
-        switch (material.getType()) {
-            case MATERIAL:
-                return material.getMaterial().equals(AlchemyItemStatus.getMaterialNonNull(content));
-            case CATEGORY:
-                return AlchemyItemStatus.getCategories(content).contains(material.getCategory());
-            default:
-                return false;
-        }
+        return switch (material.getType()) {
+            case MATERIAL -> material.getMaterial().equals(AlchemyItemStatus.getMaterialNonNull(content));
+            case CATEGORY -> AlchemyItemStatus.getCategories(content).contains(material.getCategory());
+            default -> false;
+        };
     }
 
     public static boolean hasMaterial(final Inventory inv, final List<RequireAmountMaterial> materials) {
@@ -174,24 +183,23 @@ public final class ItemUtils {
                     check.put(data, 0);
                 }
                 switch (data.getType()) {
-                    case MATERIAL:
+                    case MATERIAL -> {
                         final AlchemyMaterial alchemyMaterial = data.getMaterial();
                         for (final ItemStack item : contents) {
                             if (item != null && alchemyMaterial.equals(AlchemyItemStatus.getMaterialNullable(item))) {
                                 check.put(data, check.getInt(data) + item.getAmount());
                             }
                         }
-                        break;
-                    case CATEGORY:
+                    }
+                    case CATEGORY -> {
                         final Category category = data.getCategory();
                         for (final ItemStack item : contents) {
                             if (item != null && AlchemyItemStatus.getCategories(item).contains(category)) {
                                 check.put(data, check.getInt(data) + item.getAmount());
                             }
                         }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("[hasMaterial] not support recipe material.");
+                    }
+                    default -> throw new IllegalArgumentException("[hasMaterial] not support recipe material.");
                 }
             }
             return !check.isEmpty() && check.object2IntEntrySet().stream().noneMatch(entry -> (entry.getIntValue() < entry.getKey().getAmount()));
@@ -287,7 +295,7 @@ public final class ItemUtils {
 
     public static void gainItem(@NotNull Inventory inv, @NotNull Material material, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
-            if (i != null && i.getType() == material) {
+            if (i.getType() == material) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
                 reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);
@@ -300,7 +308,7 @@ public final class ItemUtils {
 
     public static void gainItem(@NotNull Inventory inv, @NotNull ItemStack item, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
-            if (i != null && item.isSimilar(i)) {
+            if (item.isSimilar(i)) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
                 reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);
@@ -313,7 +321,7 @@ public final class ItemUtils {
 
     public static void gainItem(@NotNull Inventory inv, @NotNull AlchemyMaterial material, int reduceAmount) {
         for (final ItemStack i : inv.getStorageContents()) {
-            if (i != null && material.equals(AlchemyItemStatus.getMaterialNonNull(i))) {
+            if (material.equals(AlchemyItemStatus.getMaterialNonNull(i))) {
                 int v = Math.max(i.getAmount() - reduceAmount, 0);
                 reduceAmount = -(i.getAmount() - reduceAmount);
                 i.setAmount(v);
@@ -360,25 +368,30 @@ public final class ItemUtils {
     }
 
     @NotNull
-    public static ItemStack unavailableItem(Material m, int customModel, Text name, Lore lore) {
+    public static ItemStack unavailableItem(Material m, int customModel, Component name) {
+        return unavailableItem(m, customModel, name, null);
+    }
+
+    @NotNull
+    public static ItemStack unavailableItem(Material m, int customModel, Component name, Lore lore) {
         final ItemStack item = createCustomModelItem(m, 1, customModel);
         item.setItemMeta(unavailableItem(item.getItemMeta(), name, lore));
         return item;
     }
 
     @NotNull
-    public static ItemStack unavailableItem(Material m, Text name) {
+    public static ItemStack unavailableItem(Material m, Component name) {
         return unavailableItem(m, name, null);
     }
 
     @NotNull
-    public static ItemStack unavailableItem(Material m, Text name, Lore lore) {
+    public static ItemStack unavailableItem(Material m, Component name, Lore lore) {
         final ItemStack item = new ItemStack(m);
         item.setItemMeta(unavailableItem(item.getItemMeta(), name, lore));
         return item;
     }
 
-    private static ItemMeta unavailableItem(ItemMeta meta, Text name, Lore lore) {
+    private static ItemMeta unavailableItem(ItemMeta meta, Component name, Lore lore) {
         if (name != null) {
             meta.displayName(name);
         }
@@ -391,16 +404,20 @@ public final class ItemUtils {
         return meta;
     }
 
-    @Deprecated
     @NotNull
-    public static ItemStack ci(Material m, int d, String name, List<String> lore) {
+    public static ItemStack ci(Material m, int d, String name, Lore lore) {
+        return ci(m, d, name.isEmpty() ? Component.empty() : Component.text(name), lore);
+    }
+
+    @NotNull
+    public static ItemStack ci(Material m, int d, Component name, List<Component> lore) {
         final ItemStack item = createCustomModelItem(m, 1, d);
         final ItemMeta meta = item.getItemMeta();
         if (name != null) {
-            meta.setDisplayName(name.isEmpty() ? ChatColor.RESET.toString() : name);
+            meta.displayName(name);
         }
         if (lore != null && !lore.isEmpty()) {
-            meta.setLore(lore);
+            meta.lore(lore);
         }
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
@@ -410,23 +427,23 @@ public final class ItemUtils {
     }
 
     public static void addHideFlags(ItemMeta meta, AlchemyMaterial am) {
-        meta.setUnbreakable(am.isUnbreaking());
-        if (am.isHideAttribute()) {
+        meta.setUnbreakable(am.unbreaking());
+        if (am.hideAttribute()) {
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         }
-        if (am.isHideDestroy()) {
+        if (am.hideDestroy()) {
             meta.addItemFlags(ItemFlag.HIDE_DESTROYS);
         }
-        if (am.isHideEnchant()) {
+        if (am.hideEnchant()) {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
-        if (am.isHidePlacedOn()) {
+        if (am.hidePlacedOn()) {
             meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
         }
-        if (am.isHidePotionEffect()) {
+        if (am.hidePotionEffect()) {
             meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
         }
-        if (am.isHideUnbreaking()) {
+        if (am.hideUnbreaking()) {
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         }
     }

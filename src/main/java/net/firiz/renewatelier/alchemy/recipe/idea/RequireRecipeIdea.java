@@ -40,7 +40,7 @@ public class RequireRecipeIdea {
                                 && requireMaterial.getMaterial() == idea.getMaterial()
                 ) || (
                         requireMaterial.getType() == RequireMaterial.RequireType.CATEGORY
-                                && idea.getMaterial().getCategories().contains(requireMaterial.getCategory())
+                                && idea.getMaterial().categories().contains(requireMaterial.getCategory())
                 )) {
                     return true;
                 }

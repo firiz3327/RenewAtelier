@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.characteristic.datas.addattack;
 
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.IBuff;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AddAttackX;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AttributeAddAttack;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.IntAddAttack;
@@ -71,7 +71,7 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
      * @return 追加ダメージ\<ダメージ, 攻撃属性\> 存在しない場合はnullを返す
      */
     @Nullable
-    public DamageComponent applyDamage(boolean isItem, double power, int criticalRate, AddAttackData addAttack, Entity damager, EntityStatus damagerStatus, LivingEntity victim, EntityStatus victimStatus, DamageComponent damageComponent, List<Buff> buffs, AlchemyItemStatus itemStatus) {
+    public DamageComponent applyDamage(boolean isItem, double power, int criticalRate, AddAttackData addAttack, Entity damager, EntityStatus damagerStatus, LivingEntity victim, EntityStatus victimStatus, DamageComponent damageComponent, List<IBuff> buffs, AlchemyItemStatus itemStatus) {
         return function.apply(new AddAttackCalcData(isItem, power, criticalRate, addAttack, damager, damagerStatus, victim, victimStatus, damageComponent, buffs, itemStatus));
     }
 
@@ -131,11 +131,11 @@ public enum AddAttackType { // <AddAttackType, 確率, (-1=全ての攻撃 0=ス
         @Nullable
         final EntityStatus victimStatus;
         final DamageComponent damageComponent;
-        final List<Buff> buffs;
+        final List<IBuff> buffs;
         @Nullable
         final AlchemyItemStatus itemStatus;
 
-        private AddAttackCalcData(boolean isItem, double power, int criticalRate, AddAttackData addAttack, Entity damager, @Nullable EntityStatus damagerStatus, LivingEntity victim, @Nullable EntityStatus victimStatus, DamageComponent damageComponent, List<Buff> buffs, @Nullable AlchemyItemStatus itemStatus) {
+        private AddAttackCalcData(boolean isItem, double power, int criticalRate, AddAttackData addAttack, Entity damager, @Nullable EntityStatus damagerStatus, LivingEntity victim, @Nullable EntityStatus victimStatus, DamageComponent damageComponent, List<IBuff> buffs, @Nullable AlchemyItemStatus itemStatus) {
             this.isItem = isItem;
             this.power = power;
             this.criticalRate = criticalRate;

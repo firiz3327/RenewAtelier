@@ -20,13 +20,6 @@ public class RecipeStatus {
     @Nullable
     private final RecipeIdeaStatus idea;
 
-    public RecipeStatus(final String id) {
-        this.recipe = Objects.requireNonNull(AlchemyRecipe.search(id));
-        this.level = 0;
-        this.exp = 0;
-        this.idea = new RecipeIdeaStatus(recipe.getIdeaRequires());
-    }
-
     public RecipeStatus(final AlchemyRecipe recipe, final boolean acquired) {
         this.recipe = Objects.requireNonNull(recipe);
         this.acquired = acquired;

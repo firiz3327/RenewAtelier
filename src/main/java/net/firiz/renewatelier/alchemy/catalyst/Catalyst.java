@@ -3,7 +3,7 @@ package net.firiz.renewatelier.alchemy.catalyst;
 import java.util.List;
 
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 
@@ -35,19 +35,15 @@ public class Catalyst {
     public void setInv(Inventory inv, boolean kettle) {
         final int size = bonus.get(0).getCS().length;
         switch (size) {
-            case 36: // 0 6x6
-                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, "", null));
-                break;
-            case 25: // 1 5x5
-                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1523, "", null));
-                break;
-            case 16: // 2 4x4
-                inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, "", null));
-                break;
-            default:
-                throw new IllegalStateException("catalyst bonus size number is not supported.");
+            case 36 -> // 0 6x6
+                    inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1511 : 1561, Component.empty(), null));
+            case 25 -> // 1 5x5
+                    inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1510 : 1523, Component.empty(), null));
+            case 16 -> // 2 4x4
+                    inv.setItem(0, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1509 : 1524, Component.empty(), null));
+            default -> throw new IllegalStateException("catalyst bonus size number is not supported.");
         }
-        inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, "", null));
+        inv.setItem(45, ItemUtils.ci(Material.DIAMOND_AXE, kettle ? 1512 : 1562, Component.empty(), null));
 
         final int defSlot = (size == 36 || size == 25 ? 3 : 13);
         bonus.forEach(b -> {
@@ -58,7 +54,7 @@ public class Catalyst {
                     inv.setItem(slot, ItemUtils.ci(
                             Material.DIAMOND_AXE,
                             cmd,
-                            ChatColor.RESET + b.getData().getName(),
+                            b.getData().getName(),
                             b.getData().getDesc()
                     ));
                 }
@@ -94,60 +90,32 @@ public class Catalyst {
      * @return
      */
     public static short getCustomModelData(int d) {
-        switch (d) {
-            case 1:
-                return 1527;
-            case 2:
-                return 1534;
-            case 3:
-                return 1541;
-            case 4:
-                return 1548;
-            case 5:
-                return 1555;
-            case 6:
-                return 1514;
-            default:
-                return -1;
-        }
+        return (short) switch (d) {
+            case 1 -> 1527;
+            case 2 -> 1534;
+            case 3 -> 1541;
+            case 4 -> 1548;
+            case 5 -> 1555;
+            case 6 -> 1514;
+            default -> -1;
+        };
     }
 
     public static int nextSlot(int slot, int size) {
         switch (size) {
             case 16:
-                switch (slot) {
-                    case 16:
-                    case 25:
-                    case 34:
-                    case 43:
-                        return slot + 6;
-                    default:
-                        break;
+                if (slot == 16 || slot == 25 || slot == 34 || slot == 43) {
+                    return slot + 6;
                 }
                 break;
             case 25:
-                switch (slot) {
-                    case 7:
-                    case 16:
-                    case 25:
-                    case 34:
-                    case 43:
-                        return slot + 5;
-                    default:
-                        break;
+                if (slot == 7 || slot == 16 || slot == 25 || slot == 34 || slot == 43) {
+                    return slot + 5;
                 }
                 break;
             case 36:
-                switch (slot) {
-                    case 8:
-                    case 17:
-                    case 26:
-                    case 35:
-                    case 44:
-                    case 53:
-                        return slot + 4;
-                    default:
-                        break;
+                if (slot == 8 || slot == 17 || slot == 26 || slot == 35 || slot == 44 || slot == 53) {
+                    return slot + 4;
                 }
                 break;
             default:

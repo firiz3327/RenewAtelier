@@ -6,23 +6,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
+import net.firiz.renewatelier.characteristic.CharacteristicData;
 import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
+import net.firiz.renewatelier.characteristic.ICharacteristic;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.inventory.item.PotionMaterial;
-import net.firiz.renewatelier.skill.item.EnumItemSkill;
+import net.firiz.renewatelier.skills.item.EnumItemSkill;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.LanguageItemUtil;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -75,15 +79,15 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
 
                 final CustomModelMaterial materialData = getMaterial(item, key); // *
                 final boolean defaultName = getBoolean(item, "default_name");
-                final String name = getName(item, defaultName, materialData); // *
+                final Component name = getName(item, defaultName, materialData); // *
                 final AlchemyMaterialCategory materialCategory = allAlchemyMaterialCategory == null ? getAlchemyMaterialCategory(item) : allAlchemyMaterialCategory; // *
                 final int quality_min = getQualityMin(item); // *
                 final int quality_max = getQualityMax(item); // *
                 final int price = item.getInt("price", 1);
                 final List<Category> categories = getCategories(item); // *
-                final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = getIngredients(item); // *
+                final List<ObjectIntImmutablePair<AlchemyIngredients>> ingredients = getIngredients(item); // *
                 final MaterialSizeTemplate sizeTemplate = getSize(item);
-                final List<Object> characteristics = getCharacteristics(item);
+                final List<ICharacteristic> characteristics = getCharacteristics(item);
                 final Catalyst catalyst = getCatalyst(item);
                 final EnumItemSkill itemSkill = getItemSkill(item);
                 final int usableCount = item.getInt("usableCount", 0);
@@ -125,9 +129,9 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
                             getBoolean(item, "hidePotionEffect"),
                             getBoolean(item, "hideUnbreaking")
                     );
-                    if (material.isDefaultName()) {
-                        if (material.getMaterial().getCustomModel() == 0) {
-                            vanillaReplaceItems.put(material.getMaterial().getMaterial(), material);
+                    if (material.defaultName()) {
+                        if (material.material().getCustomModel() == 0) {
+                            vanillaReplaceItems.put(material.material().getMaterial(), material);
                         } else {
                             throw new IllegalStateException("default name items cannot be assigned a custom model.");
                         }
@@ -191,13 +195,13 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @Nullable
-    private String getName(ConfigurationSection item, boolean defaultName, final CustomModelMaterial mat) {
-        String name = null;
+    private Component getName(ConfigurationSection item, boolean defaultName, final CustomModelMaterial mat) {
+        Component name = null;
         if (defaultName && mat != null) {
-            name = ChatColor.RESET + LanguageItemUtil.getLocalizeName(new ItemStack(mat.getMaterial())); // クエストブック用に名前を設定しておく
+            name = Text.itemName(LanguageItemUtil.getLocalizeName(new ItemStack(mat.getMaterial())));
         } else {
             if (item.contains("name")) {
-                name = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(item.getString("name")));
+                name = new Text(LegacyComponentSerializer.legacyAmpersand().deserialize(Objects.requireNonNull(item.getString("name"))));
             } else {
                 notFounds.add("name");
             }
@@ -249,14 +253,14 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @NotNull
-    private List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients(ConfigurationSection item) {
-        final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients = new ObjectArrayList<>();
+    private List<ObjectIntImmutablePair<AlchemyIngredients>> getIngredients(ConfigurationSection item) {
+        final List<ObjectIntImmutablePair<AlchemyIngredients>> ingredients = new ObjectArrayList<>();
         if (item.contains(KEY_INGREDIENTS)) {
             final List<String> ingsStr = CommonUtils.cast(item.getList(KEY_INGREDIENTS));
             if (ingsStr != null) {
                 ingsStr.forEach(ing -> {
                     final String[] ingData = ing.split(",");
-                    ingredients.add(new ImmutablePair<>(
+                    ingredients.add(new ObjectIntImmutablePair<>(
                             AlchemyIngredients.searchName(ingData[0].trim()),
                             Integer.parseInt(ingData[1].trim())
                     ));
@@ -278,21 +282,22 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
     }
 
     @NotNull
-    private List<Object> getCharacteristics(ConfigurationSection item) {
-        final List<Object> characteristics = new ObjectArrayList<>();
+    private List<ICharacteristic> getCharacteristics(ConfigurationSection item) {
+        final List<ICharacteristic> characteristics = new ObjectArrayList<>();
         if (item.contains("characteristics")) {
             final List<String> stringList = CommonUtils.cast(item.getList("characteristics"));
+            assert stringList != null;
             stringList.forEach(cStr -> {
                 if (cStr.contains(",")) {
-                    final String[] strs = cStr.split(",");
-                    final String id = strs[0].trim().toUpperCase();
+                    final String[] strArray = cStr.split(",");
+                    final String id = strArray[0].trim().toUpperCase();
                     Characteristic c;
                     try {
                         c = Characteristic.getCharacteristic(id);
                     } catch (IllegalArgumentException e) {
                         c = Characteristic.search(id);
                     }
-                    characteristics.add(new ImmutablePair<>(c, Integer.parseInt(strs[1].trim())));
+                    characteristics.add(new CharacteristicData(c, Integer.parseInt(strArray[1].trim())));
                 } else {
                     characteristics.add(CharacteristicTemplate.valueOf(cStr.toUpperCase()));
                 }

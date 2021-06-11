@@ -1,25 +1,28 @@
 package net.firiz.renewatelier.alchemy.material;
 
-import net.md_5.bungee.api.ChatColor;
+import net.firiz.ateliercommonapi.adventure.text.C;
 
 /**
  * @author firiz
  */
 public enum AlchemyAttribute {
-    RED(ChatColor.RED, "赤"),
-    BLUE(ChatColor.BLUE, "青"),
-    GREEN(ChatColor.GREEN, "緑"),
-    YELLOW(ChatColor.YELLOW, "黄"),
-    PURPLE(ChatColor.DARK_PURPLE, "紫");
-    private final String color;
-    private final String name;
+    RED(C.RED, "赤", 2),
+    BLUE(C.BLUE, "青", 3),
+    GREEN(C.GREEN, "緑", 4),
+    YELLOW(C.YELLOW, "黄", 5),
+    PURPLE(C.DARK_PURPLE, "紫", 6);
 
-    AlchemyAttribute(ChatColor color, String name) {
-        this.color = color.toString();
+    private final C color;
+    private final String name;
+    private final int value;
+
+    AlchemyAttribute(C color, String name, int value) {
+        this.color = color;
         this.name = name;
+        this.value = value;
     }
 
-    public String getColor() {
+    public C getColor() {
         return color;
     }
 
@@ -27,12 +30,7 @@ public enum AlchemyAttribute {
         return name;
     }
 
-    public static AlchemyAttribute searchColor(String color) {
-        for (AlchemyAttribute type : AlchemyAttribute.values()) {
-            if (type.getColor().equals(color)) {
-                return type;
-            }
-        }
-        return null;
+    public int getValue() {
+        return value;
     }
 }

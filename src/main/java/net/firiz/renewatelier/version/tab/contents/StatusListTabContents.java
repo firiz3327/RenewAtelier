@@ -4,6 +4,7 @@ import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.tab.TabListItem;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -20,13 +21,13 @@ public class StatusListTabContents implements TabContents {
             case 1:
                 final Player bukkitPlayer = player.getCharStats().getPlayer();
                 final EntityPlayer entityPlayer = ((CraftPlayer) bukkitPlayer).getHandle();
-                item.modifyListName(entityPlayer.getName());
+                item.modifyListName(entityPlayer.adventure$displayName);
                 item.modifyPing(entityPlayer.ping);
                 item.modifyGameMode(bukkitPlayer.getGameMode());
                 item.modifyTextures(entityPlayer.getProfile());
                 break;
             case 2:
-                item.modifyListName(whiteSpace("所持金:", formatMoney(player.getMoney())) + " E");
+                item.modifyListName(whiteSpace("所持金:", formatMoney(player.getMoney()) + " E"));
                 break;
             case 4:
                 item.modifyListName(whiteSpace("錬金LV:", stats.getAlchemyLevel() + " "));
@@ -50,7 +51,7 @@ public class StatusListTabContents implements TabContents {
                 item.modifyListName(whiteSpace("素早さ:", stats.getSpeed() + " "));
                 break;
             case 17:
-                item.modifyListName(" 詳細は /check");
+                item.modifyListName(Component.text(" 詳細は /check"));
                 break;
             default:
                 break;
@@ -74,14 +75,12 @@ public class StatusListTabContents implements TabContents {
         return decimal.stripTrailingZeros().toPlainString() + unit;
     }
 
-    public String whiteSpace(String prefix, String suffix) {
+    public Component whiteSpace(String prefix, String suffix) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 12; i++) {
-            sb.append(" ");
-        }
+        sb.append(" ".repeat(12));
         sb.replace(0, prefix.length(), prefix);
         sb.replace(sb.length() - suffix.length(), sb.length(), suffix);
-        return sb.toString();
+        return Component.text(sb.toString());
     }
 
     @Override

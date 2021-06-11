@@ -1,5 +1,9 @@
 package net.firiz.renewatelier.utils.java;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -11,7 +15,8 @@ public final class CObjects {
     private CObjects() {
     }
 
-    public static <T, O> T nullIfFunction(O obj, Function<O, T> returnFunction, T elseValue) {
+    @Contract("null, _, _ -> param3")
+    public static <T, O> T nullIfFunction(@Nullable O obj, @NotNull Function<O, T> returnFunction, @Nullable T elseValue) {
         return obj == null ? elseValue : returnFunction.apply(obj);
     }
 

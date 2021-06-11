@@ -1,7 +1,9 @@
 package net.firiz.renewatelier.version.packet;
 
 import java.util.UUID;
-import net.firiz.renewatelier.utils.pair.Pair;
+
+import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
+import it.unimi.dsi.fastutil.booleans.BooleanIntPair;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import org.bukkit.entity.EntityType;
 
@@ -26,9 +28,9 @@ public class FakeEntity {
         this.type = type;
         this.objectData = objectData;
 
-        final Pair<Boolean, Integer> check = ObjectChecker.check(type.type);
-        this.typeId = check.getRight();
-        this.object = check.getLeft();
+        final BooleanIntPair check = ObjectChecker.check(type.type);
+        this.typeId = check.rightInt();
+        this.object = check.leftBoolean();
     }
 
     public FakeEntity(FakeEntityType type, int objectData) {
@@ -38,9 +40,9 @@ public class FakeEntity {
         this.type = type;
         this.objectData = objectData;
 
-        final Pair<Boolean, Integer> check = ObjectChecker.check(type.type);
-        this.typeId = check.getRight();
-        this.object = check.getLeft();
+        final BooleanIntImmutablePair check = ObjectChecker.check(type.type);
+        this.typeId = check.rightInt();
+        this.object = check.leftBoolean();
     }
 
     public FakeEntity(FakeEntityType type) {
@@ -130,13 +132,13 @@ public class FakeEntity {
             this.value = value;
         }
 
-        public static Pair<Boolean, Integer> check(final EntityType type) {
+        public static BooleanIntImmutablePair check(final EntityType type) {
             for (final ObjectChecker c : values()) {
                 if (c.type == type) {
-                    return new Pair<>(true, c.value);
+                    return new BooleanIntImmutablePair(true, c.value);
                 }
             }
-            return new Pair<>(false, type.ordinal());
+            return new BooleanIntImmutablePair(false, type.ordinal());
         }
 
     }

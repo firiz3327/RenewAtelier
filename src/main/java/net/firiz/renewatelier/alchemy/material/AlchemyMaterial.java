@@ -3,14 +3,16 @@ package net.firiz.renewatelier.alchemy.material;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import net.firiz.renewatelier.alchemy.RequireMaterial;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
+import net.firiz.renewatelier.characteristic.ICharacteristic;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.AlchemyMaterialLoader;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
-import net.firiz.renewatelier.skill.item.EnumItemSkill;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
+import net.firiz.renewatelier.skills.item.EnumItemSkill;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +20,24 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author firiz
  */
-public final class AlchemyMaterial {
+public record AlchemyMaterial(
+        String id, Component name,
+        boolean defaultName,
+        CustomModelMaterial material,
+        AlchemyMaterialCategory materialCategory,
+        int qualityMin, int qualityMax, int price, int hp, int mp, int atk, int def, int speed,
+        int baseDamageMin, int baseDamageMax, int itemDamageMin, int itemDamageMax,
+        List<Category> categories,
+        List<ObjectIntImmutablePair<AlchemyIngredients>> ingredients,
+        MaterialSizeTemplate sizeTemplate,
+        List<ICharacteristic> characteristics,
+        Catalyst catalyst,
+        @Nullable String script,
+        @Nullable EnumItemSkill itemSkill,
+        int usableCount, double itemCooldown, boolean unbreaking, boolean hideAttribute,
+        boolean hideDestroy, boolean hideEnchant, boolean hidePlacedOn, boolean hidePotionEffect,
+        boolean hideUnbreaking
+) {
 
     private static final AlchemyMaterialLoader LOADER;
 
@@ -26,45 +45,9 @@ public final class AlchemyMaterial {
         LOADER = (AlchemyMaterialLoader) ConfigManager.INSTANCE.getLoader(AlchemyMaterialLoader.class, AlchemyMaterial.class);
     }
 
-    private final String id;
-    private final String name;
-    private final boolean defaultName;
-    private final CustomModelMaterial material;
-    private final AlchemyMaterialCategory materialCategory;
-    private final int qualityMin;
-    private final int qualityMax;
-    private final int price;
-    private final int hp; // equip
-    private final int mp; // equip
-    private final int atk; // equip
-    private final int def; // equip
-    private final int speed; // equip
-    private final int baseDamageMin; // weapon
-    private final int baseDamageMax; // weapon
-    private final int itemDamageMin; // usable item
-    private final int itemDamageMax; // usable item
-    private final List<Category> categories;
-    private final List<ImmutablePair<AlchemyIngredients, Integer>> ingredients;
-    private final MaterialSizeTemplate sizeTemplate;
-    private final List<Object> charas;
-    private final Catalyst catalyst;
-    @Nullable
-    private final String script;
-    @Nullable
-    private final EnumItemSkill itemSkill; // usable item
-    private final int usableCount;
-    private final double itemCooldown; // usable item
-    private final boolean unbreaking;
-    private final boolean hideAttribute;
-    private final boolean hideDestroy;
-    private final boolean hideEnchant;
-    private final boolean hidePlacedOn;
-    private final boolean hidePotionEffect;
-    private final boolean hideUnbreaking;
-
     public AlchemyMaterial(
             String id,
-            String name,
+            Component name,
             boolean defaultName,
             CustomModelMaterial material,
             AlchemyMaterialCategory materialCategory,
@@ -81,9 +64,9 @@ public final class AlchemyMaterial {
             int itemDamageMin,
             int itemDamageMax,
             List<Category> categories,
-            List<ImmutablePair<AlchemyIngredients, Integer>> ingredients,
+            List<ObjectIntImmutablePair<AlchemyIngredients>> ingredients,
             MaterialSizeTemplate sizeTemplate,
-            List<Object> charas,
+            List<ICharacteristic> characteristics,
             Catalyst catalyst,
             @Nullable String script,
             @Nullable EnumItemSkill itemSkill,
@@ -115,7 +98,7 @@ public final class AlchemyMaterial {
         this.categories = categories;
         this.ingredients = ingredients;
         this.sizeTemplate = sizeTemplate;
-        this.charas = charas;
+        this.characteristics = characteristics;
         this.catalyst = catalyst;
         this.script = script;
         this.itemSkill = itemSkill;
@@ -139,7 +122,7 @@ public final class AlchemyMaterial {
     @Nullable
     public static AlchemyMaterial getMaterialOrNull(@NotNull final String id) {
         for (final AlchemyMaterial am : LOADER.getList()) {
-            if (am.getId().equalsIgnoreCase(id)) {
+            if (am.id.equalsIgnoreCase(id)) {
                 return am;
             }
         }
@@ -149,124 +132,22 @@ public final class AlchemyMaterial {
     @NotNull
     public static AlchemyMaterial getMaterial(@NotNull final String id) {
         for (final AlchemyMaterial am : LOADER.getList()) {
-            if (am.getId().equalsIgnoreCase(id)) {
+            if (am.id.equalsIgnoreCase(id)) {
                 return am;
             }
         }
         throw new IllegalArgumentException(id.concat(" not found."));
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
+    public Component getName() {
         return name;
-    }
-
-    public boolean isDefaultName() {
-        return defaultName;
-    }
-
-    public CustomModelMaterial getMaterial() {
-        return material;
-    }
-
-    public AlchemyMaterialCategory getMaterialCategory() {
-        return materialCategory;
-    }
-
-    public int getQualityMin() {
-        return qualityMin;
-    }
-
-    public int getQualityMax() {
-        return qualityMax;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public int getHp() {
-        return hp;
-    }
-
-    public int getMp() {
-        return mp;
-    }
-
-    public int getAtk() {
-        return atk;
-    }
-
-    public int getDef() {
-        return def;
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
-
-    public int getBaseDamageMin() {
-        return baseDamageMin;
-    }
-
-    public int getBaseDamageMax() {
-        return baseDamageMax;
-    }
-
-    public int getItemDamageMin() {
-        return itemDamageMin;
-    }
-
-    public int getItemDamageMax() {
-        return itemDamageMax;
-    }
-
-    public List<Category> getCategories() {
-        return categories;
-    }
-
-    public List<ImmutablePair<AlchemyIngredients, Integer>> getIngredients() {
-        return ingredients;
-    }
-
-    public MaterialSizeTemplate getSizeTemplate() {
-        return sizeTemplate;
-    }
-
-    public List<Object> getCharas() {
-        return charas;
-    }
-
-    public Catalyst getCatalyst() {
-        return catalyst;
-    }
-
-    @Nullable
-    public String getScript() {
-        return script;
-    }
-
-    @Nullable
-    public EnumItemSkill getItemSkill() {
-        return itemSkill;
-    }
-
-    public int getUsableCount() {
-        return usableCount;
-    }
-
-    public double getItemCooldown() {
-        return itemCooldown;
     }
 
     public boolean hasUsefulCatalyst(final AlchemyRecipe recipe) {
         final List<RequireMaterial> catalystCategories = recipe.getCatalystCategories();
         if (catalyst != null) {
             for (final RequireMaterial requireMaterial : catalystCategories) {
-                if (requireMaterial.getMaterial().equals(this)) {
+                if (this.equals(requireMaterial.getMaterial())) {
                     return true;
                 }
                 for (final Category c : categories) {
@@ -277,33 +158,5 @@ public final class AlchemyMaterial {
             }
         }
         return false;
-    }
-
-    public boolean isUnbreaking() {
-        return unbreaking;
-    }
-
-    public boolean isHideAttribute() {
-        return hideAttribute;
-    }
-
-    public boolean isHideDestroy() {
-        return hideDestroy;
-    }
-
-    public boolean isHideEnchant() {
-        return hideEnchant;
-    }
-
-    public boolean isHidePlacedOn() {
-        return hidePlacedOn;
-    }
-
-    public boolean isHidePotionEffect() {
-        return hidePotionEffect;
-    }
-
-    public boolean isHideUnbreaking() {
-        return hideUnbreaking;
     }
 }

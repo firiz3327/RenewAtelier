@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.ateliercommonapi.loop.TickRunnable;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
@@ -23,8 +25,8 @@ import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.quest.result.ItemQuestResult;
 import net.firiz.renewatelier.quest.result.MoneyQuestResult;
 import net.firiz.renewatelier.quest.result.RecipeQuestResult;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.advancement.Advancement;
@@ -62,12 +64,17 @@ public final class Char {
     private final EngineManager engineManager;
     @NotNull
     private final TickRunnable autoSave;
-    private final int taskIdMinute;
     @NotNull
     private final MessageObjectRun messageObjectRun;
-    private final int taskIdTick;
     @NotNull
     private final AlchemyItemBag bag;
+    private final int taskIdMinute;
+    private final int taskIdTick;
+    private final int taskIdSec;
+
+    private Component lastChatComponent;
+    private int chatCount;
+    private long chatBanTime;
 
     public Char(
             @NotNull Player player,
@@ -98,13 +105,28 @@ public final class Char {
             this.settings.save(this.id);
             this.bag.save(this.id);
         };
+        final TickRunnable oneLoop = new TickRunnable() {
+            int time = 0;
+
+            @Override
+            public void run() {
+                if (time > 3) {
+                    charStats.healMp(charStats.getMaxMp() / 20);
+                    chatCount = 0;
+                    time = 0;
+                }
+                time++;
+            }
+        };
         this.taskIdMinute = LoopManager.INSTANCE.addMinutes(this.autoSave);
+        this.taskIdSec = LoopManager.INSTANCE.addSeconds(oneLoop);
         this.messageObjectRun = new MessageObjectRun();
         this.taskIdTick = LoopManager.INSTANCE.addTicks(messageObjectRun);
     }
 
     public void unload() {
         LoopManager.INSTANCE.removeMinutes(this.taskIdMinute);
+        LoopManager.INSTANCE.removeSeconds(this.taskIdSec);
         LoopManager.INSTANCE.removeTicks(this.taskIdTick);
         autoSave.run();
     }
@@ -134,12 +156,33 @@ public final class Char {
         return recipeSQL.getRecipeStatus(id);
     }
 
+    @Nullable
+    public RecipeStatus getRecipeStatus(final AlchemyRecipe recipe) {
+        return recipeSQL.getRecipeStatus(recipe);
+    }
+
     public void setRecipeStatus(final RecipeStatus status) {
         recipeSQL.setRecipeStatus(status);
     }
 
     public void addRecipeExp(final boolean view, final AlchemyRecipe recipe, final int exp) {
         recipeSQL.addRecipeExp(player, view, recipe, exp);
+    }
+
+    public void addRecipe(final boolean view, final AlchemyRecipe recipe, boolean enableAcquired) {
+        recipeSQL.addRecipeExp(player, view, recipe, 0, enableAcquired);
+    }
+
+    public void addRecipe(final boolean view, final AlchemyRecipe recipe) {
+        addRecipeExp(view, recipe, 0);
+    }
+
+    public boolean hasRecipe(@NotNull final String id) {
+        return recipeSQL.hasRecipe(id);
+    }
+
+    public boolean hasRecipe(@NotNull final AlchemyRecipe recipe) {
+        return recipeSQL.hasRecipe(recipe);
     }
     //</editor-fold>
 
@@ -155,7 +198,7 @@ public final class Char {
 
     public void addQuest(final String questId) {
         addQuest(new QuestStatus(questId));
-        player.sendMessage("クエスト「" + ChatColor.GREEN + Quest.getQuest(questId).getName() + ChatColor.RESET + "」を受注しました。");
+        player.sendMessage(Text.of("クエスト「").append(Quest.getQuest(questId).getName()).color(C.GREEN).append("」を受注しました。"));
     }
 
     public List<QuestStatus> getQuestStatusList() {
@@ -185,7 +228,7 @@ public final class Char {
         questStatus.clear();
         final Quest quest = Quest.getQuest(questStatus.getId());
         if (view) {
-            player.sendMessage("クエスト「" + ChatColor.GREEN + quest.getName() + ChatColor.RESET + "」を完了しました。");
+            player.sendMessage(Text.of("クエスト「").append(quest.getName()).color(C.GREEN).append("」を完了しました。"));
         }
         if (quest.getNextQuestId() != null) {
             addQuest(quest.getNextQuestId());
@@ -197,7 +240,7 @@ public final class Char {
                     ItemUtils.addItem(player, item.getItem());
                 } else if (result instanceof RecipeQuestResult) {
                     final AlchemyRecipe recipe = ((RecipeQuestResult) result).getResult();
-                    addRecipeExp(true, recipe, 0);
+                    addRecipe(true, recipe);
                 } else if (result instanceof MoneyQuestResult) {
                     final int money = ((MoneyQuestResult) result).getResult();
                     gainMoneyCompulsion(money);
@@ -285,5 +328,29 @@ public final class Char {
     @NotNull
     public AlchemyItemBag getBag() {
         return bag;
+    }
+
+    public void incrementChatCount() {
+        chatCount += 1;
+    }
+
+    public int getChatCount() {
+        return chatCount;
+    }
+
+    public Component getLastChatComponent() {
+        return lastChatComponent;
+    }
+
+    public void setLastChatComponent(Component lastChatComponent) {
+        this.lastChatComponent = lastChatComponent;
+    }
+
+    public void chatBan() {
+        chatBanTime = System.currentTimeMillis();
+    }
+
+    public long getChatBanTime() {
+        return chatBanTime;
     }
 }

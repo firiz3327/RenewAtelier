@@ -2,11 +2,9 @@ package net.firiz.renewatelier.quest.result;
 
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.quest.QuestItem;
-import net.firiz.renewatelier.utils.TellrawUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

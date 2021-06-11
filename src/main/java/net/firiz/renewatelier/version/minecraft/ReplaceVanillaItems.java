@@ -1,12 +1,12 @@
 package net.firiz.renewatelier.version.minecraft;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -171,8 +171,8 @@ public class ReplaceVanillaItems {
                     material,
                     getOverrideIngredients(random, material), // override ingredients
                     item,
-                    random ? -1 : material.getQualityMin(), // override quality
-                    random ? null : material.getSizeTemplate().getSize(2), // override size
+                    random ? -1 : material.qualityMin(), // override quality
+                    random ? null : material.sizeTemplate().getSize(2), // override size
                     null,
                     random ? null : Collections.emptyList(), // override characteristics
                     random ? null : Collections.emptyList(), // override categories
@@ -192,13 +192,13 @@ public class ReplaceVanillaItems {
     private static List<AlchemyIngredients> getOverrideIngredients(boolean random, AlchemyMaterial material) {
         final List<AlchemyIngredients> overrideIngredients = random ? null : new ObjectArrayList<>();
         if (overrideIngredients != null) {
-            for (final ImmutablePair<AlchemyIngredients, Integer> ing : material.getIngredients()) {
-                if (ing.getRight() >= 100) {
-                    overrideIngredients.add(ing.getLeft());
+            for (final ObjectIntImmutablePair<AlchemyIngredients> ing : material.ingredients()) {
+                if (ing.rightInt() >= 100) {
+                    overrideIngredients.add(ing.left());
                 }
             }
             if (overrideIngredients.isEmpty()) {
-                overrideIngredients.add(material.getIngredients().get(0).getLeft());
+                overrideIngredients.add(material.ingredients().get(0).left());
             }
         }
         return overrideIngredients;

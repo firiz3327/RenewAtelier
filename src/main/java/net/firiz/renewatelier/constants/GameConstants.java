@@ -1,6 +1,8 @@
 package net.firiz.renewatelier.constants;
 
-import net.md_5.bungee.api.ChatColor;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -83,12 +85,12 @@ public final class GameConstants {
     // ブロンズ・シルバー・ゴールド・ダイアモンド・>>>未定
     public static final int RECIPE_EXP = 25;
     public static final int[] RECIPE_REQ_EXPS = {0, 60, 140, 300, 620, 1260, 2540, 5100, 10000};
-    public static final String[] RECIPE_RANK_NAME = {
-            "熟練度なし",
-            ChatColor.GRAY + "ブロンズ",
-            ChatColor.WHITE + "シルバー",
-            ChatColor.GOLD + "ゴールド",
-            ChatColor.DARK_AQUA + "ダイアモンド"
+    public static final Component[] RECIPE_RANK_NAME = {
+            Text.of("熟練度なし"),
+            Text.of("ブロンズ", C.GRAY),
+            Text.of("シルバー", C.FLAT_SILVER1),
+            Text.of("ゴールド", C.GOLD),
+            Text.of("ダイアモンド", C.DARK_AQUA)
     };
 
     public static final String[] ROTATION_STR = {"上向き", "右向き", "下向き", "左向き"};

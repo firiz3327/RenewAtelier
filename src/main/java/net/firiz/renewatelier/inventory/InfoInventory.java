@@ -18,24 +18,44 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiConsumer;
+
 public class InfoInventory implements NonParamInventory {
 
-    private static final ItemStack bag = ItemUtils.unavailableItem(
-            Material.ARROW,
-            1,
-            new Text("錬金バッグを開く", true).color(C.FLAT_GREEN1),
-            new Lore("クリックで錬金バッグを開きます。", true).color(C.FLAT_SILVER1)
-    );
-    private static final ItemStack questBook = ItemUtils.unavailableItem(
-            Material.WRITABLE_BOOK,
-            new Text("クエスト一覧", true).color(C.FLAT_GREEN1),
-            new Lore("クリックでクエストブックを開きます。", true).color(C.FLAT_SILVER1)
-    );
-    private static final ItemStack infoItem = ItemUtils.unavailableItem(
-            Material.IRON_PICKAXE,
-            new Text("設定", true).color(C.FLAT_GREEN1),
-            new Lore("クリックで設定画面を開きます。", true).color(C.FLAT_SILVER1)
-    );
+    // 0 1 2 3 4 5 6 7 8
+    private enum Item {
+        BAG(1, Material.ARROW, 1, "錬金バッグを開く", "クリックで錬金バッグを開きます。", ((player, inventoryManager) -> inventoryManager.getInventory(BagInventory.class).open(player))),
+        QUEST_BOOK(3, Material.WRITABLE_BOOK, "クエスト一覧", "クリックでクエストブックを開きます。", ((player, inventoryManager) -> QuestBook.openQuestBook(player))),
+        SKILL_TREE(5, Material.ENCHANTED_BOOK, "スキルツリー", "クリックでスキルツリーを開きます。", (((player, inventoryManager) -> inventoryManager.getInventory(SkillTreeInventory.class).open(player)))),
+        SETTING(7, Material.IRON_PICKAXE, "設定", "クリックで設定画面を開きます。", ((player, inventoryManager) -> inventoryManager.getInventory(SettingInventory.class).open(player)));
+
+        final int index;
+        final ItemStack itemStack;
+        final BiConsumer<Player, InventoryManager> consumer;
+
+        Item(int index, Material material, String name, String lore, BiConsumer<Player, InventoryManager> consumer) {
+            this.index = index;
+            this.consumer = consumer;
+            this.itemStack = ItemUtils.unavailableItem(
+                    material,
+                    new Text(name, true).color(C.FLAT_GREEN1),
+                    new Lore(lore, true).color(C.FLAT_SILVER1)
+            );
+        }
+
+        Item(int index, Material material, int customModel, String name, String lore, BiConsumer<Player, InventoryManager> consumer) {
+            this.index = index;
+            this.consumer = consumer;
+            this.itemStack = ItemUtils.unavailableItem(
+                    material,
+                    customModel,
+                    new Text(name, true).color(C.FLAT_GREEN1),
+                    new Lore(lore, true).color(C.FLAT_SILVER1)
+            );
+        }
+
+    }
+
     private final Component title = Component.text("Info");
     private final InventoryManager manager;
 
@@ -51,10 +71,9 @@ public class InfoInventory implements NonParamInventory {
     @Override
     public void open(@NotNull Player player) {
         final Inventory inv = Bukkit.createInventory(player, 9, title);
-        // 0 1 x 3 x 5 x 7 8
-        inv.setItem(2, bag);
-        inv.setItem(4, questBook);
-        inv.setItem(6, infoItem);
+        for (final Item item : Item.values()) {
+            inv.setItem(item.index, item.itemStack);
+        }
         player.openInventory(inv);
     }
 
@@ -62,21 +81,13 @@ public class InfoInventory implements NonParamInventory {
     public void onClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
         final Player player = (Player) event.getWhoClicked();
-        switch (event.getRawSlot()) {
-            case 2:
+        final int raw = event.getRawSlot();
+        for (final Item item : Item.values()) {
+            if (raw == item.index) {
                 player.closeInventory();
-                manager.getInventory(BagInventory.class).open(player);
+                item.consumer.accept(player, manager);
                 break;
-            case 4:
-                player.closeInventory();
-                QuestBook.openQuestBook(player);
-                break;
-            case 6:
-                player.closeInventory();
-                manager.getInventory(SettingInventory.class).open(player);
-                break;
-            default: // ignored
-                break;
+            }
         }
     }
 

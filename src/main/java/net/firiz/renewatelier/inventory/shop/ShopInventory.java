@@ -1,11 +1,12 @@
 package net.firiz.renewatelier.inventory.shop;
 
+import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,23 +21,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public final class ShopInventory implements BiParamInventory<String, List<ShopItem>> {
 
     private static final PlayerSaveManager psm = PlayerSaveManager.INSTANCE;
-    private static final String TITLE = "SHOP";
+    private static final Component TITLE = Component.text("SHOP");
     private static final ItemStack GLASS_PANE = ItemUtils.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null);
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().endsWith(TITLE);
+        return view.title().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull final Player player, @NotNull final String title, @NotNull final List<ShopItem> shopItems) {
-        final UUID uuid = player.getUniqueId();
-        final Inventory inv = Bukkit.createInventory(null, 54, uuid.toString().concat(TITLE));
+        final Inventory inv = Bukkit.createInventory(player, 54, TITLE);
         for (int slot = 0; slot < 54; slot++) {
             if (slot < 9 || slot >= 45 || slot % 9 == 0 || slot % 9 == 8) {
                 inv.setItem(slot, GLASS_PANE);
@@ -84,13 +83,13 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
      */
     @NotNull
     private ShopResult createShopResult(@NotNull ItemStack item, @NotNull Player player) {
-        final ImmutableNullablePair<Integer, String> shopItem = ShopItem.loadShopItem(item);
-        final int price = Objects.requireNonNull(shopItem.getLeft());
-        if (shopItem.getRight() == null) {
+        final IntObjectImmutablePair<String> shopItem = ShopItem.loadShopItem(item);
+        final int price = shopItem.leftInt();
+        if (shopItem.right() == null) {
             final int mode = psm.getChar(player.getUniqueId()).hasMoney(price) ? 1 : -1;
             return new ShopResult(mode, price, null);
         } else {
-            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(shopItem.getRight());
+            final AlchemyMaterial alchemyMaterial = AlchemyMaterial.getMaterial(shopItem.right());
             final int mode = ItemUtils.hasMaterial(player.getInventory(), alchemyMaterial, price) ? 2 : -1;
             return new ShopResult(mode, price, alchemyMaterial);
         }
@@ -106,11 +105,11 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
 
     private void addItem(ItemStack item, Player player) {
         final ItemMeta meta = item.getItemMeta();
-        final List<String> cLore = Objects.requireNonNull(meta.getLore());
+        final List<Component> cLore = Objects.requireNonNull(meta.lore());
         for (int i = 0; i < 2; i++) {
             cLore.remove(cLore.size() - 1);
         }
-        meta.setLore(cLore);
+        meta.lore(cLore);
         item.setItemMeta(meta);
         ItemUtils.addItem(player, item);
     }
@@ -123,12 +122,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
                 .forEach(itemValue -> e.setCancelled(true));
     }
 
-    private static class ShopResult {
-        private final int mode;
-        private final int money;
-        @Nullable
-        private final AlchemyMaterial material;
-
+    private record ShopResult(int mode, int money, @Nullable AlchemyMaterial material) {
         private ShopResult(int mode, int money, @Nullable AlchemyMaterial material) {
             this.mode = mode;
             this.money = money;

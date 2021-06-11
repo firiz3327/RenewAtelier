@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.inventory.item.json.itemeffect;
 
-import net.firiz.renewatelier.buff.Buff;
 import net.firiz.renewatelier.buff.BuffData;
+import net.firiz.renewatelier.buff.TimerBuff;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import org.bukkit.entity.LivingEntity;
@@ -22,7 +22,7 @@ class BuffMobHitEffect implements MobHitEffect {
             final LivingData livingData = aEntityUtils.getLivingData(entity);
             if(livingData.hasStats()) {
                 assert livingData.getStats() != null;
-                livingData.getStats().addBuff(new Buff(livingData.getStats(), buffData, 0));
+                livingData.getStats().addBuff(new TimerBuff(livingData.getStats(), buffData, 0));
             }
         }
     }

@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.characteristic;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author firiz
  */
-public enum CharacteristicTemplate {
+public enum CharacteristicTemplate implements ICharacteristic {
     ITEM_LV1(
 //            new DoubleData<>(Characteristic.SELL_DOWN_1, 10),
 //            new DoubleData<>(Characteristic.SELL_DOWN_2, 5),
@@ -79,20 +79,25 @@ public enum CharacteristicTemplate {
     );
 
     @SafeVarargs
-    CharacteristicTemplate(ImmutablePair<String, Integer>... cs) {
+    CharacteristicTemplate(ObjectIntImmutablePair<String>... cs) {
         this.cs = cs;
     }
 
-    public List<ImmutablePair<Characteristic, Integer>> getCs() {
+    private List<ObjectIntImmutablePair<Characteristic>> getCs() {
         if (loaded == null) {
             loaded = new ObjectArrayList<>(cs.length);
-            for (ImmutablePair<String, Integer> fdd : cs) {
-                loaded.add(new ImmutablePair<>(Characteristic.getCharacteristic(fdd.getLeft()), fdd.getRight()));
+            for (ObjectIntImmutablePair<String> fdd : cs) {
+                loaded.add(new ObjectIntImmutablePair<>(Characteristic.getCharacteristic(fdd.left()), fdd.rightInt()));
             }
         }
         return loaded;
     }
 
-    private final ImmutablePair<String, Integer>[] cs;
-    private List<ImmutablePair<Characteristic, Integer>> loaded;
+    private final ObjectIntImmutablePair<String>[] cs;
+    private List<ObjectIntImmutablePair<Characteristic>> loaded;
+
+    @Override
+    public void add(List<ObjectIntImmutablePair<Characteristic>> cs) {
+        cs.addAll(getCs());
+    }
 }

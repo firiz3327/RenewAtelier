@@ -1,10 +1,11 @@
 package net.firiz.renewatelier.alchemy.material;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
+import it.unimi.dsi.fastutil.ints.IntObjectMutablePair;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
-import net.firiz.renewatelier.utils.pair.Pair;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -275,6 +276,7 @@ public enum AlchemyIngredients {
 
     private static final Map<String, AlchemyIngredients> BY_NAME = Maps.newHashMap();
     private final String name;
+    private final Component nameComponent;
     private final AlchemyAttribute type;
     private final int level;
 
@@ -286,6 +288,7 @@ public enum AlchemyIngredients {
 
     AlchemyIngredients(String name, AlchemyAttribute type, int level) {
         this.name = name;
+        this.nameComponent = Component.text(name);
         this.type = type;
         this.level = level;
     }
@@ -302,6 +305,10 @@ public enum AlchemyIngredients {
         return name;
     }
 
+    public Component getNameComponent() {
+        return nameComponent;
+    }
+
     public static AlchemyIngredients searchName(final String str) {
         final AlchemyIngredients ai = BY_NAME.get(str.toUpperCase());
         if (ai == null) {
@@ -315,14 +322,14 @@ public enum AlchemyIngredients {
         return ai;
     }
 
-    public static Pair<Integer, AlchemyAttribute[]> getMaxTypes(final ItemStack item) {
+    public static IntObjectMutablePair<AlchemyAttribute[]> getMaxTypes(final ItemStack item) {
         if (item != null && item.hasItemMeta()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
-                final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
-                final int level = levels.getLeft();
-                final List<AlchemyAttribute> maxTypes = itemStatus.getMaxTypes(levels.getRight());
-                return new Pair<>(level, maxTypes.toArray(new AlchemyAttribute[0]));
+                final IntObjectImmutablePair<Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
+                final int level = levels.leftInt();
+                final List<AlchemyAttribute> maxTypes = itemStatus.getMaxTypes(levels.right());
+                return new IntObjectMutablePair<>(level, maxTypes.toArray(new AlchemyAttribute[0]));
             }
         }
         return null;
@@ -332,8 +339,8 @@ public enum AlchemyIngredients {
         if (item.hasItemMeta()) {
             final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
             if (itemStatus != null) {
-                final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
-                return levels.getRight().getInt(type);
+                final IntObjectImmutablePair<Object2IntMap<AlchemyAttribute>> levels = itemStatus.getLevels();
+                return levels.right().getInt(type);
             }
         }
         return 0;

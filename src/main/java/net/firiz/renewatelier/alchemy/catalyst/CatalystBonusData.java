@@ -1,14 +1,13 @@
 package net.firiz.renewatelier.alchemy.catalyst;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
-import net.md_5.bungee.api.ChatColor;
 
 /**
  * @author firiz
@@ -38,17 +37,17 @@ public class CatalystBonusData {
                 .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME);
     }
 
-    public List<String> getDesc() {
+    public Lore getDesc() {
         final String[] desc = type.desc
                 .replace("$x", String.valueOf(x))
                 .replace("$y", y != null ? (String) type.yConversionToString(y) : ERROR_NAME)
                 .replace("$z", type.descRepletion != null ? type.descRepletion.apply(x) : ERROR_NAME)
                 .split("\n");
-        final List<String> result = new ObjectArrayList<>();
+        final Lore lore = new Lore();
         for (final String str : desc) {
-            result.add(ChatColor.GRAY + str);
+            lore.add(str).color(C.GRAY);
         }
-        return result;
+        return lore;
     }
 
     public BonusType getType() {
@@ -103,7 +102,7 @@ public class CatalystBonusData {
                 "効果レベル$x・$y",
                 "$y色で示されている\n効果のレベルを全て\n$x段階$zさせます",
                 false,
-                new ImmutablePair<>(
+                new ObjectObjectImmutablePair<>(
                         AlchemyAttribute::valueOf,
                         o -> ((AlchemyAttribute) o).getName()
                 ),
@@ -126,7 +125,7 @@ public class CatalystBonusData {
         CHARACTERISTIC("$y付与",
                 "できあがるアイテムに\n「$y」の特性が\n追加されます",
                 false,
-                new ImmutablePair<>(
+                new ObjectObjectImmutablePair<>(
                         id -> {
                             Characteristic c;
                             try {
@@ -144,14 +143,14 @@ public class CatalystBonusData {
         private final String name;
         private final String desc;
         private final boolean once; // 使い切りであるかどうか
-        private final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
+        private final ObjectObjectImmutablePair<Function<String, Object>, Function<Object, String>> yParse; // FinalDoubleData<文字列から特定のデータへ変換用, オブジェクトからデータ取得用>
         private final IntFunction<String> descRepletion;
 
         BonusType(
                 final String name,
                 final String desc,
                 final boolean once,
-                final ImmutablePair<Function<String, Object>, Function<Object, String>> yParse,
+                final ObjectObjectImmutablePair<Function<String, Object>, Function<Object, String>> yParse,
                 final IntFunction<String> descRepletion) {
             this.name = name;
             this.desc = desc;
@@ -172,7 +171,7 @@ public class CatalystBonusData {
          */
         private Object yConversionToObject(final String y) {
             if (yParse != null) {
-                return yParse.getLeft().apply(y);
+                return yParse.left().apply(y);
             }
             return y;
         }
@@ -185,7 +184,7 @@ public class CatalystBonusData {
          */
         private Object yConversionToString(final Object y) {
             if (yParse != null) {
-                return yParse.getRight().apply(y);
+                return yParse.right().apply(y);
             }
             return y;
         }

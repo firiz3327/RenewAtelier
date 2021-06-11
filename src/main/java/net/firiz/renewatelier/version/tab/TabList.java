@@ -1,11 +1,14 @@
 package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
+import io.papermc.paper.adventure.AdventureComponent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.firiz.ateliercommonapi.SkinProperty;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
 import net.firiz.renewatelier.version.VersionUtils;
 import net.firiz.renewatelier.version.packet.PacketUtils;
 import net.firiz.renewatelier.version.tab.contents.FriendListTabContents;
@@ -13,30 +16,28 @@ import net.firiz.renewatelier.version.tab.contents.PartyListTabContents;
 import net.firiz.renewatelier.version.tab.contents.PlayerListTabContents;
 import net.firiz.renewatelier.version.tab.contents.StatusListTabContents;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.EnumGamemode;
 import net.minecraft.server.v1_16_R3.IChatBaseComponent;
 import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class TabList {
 
     private final List<TabListItem> tabItems = new ObjectArrayList<>();
-    private final List<ImmutablePair<String, TabContents>> tabs = new ObjectArrayList<>();
+    private final List<ObjectObjectImmutablePair<Component, TabContents>> tabs = new ObjectArrayList<>();
 
     private int updateTime;
 
     public TabList() {
-        tabs.add(new ImmutablePair<>(ChatColor.GREEN + "    プレイヤー", new PlayerListTabContents()));
-        tabs.add(new ImmutablePair<>(ChatColor.GREEN + "     フレンド", new FriendListTabContents()));
-        tabs.add(new ImmutablePair<>(ChatColor.GREEN + "    パーティー", new PartyListTabContents()));
-        tabs.add(new ImmutablePair<>(ChatColor.GREEN + "    ステータス", new StatusListTabContents()));
+        tabs.add(new ObjectObjectImmutablePair<>(Text.of("    プレイヤー", C.GREEN), new PlayerListTabContents()));
+        tabs.add(new ObjectObjectImmutablePair<>(Text.of("     フレンド", C.GREEN), new FriendListTabContents()));
+        tabs.add(new ObjectObjectImmutablePair<>(Text.of("    パーティー", C.GREEN), new PartyListTabContents()));
+        tabs.add(new ObjectObjectImmutablePair<>(Text.of("    ステータス", C.GREEN), new StatusListTabContents()));
     }
 
     public void init() {
@@ -46,9 +47,9 @@ public class TabList {
             if (i % 20 == 0) {
                 mode++;
                 item.modifyTextures(SkinProperty.LIGHT_GREEN);
-                item.modifyListName(tabs.get(i / 20).getLeft());
+                item.modifyListName(tabs.get(i / 20).left());
             } else {
-                item.setContents(tabs.get(mode).getRight());
+                item.setContents(tabs.get(mode).right());
                 item.resetTabItem();
             }
             tabItems.add(item);
@@ -89,7 +90,7 @@ public class TabList {
         final PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(action.enumAction);
         try {
             final List b = CommonUtils.cast(VersionUtils.getFieldValue(PacketPlayOutPlayerInfo.class, packet, "b"));
-            final Constructor infoDataConstructor = Class.forName("net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo$PlayerInfoData").getDeclaredConstructor(
+            final var infoDataConstructor = Class.forName("net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo$PlayerInfoData").getDeclaredConstructor(
                     PacketPlayOutPlayerInfo.class, GameProfile.class, int.class, EnumGamemode.class, IChatBaseComponent.class
             );
             infoDataConstructor.setAccessible(true);
@@ -110,7 +111,7 @@ public class TabList {
                         item.getProfile(),
                         item.getPing(),
                         item.getGameMode(),
-                        CraftChatMessage.fromStringOrNull(item.getListName())
+                        new AdventureComponent(item.getListName())
                 ));
             }
             PacketUtils.sendPacket(player, packet);

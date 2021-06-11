@@ -1,10 +1,8 @@
 package net.firiz.renewatelier.notification;
 
-import net.firiz.renewatelier.utils.TellrawUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

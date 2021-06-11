@@ -58,7 +58,7 @@ final class HoloDamage {
                     () -> {
                         Objects.requireNonNull(location.getWorld()).getNearbyEntities(location, 20, 10, 20).stream().filter(e -> e instanceof Player).forEach(e -> {
                             final Player player = (Player) e;
-                            final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).getSettings();
+                            final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player).getSettings();
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
                             if (showDamage) {
                                 PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, location));

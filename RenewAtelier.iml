@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
-  <component name="FacetManager">
-    <facet type="kotlin-language" name="Kotlin">
-      <configuration version="3" platform="JVM 11" allPlatforms="JVM [11]" useProjectSettings="false">
-        <compilerSettings />
-        <compilerArguments>
-          <option name="jvmTarget" value="11" />
-          <option name="languageVersion" value="1.4" />
-          <option name="apiVersion" value="1.4" />
-          <option name="pluginOptions">
-            <array />
-          </option>
-          <option name="pluginClasspaths">
-            <array />
-          </option>
-          <option name="errors">
-            <ArgumentParseErrors />
-          </option>
-        </compilerArguments>
-      </configuration>
-    </facet>
-  </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_16">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -31,9 +10,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4.32" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-common:1.4.32" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-text-serializer-gson:4.7.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-text-serializer-legacy:4.7.0" level="project" />
@@ -47,29 +23,31 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.16-R0.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.27" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm:9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm-commons:9.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm:9.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-commons:9.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-tree:9.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm-analysis:9.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.destroystokyo.paper:paper:1.16.5-R0.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-api:4.4.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-key:4.4.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:examination-api:1.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:examination-string:1.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.checkerframework:checker-qual:3.9.0" level="project" />
-    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:8.0.24" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-api:4.7.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:adventure-key:4.7.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:examination-api:1.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.kyori:examination-string:1.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.checkerframework:checker-qual:3.11.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.jetbrains:annotations:20.1.0" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:8.0.25" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.11.4" level="project" />
-    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:8.3.1" level="project" />
-    <orderEntry type="library" name="Maven: commons-io:commons-io:2.8.0" level="project" />
-    <orderEntry type="library" name="Maven: org.graalvm.truffle:truffle-api:20.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.graalvm.sdk:graal-sdk:20.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.graalvm.js:js:20.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.graalvm.regex:regex:20.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm-tree:7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm-analysis:7.1" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm-util:7.1" level="project" />
-    <orderEntry type="library" name="Maven: com.ibm.icu:icu4j:64.2" level="project" />
-    <orderEntry type="library" name="Maven: org.graalvm.js:js-scriptengine:20.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.26.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.6" level="project" />
+    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:8.5.4" level="project" />
+    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil-extra:8.5.4" level="project" />
+    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil-core:8.5.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.graalvm.truffle:truffle-api:21.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.graalvm.sdk:graal-sdk:21.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.graalvm.js:js:21.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.graalvm.regex:regex:21.1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.ibm.icu:icu4j:68.2" level="project" />
+    <orderEntry type="library" name="Maven: org.graalvm.js:js-scriptengine:21.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.javassist:javassist:3.28.0-GA" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.7" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: net.firiz.ateliercommonapi:AtelierCommonAPI:1.0-SNAPSHOT">
         <CLASSES>

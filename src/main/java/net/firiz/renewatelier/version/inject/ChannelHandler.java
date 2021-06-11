@@ -3,8 +3,7 @@ package net.firiz.renewatelier.version.inject;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.firiz.renewatelier.entity.arrow.ArrowManager;
-import net.firiz.renewatelier.event.AsyncPlayerInteractEntityEvent;
+import net.firiz.renewatelier.server.event.AsyncPlayerInteractEntityEvent;
 import net.firiz.renewatelier.version.MinecraftVersion;
 import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Bukkit;
@@ -32,8 +31,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
     @MinecraftVersion("1.16")
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        System.out.println("[READ] " + msg.getClass().getSimpleName());
-        if (msg instanceof PacketPlayInUseEntity) {
-            final PacketPlayInUseEntity packet = (PacketPlayInUseEntity) msg;
+        if (msg instanceof final PacketPlayInUseEntity packet) {
             final int mobId = a.getInt(packet);
             final EnumHand enumHand = packet.c();
             final EquipmentSlot hand = enumHand == EnumHand.MAIN_HAND ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;

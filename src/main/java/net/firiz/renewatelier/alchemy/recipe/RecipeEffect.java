@@ -2,40 +2,24 @@ package net.firiz.renewatelier.alchemy.recipe;
 
 import java.util.List;
 
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author firiz
  */
-public class RecipeEffect {
-
-    private final AlchemyAttribute attribute;
-    private final List<Integer> star;
-    private final List<StarEffect> starEffects;
-    private final StarEffect defaultStarEffect;
-
-    public RecipeEffect(AlchemyAttribute attribute, List<Integer> star, List<StarEffect> starEffects, StarEffect defaultStarEffect) {
-        this.attribute = attribute;
-        this.star = star;
-        this.starEffects = starEffects;
-        this.defaultStarEffect = defaultStarEffect;
-    }
-
-    public AlchemyAttribute getAttribute() {
-        return attribute;
-    }
-
-    public List<Integer> getStar() {
-        return star;
-    }
-
-    public List<StarEffect> getStarEffects() {
-        return starEffects;
-    }
+public record RecipeEffect(
+        AlchemyAttribute attribute,
+        List<Integer> star,
+        List<StarEffect> starEffects,
+        StarEffect defaultStarEffect
+) {
 
     private double getUpCount(final KettleUserData kettleUserData) {
         double upCount = 0;
@@ -61,44 +45,45 @@ public class RecipeEffect {
 
     private int getBigStar(final KettleUserData kettleUserData) {
         final double upCount = getUpCount(kettleUserData);
-        int bigstar = 0;
+        int bigStar = 0;
         for (int i = 0; i < star.size(); i++) {
             if (i < (int) upCount && star.get(i) != 0) {
-                bigstar++;
+                bigStar++;
             }
         }
-        return bigstar;
+        return bigStar;
     }
 
-    public String getStar(final KettleUserData kettleUserData) {
+    public Component getStar(final KettleUserData kettleUserData) {
         final double upCount = getUpCount(kettleUserData);
-        final StringBuilder sb = new StringBuilder();
+        final Text text = new Text();
         for (int i = 0; i < star.size(); i++) {
             final int _star = star.get(i);
             if (i < (int) upCount) {
                 if (_star == 0) {
-                    sb.append(ChatColor.GOLD).append("★");
+                    text.append("★").color(C.GOLD);
                 } else {
-                    sb.append(ChatColor.GOLD).append("✮");
+                    text.append("✮").color(C.GOLD);
                 }
             } else if (i < upCount) {
                 if (_star == 0) {
-                    sb.append(ChatColor.YELLOW).append("★");
+                    text.append("★").color(C.YELLOW);
                 } else {
-                    sb.append(ChatColor.YELLOW).append("✭");
+                    text.append("✭").color(C.YELLOW);
                 }
             } else {
                 if (_star == 0) {
-                    sb.append(ChatColor.WHITE).append("★");
+                    text.append("★").color(C.WHITE);
                 } else {
-                    sb.append(ChatColor.WHITE).append("✭");
+                    text.append("✭").color(C.WHITE);
                 }
             }
         }
-        return sb.toString();
+        return text;
     }
 
-    public String getName(final KettleUserData kettleUserData) {
+    @Nullable
+    public Component getName(final KettleUserData kettleUserData) {
         final int bigStar = getBigStar(kettleUserData);
         final StarEffect effect = bigStar != 0 ? starEffects.get(bigStar - 1) : defaultStarEffect;
         return effect != null ? effect.getName() : null;

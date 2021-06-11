@@ -1,13 +1,17 @@
 package net.firiz.renewatelier.inventory.item.json;
 
 import com.google.gson.annotations.Expose;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.HorseSkillList;
 import net.firiz.renewatelier.entity.horse.HorseTier;
 import net.firiz.renewatelier.entity.horse.EnumHorseSkill;
-import net.firiz.renewatelier.json.JsonFactory;
+import net.firiz.renewatelier.server.json.JsonFactory;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -23,8 +27,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class HorseSaddle {
@@ -186,18 +188,18 @@ public class HorseSaddle {
         writeItem(saddle, true);
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
 
-        final String speed = ChatColor.GREEN + "+" + scaleString(tier.getSpeed(level) - tier.getSpeed(oldLevel));
-        final String jump = ChatColor.GREEN + "+" + scaleString(tier.getJump(level) - tier.getJump(oldLevel));
-        player.sendMessage(ChatColor.GRAY + "あなたの馬が " + ChatColor.GREEN + level + "Lv" + ChatColor.GRAY + "にレベルアップしました！");
-        player.sendMessage(ChatColor.GRAY + "移動速度" + speed + ChatColor.GRAY + ", ジャンプ力" + jump);
+        final Component speed = Text.of("+" + scaleString(tier.getSpeed(level) - tier.getSpeed(oldLevel)), C.GREEN);
+        final Component jump = Text.of("+" + scaleString(tier.getJump(level) - tier.getJump(oldLevel)));
+        player.sendMessage(Text.of("あなたの馬が ").color(C.GRAY).append(level + "Lv").color(C.GREEN).append("にレベルアップしました！").color(C.GRAY));
+        player.sendMessage(Text.of("移動速度").color(C.GRAY).append(speed).append(", ジャンプ力").color(C.GRAY).append(jump));
         if (isMaxLevel()) {
-            player.sendMessage(ChatColor.GREEN + "あなたの馬は最大レベルに到達しました！");
+            player.sendMessage(Text.of("あなたの馬は最大レベルに到達しました！", C.GREEN));
         }
         if (newSkill != null) {
-            player.sendMessage(ChatColor.GREEN + "新しく " + newSkill.getName() + " を覚えました！");
+            player.sendMessage(Text.of("新しく " + newSkill.getName() + " を覚えました！", C.GREEN));
         }
         if (lvUpSkill != null) {
-            player.sendMessage(ChatColor.GREEN + lvUpSkill.getName() + " のレベルが上がりました！");
+            player.sendMessage(Text.of(lvUpSkill.getName() + " のレベルが上がりました！", C.GREEN));
         }
     }
 
@@ -209,26 +211,26 @@ public class HorseSaddle {
         final ItemMeta meta = item.getItemMeta();
         meta.setCustomModelData(female ? 1 : 2);
         if (refreshLore) {
-            final List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "ランク: " + ChatColor.WHITE + tier.getTier());
-            lore.add(ChatColor.GRAY + "性別: " + ChatColor.WHITE + (female ? "牝馬♀" : "牡馬♂"));
-            lore.add(ChatColor.GRAY + "レベル: " + ChatColor.WHITE + level + " / " + tier.getMaxLevel());
-            lore.add(ChatColor.GRAY + "移動速度: " + ChatColor.WHITE + scaleString(tier.getSpeed(level)));
-            lore.add(ChatColor.GRAY + "ジャンプ力: " + ChatColor.WHITE + scaleString(tier.getJump(level)));
+            final Lore lore = new Lore();
+            lore.add("ランク: ").color(C.GRAY).add(tier.getTier()).color(C.WHITE);
+            lore.add("性別: ").color(C.GRAY).add(female ? "牝馬♀" : "牡馬♂").color(C.WHITE);
+            lore.add("ランク: ").color(C.GRAY).add(tier.getTier()).color(C.WHITE);
+            lore.add("移動速度: ").color(C.GRAY).add(scaleString(tier.getSpeed(level))).color(C.WHITE);
+            lore.add("ジャンプ力: ").color(C.GRAY).add(scaleString(tier.getJump(level))).color(C.WHITE);
             if (!horseSkills.isEmpty()) {
-                lore.add(ChatColor.GRAY + "スキル:");
+                lore.add("スキル:").color(C.GRAY);
                 horseSkills.entrySet().forEach(
-                        entry -> lore.add(ChatColor.WHITE + "- " + entry.getSkill().getName() + " : " + ChatColor.GREEN + entry.getLevel() + " / " + entry.getSkill().getMaxLevel())
+                        entry -> lore.add("- " + entry.getSkill().getName() + " : ").color(C.WHITE).append(entry.getLevel() + " / " + entry.getSkill().getMaxLevel()).color(C.GREEN)
                 );
             }
             if (female && matingCount > 0) {
-                lore.add("");
-                lore.add(ChatColor.GRAY + "交配回数: " + ChatColor.WHITE + matingCount + " / " + GameConstants.HORSE_MATING_MAX_COUNT);
+                lore.nextLine();
+                lore.add("交配回数: ").color(C.GRAY).append(matingCount + " / " + GameConstants.HORSE_MATING_MAX_COUNT).color(C.WHITE);
                 if (matingCount < GameConstants.HORSE_MATING_MAX_COUNT) {
-                    lore.add(ChatColor.GRAY + "次回交配可能日時: " + ChatColor.WHITE + matingTimeString() + " 以降");
+                    lore.add("次回交配可能日時: ").color(C.GRAY).append(matingTimeString() + " 以降").color(C.WHITE);
                 }
             }
-            meta.setLore(lore);
+            meta.lore(lore);
         }
         final String json = JsonFactory.toJson(this);
         meta.getPersistentDataContainer().set(

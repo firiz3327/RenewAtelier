@@ -1,6 +1,8 @@
 package net.firiz.renewatelier.alchemy.kettle.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
@@ -14,8 +16,8 @@ import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.packet.InventoryPacket;
 import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -37,7 +39,7 @@ import java.util.UUID;
 public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe, Inventory> {
 
     private static final KettleManager KETTLE_MANAGER = KettleManager.INSTANCE;
-    private static final String TITLE = "KETTLE_SELECT_ITEM";
+    private static final Component TITLE = Component.text("KETTLE_SELECT_ITEM");
     private final InventoryManager manager;
     private final List<UUID> openUsers = new ObjectArrayList<>();
 
@@ -47,7 +49,7 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return view.getTitle().equals(TITLE);
+        return view.title().equals(TITLE);
     }
 
     @Override
@@ -74,23 +76,22 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
         setPage(inv, nextPage);
 
         final RequireAmountMaterial requireMaterial = reqs.get(nextPage);
-        String name = null;
+        Component name = null;
         CustomModelMaterial material;
         switch (requireMaterial.getType()) {
-            case MATERIAL:
+            case MATERIAL -> {
                 final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();
-                if (!alchemyMaterial.isDefaultName()) {
+                if (!alchemyMaterial.defaultName()) {
                     name = alchemyMaterial.getName();
                 }
-                material = alchemyMaterial.getMaterial();
-                break;
-            case CATEGORY:
+                material = alchemyMaterial.material();
+            }
+            case CATEGORY -> {
                 final Category c = requireMaterial.getCategory();
-                name = ChatColor.WHITE + c.getName();
+                name = c.getNameComponent().color(C.WHITE);
                 material = c.getMaterial();
-                break;
-            default:
-                throw new IllegalStateException("illegal type. " + requireMaterial);
+            }
+            default -> throw new IllegalStateException("illegal type. " + requireMaterial);
         }
 
         if (material != null) {
@@ -98,11 +99,11 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
             final ItemStack item = material.toItemStack();
             final ItemMeta meta = item.getItemMeta();
             if (name != null) {
-                meta.setDisplayName(name);
+                meta.displayName(name);
             }
-            final List<String> lore = new ObjectArrayList<>();
-            lore.add("§7必要個数: " + req_amount);
-            meta.setLore(lore);
+            final Lore lore = new Lore();
+            lore.add("必要個数: " + req_amount).color(C.GRAY);
+            meta.lore(lore);
             item.setItemMeta(meta);
             inv.setItem(4, item);
 
@@ -129,16 +130,15 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
         final RequireAmountMaterial requireMaterial = requireMaterials.get(page);
         CustomModelMaterial material;
         switch (requireMaterial.getType()) {
-            case MATERIAL:
+            case MATERIAL -> {
                 final AlchemyMaterial alchemyMaterial = requireMaterial.getMaterial();
-                material = alchemyMaterial.getMaterial();
-                break;
-            case CATEGORY:
+                material = alchemyMaterial.material();
+            }
+            case CATEGORY -> {
                 final Category c = requireMaterial.getCategory();
                 material = c.getMaterial();
-                break;
-            default:
-                throw new IllegalStateException("illegal type. " + requireMaterial);
+            }
+            default -> throw new IllegalStateException("illegal type. " + requireMaterial);
         }
         if (material != null && !pageItems.isEmpty()) {
             final int requireAmount = requireMaterial.getAmount();

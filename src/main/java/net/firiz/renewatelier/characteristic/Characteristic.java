@@ -94,11 +94,11 @@ public final class Characteristic {
     }
 
     public boolean hasCategory(final AlchemyItemStatus itemStatus) {
-        return hasCategory(itemStatus.getAlchemyMaterial().getMaterialCategory());
+        return hasCategory(itemStatus.getAlchemyMaterial().materialCategory());
     }
 
     public boolean hasCategory(final AlchemyMaterial material) {
-        return hasCategory(material.getMaterialCategory());
+        return hasCategory(material.materialCategory());
     }
 
     public boolean hasCategory(AlchemyMaterialCategory category) {

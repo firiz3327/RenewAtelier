@@ -3,24 +3,25 @@ package net.firiz.renewatelier.inventory.item.json;
 import com.google.gson.annotations.Expose;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.*;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
-import net.firiz.renewatelier.characteristic.CharacteristicTemplate;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
-import net.firiz.renewatelier.json.JsonFactory;
+import net.firiz.renewatelier.server.json.JsonFactory;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.utils.Randomizer;
-import net.firiz.renewatelier.utils.pair.ImmutablePair;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +47,6 @@ public class AlchemyItemStatus {
     @Nullable
     private final CustomModelMaterial customModel;
     @Expose
-    @NotNull
     private int[] size;
     @Expose
     @NotNull
@@ -83,11 +83,14 @@ public class AlchemyItemStatus {
     @NotNull
     private final Map<String, String> dataContainer;
 
+    @Nullable
+    private ItemStack itemStack;
+
     private AlchemyItemStatus(AlchemyMaterial alchemyMaterial, int[] size, List<Category> categories, int quality, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics, List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, int usableCount) {
         this(alchemyMaterial, null, size, categories, quality, ingredients, characteristics, activeEffects, hp, mp, atk, def, speed, usableCount, 0, new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>());
     }
 
-    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, @NotNull int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, int usableCount, int consumedCount, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
+    private AlchemyItemStatus(@NotNull AlchemyMaterial alchemyMaterial, @Nullable CustomModelMaterial customModel, int[] size, @NotNull List<Category> categories, int quality, @NotNull List<AlchemyIngredients> ingredients, @NotNull List<Characteristic> characteristics, @NotNull List<AlchemyItemEffect> activeEffects, int hp, int mp, int atk, int def, int speed, int usableCount, int consumedCount, @NotNull List<String> prefix, @NotNull Map<String, String> dataContainer) {
         this.alchemyMaterial = alchemyMaterial;
         this.customModel = customModel;
         this.size = size;
@@ -105,6 +108,7 @@ public class AlchemyItemStatus {
         this.consumedCount = consumedCount;
         this.prefix = prefix;
         this.dataContainer = dataContainer;
+        this.itemStack = null;
     }
 
     @NotNull
@@ -148,7 +152,7 @@ public class AlchemyItemStatus {
         return activeEffects.contains(effect);
     }
 
-    public void setSize(@NotNull int[] size) {
+    public void setSize(int[] size) {
         this.size = size;
     }
 
@@ -226,6 +230,11 @@ public class AlchemyItemStatus {
 
     public boolean canUse() {
         return usableCount > consumedCount;
+    }
+
+    @Nullable
+    public ItemStack getItemStack() {
+        return itemStack;
     }
 
     /**
@@ -321,7 +330,9 @@ public class AlchemyItemStatus {
         if (item != null && item.hasItemMeta()) {
             final PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
             if (container.has(persistentDataKey, PersistentDataType.STRING)) {
-                return loadJson(container.get(persistentDataKey, PersistentDataType.STRING));
+                final AlchemyItemStatus result = loadJson(container.get(persistentDataKey, PersistentDataType.STRING));
+                result.itemStack = item;
+                return result;
             }
         }
         return null;
@@ -349,7 +360,6 @@ public class AlchemyItemStatus {
         item.setItemMeta(meta);
     }
 
-    @NotNull
     public static int[] getSize(final ItemStack item) {
         if (item != null && item.hasItemMeta()) {
             final AlchemyItemStatus itemStatus = load(item);
@@ -370,19 +380,6 @@ public class AlchemyItemStatus {
             itemStatus.setSize(size);
             itemStatus.updateItem(item);
         }
-    }
-
-    public static List<String> getLore(final String check, final ItemStack item) {
-        final List<String> list = new ObjectArrayList<>();
-        if (check != null && item != null && item.hasItemMeta()) {
-            final ItemMeta meta = item.getItemMeta();
-            if (meta != null && meta.hasLore()) {
-                Objects.requireNonNull(meta.getLore()).stream()
-                        .filter(lore -> (lore.startsWith(check)))
-                        .forEachOrdered(list::add);
-            }
-        }
-        return list;
     }
 
     public static ItemStack getItem(final String id) {
@@ -426,24 +423,24 @@ public class AlchemyItemStatus {
     }
 
     public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final VisibleFlags visibleFlags) {
-        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed(), am.getUsableCount());
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.hp(), am.mp(), am.atk(), am.def(), am.speed(), am.usableCount());
     }
 
     public static ItemStack getItem(final AlchemyMaterial am, final List<AlchemyIngredients> overIngs, ItemStack item, final int overQuality, final int[] overSize, final List<AlchemyItemEffect> activeEffects, final List<Characteristic> overCharacteristics, final List<Category> overCategory, final int usableCount, final VisibleFlags visibleFlags) {
-        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.getHp(), am.getMp(), am.getAtk(), am.getDef(), am.getSpeed(), am.getUsableCount());
+        return getItem(am, overIngs, item, overQuality, overSize, activeEffects, overCharacteristics, overCategory, visibleFlags, am.hp(), am.mp(), am.atk(), am.def(), am.speed(), am.usableCount());
     }
 
-    private static void addLore(List<String> lore, String name, String value) {
-        lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
+    private static void addLore(Lore lore, String name, String value) {
+        lore.add(name + ": ").color(C.GRAY).append(value).color(C.WHITE);
     }
 
-    private static void addLore(List<String> lore, String name, int value) {
-        lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
+    private static void addLore(Lore lore, String name, int value) {
+        lore.add(name + ": ").color(C.GRAY).append(value).color(C.WHITE);
     }
 
-    private static void addLoreStatus(List<String> lore, String name, int value) {
+    private static void addLoreStatus(Lore lore, String name, int value) {
         if (value != 0) {
-            lore.add(ChatColor.GRAY + name + ": " + ChatColor.WHITE + value);
+            lore.add(name + ": ").color(C.GRAY).append(value).color(C.WHITE);
         }
     }
 
@@ -489,15 +486,15 @@ public class AlchemyItemStatus {
             final List<String> prefix,
             final Map<String, String> dataContainer
     ) {
-        if (alchemyMaterial == null || (alchemyMaterial.getIngredients().isEmpty() && (overrideIngredients == null || overrideIngredients.isEmpty()))) {
+        if (alchemyMaterial == null || (alchemyMaterial.ingredients().isEmpty() && (overrideIngredients == null || overrideIngredients.isEmpty()))) {
             return null;
         }
         final AlchemyItemStatus itemStatus = new AlchemyItemStatus(
                 alchemyMaterial,
                 null,
-                overSize == null ? alchemyMaterial.getSizeTemplate().getSize(Randomizer.nextInt(9)) : overSize,
-                overrideCategory == null ? alchemyMaterial.getCategories() : overrideCategory,
-                overQuality != -1 ? overQuality : Randomizer.nextInt(alchemyMaterial.getQualityMax() - alchemyMaterial.getQualityMin()) + alchemyMaterial.getQualityMin(),
+                overSize == null ? alchemyMaterial.sizeTemplate().getSize(Randomizer.nextInt(9)) : overSize,
+                overrideCategory == null ? alchemyMaterial.categories() : overrideCategory,
+                overQuality != -1 ? overQuality : Randomizer.nextInt(alchemyMaterial.qualityMax() - alchemyMaterial.qualityMin()) + alchemyMaterial.qualityMin(),
                 createIngredientList(alchemyMaterial, overrideIngredients),
                 createCharacteristicList(alchemyMaterial, overrideCharacteristics),
                 Objects.requireNonNullElse(activeEffects, Collections.emptyList()),
@@ -520,12 +517,12 @@ public class AlchemyItemStatus {
 
     public ItemStack updateItem(@Nullable ItemStack item, @NotNull VisibleFlags visibleFlags) {
         if (item == null || item.getType() == Material.AIR) {
-            item = alchemyMaterial.getMaterial().toItemStack();
+            item = alchemyMaterial.material().toItemStack();
         }
         writeJson(item);
         final ItemMeta meta = Objects.requireNonNull(item.getItemMeta());
-        if (!alchemyMaterial.isDefaultName()) {
-            meta.setDisplayName(alchemyMaterial.getName());
+        if (!alchemyMaterial.defaultName()) {
+            meta.displayName(alchemyMaterial.name());
         }
 
         final PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
@@ -535,9 +532,9 @@ public class AlchemyItemStatus {
                 value
         ));
 
-        final List<String> lore = new ObjectArrayList<>();
+        final Lore lore = new Lore();
         if (!prefix.isEmpty()) {
-            lore.addAll(prefix);
+            prefix.forEach(str -> lore.add(LegacyComponentSerializer.legacyAmpersand().deserialize(str)));
         }
         if (visibleFlags.id) {
             lore.add("");
@@ -556,37 +553,33 @@ public class AlchemyItemStatus {
             addLoreStatus(lore, "素早さ", speed);
 
             if (categories.contains(Category.WEAPON)) {
-                addLore(lore, "ダメージ", alchemyMaterial.getBaseDamageMin() + " - " + alchemyMaterial.getBaseDamageMax());
+                addLore(lore, "ダメージ", alchemyMaterial.baseDamageMin() + " - " + alchemyMaterial.baseDamageMax());
             }
         }
 
         // 錬金成分
         if (visibleFlags.ingredients) {
-            final ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> levels = getLevels();
-            final int allLevel = levels.getLeft();
-            final List<AlchemyAttribute> maxTypes = getMaxTypes(levels.getRight());
+            final IntObjectImmutablePair<Object2IntMap<AlchemyAttribute>> levels = getLevels();
+            final int allLevel = levels.leftInt();
+            final List<AlchemyAttribute> maxTypes = getMaxTypes(levels.right());
             // 錬金成分・設定
-            final StringBuilder ingredientStringBuilder = new StringBuilder();
-            ingredientStringBuilder.append(ChatColor.GRAY).append("錬金成分: ").append(ChatColor.WHITE).append(allLevel).append(" ");
-            maxTypes.forEach(type -> ingredientStringBuilder.append(type.getColor()).append("●"));
-            lore.add(ingredientStringBuilder.toString());
-            ingredients.forEach(i -> lore.add(ChatColor.WHITE + "- " + i.getName() + " : " + i.getType().getColor() + i.getLevel()));
+            lore.add("錬金成分: ").color(C.GRAY).append(allLevel).color(C.WHITE).append(" ");
+            maxTypes.forEach(type -> lore.append("●").color(type.getColor()));
+            ingredients.forEach(i -> lore.add("- ").color(C.WHITE).append(i.getName() + " : ").append(i.getLevel()).color(i.getType().getColor()));
         }
         // サイズ
         if (visibleFlags.size) {
-            lore.add("§7サイズ:");
-            StringBuilder str = new StringBuilder();
+            lore.add("サイズ:").color(C.GRAY).nextLine();
             int cSize = 0;
             for (final int i : size) {
                 if (i == 0) {
-                    str.append(CommonUtils.intCColor(i)).append(GameConstants.W_W);
+                    lore.append(GameConstants.W_W).color(CommonUtils.intCColor(i));
                 } else {
-                    str.append(CommonUtils.intCColor(i)).append(GameConstants.W_B);
+                    lore.append(GameConstants.W_B).color(CommonUtils.intCColor(i));
                 }
                 if (cSize >= 2) {
-                    lore.add(str.toString());
                     cSize = 0;
-                    str = new StringBuilder();
+                    lore.nextLine();
                 } else {
                     cSize++;
                 }
@@ -594,9 +587,9 @@ public class AlchemyItemStatus {
         }
         // 触媒
         if (visibleFlags.catalyst) {
-            final Catalyst catalyst = alchemyMaterial.getCatalyst();
+            final Catalyst catalyst = alchemyMaterial.catalyst();
             if (catalyst != null) {
-                lore.add("§7触媒:");
+                lore.add("触媒:").color(C.GRAY);
                 final IntList allCS = new IntArrayList();
                 for (final CatalystBonus bonus : catalyst.getBonus()) {
                     if (allCS.isEmpty()) {
@@ -613,43 +606,42 @@ public class AlchemyItemStatus {
                 }
                 final int length = allCS.size();
                 final int rotate_value = length == 36 ? 6 : (length == 25 ? 5 : 4);
-                final StringBuilder sb = new StringBuilder();
+                lore.nextLine();
                 int count = 0;
                 for (int i = 0; i < rotate_value; i++) {
                     for (int j = 1; j <= rotate_value; j++) {
                         final int value = allCS.getInt(count);
                         if (value == 0) {
-                            sb.append(CommonUtils.intCColor(value)).append(GameConstants.W_W);
+                            lore.append(GameConstants.W_W).color(CommonUtils.intCColor(value));
                         } else {
-                            sb.append(CommonUtils.intCColor(value)).append(GameConstants.W_B);
+                            lore.append(GameConstants.W_B).color(CommonUtils.intCColor(value));
                         }
                         count++;
                     }
-                    lore.add(sb.toString());
-                    sb.delete(0, sb.length());
+                    lore.nextLine();
                 }
             }
         }
         // 効果
         if (activeEffects != null && !activeEffects.isEmpty()) {
-            lore.add("§7効果: ");
-            activeEffects.forEach(effect -> lore.add(ChatColor.WHITE + "- " + effect.getName()));
+            lore.add("効果: ").color(C.GRAY);
+            activeEffects.forEach(effect -> lore.add("- " + effect.getName()).color(C.WHITE));
         }
         // 特性
         if (!characteristics.isEmpty()) {
-            lore.add("§7特性:");
-            characteristics.forEach(c -> lore.add(ChatColor.WHITE + "- " + c.getName()));
+            lore.add("特性:").color(C.GRAY);
+            characteristics.forEach(c -> lore.add("- " + c.getName()).color(C.WHITE));
         }
         // カテゴリ
         if (visibleFlags.category && !categories.isEmpty()) {
-            lore.add("§7カテゴリ:");
-            categories.forEach(category -> lore.add(ChatColor.WHITE + "- " + category.getName()));
+            lore.add("カテゴリ:").color(C.GRAY);
+            categories.forEach(category -> lore.add("- " + category.getName()).color(C.WHITE));
         }
         // Lore終了
         if (visibleFlags.end) {
             lore.add("");
         }
-        meta.setLore(lore);
+        meta.lore(lore);
 
         // unbreaking & flag系
         ItemUtils.addHideFlags(meta, alchemyMaterial);
@@ -669,17 +661,17 @@ public class AlchemyItemStatus {
                 allLevel += getLevel(levels, activeIngredients, ingredients);
             }
         } else {
-            for (final ImmutablePair<AlchemyIngredients, Integer> dd : alchemyMaterial.getIngredients()) {
-                if (dd.getRight() == 100) {
-                    final AlchemyIngredients ingredients = dd.getLeft();
+            for (final ObjectIntImmutablePair<AlchemyIngredients> dd : alchemyMaterial.ingredients()) {
+                if (dd.rightInt() == 100) {
+                    final AlchemyIngredients ingredients = dd.left();
                     allLevel += getLevel(levels, activeIngredients, ingredients);
                 }
             }
             // 錬金成分・ランダム取得
-            for (int i = 0; i < Math.min(6, Randomizer.nextInt(alchemyMaterial.getIngredients().size()) + 1); i++) {
-                final ImmutablePair<AlchemyIngredients, Integer> dd = alchemyMaterial.getIngredients().get(Randomizer.nextInt(alchemyMaterial.getIngredients().size()));
-                if (Randomizer.nextInt(100) <= dd.getRight()) {
-                    final AlchemyIngredients ingredients = dd.getLeft();
+            for (int i = 0; i < Math.min(6, Randomizer.nextInt(alchemyMaterial.ingredients().size()) + 1); i++) {
+                final ObjectIntImmutablePair<AlchemyIngredients> dd = alchemyMaterial.ingredients().get(Randomizer.nextInt(alchemyMaterial.ingredients().size()));
+                if (Randomizer.nextInt(100) <= dd.rightInt()) {
+                    final AlchemyIngredients ingredients = dd.left();
                     if (!activeIngredients.contains(ingredients)) {
                         activeIngredients.add(ingredients);
                         int level = ingredients.getLevel();
@@ -695,7 +687,7 @@ public class AlchemyItemStatus {
             }
             // 錬金成分・非マイナス化
             final List<AlchemyIngredients> materialIngredients = new ObjectArrayList<>();
-            alchemyMaterial.getIngredients().forEach(dd -> materialIngredients.add(dd.getLeft()));
+            alchemyMaterial.ingredients().forEach(dd -> materialIngredients.add(dd.left()));
             while (allLevel <= 0) {
                 Collections.shuffle(materialIngredients);
                 for (final AlchemyIngredients ingredients : materialIngredients) {
@@ -712,20 +704,14 @@ public class AlchemyItemStatus {
     private static List<Characteristic> createCharacteristicList(@NotNull AlchemyMaterial alchemyMaterial, @Nullable List<Characteristic> overrideCharacteristics) {
         final List<Characteristic> characteristics = new ObjectArrayList<>();
         if (overrideCharacteristics == null) {
-            if (alchemyMaterial.getCharas() != null) {
-                final List<ImmutablePair<Characteristic, Integer>> cs = new ObjectArrayList<>();
-                alchemyMaterial.getCharas().forEach(obj -> {
-                    if (obj instanceof CharacteristicTemplate) {
-                        cs.addAll(((CharacteristicTemplate) obj).getCs());
-                    } else if (obj instanceof ImmutablePair) {
-                        cs.add(CommonUtils.cast(obj));
-                    }
-                });
+            if (alchemyMaterial.characteristics() != null) {
+                final List<ObjectIntImmutablePair<Characteristic>> cs = new ObjectArrayList<>();
+                alchemyMaterial.characteristics().forEach(obj -> obj.add(cs));
                 Collections.shuffle(cs);
-                for (final ImmutablePair<Characteristic, Integer> dd : cs) {
+                for (final ObjectIntImmutablePair<Characteristic> dd : cs) {
                     if (characteristics.size() < 3) {
-                        if (Randomizer.nextInt(1000 /* - Math.max(500, (錬金レベル * 10)) */) <= dd.getRight()) {
-                            characteristics.add(dd.getLeft());
+                        if (Randomizer.nextInt(1000 /* - Math.max(500, (錬金レベル * 10)) */) <= dd.rightInt()) {
+                            characteristics.add(dd.left());
                         }
                         continue;
                     }
@@ -755,13 +741,13 @@ public class AlchemyItemStatus {
     }
 
     @NotNull
-    public ImmutablePair<Integer, Object2IntMap<AlchemyAttribute>> getLevels() {
+    public IntObjectImmutablePair<Object2IntMap<AlchemyAttribute>> getLevels() {
         int allLevel = 0;
         final Object2IntMap<AlchemyAttribute> levels = new Object2IntOpenHashMap<>();
         for (final AlchemyIngredients ingredient : ingredients) {
             allLevel += getLevel(levels, ingredient);
         }
-        return new ImmutablePair<>(allLevel, levels);
+        return new IntObjectImmutablePair<>(allLevel, levels);
     }
 
     @NotNull
@@ -783,6 +769,7 @@ public class AlchemyItemStatus {
     @Nullable
     public static AlchemyMaterial getMaterialNullable(@Nullable ItemStack item) {
         return CObjects.nullIfFunction(load(item), AlchemyItemStatus::getAlchemyMaterial, null);
+
     }
 
     @NotNull

@@ -11,7 +11,7 @@ public class AlchemyMaterialRecipeResult extends ARecipeResult<AlchemyMaterial> 
 
     @Override
     public CustomModelMaterial getCustomModelMaterial() {
-        return getResult().getMaterial();
+        return getResult().material();
     }
 
 }

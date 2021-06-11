@@ -3,6 +3,7 @@ package net.firiz.renewatelier.version.tab.contents;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.version.tab.TabListItem;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
@@ -18,7 +19,7 @@ public class PlayerListTabContents implements TabContents {
         if (slot < onlinePlayers.size()) {
             final Player slotPlayer = onlinePlayers.get(slot);
             final EntityPlayer slotEntityPlayer = ((CraftPlayer) slotPlayer).getHandle();
-            item.modifyListName(slotEntityPlayer.getName());
+            item.modifyListName(slotEntityPlayer.adventure$displayName);
             item.modifyPing(slotEntityPlayer.ping);
             item.modifyGameMode(slotPlayer.getGameMode());
             item.modifyTextures(slotEntityPlayer.getProfile());

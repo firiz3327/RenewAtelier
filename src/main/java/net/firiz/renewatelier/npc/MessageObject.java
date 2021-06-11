@@ -19,7 +19,7 @@ public class MessageObject {
     private Location baseLocation;
 
     public MessageObject(Player player, Location location) {
-        this(PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()), location);
+        this(PlayerSaveManager.INSTANCE.getChar(player), location);
     }
 
     public MessageObject(Char character, Location location) {

@@ -1,5 +1,7 @@
 package net.firiz.renewatelier.entity.player.sql;
 
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.recipe.AlchemyRecipe;
 import net.firiz.renewatelier.alchemy.recipe.RecipeStatus;
 import net.firiz.renewatelier.alchemy.recipe.idea.IncreaseIdea;
@@ -14,7 +16,7 @@ import net.firiz.renewatelier.notification.Notification;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.java.ArrayUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class RecipeSQL {
+public record RecipeSQL(int id, @NotNull List<RecipeStatus> recipeStatuses) {
 
     private static final String TABLE_RECIPE_LEVELS = "recipeLevels";
     private static final String[] COLUMNS = {
@@ -36,10 +38,6 @@ public class RecipeSQL {
             "exp",
             "idea"
     };
-
-    private final int id;
-    @NotNull
-    private final List<RecipeStatus> recipeStatuses;
 
     public RecipeSQL(final int id, @NotNull List<RecipeStatus> recipeStatuses) {
         this.id = id;
@@ -57,6 +55,14 @@ public class RecipeSQL {
         insert(recipeStatus);
     }
 
+    public boolean hasRecipe(@NotNull final String id) {
+        return getRecipeStatus(id) != null;
+    }
+
+    public boolean hasRecipe(@NotNull final AlchemyRecipe recipe) {
+        return getRecipeStatus(recipe) != null;
+    }
+
     @NotNull
     public List<RecipeStatus> getRecipeStatusList() {
         return Collections.unmodifiableList(recipeStatuses);
@@ -66,6 +72,16 @@ public class RecipeSQL {
     public RecipeStatus getRecipeStatus(final String id) {
         for (final RecipeStatus rs : getRecipeStatusList()) {
             if (rs.getId().equals(id)) {
+                return rs;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public RecipeStatus getRecipeStatus(final AlchemyRecipe recipe) {
+        for (final RecipeStatus rs : getRecipeStatusList()) {
+            if (rs.getRecipe() == recipe) {
                 return rs;
             }
         }
@@ -83,29 +99,29 @@ public class RecipeSQL {
     }
 
     public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp) {
-        if (addRecipeExp(recipe, exp) && view) {
+        addRecipeExp(player, view, recipe, exp, false);
+    }
+
+    public void addRecipeExp(final Player player, final boolean view, final AlchemyRecipe recipe, final int exp, final boolean enableAcquired) {
+        if (addRecipeExp(recipe, exp, enableAcquired) && view) {
             notification(player, recipe);
         }
     }
 
-    private boolean addRecipeExp(final AlchemyRecipe recipe, final int exp) {
+    private boolean addRecipeExp(final AlchemyRecipe recipe, final int exp, final boolean enableAcquired) {
         final String recipeId = recipe.getId();
-        RecipeStatus status = null;
-        for (final RecipeStatus rs : getRecipeStatusList()) {
-            if (rs.getId().equals(recipeId)) {
-                if (rs.getLevel() > 3) {
-                    return false;
-                } else {
-                    status = rs;
-                    break;
-                }
-            }
+        RecipeStatus status = getRecipeStatus(recipeId);
+        if (status != null && status.getLevel() > 3) {
+            return false;
         }
 
         boolean first = false;
-        if (status == null) { // コマンドの場合のみ(基本的にアイデアで開放、若しくはその他要素で開放)
+        if (status == null) { // スキルもしくはコマンドの場合のみ(基本的にアイデアで開放、若しくはその他要素で開放)
             status = addRecipe(recipe);
             first = true;
+        }
+        if (enableAcquired) {
+            status.setAcquired(true);
         }
 
         status.setExp(status.getExp() + exp);
@@ -125,7 +141,7 @@ public class RecipeSQL {
     public void increaseIdea(@NotNull final Player player, @NotNull IncreaseIdea item) {
         Objects.requireNonNull(player);
         Objects.requireNonNull(item);
-        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player);
         AlchemyRecipe.getIdeaRecipeList().stream()
                 .filter(ideaRecipe -> ideaRecipe.hasIdeaRequire(item))
                 .forEach(ideaRecipe -> {
@@ -174,15 +190,15 @@ public class RecipeSQL {
     private void notification(@NotNull final Player player, @NotNull final AlchemyRecipe recipe) {
         Notification.recipeNotification(player, Material.CAULDRON);
 
-        String name = "unknown";
+        Component name = Component.text("unknown");
         final ARecipeResult<?> resultData = recipe.getResult();
         if (resultData instanceof AlchemyMaterialRecipeResult) {
             name = ((AlchemyMaterialRecipeResult) resultData).getResult().getName();
         } else if (resultData instanceof MinecraftMaterialRecipeResult) { // 基本想定しない
             final Material material = ((MinecraftMaterialRecipeResult) resultData).getResult();
-            name = LanguageItemUtil.getLocalizeName(new ItemStack(material));
+            name = Component.text(LanguageItemUtil.getLocalizeName(new ItemStack(material)));
         }
-        player.sendMessage("レシピ【" + ChatColor.GREEN + name + ChatColor.RESET + "】を開放しました。");
+        player.sendMessage(Text.of("レシピ【").append(name).color(C.GREEN).append("】を開放しました。").color(C.WHITE));
     }
 
 }

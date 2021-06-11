@@ -2,11 +2,13 @@ package net.firiz.renewatelier.version.tab;
 
 import com.mojang.authlib.GameProfile;
 import net.firiz.ateliercommonapi.SkinProperty;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.*;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,21 +27,21 @@ public class TabListItem {
 
     private int ping;
     @NotNull
-    private String listName;
+    private Component listName;
     @NotNull
     private EnumGamemode gameMode;
 
     public TabListItem(int slot, String name) {
         this.profile = new GameProfile(new UUID(slot, slot), name);
         this.ping = 32;
-        this.listName = "";
+        this.listName = Component.empty();
         this.gameMode = EnumGamemode.CREATIVE;
     }
 
     /**
      * 個別プレイヤー用にTabListItem作成用コンストラクタ
      */
-    private TabListItem(@NotNull GameProfile profile, int ping, @NotNull String listName, @NotNull EnumGamemode gameMode) {
+    private TabListItem(@NotNull GameProfile profile, int ping, @NotNull Component listName, @NotNull EnumGamemode gameMode) {
         this.profile = profile;
         this.ping = ping;
         this.listName = listName;
@@ -67,7 +69,7 @@ public class TabListItem {
 
     public void resetTabItem() {
         modifyTextures(SkinProperty.GRAY);
-        modifyListName(ChatColor.RESET + "                     ");
+        modifyListName(Text.of("                     ", C.WHITE));
         modifyPing(0);
     }
 
@@ -81,7 +83,7 @@ public class TabListItem {
     }
 
     @NotNull
-    public String getListName() {
+    public Component getListName() {
         return listName;
     }
 
@@ -94,7 +96,7 @@ public class TabListItem {
         this.ping = ping;
     }
 
-    public void modifyListName(@NotNull String listName) {
+    public void modifyListName(@NotNull Component listName) {
         this.listName = Objects.requireNonNull(listName);
     }
 

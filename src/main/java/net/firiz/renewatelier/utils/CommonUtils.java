@@ -2,13 +2,12 @@ package net.firiz.renewatelier.utils;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.block.Action;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NonNls;
@@ -44,6 +43,14 @@ public final class CommonUtils {
         return new NamespacedKey(plugin, key);
     }
 
+    public static boolean hasSettingString(final PersistentDataHolder dataHolder, final NamespacedKey key) {
+        return dataHolder.getPersistentDataContainer().has(key, PersistentDataType.STRING);
+    }
+
+    public static boolean hasSettingInt(final PersistentDataHolder dataHolder, final NamespacedKey key) {
+        return dataHolder.getPersistentDataContainer().has(key, PersistentDataType.INTEGER);
+    }
+
     public static String getSetting(final PersistentDataHolder dataHolder, final NamespacedKey key) {
         return dataHolder.getPersistentDataContainer().get(key, PersistentDataType.STRING);
     }
@@ -60,24 +67,24 @@ public final class CommonUtils {
         dataHolder.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, value);
     }
 
-    public static String intCColor(int i) {
+    public static TextColor intCColor(int i) {
         switch (i) {
             case 0:
-                return ChatColor.GRAY.toString();
+                return C.GRAY;
             case 1:
-                return ChatColor.WHITE.toString();
+                return C.WHITE;
             case 2:
-                return AlchemyAttribute.RED.getColor();
+                return C.RED;
             case 3:
-                return AlchemyAttribute.BLUE.getColor();
+                return C.BLUE;
             case 4:
-                return AlchemyAttribute.GREEN.getColor();
+                return C.GREEN;
             case 5:
-                return AlchemyAttribute.YELLOW.getColor();
+                return C.YELLOW;
             case 6:
-                return AlchemyAttribute.PURPLE.getColor();
+                return C.DARK_PURPLE;
             default:
-                return "";
+                return C.BLACK;
         }
     }
 

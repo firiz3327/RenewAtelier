@@ -11,6 +11,7 @@ import net.firiz.renewatelier.characteristic.datas.addattack.AddAttackType;
 import net.firiz.renewatelier.characteristic.datas.addattack.x.AttributeAddAttack;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.utils.CommonUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -144,20 +145,23 @@ public enum AlchemyItemEffect {
     }
 
     private final String name;
-    private final String description; // 未使用
+    private final Component nameComponent;
+    private final Component description; // 未使用
 
     @NotNull
     private final List<IItemEffect> effects;
 
     AlchemyItemEffect(String name, String description, @NotNull IItemEffect effect) {
         this.name = name;
-        this.description = description;
+        this.nameComponent = Component.text(name);
+        this.description = Component.text(description);
         this.effects = ObjectLists.singleton(effect);
     }
 
     AlchemyItemEffect(String name, String description, @NotNull RandValue... randValues) {
         this.name = name;
-        this.description = description;
+        this.nameComponent = Component.text(name);
+        this.description = Component.text(description);
         this.effects = new ObjectArrayList<>(randValues);
     }
 
@@ -172,6 +176,14 @@ public enum AlchemyItemEffect {
 
     public String getName() {
         return name;
+    }
+
+    public Component getNameComponent() {
+        return nameComponent;
+    }
+
+    public Component getDescription() {
+        return description;
     }
 
     public boolean isSingleton() {
@@ -193,32 +205,32 @@ public enum AlchemyItemEffect {
 
     public void initialize(ItemStack item) {
         singleEffect(
-                effect -> effect instanceof ItemInitialize,
+                ItemInitialize.class::isInstance,
                 ItemInitialize.class
         ).ifPresent(i -> i.accept(item));
     }
 
     public void mobHit(LivingEntity entity) {
         singleEffect(
-                effect -> effect instanceof MobHitEffect,
+                MobHitEffect.class::isInstance,
                 MobHitEffect.class
         ).ifPresent(i -> i.accept(entity));
     }
 
     @Nullable
     public AddAttackData getAddAttackData() {
-        return singleEffect(effect -> effect instanceof AddAttackData, AddAttackData.class).orElse(null);
+        return singleEffect(AddAttackData.class::isInstance, AddAttackData.class).orElse(null);
     }
 
     @Nullable
     public RaisePower getRaisePower() {
-        return singleEffect(effect -> effect instanceof RaisePower, RaisePower.class).orElse(null);
+        return singleEffect(RaisePower.class::isInstance, RaisePower.class).orElse(null);
     }
 
     @NotNull
     public List<RandValue> getRandValues() {
         if (getEffect() instanceof RandValue) {
-            return effects.stream().map(effect -> (RandValue) effect).collect(Collectors.toList());
+            return effects.stream().map(RandValue.class::cast).collect(Collectors.toList());
         }
         return ObjectLists.emptyList();
     }

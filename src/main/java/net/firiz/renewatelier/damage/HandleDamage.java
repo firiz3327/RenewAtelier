@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.damage;
 
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.IBuff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
@@ -8,7 +8,6 @@ import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
-import net.firiz.renewatelier.npc.NPCObject;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;
 import net.firiz.renewatelier.version.nms.NMSEntityUtils;
@@ -65,7 +64,7 @@ public final class HandleDamage {
                 location,
                 1.5,
                 6
-        ).filter(entity -> !(entity instanceof Player) && !NPCObject.hasEntity(entity)).forEach(entity -> {
+        ).forEach(entity -> {
             damageUtilV2.normalDamage(
                     AttackAttribute.SLASH,
                     charStats,
@@ -155,7 +154,7 @@ public final class HandleDamage {
                 damager.sendMessage("HP: " + stats.getHp() + " / " + stats.getMaxHp());
                 damager.sendMessage("ATK: " + stats.getAtk() + " DEF: " + stats.getDef() + " SPD: " + stats.getSpeed());
                 damager.sendMessage("Buffs: ");
-                for (final Buff buff : stats.getBuffs()) {
+                for (final IBuff buff : stats.getBuffs()) {
                     final StringJoiner joiner = new StringJoiner(" ");
                     joiner.add("-")
                             .add(buff.getBuffValueType().toString())

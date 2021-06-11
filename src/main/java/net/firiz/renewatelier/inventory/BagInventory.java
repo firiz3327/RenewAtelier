@@ -23,7 +23,7 @@ public final class BagInventory implements NonParamInventory {
 
     @Override
     public void open(@NotNull Player player) {
-        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player);
         final List<JsonItem> items = character.getBag().getItems();
         final Inventory inv = Bukkit.createInventory(player, AlchemyItemBag.SIZE, TITLE);
         for (int i = 0, size = Math.min(inv.getSize(), items.size()); i < size; i++) {
@@ -44,7 +44,7 @@ public final class BagInventory implements NonParamInventory {
     @Override
     public void onClose(@NotNull InventoryCloseEvent event) {
         final Player player = (Player) event.getPlayer();
-        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player);
         character.getBag()
                 .refresh(event.getInventory().getStorageContents())
                 .forEach(i -> ItemUtils.addItem(player, i));

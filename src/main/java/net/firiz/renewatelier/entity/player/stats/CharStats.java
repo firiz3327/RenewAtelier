@@ -1,15 +1,21 @@
 package net.firiz.renewatelier.entity.player.stats;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
+import net.firiz.renewatelier.buff.IBuff;
+import net.firiz.renewatelier.buff.TimerBuff;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.EntityStatus;
+import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
+import net.firiz.renewatelier.skills.character.IPlayerSkillBuilder;
+import net.firiz.renewatelier.skills.character.PlayerSkillManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -21,11 +27,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.*;
 
 public class CharStats extends EntityStatus {
 
     private final Player player;
+    private Char character;
     private long exp;
     private int alchemyLevel;
     private int alchemyExp;
@@ -42,7 +50,9 @@ public class CharStats extends EntityStatus {
 
     private long lastAttackTime = 0;
 
-    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, long money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<Buff> buffs) {
+    private final PlayerSkillManager skillManager;
+
+    public CharStats(Player player, int level, long exp, int alchemyLevel, int alchemyExp, long money, int maxHp, int hp, int maxMp, int mp, int atk, int def, int speed, List<IBuff> buffs) {
         super(player, level, maxHp, hp, atk, def, speed);
         this.player = player;
         this.exp = exp;
@@ -55,13 +65,27 @@ public class CharStats extends EntityStatus {
         this.avo = 100;
         this.equipStats = new EquipStats(this, maxHp, maxMp, atk, def, speed, acc, avo);
         this.buffedStats = new BuffedStats(this, equipStats, level);
-        for (final Buff buff : buffs) {
+        for (final IBuff buff : buffs) {
             buff.setStatus(this);
-            buff.startTimer();
+            if (buff instanceof TimerBuff) {
+                ((TimerBuff) buff).startTimer();
+            }
         }
+
+        this.skillManager = new PlayerSkillManager(player);
 
         updateHp();
         updateMp();
+    }
+
+    public void init(Char character, List<IPlayerSkillBuilder> skills) {
+        this.character = character;
+        skillManager.init(character, skills);
+    }
+
+    @NotNull
+    public PlayerSkillManager getSkillManager() {
+        return skillManager;
     }
 
     public void save(int id) {
@@ -111,6 +135,7 @@ public class CharStats extends EntityStatus {
         update(() -> {
             equipStats.updateWeapon(-1);
             buffedStats.update();
+            // skillManagerはアイテムありきで更新するため、skillManager::updateはいらない
         });
     }
 
@@ -118,6 +143,7 @@ public class CharStats extends EntityStatus {
         update(() -> {
             equipStats.updateWeapon(slot);
             buffedStats.update();
+            skillManager.update();
         });
     }
 
@@ -301,13 +327,11 @@ public class CharStats extends EntityStatus {
         this.speed += speedUp;
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
-        player.sendTitle(
-                ChatColor.GREEN + "LEVEL UP",
-                "プレイヤーレベル: " + this.level,
-                10,
-                70,
-                20
-        );
+        player.showTitle(Title.title(
+                Text.of("LEVEL UP", C.GREEN),
+                Text.of("プレイヤーレベル: " + this.level),
+                Title.Times.of(Duration.ofMillis(500), Duration.ofMillis(3500), Duration.ofMillis(1000))
+        ));
         updateStats();
     }
 
@@ -335,13 +359,11 @@ public class CharStats extends EntityStatus {
         }
         if (levelUp) {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.1f, 1);
-            player.sendTitle(
-                    ChatColor.YELLOW + "LEVEL UP",
-                    "錬金レベル: " + this.alchemyLevel,
-                    10,
-                    70,
-                    20
-            );
+            player.showTitle(Title.title(
+                    Text.of("LEVEL UP", C.YELLOW),
+                    Text.of("錬金レベル: " + this.alchemyLevel),
+                    Title.Times.of(Duration.ofMillis(500), Duration.ofMillis(3500), Duration.ofMillis(1000))
+            ));
         }
         return levelUp;
     }
@@ -377,6 +399,10 @@ public class CharStats extends EntityStatus {
 
     public void heal(double heal) {
         damageHp(-heal);
+    }
+
+    public void healMp(int heal) {
+        damageMp(-heal);
     }
 
     public void damageHp(double damage) {
@@ -431,15 +457,23 @@ public class CharStats extends EntityStatus {
 
     private void viewMp() {
         final double mpGage = 30 * ((double) mp / getMaxMp());
-        final StringBuilder sb = new StringBuilder();
-        sb.append("MP ").append(mp).append(" / ").append(getMaxMp()).append(' ').append(ChatColor.BLUE.toString());
-        for (int i = 0; i < 30; i++) {
-            if (i >= mpGage) {
-                sb.append(ChatColor.GRAY);
+        final Text text = new Text("MP ");
+        text.append(mp).append(" / ").append(getMaxMp()).append(' ');
+        if (mpGage == 30) {
+            player.sendActionBar(text.append("||||||||||||||||||||||||||||||").color(C.AQUA));
+        } else {
+            StringBuilder sb = new StringBuilder();
+            boolean val = true;
+            for (int i = 0; i < 30; i++) {
+                if (i >= mpGage && val) {
+                    val = false;
+                    text.append(sb.toString()).color(C.AQUA);
+                    sb = new StringBuilder();
+                }
+                sb.append('|');
             }
-            sb.append('|');
+            player.sendActionBar(text.append(sb.toString()).color(C.GRAY));
         }
-        player.sendActionBar(sb.toString());
     }
 
     public void clearBuffs() {

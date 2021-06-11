@@ -1,21 +1,17 @@
 package net.firiz.renewatelier.entity;
 
-import net.firiz.renewatelier.buff.Buff;
-import net.firiz.renewatelier.buff.BuffData;
-import net.firiz.renewatelier.buff.BuffType;
-import net.firiz.renewatelier.buff.BuffValueType;
+import net.firiz.renewatelier.buff.*;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public abstract class EntityStatus {
 
     private final Entity entity;
-    protected final Set<Buff> buffs;
+    protected final Set<TimerBuff> buffs;
+    protected final Set<PassiveBuff> passiveBuffs;
     protected int level;
     protected int maxHp;
     protected double hp;
@@ -23,7 +19,15 @@ public abstract class EntityStatus {
     protected int def;
     protected int speed;
 
-    public EntityStatus(Entity entity, int level, int maxHp, double hp, int atk, int def, int speed, final Set<Buff> buffs) {
+    public EntityStatus(Entity entity, int level, int maxHp, double hp, int atk, int def, int speed) {
+        this(entity, level, maxHp, hp, atk, def, speed, new HashSet<>());
+    }
+
+    public EntityStatus(Entity entity, int level, int maxHp, double hp, int atk, int def, int speed, final Set<TimerBuff> buffs) {
+        this(entity, level, maxHp, hp, atk, def, speed, buffs, new HashSet<>());
+    }
+
+    public EntityStatus(Entity entity, int level, int maxHp, double hp, int atk, int def, int speed, final Set<TimerBuff> buffs, final Set<PassiveBuff> passiveBuffs) {
         this.entity = entity;
         this.level = level;
         this.maxHp = maxHp;
@@ -32,17 +36,7 @@ public abstract class EntityStatus {
         this.def = def;
         this.speed = speed;
         this.buffs = buffs;
-    }
-
-    public EntityStatus(Entity entity, int level, int maxHp, double hp, int atk, int def, int speed) {
-        this.entity = entity;
-        this.level = level;
-        this.maxHp = maxHp;
-        this.hp = hp;
-        this.atk = atk;
-        this.def = def;
-        this.speed = speed;
-        this.buffs = new HashSet<>();
+        this.passiveBuffs = passiveBuffs;
     }
 
     public Entity getEntity() {
@@ -63,12 +57,12 @@ public abstract class EntityStatus {
 
     public abstract int getSpeed();
 
-    public boolean addBuff(@NotNull final Buff buff) {
+    public boolean addBuff(@NotNull final TimerBuff buff) {
         if (buffs.contains(buff)) {
             return false;
         }
         byte add = 0;
-        for (final Buff b : getBuffs()) {
+        for (final TimerBuff b : getBuffTimers()) {
             if (b.getBuffValueType() != BuffValueType.NONE && b.getType() == buff.getType()) {
                 if (/*b.getLevel() <= buff.getLevel() || */b.getX() <= buff.getX()) { // より効果の高いバフへ上書き
                     b.stopTimer();
@@ -91,8 +85,27 @@ public abstract class EntityStatus {
         return checkAdd;
     }
 
-    public Set<Buff> getBuffs() {
-        return Collections.unmodifiableSet(new HashSet<>(buffs));
+    public Set<IBuff> getBuffs() {
+        return Set.copyOf(buffs);
+    }
+
+    public Set<TimerBuff> getBuffTimers() {
+        return Set.copyOf(buffs);
+    }
+
+    public boolean addPassiveBuff(@NotNull final PassiveBuff passive) {
+        if (passiveBuffs.contains(passive)) {
+            return false;
+        }
+        return passiveBuffs.add(passive);
+    }
+
+    public Set<IBuff> getPassiveBuffs() {
+        return Set.copyOf(passiveBuffs);
+    }
+
+    public void resetPassiveBuff() {
+        passiveBuffs.clear();
     }
 
     public boolean hasAntiHeal() {

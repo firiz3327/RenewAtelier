@@ -1,26 +1,27 @@
 package net.firiz.renewatelier.entity.player.sql.load;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.IBuff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.buff.BuffValueType;
+import net.firiz.renewatelier.buff.TimerBuff;
 import net.firiz.renewatelier.sql.SQLManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class BuffLoader implements StatusLoader<List<Buff>> {
+class BuffLoader implements StatusLoader<List<IBuff>> {
 
     @NotNull
     @Override
-    public List<Buff> load(int id) {
+    public List<IBuff> load(int id) {
         final List<List<Object>> saveTypesObj = SQLManager.INSTANCE.select(
                 "buffs",
                 new String[]{"userId", "buffValueType", "level", "buffType", "duration", "limitDuration", "x"},
                 new Object[]{id}
         );
-        final List<Buff> saveTypes = new ObjectArrayList<>();
-        saveTypesObj.forEach(obj -> saveTypes.add(new Buff(
+        final List<IBuff> saveTypes = new ObjectArrayList<>();
+        saveTypesObj.forEach(obj -> saveTypes.add(new TimerBuff(
                 null,
                 BuffValueType.valueOf((String) obj.get(1)), // buffValueType
                 (int) obj.get(2), // level

@@ -2,18 +2,15 @@ package net.firiz.renewatelier.alchemy.kettle.box;
 
 import java.util.*;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.*;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.kettle.bonus.BonusItem;
 import net.firiz.renewatelier.alchemy.material.MaterialSize;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.GArray;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
-import net.firiz.renewatelier.utils.pair.Pair;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,8 +42,8 @@ public class KettleBox {
                 if (sel >= 0) {
                     usedBonus.set(sel, null);
                 }
-                final KettleBoxCircleData kbd = data.getRight();
-                final ItemStack item = data.getLeft().getItem();
+                final KettleBoxCircleData kbd = data.right();
+                final ItemStack item = data.left().getItem();
                 int[] size = AlchemyItemStatus.getSize(item);
                 if (kbd.getRotate() != 0) {
                     for (int j = 0; j < 4 - kbd.getRotate(); j++) {
@@ -68,22 +65,18 @@ public class KettleBox {
     }
 
     private int[] getRLUDTypeSize(int rlud, int[] size) {
-        switch (rlud) {
-            case 1:
-                return MaterialSize.rightLeftTurn(size);
-            case 2:
-                return MaterialSize.upDownTurn(size);
-            case 3:
-                return MaterialSize.upDownTurn(MaterialSize.rightLeftTurn(size));
-            default:
-                return size;
-        }
+        return switch (rlud) {
+            case 1 -> MaterialSize.rightLeftTurn(size);
+            case 2 -> MaterialSize.upDownTurn(size);
+            case 3 -> MaterialSize.upDownTurn(MaterialSize.rightLeftTurn(size));
+            default -> size;
+        };
     }
 
     public final void addItem(final ItemStack item, final Int2IntMap rslots, final int rotate, final int rlud) {
         for (int i = 0; i < items.length(); i++) {
             if (items.get(i) == null) {
-                items.set(i, new Pair<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
+                items.set(i, new ObjectObjectMutablePair<>(new BonusItem(item), new KettleBoxCircleData(rslots, rotate, rlud)));
                 break;
             }
         }
@@ -129,7 +122,7 @@ public class KettleBox {
 
     public final List<ItemStack> getItemStacks() {
         final List<ItemStack> result = new ObjectArrayList<>();
-        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.getLeft().getItem()));
+        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.left().getItem()));
         return result;
 
     }
@@ -140,13 +133,13 @@ public class KettleBox {
 
     public final List<BonusItem> getItems() {
         final List<BonusItem> result = new ObjectArrayList<>();
-        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.getLeft()));
+        items.stream().filter(Objects::nonNull).forEach(data -> result.add(data.left()));
         return result;
 
     }
 
     public final Int2IntMap getSlots() {
-        return items.get(items.length() - 1).getRight().getRSlots();
+        return items.get(items.length() - 1).right().getRSlots();
     }
 
     public final int getCSize() {
@@ -164,11 +157,10 @@ public class KettleBox {
         final Map<Pair<Integer, BonusItem>, Int2IntMap> overlap = getOverlap();
         overlap.keySet().forEach(layer -> {
             final Int2IntMap datas = overlap.get(layer);
-            datas.keySet().forEach(CollectionUtils.intConsumer(slot -> result.put(new Pair<>(slot, layer.getRight()), datas.get(slot))));
+            datas.keySet().forEach(CollectionUtils.intConsumer(slot -> result.put(new ObjectObjectImmutablePair<>(slot, layer.right()), datas.get(slot))));
         });
 
         return result;
-
     }
 
     public final List<BonusItem> getResultItems() {
@@ -177,7 +169,7 @@ public class KettleBox {
         // 配置
         // <layer, itemStack>, <slot, value>
         final Map<Pair<Integer, BonusItem>, Int2IntMap> overlap = getOverlap();
-        overlap.keySet().forEach(layer -> result.add(layer.getRight()));
+        overlap.keySet().forEach(layer -> result.add(layer.right()));
 
         return result;
     }
@@ -188,7 +180,7 @@ public class KettleBox {
             final Pair<BonusItem, KettleBoxCircleData> dd = items.get(i);
 
             if (dd != null) {
-                final Int2IntMap rslots = dd.getRight().getRSlots();
+                final Int2IntMap rslots = dd.right().getRSlots();
 
                 for (final Pair<Integer, BonusItem> layer : new Object2ObjectLinkedOpenHashMap<>(overlap).keySet()) {
                     boolean checkOver = false;
@@ -207,7 +199,7 @@ public class KettleBox {
                         overlap.remove(layer);
                     }
                 }
-                overlap.put(new Pair<>(i, dd.getLeft()), rslots);
+                overlap.put(new ObjectObjectImmutablePair<>(i, dd.left()), rslots);
             }
         }
         return overlap;

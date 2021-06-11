@@ -84,7 +84,7 @@ public class RecipeIdeaStatus {
         boolean result = false;
         if (material != null) {
             if (require.getType() == RequireMaterial.RequireType.CATEGORY) {
-                for (final Category category : material.getCategories()) {
+                for (final Category category : material.categories()) {
                     if (category == require.getCategory()) {
                         result = true;
                         break;

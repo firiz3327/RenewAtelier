@@ -8,13 +8,16 @@ import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.EngineManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
-import net.firiz.renewatelier.script.execution.ScriptManager;
+import net.firiz.renewatelier.server.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.inject.PlayerInjection;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author firiz
@@ -52,6 +55,7 @@ public enum PlayerSaveManager {
         loaders.add(new BuffLoader());
         loaders.add(new CharSettingLoader());
         loaders.add(new BagLoader());
+        loaders.add(new SkillLoader());
     }
 
     public void loadPlayers() {
@@ -66,6 +70,27 @@ public enum PlayerSaveManager {
 
     public Collection<Char> getChars() {
         return Collections.unmodifiableCollection(statusList.values());
+    }
+
+    @NotNull
+    public Optional<Char> searchChar(@Nullable final String name) {
+        if (name == null) {
+            return Optional.empty();
+        }
+        for (final Char character : statusList.values()) {
+            if (name.equals(character.getPlayer().getName())) {
+                return Optional.of(character);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Char getChar(final Entity player) {
+        if (player instanceof Player) {
+            return getChar(player.getUniqueId());
+        } else {
+            throw new IllegalArgumentException(player.getUniqueId() + " isn't player.");
+        }
     }
 
     public Char getChar(final UUID uuid) {
@@ -134,6 +159,7 @@ public enum PlayerSaveManager {
                 CommonUtils.cast(loaderValues.get(3)), // charSettingLoader
                 CommonUtils.cast(loaderValues.get(4)) // bagLoader
         );
+        character.getCharStats().init(character, CommonUtils.cast(loaderValues.get(5)));
         new Thread(() -> {
             final EngineManager engineManager = character.getEngineManager();
             engineManager.setJsEngine(script.createJsEngine());

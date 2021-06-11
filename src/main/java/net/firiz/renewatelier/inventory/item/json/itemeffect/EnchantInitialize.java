@@ -17,7 +17,7 @@ class EnchantInitialize implements ItemInitialize {
     public void accept(ItemStack itemStack) {
         final ItemMeta meta = itemStack.getItemMeta();
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(enchantEffect.getEnchant(), enchantEffect.getLevel(), true);
+        meta.addEnchant(enchantEffect.enchant(), enchantEffect.level(), true);
         itemStack.setItemMeta(meta);
     }
 }

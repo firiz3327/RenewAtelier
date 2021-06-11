@@ -1,10 +1,12 @@
 package net.firiz.renewatelier.inventory.shop;
 
+import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -43,28 +45,28 @@ public class ShopItem {
         final PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
         dataContainer.set(priceKey, PersistentDataType.INTEGER, price);
         if (coinType != null) {
-            dataContainer.set(coinTypeKey, PersistentDataType.STRING, coinType.getId());
+            dataContainer.set(coinTypeKey, PersistentDataType.STRING, coinType.id());
         }
-        final List<String> lore = meta.getLore() == null ? new ObjectArrayList<>() : meta.getLore();
-        lore.add("");
-        final String sb = ChatColor.GREEN +
-                (coinType == null ? "価格" : coinType.getName()) +
-                ChatColor.WHITE +
-                ": " +
-                price +
-                (coinType == null ? " $" : " 個");
-        lore.add(sb);
-        meta.setLore(lore);
+        final List<Component> lore = meta.lore() == null ? new ObjectArrayList<>() : meta.lore();
+        assert lore != null;
+        lore.add(Component.empty());
+        lore.add(
+                new Text().append((coinType == null ? Component.text("価格") : coinType.getName()).color(C.GREEN))
+                        .append(": " + price + (coinType == null ? " $" : " 個")).color(C.WHITE)
+        );
+        meta.lore(lore);
         clone.setItemMeta(meta);
 
         return clone;
     }
 
-    public static ImmutableNullablePair<Integer, String> loadShopItem(@NotNull final ItemStack item) {
-        return new ImmutableNullablePair<>(
-                item.getItemMeta().getPersistentDataContainer().get(priceKey, PersistentDataType.INTEGER),
-                item.getItemMeta().getPersistentDataContainer().get(coinTypeKey, PersistentDataType.STRING)
-        );
+    public static IntObjectImmutablePair<String> loadShopItem(@NotNull final ItemStack item) {
+        final PersistentDataContainer dataContainer = item.getItemMeta().getPersistentDataContainer();
+        if (dataContainer.has(priceKey, PersistentDataType.INTEGER) && dataContainer.has(coinTypeKey, PersistentDataType.STRING)) {
+            final int value = Objects.requireNonNull(dataContainer.get(priceKey, PersistentDataType.INTEGER));
+            return new IntObjectImmutablePair<>(value, dataContainer.get(coinTypeKey, PersistentDataType.STRING));
+        }
+        throw new IllegalArgumentException("item not has shop item key.");
     }
 
 }

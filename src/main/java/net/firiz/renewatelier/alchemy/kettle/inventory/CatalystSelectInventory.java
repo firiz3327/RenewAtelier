@@ -1,6 +1,9 @@
 package net.firiz.renewatelier.alchemy.kettle.inventory;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
@@ -10,7 +13,8 @@ import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.md_5.bungee.api.ChatColor;
+import net.firiz.renewatelier.version.LanguageItemUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -61,28 +65,34 @@ public final class CatalystSelectInventory implements BiParamInventory<AlchemyRe
         if (catalystItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
         } else {
-            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst();
+            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).catalyst();
         }
         catalyst.setInv(inv, false);
-        final List<String> lore = new ObjectArrayList<>();
+        final Lore lore = new Lore();
         lore.add("");
-        lore.add(ChatColor.GRAY + "使用可能カテゴリー");
+        lore.add("使用可能カテゴリー").color(C.GRAY);
         recipe.getCatalystCategories().forEach(ct -> {
             switch (ct.getType()) {
-                case MATERIAL:
-                    lore.add(ChatColor.WHITE + "- " + ct.getMaterial().getName());
-                    break;
-                case CATEGORY:
-                    lore.add(ChatColor.WHITE + "- " + ct.getCategory().getName());
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + ct.getType());
+                case MATERIAL -> lore.add("- " + ct.getMaterial().getName()).color(C.WHITE);
+                case CATEGORY -> lore.add("- " + ct.getCategory().getName()).color(C.WHITE);
+                default -> throw new IllegalStateException("Unexpected value: " + ct.getType());
             }
         });
+        final Component displayName;
+        if (catalystItem == null) {
+            displayName = Text.of("触媒を指定せずに作成");
+        } else {
+            if (catalystItem.getItemMeta().hasDisplayName()) {
+                displayName = catalystItem.getItemMeta().displayName();
+            } else {
+                displayName = Component.text(LanguageItemUtil.getLocalizeName(catalystItem));
+            }
+        }
+        assert displayName != null;
         inv.setItem(37, ItemUtils.ci(
                 catalystItem == null ? Material.BARRIER : catalystItem.getType(),
                 0,
-                ChatColor.GRAY + "現在の触媒： " + ChatColor.RESET + (catalystItem == null ? "触媒を指定せずに作成" : Objects.requireNonNull(catalystItem.getItemMeta()).getDisplayName()),
+                Text.of("現在の触媒： ", C.GRAY).append(displayName).color(C.WHITE),
                 lore
         ));
     }

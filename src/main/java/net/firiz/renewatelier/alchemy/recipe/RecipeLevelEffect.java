@@ -7,14 +7,7 @@ import java.util.Arrays;
 /**
  * @author firiz
  */
-public class RecipeLevelEffect {
-    private final RecipeLEType type;
-    private final int count;
-
-    public RecipeLevelEffect(RecipeLEType type, int count) {
-        this.type = type;
-        this.count = count;
-    }
+public record RecipeLevelEffect(RecipeLevelEffect.RecipeLEType type, int count) {
 
     public int getCount(RecipeLEType type) {
         if (type == this.type) {

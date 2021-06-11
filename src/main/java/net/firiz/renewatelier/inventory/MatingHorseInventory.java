@@ -11,10 +11,7 @@ import net.firiz.renewatelier.inventory.manager.NonParamInventory;
 import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -140,14 +137,14 @@ public class MatingHorseInventory implements NonParamInventory {
         return femaleSaddle.isFemale()
                 && femaleSaddle.getMatingCount() < GameConstants.HORSE_MATING_MAX_COUNT
                 && femaleSaddle.availableMatingTime()
-                && PlayerSaveManager.INSTANCE.getChar(player.getUniqueId()).gainMoney(-femaleSaddle.getTier().getRequireMoney());
+                && PlayerSaveManager.INSTANCE.getChar(player).gainMoney(-femaleSaddle.getTier().getRequireMoney());
     }
 
     private ItemStack availableMatingItem(@NotNull Player player, @NotNull final HorseSaddle femaleSaddle) {
         final boolean female = femaleSaddle.isFemale();
         final boolean matingCount = femaleSaddle.getMatingCount() < GameConstants.HORSE_MATING_MAX_COUNT;
         final boolean matingTime = femaleSaddle.availableMatingTime();
-        final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+        final Char character = PlayerSaveManager.INSTANCE.getChar(player);
         final int requireMoney = femaleSaddle.getTier().getRequireMoney();
         final boolean hasMoney = character.gainMoney(-requireMoney);
 

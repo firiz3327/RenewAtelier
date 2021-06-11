@@ -2,7 +2,7 @@ package net.firiz.renewatelier.entity;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.firiz.renewatelier.alchemy.material.Category;
-import net.firiz.renewatelier.buff.Buff;
+import net.firiz.renewatelier.buff.IBuff;
 import net.firiz.renewatelier.buff.BuffType;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.characteristic.CharacteristicType;
@@ -73,6 +73,7 @@ public enum CalcStatType {
         // バフ計算
         if (buff) {
             getBuff(charStats.getBuffs(), defStatus, status);
+            getBuff(charStats.getPassiveBuffs(), defStatus, status);
         }
 
         return status.intValue();
@@ -90,14 +91,15 @@ public enum CalcStatType {
         // バフ計算
         if (buff && this != MP) {
             getBuff(monsterStats.getBuffs(), defStatus, status);
+            getBuff(monsterStats.getPassiveBuffs(), defStatus, status);
         }
 
         return status.intValue();
     }
 
-    private void getBuff(@NotNull final Collection<Buff> buffs, final int defStatus, @NotNull final AtomicInteger status) {
+    private void getBuff(@NotNull final Collection<IBuff> buffs, final int defStatus, @NotNull final AtomicInteger status) {
         final BuffType[] checkBuffTypes = buffTypes.get(this);
-        for (final Buff b : buffs) {
+        for (final IBuff b : buffs) {
             if (b.getType() == checkBuffTypes[0]) { // percent
                 status.addAndGet((int) (defStatus * (b.getX() * 0.01)));
             } else if (b.getType() == checkBuffTypes[1]) { // fixed
@@ -121,7 +123,7 @@ public enum CalcStatType {
             final PlayerInventory inv = charStats.getPlayer().getInventory();
             if (weapon) {
                 final AlchemyItemStatus itemStatus = AlchemyItemStatus.load(item);
-                if (itemStatus != null && itemStatus.getAlchemyMaterial().getCategories().contains(Category.WEAPON)) {
+                if (itemStatus != null && itemStatus.getAlchemyMaterial().categories().contains(Category.WEAPON)) {
                     getStats(charStats, defStatus, status, item);
                 }
             } else {

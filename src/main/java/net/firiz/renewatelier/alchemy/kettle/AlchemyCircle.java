@@ -1,8 +1,7 @@
 package net.firiz.renewatelier.alchemy.kettle;
 
-import net.firiz.renewatelier.alchemy.material.AlchemyAttribute;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -108,64 +107,33 @@ public enum AlchemyCircle {
         return null;
     }
 
-    public static ItemStack getCircle(final String value, final ItemStack sitem) {
-        return getCircle(colorCint(value), sitem);
-    }
-
-    public static ItemStack getCircle(final int value, final ItemStack sitem) {
-        if (ItemUtils.getType(sitem) == Material.DIAMOND_AXE) {
-            final AlchemyCircle ai = searchData(ItemUtils.getCustomModelData(sitem));
-            if (ai != null && !String.valueOf(ai.value).substring(1, 2).equals("0")) {
-                final int v2 = Integer.parseInt(String.valueOf(ai.value).substring(0, 1));
-                return i(value, v2, sitem);
+    public static ItemStack getCircle(final int value, final ItemStack sItem) {
+        if (ItemUtils.getType(sItem) == Material.DIAMOND_AXE) {
+            final AlchemyCircle circle = searchData(ItemUtils.getCustomModelData(sItem));
+            if (circle != null && String.valueOf(circle.value).charAt(1) != '0') {
+                return i(value, Integer.parseInt(String.valueOf(circle.value).substring(0, 1)), sItem);
             }
         }
-        return i(0, value, sitem);
+        return i(0, value, sItem);
     }
 
-    private static ItemStack i(final int v1, final int v2, final ItemStack sitem) {
+    private static ItemStack i(final int v1, final int v2, final ItemStack sItem) {
         final ItemStack item = new ItemStack(Material.DIAMOND_AXE, 1);
         final int cmd = AlchemyCircle.searchValue(Integer.parseInt(v2 + "" + v1)).data;
         final ItemMeta meta = item.getItemMeta();
         ItemUtils.setCustomModelData(meta, cmd);
-        if (sitem != null) {
-            final ItemMeta smeta = sitem.getItemMeta();
-            meta.setDisplayName(smeta.getDisplayName());
-            meta.setLore(smeta.getLore());
+        if (sItem != null) {
+            final ItemMeta changeMeta = sItem.getItemMeta();
+            meta.displayName(changeMeta.displayName());
+            meta.lore(changeMeta.lore());
         } else {
-            meta.setDisplayName("-");
+            meta.displayName(Component.text("-"));
         }
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);
         return item;
-    }
-
-    public static int colorCint(String str) {
-        if (str == null) {
-            return 0;
-        }
-
-        if (!str.contains("§")) {
-            str = "§".concat(str);
-        }
-        if (str.equals(ChatColor.GRAY.toString())) {
-            return 0;
-        } else if (str.equals(ChatColor.WHITE.toString())) {
-            return 1;
-        } else if (str.equals(AlchemyAttribute.RED.getColor())) {
-            return 2;
-        } else if (str.equals(AlchemyAttribute.BLUE.getColor())) {
-            return 3;
-        } else if (str.equals(AlchemyAttribute.GREEN.getColor())) {
-            return 4;
-        } else if (str.equals(AlchemyAttribute.YELLOW.getColor())) {
-            return 5;
-        } else if (str.equals(AlchemyAttribute.PURPLE.getColor())) {
-            return 6;
-        }
-        return 0;
     }
 
 }

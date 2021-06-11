@@ -3,6 +3,7 @@ package net.firiz.renewatelier.alchemy.recipe;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.Category;
 import net.firiz.renewatelier.inventory.item.json.itemeffect.AlchemyItemEffect;
+import net.kyori.adventure.text.Component;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,14 +19,14 @@ public class StarEffect {
     }
 
     private final StarEffectType type;
-    private final String name;
+    private final Component name;
     private final AlchemyItemEffect effect;
     private final AlchemyIngredients ingredient;
     private final Category category;
 
     public StarEffect(final AlchemyItemEffect effect) {
         this.type = StarEffectType.ITEM_EFFECT;
-        this.name = effect.getName();
+        this.name = effect.getNameComponent();
         this.effect = effect;
         this.ingredient = null;
         this.category = null;
@@ -33,7 +34,7 @@ public class StarEffect {
 
     public StarEffect(final AlchemyIngredients ingredient) {
         this.type = StarEffectType.INGREDIENT;
-        this.name = ingredient.getName();
+        this.name = ingredient.getNameComponent();
         this.effect = null;
         this.ingredient = ingredient;
         this.category = null;
@@ -41,7 +42,7 @@ public class StarEffect {
 
     public StarEffect(final Category category) {
         this.type = StarEffectType.CATEGORY;
-        this.name = category.getName();
+        this.name = category.getNameComponent();
         this.effect = null;
         this.ingredient = null;
         this.category = category;
@@ -51,7 +52,7 @@ public class StarEffect {
         return type;
     }
 
-    public String getName() {
+    public Component getName() {
         return name;
     }
 
@@ -67,23 +68,10 @@ public class StarEffect {
         return category;
     }
 
-    public static class EnchantEffect {
-        @NotNull
-        private final Enchantment enchant;
-        private final int level;
-
+    public record EnchantEffect(@NotNull Enchantment enchant, int level) {
         public EnchantEffect(@NotNull final Enchantment enchant, final int level) {
             this.enchant = enchant;
             this.level = level;
-        }
-
-        @NotNull
-        public Enchantment getEnchant() {
-            return enchant;
-        }
-
-        public int getLevel() {
-            return level;
         }
     }
 

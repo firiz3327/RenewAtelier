@@ -1,9 +1,13 @@
 package net.firiz.renewatelier.alchemy.kettle.inventory;
 
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.alchemy.catalyst.Catalyst;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonus;
 import net.firiz.renewatelier.alchemy.catalyst.CatalystBonusData;
@@ -28,8 +32,7 @@ import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
-import net.firiz.renewatelier.utils.pair.Pair;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -96,38 +99,33 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         }
 
         // 回転の状態Lore
-        final List<String> rotateLore = new ObjectArrayList<>();
-        rotateLore.add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[0]);
-        rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[0][0]);
-        rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[0][1]);
-        playerInv.setItem(10, ItemUtils.ci(Material.BARRIER, 0, ChatColor.RESET + "回転", rotateLore));
+        final Lore rotateLore = new Lore();
+        rotateLore.add("現在： " + GameConstants.ROTATION_STR[0]).color(C.GRAY);
+        rotateLore.add(GameConstants.TURN_STR[0][0]).color(C.GRAY);
+        rotateLore.add(GameConstants.TURN_STR[0][1]).color(C.GRAY);
+        playerInv.setItem(10, ItemUtils.ci(Material.BARRIER, 0, Text.itemName("回転", C.WHITE), rotateLore));
 
         // 設定アイテムの作成
         inv.setItem(1, createSettingItem());
 
         final int[] ss = new int[]{0, 0, 0, 0, 1, 0, 0, 0, 0};
         int l = 0;
-        StringBuilder sb = new StringBuilder();
-        final List<String> lore = new ObjectArrayList<>();
+        final Lore lore = new Lore();
         for (final int n : ss) {
             l++;
-            sb.append(String.valueOf(n)
-                    .replace("0", ChatColor.GRAY + GameConstants.W_W)
-                    .replace("1", ChatColor.WHITE + GameConstants.W_B)
-            );
+            lore.add(n == 0 ? Text.of(GameConstants.W_W, C.GRAY) : Text.of(GameConstants.W_B, C.WHITE));
             if (l % 3 == 0) {
-                lore.add(sb.toString());
-                sb = new StringBuilder();
+                lore.nextLine();
             }
         }
-        final ItemStack centerDisplay = ItemUtils.ci(Material.BARRIER, 0, ChatColor.WHITE + "中心点", lore);
+        final ItemStack centerDisplay = ItemUtils.ci(Material.BARRIER, 0, Text.itemName("中心点", C.WHITE), lore);
         player.getInventory().setItem(19, centerDisplay);
         setResultSlot(inv, player, true);
         player.openInventory(inv);
     }
 
     private ItemStack createSettingItem() {
-        final ItemStack item = ItemUtils.ci(Material.BARRIER, 0, "", null);
+        final ItemStack item = ItemUtils.ci(Material.BARRIER, 0, Component.empty(), null);
         final ItemMeta meta = item.getItemMeta();
         CommonUtils.setSettingInt(meta, centerKey, 4);
         CommonUtils.setSettingInt(meta, turn1Key, 0);
@@ -183,7 +181,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         final KettleCharacteristicManager kettleCharacteristicManager = kettleUserData.getKettleCharacteristicManager();
         final AlchemyRecipe recipe = kettleUserData.getRecipe();
         final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
-        final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe.getId()));
+        final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe));
 
         setKettleItems(inv, player, recipe);
 
@@ -200,7 +198,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         // 触媒追加効果 評価
         // 確認・設定
         final ItemStack catalystItem = kettleUserData.getCatalystItem();
-        final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
+        final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).catalyst() : Catalyst.getDefaultCatalyst();
         final List<CatalystBonus> catalystBonuses = catalyst.getBonus();
         final int size = catalystBonuses.get(0).getCS().length;
         final int defSlot = (size == 36 || size == 25 ? 3 : 13);
@@ -326,7 +324,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
             final AlchemyMaterial result = ((AlchemyMaterialRecipeResult) resultData).getResult();
 
             // カテゴリ 評価 - カテゴリ追加の触媒効果などを実装後
-            final List<Category> categories = new ObjectArrayList<>(result.getCategories());
+            final List<Category> categories = new ObjectArrayList<>(result.categories());
             // 錬金成分 評価
             final List<AlchemyIngredients> ingredients = recipe.getDefaultIngredients();
             for (final RecipeEffect effect : recipe.getEffects()) {
@@ -365,17 +363,17 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                 if (itemSize >= 9) {
                     resultSize = MaterialSize.S9_1.getSize(0);
                 } else {
-                    resultSize = result.getSizeTemplate().getSize(itemSize - 2);
+                    resultSize = result.sizeTemplate().getSize(itemSize - 2);
                 }
             }
             resultItem = AlchemyItemStatus.getItem(
                     result,
                     ingredients, // 錬金属性 書き換え
-                    result.getMaterial().toItemStack(recipe.getAmount() + add_amount + bonusAmount),
+                    result.material().toItemStack(recipe.getAmount() + add_amount + bonusAmount),
                     allQuality, // 品質 書き換え
                     resultSize, // サイズ 書き換え
                     characteristics, // 特性 書き換え
-                    result.getCategories().equals(categories) ? new ObjectArrayList<>() : categories, // カテゴリ 書き換え
+                    result.categories().equals(categories) ? new ObjectArrayList<>() : categories, // カテゴリ 書き換え
                     true
             );
         } else if (resultData instanceof MinecraftMaterialRecipeResult) { // 基本想定しない
@@ -388,64 +386,64 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
 
         if (resultItem != null) {
             final ItemMeta meta = resultItem.getItemMeta();
-            final List<String> lore = meta.getLore();
+            final Lore lore = new Lore(meta.lore());
 
             // ボーナス項目
-            final StringBuilder sbBonus = new StringBuilder();
+            final Text textBonus = new Text();
             for (final AlchemyAttribute aa : AlchemyAttribute.values()) {
-                sbBonus.append(aa.getColor()).append(bonusManager.getBonus(aa)).append("% ");
+                textBonus.append(bonusManager.getBonus(aa) + "% ").color(aa.getColor());
             }
-            lore.add(2, sbBonus.toString());
+            lore.add(2, textBonus);
             lore.add(3, bonusManager.getBar());
 
             // 効果項目
-            lore.add(4, ChatColor.GRAY + "効果:");
-            int loreslot = 5;
+            lore.add(4, Text.of("効果:", C.GRAY));
+            int loreSlot = 5;
             if (recipe.getEffects().isEmpty()) {
-                lore.add(loreslot, ChatColor.WHITE + "なし");
-                loreslot++;
+                lore.add(loreSlot, Text.of("なし", C.WHITE));
+                loreSlot++;
             } else {
                 for (final RecipeEffect effect : recipe.getEffects()) {
-                    final String name = effect.getName(kettleUserData);
-                    lore.add(loreslot, effect.getAttribute().getColor().concat("・") + (name == null ? ChatColor.WHITE + "なし" : name));
-                    lore.add(loreslot + 1, "  ".concat(effect.getStar(kettleUserData)));
-                    loreslot += 2;
+                    final Component name = effect.getName(kettleUserData);
+                    lore.add(loreSlot, new Text("・").color(C.WHITE).append(name == null ? Component.text("なし").color(C.WHITE) : name));
+                    lore.add(loreSlot + 1, new Text("  ").append(effect.getStar(kettleUserData)));
+                    loreSlot += 2;
                 }
             }
 
             // 触媒効果項目
-            lore.add(loreslot, ChatColor.GRAY + "触媒効果:");
+            lore.add(loreSlot, "触媒効果:").color(C.GRAY);
             if (catalystBonusesL != null && !catalystBonusesL.isEmpty()) {
                 for (final CatalystBonus bonus : catalystBonusesL) {
-                    loreslot++;
-                    lore.add(loreslot, ChatColor.GREEN + "- ".concat(bonus.getData().getName()));
+                    loreSlot++;
+                    lore.add(loreSlot, "- ".concat(bonus.getData().getName())).color(C.GREEN);
                 }
             } else {
-                loreslot++;
-                lore.add(loreslot, ChatColor.WHITE + "なし");
+                loreSlot++;
+                lore.add(loreSlot, "なし").color(C.WHITE);
             }
 
             // 特性項目
             final int inheriting = recipeEffects.getInt(RecipeLevelEffect.RecipeLEType.ADD_INHERITING);
-            lore.add(lore.size() - 1, ChatColor.GRAY + "特性:");
+            lore.add(lore.size() - 1, "特性:").color(C.GRAY);
             final int cSlot = Math.min(3, inheriting + bonusInheriting);
             if (cSlot == 0) {
-                lore.add(lore.size() - 1, ChatColor.WHITE + "特性引継ぎスロットなし");
+                lore.add(lore.size() - 1, "特性引継ぎスロットなし").color(C.WHITE);
             } else {
                 final List<Characteristic> cs = kettleCharacteristicManager.getActiveCharacteristics();
                 int count = 0;
                 if (cs != null) {
                     for (final Characteristic c : cs) {
-                        lore.add(lore.size() - 1, ChatColor.WHITE + "- " + c.getName());
+                        lore.add(lore.size() - 1, "- " + c.getName()).color(C.WHITE);
                         count++;
                     }
                 }
                 for (int i = count; i < cSlot; i++) {
-                    lore.add(lore.size() - 1, ChatColor.WHITE + "- なし");
+                    lore.add(lore.size() - 1, "- なし").color(C.WHITE);
                 }
             }
 
-            meta.setLore(lore);
+            meta.lore(lore);
             resultItem.setItemMeta(meta);
             inv.setItem(46, resultItem);
             if (resetCharacteristic) {
@@ -463,7 +461,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         if (catalystItem == null) {
             catalyst = Catalyst.getDefaultCatalyst();
         } else {
-            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst();
+            catalyst = AlchemyItemStatus.getMaterialNonNull(catalystItem).catalyst();
         }
         catalyst.setInv(inv, true);
 
@@ -494,7 +492,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 slotItem = ignores.contains(b) ? null : ItemUtils.ci(
                                         Material.DIAMOND_AXE,
                                         cmd,
-                                        ChatColor.RESET + b.getData().getName(),
+                                        b.getData().getName(),
                                         b.getData().getDesc()
                                 );
                                 break getSlotItem;
@@ -509,9 +507,9 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
 
             final Object2IntMap<Pair<Integer, BonusItem>> resultCS = box.getResultCS();
             resultCS.keySet().forEach(slotData -> {
-                final String color = AlchemyIngredients.getMaxTypes(slotData.getRight().getItem()).getRight()[0].getColor();
-                final ItemStack item = AlchemyCircle.getCircle(color, inv.getItem(slotData.getLeft()));
-                inv.setItem(slotData.getLeft(), item);
+                final AlchemyAttribute attribute = AlchemyIngredients.getMaxTypes(slotData.right().getItem()).right()[0];
+                final ItemStack item = AlchemyCircle.getCircle(attribute.getValue(), inv.getItem(slotData.left()));
+                inv.setItem(slotData.left(), item);
             });
         }
     }
@@ -524,7 +522,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         if (characteristics == null || !(resultData instanceof AlchemyMaterialRecipeResult)) {
             return;
         }
-        final AlchemyMaterialCategory materialCategory = ((AlchemyMaterial) resultData.getResult()).getMaterialCategory();
+        final AlchemyMaterialCategory materialCategory = ((AlchemyMaterial) resultData.getResult()).materialCategory();
         final Set<Characteristic> combinedCharacteristics = Characteristic.combine(materialCategory, characteristics);
         final int page = getCharacteristicPage(inv);
         final int nextPage = Math.max(1, page + move);
@@ -562,12 +560,12 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
             int slot = 1;
             int count = 0;
             for (final Characteristic c : lists.get(check ? nextPage : page)) {
-                final List<String> bookLore = new ObjectArrayList<>();
+                final Lore bookLore = new Lore();
                 final boolean on = kettleCharacteristicManager.hasActiveCharacteristic(c);
-                bookLore.add(ChatColor.GRAY + (on ? "削除" : "追加"));
-                bookLore.add(ChatColor.GRAY + c.getDesc());
+                bookLore.add((on ? "削除" : "追加")).color(C.GRAY);
+                bookLore.add(c.getDesc()).color(C.GRAY);
 
-                final ItemStack item = ItemUtils.ci(on ? Material.ENCHANTED_BOOK : Material.BOOK, 0, ChatColor.RESET + c.getName(), bookLore);
+                final ItemStack item = ItemUtils.ci(on ? Material.ENCHANTED_BOOK : Material.BOOK, 0, Text.itemName(c.getName(), C.WHITE), bookLore);
                 ItemUtils.setSetting(item, characteristicKey, c.getId());
                 inv.setItem(startSlot + slot, item);
 
@@ -589,11 +587,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
         }
         final int raw = e.getRawSlot();
         switch (e.getAction()) {
-            case DROP_ALL_CURSOR:
-            case DROP_ONE_CURSOR:
-            case DROP_ALL_SLOT:
-            case DROP_ONE_SLOT:
-            case HOTBAR_SWAP:
+            case DROP_ALL_CURSOR, DROP_ONE_CURSOR, DROP_ALL_SLOT, DROP_ONE_SLOT, HOTBAR_SWAP:
                 e.setCancelled(true);
                 return;
             case SWAP_WITH_CURSOR:
@@ -659,7 +653,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 resultItem = AlchemyItemStatus.getItem(
                                         result,
                                         ingredients, // 錬金属性 書き換え
-                                        result.getMaterial().toItemStack(resultSlotItem.getAmount()),
+                                        result.material().toItemStack(resultSlotItem.getAmount()),
                                         quality, // 品質 書き換え
                                         itemStatus.getSize(), // サイズ 書き換え
                                         activeEffects, // 発現効果
@@ -682,7 +676,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 player.closeInventory(); // コンテンツを更新してすぐにインベントリを閉じると一部のアイテムが残るバグがある？？
                                 final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
                                 status.increaseIdea(recipe);
-                                status.addRecipeExp(false, recipe, status.getRecipeStatus(recipe.getId()).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
+                                status.addRecipeExp(false, recipe, status.getRecipeStatus(recipe).getLevel() != 0 ? GameConstants.RECIPE_EXP : 0);
                                 status.getCharStats().addAlchemyExp(Math.max(1, recipe.getReqAlchemyLevel() / 2));
                                 new AlchemyResultDrop(loc, resultItem).start();
                             }
@@ -692,9 +686,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                 break;
             case CONTAINER:
                 switch (raw) {
-                    case 54:
-                    case 55:
-                    case 56: {
+                    case 54, 55, 56 -> {
                         //<editor-fold defaultstate="collapsed" desc="左右反転・上下反転・回転">
                         CommonUtils.log("左右反転・上下反転・回転");
                         e.setCancelled(true);
@@ -716,11 +708,11 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                         }
                         setTurn1(inv, turn3);
                         setTurn2(inv, turn4);
-                        final List<String> rotateLore = new ObjectArrayList<>();
-                        rotateLore.add(ChatColor.GRAY + "現在： " + GameConstants.ROTATION_STR[turn3]);
-                        rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[turn4][0]);
-                        rotateLore.add(ChatColor.GRAY + GameConstants.TURN_STR[turn4][1]);
-                        playerInv.setItem(10, ItemUtils.ci(Material.BARRIER, 0, ChatColor.RESET + "回転", rotateLore));
+                        final Lore rotateLore = new Lore();
+                        rotateLore.add("現在： " + GameConstants.ROTATION_STR[turn3]).color(C.GRAY);
+                        rotateLore.add(GameConstants.TURN_STR[turn4][0]).color(C.GRAY);
+                        rotateLore.add(GameConstants.TURN_STR[turn4][1]).color(C.GRAY);
+                        playerInv.setItem(10, ItemUtils.ci(Material.BARRIER, 0, Text.itemName("回転", C.WHITE), rotateLore));
 
                         for (int i = 1; i <= 4; i++) {
                             for (int j = 3; j < 9; j++) {
@@ -740,13 +732,9 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 }
                             }
                         }
-
-                        break;
                         //</editor-fold>
                     }
-                    case 63:
-                    case 64:
-                    case 65: {
+                    case 63, 64, 65 -> {
                         //<editor-fold defaultstate="collapsed" desc="中心点移動">
                         CommonUtils.log("中心点移動");
                         e.setCancelled(true);
@@ -763,28 +751,20 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                         final int[] ss = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
                         ss[nextCenter] = 1;
                         int l = 0;
-                        StringBuilder sb = new StringBuilder();
-                        final List<String> lore = new ObjectArrayList<>();
+                        final Lore lore = new Lore();
                         for (int n : ss) {
                             l++;
-                            sb.append(String.valueOf(n)
-                                    .replace("0", ChatColor.GRAY + GameConstants.W_W)
-                                    .replace("1", ChatColor.WHITE + GameConstants.W_B)
-                            );
+                            lore.add(n == 0 ? Component.text(GameConstants.W_W).color(C.GRAY) : Component.text(GameConstants.W_B).color(C.WHITE));
                             if (l % 3 == 0) {
-                                lore.add(sb.toString());
-                                sb = new StringBuilder();
+                                lore.nextLine();
                             }
                         }
                         final ItemMeta centerDisplay = player.getInventory().getItem(19).getItemMeta();
-                        centerDisplay.setLore(lore);
+                        centerDisplay.lore(lore);
                         player.getInventory().getItem(19).setItemMeta(centerDisplay);
-                        break;
                         //</editor-fold>
                     }
-                    case 72:
-                    case 73:
-                    case 74: {
+                    case 72, 73, 74 -> {
                         //<editor-fold defaultstate="collapsed" desc="戻す">
                         CommonUtils.log("戻す");
                         e.setCancelled(true);
@@ -801,8 +781,8 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 for (int i = 0; i < 3; i++) {
                                     final boolean checkInv = checkInv(slot, playerInventory);
                                     if (checkInv) {
-                                        assert backData.getLeft() != null;
-                                        playerInventory.setItem(slot.intValue(), backData.getLeft().getItem());
+                                        assert backData.left() != null;
+                                        playerInventory.setItem(slot.intValue(), backData.left().getItem());
                                         check = true;
                                         break;
                                     }
@@ -811,7 +791,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                 if (!check) {
                                     for (int i = 3; i < 9; i++) { // 3~8 slots
                                         if (playerInventory.getItem(i) == null) {
-                                            playerInventory.setItem(i, backData.getLeft().getItem());
+                                            playerInventory.setItem(i, backData.left().getItem());
                                             break;
                                         }
                                     }
@@ -823,10 +803,9 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                             }
                         }
                         player.playSound(player.getEyeLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.1f, 1);
-                        break;
                         //</editor-fold>
                     }
-                    case 11: {
+                    case 11 -> {
                         //<editor-fold defaultstate="collapsed" desc="特性一覧 ページ移動-上">
                         e.setCancelled(true);
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
@@ -835,16 +814,15 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                         break;
                         //</editor-fold>
                     }
-                    case 29: {
+                    case 29 -> {
                         //<editor-fold defaultstate="collapsed" desc="特性一覧 ページ移動-下">
                         e.setCancelled(true);
                         player.playSound(player.getEyeLocation(), Sound.UI_BUTTON_CLICK, 0.1f, 1);
                         setCharacteristicPage(inv, player, 1);
                         CommonUtils.log("特性一覧 ページ移動-下");
-                        break;
                         //</editor-fold>
                     }
-                    default: {
+                    default -> {
                         //<editor-fold defaultstate="collapsed" desc="default">
                         if (raw < 54) {
                             if ((raw >= 9 && raw <= 10)
@@ -857,7 +835,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     CommonUtils.log("特性 追加・削除");
                                     final AlchemyRecipe recipe = kettleUserData.getRecipe();
                                     final Char status = PlayerSaveManager.INSTANCE.getChar(uuid);
-                                    final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe.getId()));
+                                    final RecipeStatus recipeStatus = Objects.requireNonNull(status.getRecipeStatus(recipe));
                                     final List<RecipeLevelEffect> effects = recipe.getLevels().get(recipeStatus.getLevel());
                                     if (effects != null) {
                                         final Characteristic c = Characteristic.getCharacteristic(ItemUtils.getSetting(item, characteristicKey));
@@ -910,7 +888,7 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                     };
 
                                     final ItemStack catalystItem = kettleUserData.getCatalystItem();
-                                    final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).getCatalyst() : Catalyst.getDefaultCatalyst();
+                                    final Catalyst catalyst = catalystItem != null ? AlchemyItemStatus.getMaterialNonNull(catalystItem).catalyst() : Catalyst.getDefaultCatalyst();
                                     final int cSize = catalyst.getBonus().get(0).getCS().length;
                                     Int2IntMap rslots = new Int2IntOpenHashMap();
                                     for (int i = 0; i < size.length; i++) {
@@ -961,10 +939,10 @@ public class AlchemyKettleInventory implements BiParamInventory<AlchemyRecipe, I
                                         final ItemMeta setting = inv.getItem(1).getItemMeta();
                                         final ItemStack clone = cursor.clone();
                                         clone.setAmount(1);
-                                        final Pair<Integer, AlchemyAttribute[]> allLevel = AlchemyIngredients.getMaxTypes(clone);
+                                        final IntObjectMutablePair<AlchemyAttribute[]> allLevel = AlchemyIngredients.getMaxTypes(clone);
                                         bonusManager.addBar(
-                                                allLevel.getLeft(),
-                                                allLevel.getRight()
+                                                allLevel.leftInt(),
+                                                allLevel.right()
                                         );
                                         cursor.setAmount(cursor.getAmount() - 1);
                                         final int turn1 = getTurn1(inv);

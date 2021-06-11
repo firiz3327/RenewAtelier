@@ -1,9 +1,12 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.utils.java.CObjects;
-import net.firiz.renewatelier.utils.pair.ImmutableNullablePair;
+import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
+import net.firiz.renewatelier.entity.player.stats.CharStats;
+import net.firiz.renewatelier.skills.character.PlayerSkillManager;
+import net.firiz.renewatelier.skills.character.skill.EnumPlayerSkill;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
@@ -16,7 +19,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jetbrains.annotations.NotNull;
@@ -55,11 +57,19 @@ public enum ArrowManager {
         return interactCrossbow2(player).result;
     }
 
+    public void interactBow(@NotNull Player player) {
+        final ItemStack bow = player.getInventory().getItemInMainHand();
+        if (EnumPlayerSkill.Weapon.STAFF.similarItem(bow) || (player.isSneaking() && EnumPlayerSkill.Weapon.BOW.similarItem(bow))) {
+            final CharStats stats = PlayerSaveManager.INSTANCE.getChar(player).getCharStats();
+            stats.getSkillManager().fireSkill(stats.getWeapon());
+        }
+    }
+
     private InteractCrossbowResult interactCrossbow2(@NotNull Player player) {
-        final ImmutableNullablePair<ItemStack, ItemStack> arrows = getConsumeArrow(player);
-        final ItemStack consumeArrow = arrows.getLeft();
+        final ObjectObjectImmutablePair<ItemStack, ItemStack> arrows = getConsumeArrow(player);
+        final ItemStack consumeArrow = arrows.left();
         if (consumeArrow != null) {
-            final ItemStack nextConsumeArrow = arrows.getRight();
+            final ItemStack nextConsumeArrow = arrows.right();
             if (CustomArrow.isFound(consumeArrow) && nextConsumeArrow == null) {
                 player.sendMessage(STR_NO_AVAILABLE_ARROW);
             } else {
@@ -83,9 +93,15 @@ public enum ArrowManager {
         ItemStack consumeArrow = null;
         ItemStack nextConsumeArrow = null;
         if (entity instanceof Player) {
-            final ImmutableNullablePair<ItemStack, ItemStack> arrows = getConsumeArrow((Player) entity);
-            consumeArrow = arrows.getLeft();
-            nextConsumeArrow = arrows.getRight();
+            final CharStats stats = PlayerSaveManager.INSTANCE.getChar(entity).getCharStats();
+            final PlayerSkillManager skillManager = stats.getSkillManager();
+            if (EnumPlayerSkill.Weapon.STAFF.similarItem(bow) || (skillManager.getNowSkill() != null && EnumPlayerSkill.Weapon.BOW.similarItem(bow))) {
+                skillManager.shoot(baseArrow);
+                return true;
+            }
+            final ObjectObjectImmutablePair<ItemStack, ItemStack> arrows = getConsumeArrow((Player) entity);
+            consumeArrow = arrows.left();
+            nextConsumeArrow = arrows.right();
         }
 
         if (consumeArrow != null) { // always entity is player
@@ -119,8 +135,8 @@ public enum ArrowManager {
         return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, false, force, isCrossbow, true).getAtelierArrowEntity();
     }
 
-    private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isSkill) {
-        return shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, isConsumeArrow, force, false, isSkill);
+    private void shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isSkill) {
+        shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, isConsumeArrow, force, false, isSkill);
     }
 
     private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isCrossbow, final boolean isSkill) {
@@ -129,26 +145,20 @@ public enum ArrowManager {
 
         IAtelierArrow cloneArrow;
         switch (consumeArrow.getType()) {
-            case ARROW:
-                cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
-                break;
-            case TIPPED_ARROW:
+            case ARROW -> cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
+            case TIPPED_ARROW -> {
                 cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
                 final PotionMeta potionMeta = (PotionMeta) consumeArrow.getItemMeta();
                 assert potionMeta != null;
-
                 final NMSAtelierTippedArrow arrow = (NMSAtelierTippedArrow) cloneArrow;
                 arrow.setBasePotionData(potionMeta.getBasePotionData());
                 potionMeta.getCustomEffects().forEach(potionEffect -> arrow.addCustomEffect(potionEffect, true));
                 if (potionMeta.hasColor() && potionMeta.getColor() != null) {
                     arrow.setColor(potionMeta.getColor());
                 }
-                break;
-            case SPECTRAL_ARROW:
-                cloneArrow = new NMSAtelierSpectralArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
-                break;
-            default:
-                throw new IllegalStateException("consumeArrow is not arrow.");
+            }
+            case SPECTRAL_ARROW -> cloneArrow = new NMSAtelierSpectralArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
+            default -> throw new IllegalStateException("consumeArrow is not arrow.");
         }
         cloneArrow.setShooter(baseArrow.getShooter());
         cloneArrow.setFireTicks(baseArrow.getFireTicks());
@@ -194,7 +204,7 @@ public enum ArrowManager {
         return false;
     }
 
-    private ImmutableNullablePair<ItemStack, ItemStack> getConsumeArrow(@NotNull Player player) {
+    private ObjectObjectImmutablePair<ItemStack, ItemStack> getConsumeArrow(@NotNull Player player) {
         ItemStack consumeArrow = null;
         ItemStack nextConsumeArrow = null;
         final PlayerInventory playerInventory = player.getInventory();
@@ -212,17 +222,35 @@ public enum ArrowManager {
                 }
             }
         }
-        return new ImmutableNullablePair<>(consumeArrow, nextConsumeArrow);
+        return new ObjectObjectImmutablePair<>(consumeArrow, nextConsumeArrow);
     }
 
-    private static class InteractCrossbowResult {
-        final ImmutableNullablePair<ItemStack, ItemStack> arrows;
-        final boolean result;
+    private record InteractCrossbowResult(
+            ObjectObjectImmutablePair<ItemStack, ItemStack> arrows,
+            boolean result
+    ) {
 
-        public InteractCrossbowResult(ImmutableNullablePair<ItemStack, ItemStack> arrows, boolean result) {
-            this.arrows = arrows;
-            this.result = result;
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (InteractCrossbowResult) obj;
+            return Objects.equals(this.arrows, that.arrows) &&
+                    this.result == that.result;
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(arrows, result);
+        }
+
+        @Override
+        public String toString() {
+            return "InteractCrossbowResult[" +
+                    "arrows=" + arrows + ", " +
+                    "result=" + result + ']';
+        }
+
     }
 
 }

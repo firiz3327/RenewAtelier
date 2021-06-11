@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.inventory.item.json;
 
 import com.google.gson.annotations.Expose;
-import net.firiz.renewatelier.json.JsonFactory;
+import net.firiz.renewatelier.server.json.JsonFactory;
 
 import java.util.List;
 

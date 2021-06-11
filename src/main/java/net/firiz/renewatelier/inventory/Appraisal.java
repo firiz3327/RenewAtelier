@@ -1,12 +1,14 @@
 package net.firiz.renewatelier.inventory;
 
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.inventory.manager.NonParamInventory;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -18,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
 
 public final class Appraisal implements NonParamInventory {
 
-    private static final String TITLE = "鑑定";
+    private static final Component TITLE = Component.text("鑑定");
 
     @Override
     public boolean check(@NotNull InventoryView view) {
-        return view.getTitle().equals(TITLE);
+        return view.title().equals(TITLE);
     }
 
     @Override
@@ -30,7 +32,7 @@ public final class Appraisal implements NonParamInventory {
         final Inventory inv = Bukkit.createInventory(player, 18, TITLE);
         for (int i = 9; i < 18; i++) {
             if (i == 13) {
-                inv.setItem(i, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, ChatColor.GREEN + "鑑定", null));
+                inv.setItem(i, ItemUtils.ci(Material.ENCHANTED_BOOK, 0, Text.itemName("鑑定", C.GREEN), null));
             } else {
                 inv.setItem(i, ItemUtils.ci(Material.GRAY_STAINED_GLASS_PANE, 0, "", null));
             }
@@ -46,7 +48,7 @@ public final class Appraisal implements NonParamInventory {
             e.setCancelled(true);
             if (raw == 13) {
                 final Player player = (Player) e.getWhoClicked();
-                final Char character = PlayerSaveManager.INSTANCE.getChar(player.getUniqueId());
+                final Char character = PlayerSaveManager.INSTANCE.getChar(player);
                 for (int i = 0; i < 9; i++) {
                     final ItemStack item = inv.getItem(i);
                     if (item != null) {

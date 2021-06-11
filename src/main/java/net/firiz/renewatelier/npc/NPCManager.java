@@ -3,14 +3,14 @@ package net.firiz.renewatelier.npc;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.ateliercommonapi.loop.TickRunnable;
+import net.firiz.ateliercommonapi.utils.pair.longs.ObjectLongNonNullMutablePair;
 import net.firiz.renewatelier.AtelierPlugin;
-import net.firiz.renewatelier.script.conversation.NPCConversation;
-import net.firiz.renewatelier.script.execution.ScriptManager;
+import net.firiz.renewatelier.server.script.conversation.NPCConversation;
+import net.firiz.renewatelier.server.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
-import net.firiz.renewatelier.utils.pair.NonNullPair;
 import net.firiz.renewatelier.version.nms.VEntity;
 import net.firiz.renewatelier.version.nms.VEntityPlayer;
 import net.firiz.renewatelier.version.packet.EntityPacket;
@@ -31,7 +31,7 @@ public enum NPCManager {
     INSTANCE;
 
     private final List<NPC> npcList = new ObjectArrayList<>();
-    private final Map<UUID, NonNullPair<NPCConversation, Long>> scriptPlayers = new Object2ObjectOpenHashMap<>();
+    private final Map<UUID, ObjectLongNonNullMutablePair<NPCConversation>> scriptPlayers = new Object2ObjectOpenHashMap<>();
 
     public void load() {
         SQLManager.INSTANCE.select("npcs", new String[]{
@@ -157,8 +157,8 @@ public enum NPCManager {
         return true;
     }
 
-    private boolean canAction(long now, NonNullPair<NPCConversation, Long> scriptPlayerValue) {
-        return now - scriptPlayerValue.getRight() >= 100;
+    private boolean canAction(long now, ObjectLongNonNullMutablePair<NPCConversation> scriptPlayerValue) {
+        return now - scriptPlayerValue.right() >= 100;
     }
 
     public boolean action(@NotNull Player player, int entityId) {
@@ -172,17 +172,17 @@ public enum NPCManager {
 
             boolean start = true;
             if (scriptPlayers.containsKey(uuid)) {
-                final NonNullPair<NPCConversation, Long> scriptPlayerValue = scriptPlayers.get(uuid);
-                if (scriptFile.equals(scriptPlayerValue.getLeft().getScriptName())) {
+                final ObjectLongNonNullMutablePair<NPCConversation> scriptPlayerValue = scriptPlayers.get(uuid);
+                if (scriptFile.equals(scriptPlayerValue.left().getScriptName())) {
                     start = false;
                     final long now = System.currentTimeMillis();
                     final boolean canAction = canAction(now, scriptPlayerValue);
                     if (canAction) {
-                        scriptPlayerValue.setRight(now);
+                        scriptPlayerValue.right(now);
                         Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> {
-                            final NonNullPair<NPCConversation, Long> value = scriptPlayers.get(uuid);
+                            final ObjectLongNonNullMutablePair<NPCConversation> value = scriptPlayers.get(uuid);
                             if (value != null) {
-                                final Invocable iv = value.getLeft().getIv();
+                                final Invocable iv = value.left().getIv();
                                 if (iv != null) {
                                     try {
                                         iv.invokeFunction("action", sneaking);
@@ -200,7 +200,7 @@ public enum NPCManager {
             if (start) {
                 final NPCConversation conversation = new NPCConversation(npc, scriptFile, player);
                 Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> ScriptManager.INSTANCE.start(scriptFile, player, conversation, "action", sneaking));
-                scriptPlayers.put(uuid, new NonNullPair<>(conversation, System.currentTimeMillis()));
+                scriptPlayers.put(uuid, new ObjectLongNonNullMutablePair<>(conversation, System.currentTimeMillis()));
             }
             return true;
         }
@@ -212,7 +212,7 @@ public enum NPCManager {
     }
 
     public NPCConversation getNPCConversation(final UUID uuid) {
-        return scriptPlayers.get(uuid).getLeft();
+        return scriptPlayers.get(uuid).left();
     }
 
 }
