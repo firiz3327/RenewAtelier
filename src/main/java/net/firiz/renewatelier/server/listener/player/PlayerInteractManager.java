@@ -31,7 +31,7 @@ class PlayerInteractManager {
 
     void interact(Cancellable e, Player player, Action action, Block block, ItemStack item) {
         if (block != null && block.getType().isInteractable()) {
-            if (!player.isSneaking() && block.getType() == Material.CAULDRON) {
+            if (!player.isSneaking() && block.getType() == Material.WATER_CAULDRON) {
                 final Levelled cauldron = (Levelled) block.getBlockData();
                 int newLevel = -1;
                 if (item != null) {
@@ -52,10 +52,7 @@ class PlayerInteractManager {
                 if (newLevel == cauldron.getMaximumLevel()) {
                     final Block downBlock = block.getRelative(BlockFace.DOWN);
                     switch (downBlock.getType()) {
-                        case FIRE:
-                        case CAMPFIRE:
-                        case SOUL_FIRE:
-                        case SOUL_CAMPFIRE:
+                        case FIRE, CAMPFIRE, SOUL_FIRE, SOUL_CAMPFIRE:
                             PlayerSaveManager.INSTANCE.getChar(player).completionAlchemyKettleAdvancement(block.getLocation());
                             break;
                         default:
@@ -114,24 +111,14 @@ class PlayerInteractManager {
                 e.setCancelled(true);
                 // スキル管理GUIでも作ろうかな
                 return true;
-            case CAULDRON:
+            case WATER_CAULDRON:
                 final BlockData blockData = block.getBlockData();
-                if (blockData instanceof Levelled) { // levelled only cauldron
-                    final Levelled cauldron = (Levelled) blockData;
-                    boolean typeCheck;
-                    switch (block.getRelative(BlockFace.DOWN).getType()) {
-                        case FIRE:
-                        case CAMPFIRE:
-                        case SOUL_FIRE:
-                        case SOUL_CAMPFIRE:
-                            typeCheck = true;
-                            break;
-                        default:
-                            typeCheck = false;
-                            break;
-                    }
-                    if (block.getType() == Material.CAULDRON
-                            && !player.isSneaking()
+                if (blockData instanceof final Levelled cauldron) { // levelled only cauldron
+                    final boolean typeCheck = switch (block.getRelative(BlockFace.DOWN).getType()) {
+                        case FIRE, CAMPFIRE, SOUL_FIRE, SOUL_CAMPFIRE -> true;
+                        default -> false;
+                    };
+                    if (!player.isSneaking()
                             && CommonUtils.isRightOnly(action, true)
                             && cauldron.getLevel() == cauldron.getMaximumLevel()
                             && typeCheck) {
