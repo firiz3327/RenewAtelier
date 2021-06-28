@@ -1,7 +1,7 @@
 package net.firiz.renewatelier.server.event;
 
 import net.firiz.renewatelier.utils.java.CObjects;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -18,8 +18,6 @@ public class AsyncPlayerInteractEntityEvent extends PlayerEvent implements Cance
     private final boolean isRightClick;
     @NotNull
     private final EquipmentSlot hand;
-    @Nullable
-    private final Entity entity;
     private boolean cancelled;
 
     public AsyncPlayerInteractEntityEvent(@NotNull Player player, int entityId, boolean isRightClick, @NotNull EquipmentSlot hand) {
@@ -27,11 +25,6 @@ public class AsyncPlayerInteractEntityEvent extends PlayerEvent implements Cance
         this.entityId = entityId;
         this.isRightClick = isRightClick;
         this.hand = hand;
-        this.entity = CObjects.nullIfFunction(
-                ((CraftWorld) player.getWorld()).getHandle().getEntity(entityId),
-                net.minecraft.server.v1_16_R3.Entity::getBukkitEntity,
-                null
-        );
     }
 
     public int getEntityId() {
@@ -49,7 +42,11 @@ public class AsyncPlayerInteractEntityEvent extends PlayerEvent implements Cance
 
     @Nullable
     public Entity getEntity() {
-        return entity;
+        return CObjects.nullIfFunction(
+                ((CraftWorld) player.getWorld()).getHandle().getEntity(entityId),
+                net.minecraft.world.entity.Entity::getBukkitEntity,
+                null
+        );
     }
 
     @NotNull

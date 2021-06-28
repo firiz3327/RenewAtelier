@@ -1,12 +1,11 @@
 package net.firiz.renewatelier.version.tab.contents;
 
+import net.firiz.ateliercommonapi.nms.MinecraftConverter;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.version.tab.TabListItem;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_16_R3.EntityPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -20,11 +19,11 @@ public class StatusListTabContents implements TabContents {
         switch (slot) {
             case 1:
                 final Player bukkitPlayer = player.getCharStats().getPlayer();
-                final EntityPlayer entityPlayer = ((CraftPlayer) bukkitPlayer).getHandle();
-                item.modifyListName(entityPlayer.adventure$displayName);
-                item.modifyPing(entityPlayer.ping);
+                final var entityPlayer = MinecraftConverter.convert(bukkitPlayer);
+                item.modifyListName(entityPlayer.displayName());
+                item.modifyPing(entityPlayer.ping());
                 item.modifyGameMode(bukkitPlayer.getGameMode());
-                item.modifyTextures(entityPlayer.getProfile());
+                item.modifyTextures(entityPlayer.profile());
                 break;
             case 2:
                 item.modifyListName(whiteSpace("所持金:", formatMoney(player.getMoney()) + " E"));

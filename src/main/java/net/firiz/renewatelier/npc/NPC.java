@@ -1,8 +1,9 @@
 package net.firiz.renewatelier.npc;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.firiz.renewatelier.version.nms.VEntity;
-import net.firiz.renewatelier.version.nms.VEntityPlayer;
+import net.firiz.ateliercommonapi.nms.entity.NMSLivingEntity;
+import net.firiz.ateliercommonapi.nms.entity.player.NMSPlayer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,15 +16,15 @@ public class NPC {
     @NotNull
     private final NPCObject npcObject;
     @NotNull
-    private final VEntity<?> entity;
+    private final NMSLivingEntity entity;
 
     private final boolean isPlayer;
     private final List<UUID> viewer = new ObjectArrayList<>();
 
-    public NPC(@NotNull NPCObject npcObject, @NotNull VEntity<?> entity) {
+    public NPC(@NotNull NPCObject npcObject, @NotNull NMSLivingEntity entity) {
         this.npcObject = npcObject;
         this.entity = entity;
-        this.isPlayer = entity instanceof VEntityPlayer;
+        this.isPlayer = entity instanceof NMSPlayer;
     }
 
     @NotNull
@@ -36,42 +37,44 @@ public class NPC {
     }
 
     public int getEntityId() {
-        return entity.getEntityId();
+        return entity.id();
     }
 
     public String getName() {
-        return entity.getName();
+        if (isPlayer) {
+            return PlainTextComponentSerializer.plainText().serialize(((NMSPlayer) entity).displayName());
+        } else {
+            return PlainTextComponentSerializer.plainText().serialize(entity.customName());
+        }
     }
 
     public Location getLocation() {
-        return entity.getLocation();
+        return entity.location();
     }
 
     public Location getEyeLocation() {
-        return entity.getEyeLocation();
+        return entity.eyeLocation();
     }
 
     public Location getMessageLocation() {
-        return entity.getEyeLocation().add(0, 0.4, 0);
+        return entity.eyeLocation().add(0, 0.4, 0);
     }
 
     @NotNull
-    public VEntity<?> getEntity() {
+    public NMSLivingEntity getEntity() {
         return entity;
     }
 
     @NotNull
-    public VEntityPlayer getEntityPlayer() {
-        return (VEntityPlayer) entity;
+    public NMSPlayer getEntityPlayer() {
+        return (NMSPlayer) entity;
     }
 
     public void addViewer(Player player) {
-//        player.sendMessage("add viewer " + getName());
         viewer.add(player.getUniqueId());
     }
 
     public void removeViewer(Player player) {
-//        player.sendMessage("remove viewer " + getName());
         viewer.remove(player.getUniqueId());
     }
 

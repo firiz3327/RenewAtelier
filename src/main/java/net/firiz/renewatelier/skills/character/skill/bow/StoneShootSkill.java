@@ -39,7 +39,7 @@ public class StoneShootSkill extends BowCharSkill {
     @Override
     public void die() {
         super.die();
-        projectile.die();
+        projectile.dieAll();
     }
 
     public void dieAuto() {

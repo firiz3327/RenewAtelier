@@ -1,18 +1,19 @@
 package net.firiz.renewatelier.version.entity.atelier.test;
 
+import net.firiz.ateliercommonapi.MinecraftVersion;
 import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
-import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.EntitySupplier;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.firiz.renewatelier.version.entity.atelier.TargetEntityTypes;
-import net.minecraft.server.v1_16_R3.DamageSource;
-import net.minecraft.server.v1_16_R3.EntityZombie;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.monster.EntityZombie;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.jetbrains.annotations.NotNull;
 
-@MinecraftVersion("1.16")
+@MinecraftVersion("1.17")
 public class TestBoss extends EntityZombie implements EntitySupplier {
 
     private final LivingData livingData;
@@ -43,12 +44,12 @@ public class TestBoss extends EntityZombie implements EntitySupplier {
     }
 
     @Override
-    public boolean damageEntity(DamageSource ds, float f) {
+    public boolean damageEntity(@NotNull DamageSource ds, float f) {
         return livingData.onDamageEntity(ds, f);
     }
 
     @Override
-    public void die(DamageSource damagesource) {
+    public void die(@NotNull DamageSource damagesource) {
         livingData.onDie(damagesource);
     }
 

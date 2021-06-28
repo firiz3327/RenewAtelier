@@ -9,8 +9,8 @@ import net.firiz.renewatelier.skills.character.PlayerSkillManager;
 import net.firiz.renewatelier.skills.character.skill.EnumPlayerSkill;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierTippedArrow;
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
-import net.firiz.renewatelier.version.entity.projectile.arrow.IAtelierArrow;
-import net.minecraft.server.v1_16_R3.EntityArrow;
+import net.firiz.renewatelier.version.entity.projectile.arrow.INMSAtelierArrow;
+import net.minecraft.world.entity.projectile.EntityArrow;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -139,34 +139,36 @@ public enum ArrowManager {
         shootAtelierArrow(shooter, bow, baseArrow, consumeArrow, isConsumeArrow, force, false, isSkill);
     }
 
-    private IAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isCrossbow, final boolean isSkill) {
+    private INMSAtelierArrow shootAtelierArrow(@NotNull LivingEntity shooter, @NotNull ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, final boolean isConsumeArrow, final float force, final boolean isCrossbow, final boolean isSkill) {
         final ItemStack oneArrow = consumeArrow.clone();
         oneArrow.setAmount(1);
 
-        IAtelierArrow cloneArrow;
+        INMSAtelierArrow nmsCloneArrow;
         switch (consumeArrow.getType()) {
-            case ARROW -> cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
+            case ARROW -> nmsCloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
             case TIPPED_ARROW -> {
-                cloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
+                nmsCloneArrow = new NMSAtelierTippedArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
                 final PotionMeta potionMeta = (PotionMeta) consumeArrow.getItemMeta();
                 assert potionMeta != null;
-                final NMSAtelierTippedArrow arrow = (NMSAtelierTippedArrow) cloneArrow;
+                final NMSAtelierTippedArrow nmsArrow = (NMSAtelierTippedArrow) nmsCloneArrow;
+                final AtelierTippedArrow arrow = nmsArrow.getAtelierArrowEntity();
                 arrow.setBasePotionData(potionMeta.getBasePotionData());
                 potionMeta.getCustomEffects().forEach(potionEffect -> arrow.addCustomEffect(potionEffect, true));
                 if (potionMeta.hasColor() && potionMeta.getColor() != null) {
                     arrow.setColor(potionMeta.getColor());
                 }
             }
-            case SPECTRAL_ARROW -> cloneArrow = new NMSAtelierSpectralArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
+            case SPECTRAL_ARROW -> nmsCloneArrow = new NMSAtelierSpectralArrow(shooter.getEyeLocation(), bow, oneArrow, shooter, force, isSkill);
             default -> throw new IllegalStateException("consumeArrow is not arrow.");
         }
+        final AtelierAbstractArrow cloneArrow = nmsCloneArrow.getAtelierArrowEntity();
         cloneArrow.setShooter(baseArrow.getShooter());
         cloneArrow.setFireTicks(baseArrow.getFireTicks());
         cloneArrow.setPierceLevel(baseArrow.getPierceLevel());
         cloneArrow.setKnockbackStrength(baseArrow.getKnockbackStrength());
         cloneArrow.setDamage(baseArrow.getDamage());
         cloneArrow.setCritical(baseArrow.isCritical());
-        ((EntityArrow) cloneArrow).setShotFromCrossbow(isCrossbow);
+        ((EntityArrow) nmsCloneArrow).setShotFromCrossbow(isCrossbow);
 
         if (!(shooter instanceof Player) || ((Player) shooter).getGameMode() == GameMode.CREATIVE) {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
@@ -179,8 +181,8 @@ public enum ArrowManager {
             cloneArrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
         }
         soundArrow(shooter);
-        cloneArrow.shoot(baseArrow.getVelocity());
-        return cloneArrow;
+        nmsCloneArrow.shoot(baseArrow.getVelocity());
+        return nmsCloneArrow;
     }
 
     private boolean shootNextArrow(@NotNull Player player, @Nullable ItemStack bow, @NotNull AbstractArrow baseArrow, @NotNull ItemStack consumeArrow, @Nullable ItemStack nextConsumeArrow, float force) {

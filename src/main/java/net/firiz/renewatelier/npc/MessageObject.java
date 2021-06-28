@@ -1,12 +1,13 @@
 package net.firiz.renewatelier.npc;
 
 import net.firiz.ateliercommonapi.FakeId;
+import net.firiz.ateliercommonapi.nms.entity.EntityData;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakeEntity;
-import net.firiz.renewatelier.version.packet.PacketUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +15,7 @@ public class MessageObject {
 
     protected static final int FAKE_UNIQUE_ID = FakeId.createUniqueId();
     private final Char player;
-    private FakeEntity fakeEntity;
+    private EntityData entityData;
 
     private Location baseLocation;
 
@@ -37,18 +38,18 @@ public class MessageObject {
 
     private void showStand(String message) {
         final Player bukkitPlayer = this.player.getPlayer();
-        if (fakeEntity == null) {
-            this.fakeEntity = new FakeEntity(FAKE_UNIQUE_ID, FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-            PacketUtils.sendPacket(bukkitPlayer, EntityPacket.getSpawnPacket(this.fakeEntity, this.baseLocation));
-            player.getMessageObjectRun().add(this);
+        if (this.entityData == null) {
+            this.entityData = new EntityData(FAKE_UNIQUE_ID, EntityType.ARMOR_STAND);
+            PacketUtils.sendPacket(bukkitPlayer, this.entityData.spawnPacket(this.baseLocation));
+            this.player.getMessageObjectRun().add(this);
         } else {
-            player.getMessageObjectRun().resetTime();
+            this.player.getMessageObjectRun().resetTime();
         }
-        PacketUtils.sendPacket(bukkitPlayer, EntityPacket.getMessageStandMeta(bukkitPlayer.getWorld(), message).compile(FAKE_UNIQUE_ID));
+        PacketUtils.sendPacket(bukkitPlayer, EntityData.armorStand(this.entityData, bukkitPlayer.getWorld(), Component.text(message), false).metaPacket());
     }
 
     protected void hideStand() {
-        PacketUtils.sendPacket(this.player.getPlayer(), EntityPacket.getDespawnPacket(FAKE_UNIQUE_ID));
-        this.fakeEntity = null;
+        PacketUtils.sendPacket(this.player.getPlayer(), entityData.despawnPacket());
+        this.entityData = null;
     }
 }

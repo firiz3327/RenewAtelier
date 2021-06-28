@@ -1,10 +1,11 @@
 package net.firiz.renewatelier.npc;
 
 import net.firiz.ateliercommonapi.SkinProperty;
+import net.firiz.ateliercommonapi.nms.entity.NMSLivingEntity;
+import net.firiz.ateliercommonapi.nms.entity.NMSVillager;
+import net.firiz.ateliercommonapi.nms.entity.player.NMSPlayer;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakePlayerPacket;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -83,7 +84,7 @@ public class NPCObject {
         final Location location = new Location(world, x, y, z);
         final NPC npc;
         switch (entityType) {
-            case VILLAGER -> npc = new NPC(this, EntityPacket.createVillager(
+            case VILLAGER -> npc = new NPC(this, NMSVillager.create(
                     location,
                     colorName,
                     CObjects.nullIfFunction(villagerType, Villager.Type::valueOf, Villager.Type.PLAINS),
@@ -98,7 +99,7 @@ public class NPCObject {
                     if (skinProperty == null) {
                         uuid = UUID.fromString(skinUUID);
                     } else {
-                        npc = new NPC(this, FakePlayerPacket.createEntityPlayer(
+                        npc = new NPC(this, NMSPlayer.create(
                                 location.getWorld(),
                                 location,
                                 skinProperty,
@@ -107,14 +108,14 @@ public class NPCObject {
                         break;
                     }
                 }
-                npc = new NPC(this, FakePlayerPacket.createEntityPlayer(
+                npc = new NPC(this, NMSPlayer.create(
                         location.getWorld(),
                         location,
                         uuid,
                         colorName
                 ));
             }
-            default -> npc = new NPC(this, EntityPacket.createEntity(location, colorName, entityType));
+            default -> npc = new NPC(this, NMSLivingEntity.createLiving(location, colorName, entityType));
         }
         return npc;
     }

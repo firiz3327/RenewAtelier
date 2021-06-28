@@ -1,6 +1,6 @@
 package net.firiz.renewatelier.version.minecraft;
 
-import net.firiz.renewatelier.version.MinecraftVersion;
+import net.firiz.ateliercommonapi.MinecraftVersion;
 
 /**
  * @author firiz

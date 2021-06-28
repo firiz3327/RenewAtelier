@@ -1,19 +1,27 @@
 package net.firiz.renewatelier.version.entity.horse;
 
+import net.firiz.ateliercommonapi.MinecraftVersion;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.EnumHorseSkill;
 import net.firiz.renewatelier.entity.horse.HorseTier;
 import net.firiz.renewatelier.inventory.item.json.HorseSaddle;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ai.attributes.GenericAttributes;
+import net.minecraft.world.entity.animal.horse.EntityHorse;
+import net.minecraft.world.entity.animal.horse.HorseColor;
+import net.minecraft.world.entity.animal.horse.HorseStyle;
+import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -23,10 +31,10 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.UUID;
 
-@MinecraftVersion("1.16")
+@MinecraftVersion("1.17")
 public class NMSAtelierHorse extends EntityHorse {
 
-    private static final net.minecraft.server.v1_16_R3.ItemStack NMS_SADDLE = CraftItemStack.asNMSCopy(new ItemStack(Material.SADDLE));
+    private static final net.minecraft.world.item.ItemStack NMS_SADDLE = CraftItemStack.asNMSCopy(new ItemStack(Material.SADDLE));
     private static final PotionEffect BOOST_POTION = new PotionEffect(PotionEffectType.SPEED, 40, 0); // 2sec
     private static final NamespacedKey key = CommonUtils.createKey("nmsAtelierHorse");
 
@@ -48,7 +56,7 @@ public class NMSAtelierHorse extends EntityHorse {
     private static final float MIN_ACCELERATION = 40;
 
     public NMSAtelierHorse(Player player, org.bukkit.World world, ItemStack saddle) {
-        super(EntityTypes.HORSE, ((CraftWorld) world).getHandle());
+        super(EntityTypes.M, ((CraftWorld) world).getHandle());
         this.saddle = saddle;
         this.horseSaddle = HorseSaddle.load(saddle);
         init(player.getUniqueId());
@@ -57,9 +65,10 @@ public class NMSAtelierHorse extends EntityHorse {
     private void init(UUID owner) {
         final PersistentDataContainer dataContainer = getBukkitLivingEntity().getPersistentDataContainer();
         dataContainer.set(key, PersistentDataType.BYTE, (byte) 0);
-        getAttributeInstance(GenericAttributes.MAX_HEALTH).setValue(1);
+        getAttributeInstance(GenericAttributes.a).setValue(1);
         refreshHorseStats();
-        inventoryChest.setItem(0, NMS_SADDLE.cloneItemStack());
+        saddle(null);
+//        inventoryChest.setItem(0, NMS_SADDLE.cloneItemStack());
         setVariant(HorseColor.a(horseSaddle.getColor()), HorseStyle.a(horseSaddle.getStyle()));
         setOwnerUUID(owner);
         setTamed(true);
@@ -75,12 +84,12 @@ public class NMSAtelierHorse extends EntityHorse {
             speed *= 0.8 + (skillLevel * 0.01);
             jump *= 0.8 + (skillLevel * 0.01);
         }
-        if(horseSaddle.hasSkill(EnumHorseSkill.ACCELERATION)) {
+        if (horseSaddle.hasSkill(EnumHorseSkill.ACCELERATION)) {
             accelerationUp = 2 + (horseSaddle.getSkillLevel(EnumHorseSkill.ACCELERATION) * 0.1);
         }
         speed *= (int) acceleration * 0.01;
-        getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(speed);
-        getAttributeInstance(GenericAttributes.JUMP_STRENGTH).setValue(jump);
+        getAttributeInstance(GenericAttributes.d).setValue(speed);
+        getAttributeInstance(GenericAttributes.m).setValue(jump);
     }
 
     public HorseSaddle getHorseSaddle() {
@@ -93,7 +102,7 @@ public class NMSAtelierHorse extends EntityHorse {
         oldX = location.getX();
         oldZ = location.getZ();
         boostTime = System.currentTimeMillis() + 10000;
-        world.addEntity(this);
+        getWorld().addEntity(this);
         ((CraftPlayer) player).getHandle().startRiding(this);
     }
 
@@ -110,7 +119,7 @@ public class NMSAtelierHorse extends EntityHorse {
                 twoSeater = null;
             }
         }
-        twoSeater = new NMSHorseTwoSeater(world, this);
+        twoSeater = new NMSHorseTwoSeater(getWorld(), this);
         twoSeater.spawn(player);
         refreshHorseStats();
     }
@@ -137,7 +146,7 @@ public class NMSAtelierHorse extends EntityHorse {
 
     private boolean isStartMovement() {
         final Vec3D nowVector = getRider().getMot();
-        final boolean result = oldVector != null && oldVector.x == 0 && oldVector.z == 0 && nowVector.x != 0 && nowVector.z != 0;
+        final boolean result = oldVector != null && oldVector.getX() == 0 && oldVector.getZ() == 0 && nowVector.getX() != 0 && nowVector.getZ() != 0;
         oldVector = nowVector;
         return result;
     }
@@ -159,13 +168,16 @@ public class NMSAtelierHorse extends EntityHorse {
             boostCount--;
         }
         final double maxHealth = Math.max(1, boostCount * 2);
-        getAttributeInstance(GenericAttributes.MAX_HEALTH).setValue(maxHealth);
+        getAttributeInstance(GenericAttributes.a).setValue(maxHealth);
         setHealth((float) maxHealth);
     }
 
+    /*
+    die -> a(Entity.RemovalReason reason)
+     */
     @Override
-    public void die() {
-        super.die();
+    public void a(Entity.RemovalReason reason) {
+        super.a(reason);
         if (twoSeater != null) {
             twoSeater.die();
         }
@@ -206,8 +218,8 @@ public class NMSAtelierHorse extends EntityHorse {
             hasTwoSeater = false;
             refreshHorseStats = true;
         }
-        if (!passengers.isEmpty()) {
-            final Entity entity = passengers.get(0);
+        if (!getPassengers().isEmpty()) {
+            final Entity entity = getPassengers().get(0);
             if (entity instanceof EntityPlayer) {
                 if (hasTwoSeater) {
                     final Location behind = getBehindEntity(entity);
@@ -232,7 +244,7 @@ public class NMSAtelierHorse extends EntityHorse {
     }
 
     private Entity getRider() {
-        return passengers.get(0);
+        return getPassengers().get(0);
     }
 
     @Override
@@ -241,13 +253,13 @@ public class NMSAtelierHorse extends EntityHorse {
     }
 
     public Location getBehindEntity(Entity entity) {
-        final Location location = new Location(null, entity.locX(), entity.locY(), entity.locZ(), entity.getBukkitYaw(), entity.pitch);
+        final Location location = new Location(null, entity.locX(), entity.locY(), entity.locZ(), entity.getBukkitYaw(), entity.getXRot());
         return location.add(location.getDirection().normalize().multiply(-0.55));
     }
 
     private void playSound(Sound sound, float volume, float pitch) {
-        world.getWorld().playSound(
-                new Location(world.getWorld(), locX(), locY() + 0.5, locZ()),
+        getWorld().getWorld().playSound(
+                new Location(getWorld().getWorld(), locX(), locY() + 0.5, locZ()),
                 sound, volume, pitch
         );
     }

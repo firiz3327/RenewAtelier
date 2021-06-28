@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.firiz.ateliercommonapi.adventure.text.C;
 import net.firiz.ateliercommonapi.adventure.text.Lore;
 import net.firiz.ateliercommonapi.adventure.text.Text;
+import net.firiz.ateliercommonapi.nms.packet.InventoryPacket;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
@@ -22,8 +23,6 @@ import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.firiz.renewatelier.version.packet.InventoryPacket;
-import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -75,7 +74,7 @@ public final class RecipeSelectInventory implements ParamInventory<Location> {
 
         setRecipeScroll(player.getUniqueId(), inv, 0);
         player.openInventory(inv);
-        InventoryPacket.update(player, "", InventoryPacketType.CHEST);
+        InventoryPacket.update(player, Component.text(""), InventoryPacket.InventoryPacketType.CHEST);
     }
 
     private void addRecipeStatus(final UUID uuid, final AlchemyRecipe recipe, final RecipeStatus recipeStatus, final ItemMeta meta, final Lore lore) {

@@ -8,6 +8,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.horse.HorseSkillList;
 import net.firiz.renewatelier.entity.horse.HorseTier;
 import net.firiz.renewatelier.entity.horse.EnumHorseSkill;
+import net.firiz.renewatelier.language.Lang;
 import net.firiz.renewatelier.server.json.JsonFactory;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.Randomizer;
@@ -189,17 +190,17 @@ public class HorseSaddle {
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
 
         final Component speed = Text.of("+" + scaleString(tier.getSpeed(level) - tier.getSpeed(oldLevel)), C.GREEN);
-        final Component jump = Text.of("+" + scaleString(tier.getJump(level) - tier.getJump(oldLevel)));
-        player.sendMessage(Text.of("あなたの馬が ").color(C.GRAY).append(level + "Lv").color(C.GREEN).append("にレベルアップしました！").color(C.GRAY));
-        player.sendMessage(Text.of("移動速度").color(C.GRAY).append(speed).append(", ジャンプ力").color(C.GRAY).append(jump));
+        final Component jump = Text.of("+" + scaleString(tier.getJump(level) - tier.getJump(oldLevel)), C.GREEN);
+        player.sendMessage(Lang.HORSE_LEVELUP.get(level + "Lv"));
+        player.sendMessage(Lang.HORSE_LEVELUP_STATUSUP.get(speed, jump));
         if (isMaxLevel()) {
-            player.sendMessage(Text.of("あなたの馬は最大レベルに到達しました！", C.GREEN));
+            player.sendMessage(Lang.HORSE_LEVELUP_MAX.get());
         }
         if (newSkill != null) {
-            player.sendMessage(Text.of("新しく " + newSkill.getName() + " を覚えました！", C.GREEN));
+            player.sendMessage(Lang.HORSE_LEVELUP_SKILL_NEW.get(newSkill.getName()));
         }
         if (lvUpSkill != null) {
-            player.sendMessage(Text.of(lvUpSkill.getName() + " のレベルが上がりました！", C.GREEN));
+            player.sendMessage(Lang.HORSE_LEVELUP_SKILL_LVUP.get(lvUpSkill.getName()));
         }
     }
 
@@ -212,22 +213,24 @@ public class HorseSaddle {
         meta.setCustomModelData(female ? 1 : 2);
         if (refreshLore) {
             final Lore lore = new Lore();
-            lore.add("ランク: ").color(C.GRAY).add(tier.getTier()).color(C.WHITE);
-            lore.add("性別: ").color(C.GRAY).add(female ? "牝馬♀" : "牡馬♂").color(C.WHITE);
-            lore.add("ランク: ").color(C.GRAY).add(tier.getTier()).color(C.WHITE);
-            lore.add("移動速度: ").color(C.GRAY).add(scaleString(tier.getSpeed(level))).color(C.WHITE);
-            lore.add("ジャンプ力: ").color(C.GRAY).add(scaleString(tier.getJump(level))).color(C.WHITE);
+            lore.add(Lang.HORSE_SADDLE_LORE_DESC_RANK.get(tier.getTier()));
+            lore.add(Lang.HORSE_SADDLE_LORE_DESC_GENDER.get(female ? Lang.HORSE_GENDER_FEMALE : Lang.HORSE_GENDER_MALE));
+            lore.add(Lang.HORSE_SADDLE_LORE_DESC_SPEED.get(scaleString(tier.getSpeed(level))));
+            lore.add(Lang.HORSE_SADDLE_LORE_DESC_JUMP.get(scaleString(tier.getJump(level))));
             if (!horseSkills.isEmpty()) {
-                lore.add("スキル:").color(C.GRAY);
+                lore.add(Lang.HORSE_SADDLE_LORE_DESC_SKILL.get());
                 horseSkills.entrySet().forEach(
-                        entry -> lore.add("- " + entry.getSkill().getName() + " : ").color(C.WHITE).append(entry.getLevel() + " / " + entry.getSkill().getMaxLevel()).color(C.GREEN)
+                        entry -> lore.add("- ").color(C.WHITE)
+                                .append(entry.getSkill().getName()).color(C.WHITE)
+                                .append(" : ").color(C.WHITE)
+                                .append(entry.getLevel() + " / " + entry.getSkill().getMaxLevel()).color(C.GREEN)
                 );
             }
             if (female && matingCount > 0) {
                 lore.nextLine();
-                lore.add("交配回数: ").color(C.GRAY).append(matingCount + " / " + GameConstants.HORSE_MATING_MAX_COUNT).color(C.WHITE);
+                lore.add(Lang.HORSE_SADDLE_LORE_DESC_MATING.get(matingCount + " / " + GameConstants.HORSE_MATING_MAX_COUNT));
                 if (matingCount < GameConstants.HORSE_MATING_MAX_COUNT) {
-                    lore.add("次回交配可能日時: ").color(C.GRAY).append(matingTimeString() + " 以降").color(C.WHITE);
+                    lore.add(Lang.HORSE_SADDLE_LORE_DESC_MATING_TIME.get(matingTimeString()));
                 }
             }
             meta.lore(lore);
@@ -243,7 +246,6 @@ public class HorseSaddle {
 
     public String scaleString(double val) {
         return CommonUtils.scaleString(val * 1000, 0, RoundingMode.HALF_UP);
-//        return CommonUtils.scaleString(val, 2, RoundingMode.HALF_UP);
     }
 
     public void refreshMatingTime() {

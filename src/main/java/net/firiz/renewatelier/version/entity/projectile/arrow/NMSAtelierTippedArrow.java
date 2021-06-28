@@ -1,37 +1,31 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
-import com.google.common.base.Preconditions;
-import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
+import net.firiz.ateliercommonapi.MinecraftVersion;
+import net.firiz.ateliercommonapi.nms.item.NMSItemStack;
 import net.firiz.renewatelier.entity.arrow.AtelierTippedArrow;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.nms.VItemStack;
-import net.minecraft.server.v1_16_R3.*;
-import org.apache.commons.lang.Validate;
-import org.bukkit.Color;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.entity.projectile.EntityArrow;
+import net.minecraft.world.entity.projectile.EntityTippedArrow;
+import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R3.potion.CraftPotionUtil;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftVector;
-import org.bukkit.entity.AbstractArrow;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_17_R1.util.CraftVector;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IAtelierArrow {
+public final class NMSAtelierTippedArrow extends EntityTippedArrow implements INMSAtelierArrow {
 
     private CraftEntity bukkitEntity;
     private final Location location;
-    private final VItemStack bow;
-    private final VItemStack arrow;
+    private final NMSItemStack bow;
+    private final NMSItemStack arrow;
     private final LivingEntity source;
     private final float force;
     private final boolean isSkill;
@@ -50,8 +44,8 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     public NMSAtelierTippedArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force, boolean isSkill) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
-        this.bow = VersionUtils.asVItemCopy(bow);
-        this.arrow = VersionUtils.asVItemCopy(arrow);
+        this.bow = NMSItemStack.convert(bow);
+        this.arrow = NMSItemStack.convert(arrow);
         this.source = source;
         this.force = force;
         this.isSkill = isSkill;
@@ -60,7 +54,7 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     @Override
     public void shoot(@Nullable Vector velocity) {
         this.velocity = velocity;
-        world.addEntity(this);
+        getWorld().addEntity(this);
         shoot(location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
     }
 
@@ -76,15 +70,15 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     /**
      * EntityArrowのtickのMathHelper.sqrt(c(vec3d))辺りを参照
      */
+    @MinecraftVersion("1.17")
     protected static void s(@NotNull EntityArrow arrow, @NotNull Vector velocity) {
         final Vec3D vec3d = CraftVector.toNMS(velocity);
         arrow.setMot(vec3d);
-        float f2 = MathHelper.sqrt(c(vec3d));
-        arrow.yaw = (float) (MathHelper.d(vec3d.x, vec3d.z) * 57.2957763671875D);
-        arrow.pitch = (float) (MathHelper.d(vec3d.y, f2) * 57.2957763671875D);
-        arrow.lastYaw = arrow.yaw;
-        arrow.lastPitch = arrow.pitch;
-        arrow.despawnCounter = 0;
+        final double d0 = vec3d.h();
+        arrow.setYRot((float) (MathHelper.d(vec3d.b, vec3d.d) * 57.2957763671875D));
+        arrow.setXRot((float) (MathHelper.d(vec3d.c, d0) * 57.2957763671875D));
+        arrow.x = arrow.getYRot(); // lastYaw
+        arrow.y = arrow.getXRot(); // lastPitch
     }
 
     @Override
@@ -96,50 +90,18 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     @Override
     @NotNull
     public ItemStack getBow() {
-        return bow.getItem();
+        return bow.itemStack();
     }
 
     @Override
     @NotNull
     public ItemStack getArrow() {
-        return arrow.getItem();
+        return arrow.itemStack();
     }
 
     @NotNull
     public Location getLocation() {
         return location;
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof org.bukkit.entity.Entity) {
-            super.setShooter(((CraftEntity) shooter).getHandle());
-        } else {
-            super.setShooter(null);
-        }
-
-        projectileSource = shooter;
-    }
-
-    @Override
-    public void setPickupStatus(AbstractArrow.PickupStatus status) {
-        Preconditions.checkNotNull(status, "status");
-        fromPlayer = net.minecraft.server.v1_16_R3.EntityArrow.PickupStatus.a(status.ordinal());
-    }
-
-    @Override
-    public void setFireTicks(int fireTicks) {
-        this.fireTicks = fireTicks;
-    }
-
-    @Override
-    public void setKnockbackStrength(int knockbackStrength) {
-        this.knockbackStrength = knockbackStrength;
-    }
-
-    @Override
-    public void setPierceLevel(int pierceLevel) {
-        super.setPierceLevel((byte) pierceLevel);
     }
 
     @Override
@@ -149,48 +111,14 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     }
 
     @Override
-    public void setVelocity(@NotNull Vector velocity) {
-        velocity.checkFinite();
-        this.setMot(CraftVector.toNMS(velocity));
-        this.velocityChanged = true;
-    }
-
-    public void setBasePotionData(PotionData data) {
-        Validate.notNull(data, "PotionData cannot be null");
-        setType(CraftPotionUtil.fromBukkit(data));
-    }
-
-    public void setColor(Color color) {
-        super.setColor(color.asRGB());
-    }
-
-    public void addCustomEffect(PotionEffect effect, boolean override) {
-        int effectId = effect.getType().getId();
-        MobEffect existing = null;
-        for (MobEffect mobEffect : effects) {
-            if (MobEffectList.getId(mobEffect.getMobEffect()) == effectId) {
-                existing = mobEffect;
-            }
-        }
-        if (existing != null) {
-            if (!override) {
-                return;
-            }
-            effects.remove(existing);
-        }
-        addEffect(CraftPotionUtil.fromBukkit(effect));
-        refreshEffects();
-    }
-
-    @Override
-    public CraftEntity getBukkitEntity() {
+    public @NotNull CraftEntity getBukkitEntity() {
         if (bukkitEntity == null) {
             bukkitEntity = new AtelierTippedArrow(
-                    this.world.getServer(),
+                    getWorld().getCraftServer(),
                     this,
                     source,
-                    bow.getItem(),
-                    arrow.getItem(),
+                    bow.itemStack(),
+                    arrow.itemStack(),
                     force,
                     isSkill
             );
@@ -200,12 +128,12 @@ public final class NMSAtelierTippedArrow extends EntityTippedArrow implements IA
     }
 
     @Override
-    public AtelierAbstractArrow getAtelierArrowEntity() {
-        return (AtelierAbstractArrow) getBukkitEntity();
+    public AtelierTippedArrow getAtelierArrowEntity() {
+        return (AtelierTippedArrow) getBukkitEntity();
     }
 
     @Override
-    protected net.minecraft.server.v1_16_R3.ItemStack getItemStack() {
-        return (net.minecraft.server.v1_16_R3.ItemStack) arrow.getNmsItem();
+    public @NotNull net.minecraft.world.item.ItemStack getItemStack() {
+        return arrow.nms();
     }
 }

@@ -72,7 +72,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void interactEntity(final AsyncPlayerInteractEntityEvent e) {
-        interactManager.interactEntity(e, e.getPlayer(), e.getEntity(), e.getHand(), e.isRightClick(), e.getEntityId());
+        Bukkit.getScheduler().runTask(AtelierPlugin.getPlugin(), () -> interactManager.interactEntity(e, e.getPlayer(), e.getEntity(), e.getHand(), e.isRightClick(), e.getEntityId()));
     }
 
     @EventHandler

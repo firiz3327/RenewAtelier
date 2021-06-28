@@ -4,20 +4,22 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.firiz.ateliercommonapi.FakeId;
+import net.firiz.ateliercommonapi.nms.entity.EntityData;
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.EntityStatus;
 import net.firiz.renewatelier.entity.monster.MonsterStats;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakeEntity;
-import net.firiz.renewatelier.version.packet.PacketUtils;
-import net.minecraft.server.v1_16_R3.Packet;
+import net.kyori.adventure.text.Component;
+import net.minecraft.network.protocol.Packet;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.util.WeakCollection;
+import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -29,9 +31,9 @@ import java.util.*;
 public final class HoloHealth extends AbstractHoloHealth {
 
     private static final BukkitScheduler SCHEDULER = Bukkit.getScheduler();
-    private final FakeEntity holoHp;
-    private final FakeEntity holoCustomName;
-    private final FakeEntity holoResistances;
+    private final EntityData holoHp;
+    private final EntityData holoCustomName;
+    private final EntityData holoResistances;
     private final WeakCollection<Player> sentPlayers = new WeakCollection<>();
     private final TeleportTaskList teleportTaskList = new TeleportTaskList();
     private int holoDeleteTaskId = -1;
@@ -39,9 +41,9 @@ public final class HoloHealth extends AbstractHoloHealth {
 
     public HoloHealth(@NotNull LivingEntity entity, @Nullable LivingData livingData, @NotNull String customName) {
         super(entity, livingData, customName);
-        this.holoHp = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-        this.holoCustomName = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
-        this.holoResistances = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+        this.holoHp = new EntityData(FakeId.createId(), EntityType.ARMOR_STAND);
+        this.holoCustomName = new EntityData(FakeId.createId(), EntityType.ARMOR_STAND);
+        this.holoResistances = new EntityData(FakeId.createId(), EntityType.ARMOR_STAND);
     }
 
     @Override
@@ -79,16 +81,10 @@ public final class HoloHealth extends AbstractHoloHealth {
                         if (entity.isDead()) {
                             die();
                         } else {
-                            PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
-                                    holoHp.getEntityId(), getLoc(0), false
-                            ));
-                            PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
-                                    holoCustomName.getEntityId(), getLoc(hasResistances ? 2 : 1), false
-                            ));
+                            PacketUtils.broadcast(entity, entity.getWorld(), EntityPacket.teleportPacket(holoHp.id(), getLoc(0), false));
+                            PacketUtils.broadcast(entity, entity.getWorld(), EntityPacket.teleportPacket(holoCustomName.id(), getLoc(hasResistances ? 2 : 1), false));
                             if (hasResistances) {
-                                PacketUtils.broadcast(entity, EntityPacket.getTeleportPacket(
-                                        holoResistances.getEntityId(), getLoc(1), false
-                                ));
+                                PacketUtils.broadcast(entity, entity.getWorld(), EntityPacket.teleportPacket(holoResistances.id(), getLoc(1), false));
                             }
                         }
                     },
@@ -99,18 +95,18 @@ public final class HoloHealth extends AbstractHoloHealth {
 
     private List<Packet<?>> spawn() {
         final List<Packet<?>> packets = new ObjectArrayList<>();
-        packets.add(EntityPacket.getSpawnPacket(holoHp, getLoc(0)));
+        packets.add(holoHp.spawnPacket(getLoc(0)));
         final Packet<?> packet = holoResSpawn(true);
         if (packet != null) {
             packets.add(packet);
         }
-        packets.add(EntityPacket.getSpawnPacket(holoCustomName, getLoc(hasResistances ? 2 : 1)));
+        packets.add(holoCustomName.spawnPacket(getLoc(hasResistances ? 2 : 1)));
         return packets;
     }
 
     private Packet<?> holoResSpawn(boolean changed) {
         if (hasResistances && changed) {
-            return EntityPacket.getSpawnPacket(holoResistances, getLoc(1));
+            return holoResistances.spawnPacket(getLoc(1));
         }
         return null;
     }
@@ -118,7 +114,7 @@ public final class HoloHealth extends AbstractHoloHealth {
     private List<Packet<?>> meta() {
         final List<Packet<?>> packets = new ObjectArrayList<>();
         if (hasResistances) {
-            packets.add(EntityPacket.getMessageStandMeta(entity.getWorld(), createDisplayResistances(), true).compile(holoResistances.getEntityId()));
+            packets.add(EntityData.armorStand(holoResistances, entity.getWorld(), Component.text(createDisplayResistances()), true).metaPacket());
         }
         final StringBuilder displayHp = new StringBuilder(ChatColor.RED.toString());
         displayHp.append("❤❤❤❤❤❤❤❤❤");
@@ -131,8 +127,8 @@ public final class HoloHealth extends AbstractHoloHealth {
         } else {
             displayHp.insert(Math.min(2 + insertPos, displayHp.length()), ChatColor.GRAY);
         }
-        packets.add(EntityPacket.getMessageStandMeta(entity.getWorld(), displayHp.toString(), true).compile(holoHp.getEntityId()));
-        packets.add(EntityPacket.getMessageStandMeta(entity.getWorld(), createDisplayCustomName(), true).compile(holoCustomName.getEntityId()));
+        packets.add(EntityData.armorStand(holoHp, entity.getWorld(), Component.text(displayHp.toString()), true).metaPacket());
+        packets.add(EntityData.armorStand(holoCustomName, entity.getWorld(), Component.text(createDisplayCustomName()), true).metaPacket());
         return packets;
     }
 
@@ -140,9 +136,9 @@ public final class HoloHealth extends AbstractHoloHealth {
     public void die() {
         sentPlayers.clear();
         teleportTaskList.cancel();
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoHp.getEntityId()));
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoCustomName.getEntityId()));
-        PacketUtils.broadcast(entity, EntityPacket.getDespawnPacket(holoResistances.getEntityId()));
+        PacketUtils.broadcast(entity, entity.getWorld(), holoHp.despawnPacket());
+        PacketUtils.broadcast(entity, entity.getWorld(), holoCustomName.despawnPacket());
+        PacketUtils.broadcast(entity, entity.getWorld(), holoResistances.despawnPacket());
     }
 
     private String createDisplayResistances() {

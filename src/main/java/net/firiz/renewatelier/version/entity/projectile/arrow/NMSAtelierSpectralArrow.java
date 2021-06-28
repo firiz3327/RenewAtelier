@@ -1,32 +1,27 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow;
 
-import com.google.common.base.Preconditions;
+import net.firiz.ateliercommonapi.nms.item.NMSItemStack;
 import net.firiz.renewatelier.entity.arrow.AtelierAbstractArrow;
 import net.firiz.renewatelier.entity.arrow.AtelierSpectralArrow;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.nms.VItemStack;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.world.entity.projectile.EntitySpectralArrow;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftVector;
-import org.bukkit.entity.AbstractArrow;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implements IAtelierArrow {
+public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implements INMSAtelierArrow {
 
     private CraftEntity bukkitEntity;
     private final Location location;
-    private final VItemStack bow;
-    private final VItemStack arrow;
+    private final NMSItemStack bow;
+    private final NMSItemStack arrow;
     private final LivingEntity source;
     private final float force;
     private final boolean isSkill;
@@ -45,8 +40,8 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     public NMSAtelierSpectralArrow(@NotNull Location location, @NotNull ItemStack bow, @NotNull ItemStack arrow, @NotNull LivingEntity source, float force, boolean isSkill) {
         super(((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle(), ((CraftLivingEntity) source).getHandle());
         this.location = location;
-        this.bow = VersionUtils.asVItemCopy(bow);
-        this.arrow = VersionUtils.asVItemCopy(arrow);
+        this.bow = NMSItemStack.convert(bow);
+        this.arrow = NMSItemStack.convert(arrow);
         this.source = source;
         this.force = force;
         this.isSkill = isSkill;
@@ -55,7 +50,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     @Override
     public void shoot(@Nullable Vector velocity) {
         this.velocity = velocity;
-        world.addEntity(this);
+        getWorld().addEntity(this);
         shoot(location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
     }
 
@@ -76,14 +71,14 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
 
     @Override
     @NotNull
-    public org.bukkit.inventory.ItemStack getBow() {
-        return bow.getItem();
+    public ItemStack getBow() {
+        return bow.itemStack();
     }
 
     @Override
     @NotNull
-    public org.bukkit.inventory.ItemStack getArrow() {
-        return arrow.getItem();
+    public ItemStack getArrow() {
+        return arrow.itemStack();
     }
 
     @NotNull
@@ -92,59 +87,20 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     }
 
     @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof org.bukkit.entity.Entity) {
-            super.setShooter(((CraftEntity) shooter).getHandle());
-        } else {
-            super.setShooter(null);
-        }
-
-        projectileSource = shooter;
-    }
-
-    @Override
-    public void setPickupStatus(AbstractArrow.PickupStatus status) {
-        Preconditions.checkNotNull(status, "status");
-        fromPlayer = net.minecraft.server.v1_16_R3.EntityArrow.PickupStatus.a(status.ordinal());
-    }
-
-    @Override
-    public void setFireTicks(int fireTicks) {
-        this.fireTicks = fireTicks;
-    }
-
-    @Override
-    public void setKnockbackStrength(int knockbackStrength) {
-        this.knockbackStrength = knockbackStrength;
-    }
-
-    @Override
-    public void setPierceLevel(int pierceLevel) {
-        super.setPierceLevel((byte) pierceLevel);
-    }
-
-    @Override
     @NotNull
     public ItemStack getItem() {
-        return arrow.getItem();
-    }
-
-    @Override
-    public void setVelocity(@NotNull Vector velocity) {
-        velocity.checkFinite();
-        this.setMot(CraftVector.toNMS(velocity));
-        this.velocityChanged = true;
+        return arrow.itemStack();
     }
 
     @Override
     public CraftEntity getBukkitEntity() {
         if (bukkitEntity == null) {
             bukkitEntity = new AtelierSpectralArrow(
-                    this.world.getServer(),
+                    getWorld().getCraftServer(),
                     this,
                     source,
-                    bow.getItem(),
-                    arrow.getItem(),
+                    bow.itemStack(),
+                    arrow.itemStack(),
                     force,
                     isSkill
             );
@@ -159,7 +115,7 @@ public final class NMSAtelierSpectralArrow extends EntitySpectralArrow implement
     }
 
     @Override
-    protected net.minecraft.server.v1_16_R3.ItemStack getItemStack() {
-        return (net.minecraft.server.v1_16_R3.ItemStack) arrow.getNmsItem();
+    public net.minecraft.world.item.ItemStack getItemStack() {
+        return arrow.nms();
     }
 }

@@ -2,13 +2,15 @@ package net.firiz.renewatelier.version.entity.atelier;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import javassist.*;
+import net.firiz.ateliercommonapi.MinecraftVersion;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.MinecraftVersion;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityLiving;
+import net.minecraft.world.level.World;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
 
-@MinecraftVersion("1.16")
+@MinecraftVersion("1.17")
 public enum AtelierEntityUtils {
     INSTANCE;
 
@@ -44,9 +46,11 @@ public enum AtelierEntityUtils {
             CommonUtils.logWarning(e);
         }
 
+        CommonUtils.log("atelierEntityUtils init");
         final CtClass supplier = pool.getOrNull(Supplier.class.getCanonicalName());
         supplier.setGenericSignature(Object.class.getCanonicalName());
         interfaces = new CtClass[]{supplier};
+        CommonUtils.log("created supplier CtClass");
         for (final TargetEntityTypes types : TargetEntityTypes.values()) {
             if (types.customClass == null) {
                 try {
@@ -61,11 +65,12 @@ public enum AtelierEntityUtils {
                 }
             }
         }
+        CommonUtils.log("initialized entityMap");
     }
 
     private void initEntity(EntityLiving entity, World world) {
         world.addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
-        entity.canPickUpLoot = false;
+        entity.bukkitPickUpLoot = false;
     }
 
     @NotNull
@@ -212,20 +217,20 @@ public enum AtelierEntityUtils {
             // floatだとObjectクラスとして認識してくれないので、Float.valueOfでFloatにする
             // booleanを返すとBooleanになるので、booleanValue()でbooleanへ変換
             // Entity.class
-            final String damageEntityBody = "public boolean damageEntity(net.minecraft.server.v1_16_R3.DamageSource damagesource, float f) {" +
-                    "return ((Boolean) damageEntity0001.invoke(livingData, new Object[]{damagesource, Float.valueOf(f)})).booleanValue();}";
+            final String damageEntityBody = "public boolean damageEntity(net.minecraft.world.damagesource.DamageSource source, float f) {" +
+                    "return ((Boolean) damageEntity0001.invoke(livingData, new Object[]{source, Float.valueOf(f)})).booleanValue();}";
             final CtMethod overrideDamageEntity = CtNewMethod.make(damageEntityBody, clasz);
             clasz.addMethod(overrideDamageEntity);
 
             // EntityLiving.class
-            final String dieBody = "public void die(net.minecraft.server.v1_16_R3.DamageSource damagesource) {" +
-                    "die0001.invoke(livingData, new Object[]{damagesource});}";
+            final String dieBody = "public void die(net.minecraft.world.damagesource.DamageSource source) {" +
+                    "die0001.invoke(livingData, new Object[]{source});}";
             final CtMethod overrideDie = CtNewMethod.make(dieBody, clasz);
             clasz.addMethod(overrideDie);
 
             // EntityLiving.class
-            final String dropBody = "protected void dropDeathLoot(net.minecraft.server.v1_16_R3.DamageSource damagesource, int i, boolean flag) {" +
-                    "drop0001.invoke(livingData, new Object[]{damagesource, Integer.valueOf(i), Boolean.valueOf(flag)});}";
+            final String dropBody = "protected void dropDeathLoot(net.minecraft.world.damagesource.DamageSource source, int lootingMultiplier, boolean allowDrops) {" +
+                    "drop0001.invoke(livingData, new Object[]{source, Integer.valueOf(lootingMultiplier), Boolean.valueOf(allowDrops)});}";
             final CtMethod overrideDrop = CtNewMethod.make(dropBody, clasz);
             clasz.addMethod(overrideDrop);
 

@@ -2,15 +2,23 @@ package net.firiz.renewatelier.version.entity.atelier;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.firiz.ateliercommonapi.MinecraftVersion;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.AttackResistance;
 import net.firiz.renewatelier.entity.Race;
 import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.vanilla.LivingCreeper;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.world.entity.EntityLiving;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.EntityIronGolem;
+import net.minecraft.world.entity.animal.EntitySnowman;
+import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.monster.hoglin.EntityHoglin;
+import net.minecraft.world.entity.monster.piglin.EntityPiglin;
+import net.minecraft.world.entity.monster.piglin.EntityPiglinBrute;
+import net.minecraft.world.level.World;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,8 +28,11 @@ import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public enum TargetEntityTypes {
@@ -306,7 +317,9 @@ public enum TargetEntityTypes {
     final Object2ObjectMap<AttackAttribute, AttackResistance> resistances;
 
     @Nullable
-    final String nmsEntityType;
+    final String nmsEntityTypeFieldName;
+
+    static Map<Class<?>, String> entityTypeNames;
 
     TargetEntityTypes(
             @NotNull EntityType type,
@@ -319,7 +332,7 @@ public enum TargetEntityTypes {
         this(type, clasz, race, body, entityType, name, null, resistances);
     }
 
-    @MinecraftVersion("1.16")
+    @MinecraftVersion("1.17")
     TargetEntityTypes(
             @NotNull EntityType type,
             @NotNull Class<? extends EntityLiving> clasz,
@@ -337,11 +350,13 @@ public enum TargetEntityTypes {
         this.name = name;
         this.initConsumer = initConsumer;
         this.resistances = resistances;
-        this.nmsEntityType = entityType;
+//        this.nmsEntityType = entityType;
+        this.nmsEntityTypeFieldName = getFieldName(clasz);
         if (body != null) {
-            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R3");
+            this.body = body;
+//            this.body = body.replace("$NMS", "net.minecraft.server.v1_16_R3");
         } else if (entityType != null) {
-            this.body = "{super(net.minecraft.server.v1_16_R3.EntityTypes." + entityType + ", (net.minecraft.server.v1_16_R3.World) $args[0]);}";
+            this.body = "{super(net.minecraft.world.entity.EntityTypes." + nmsEntityTypeFieldName + ", (net.minecraft.world.level.World) $args[0]);}";
         } else {
             throw new IllegalStateException("not found body code.");
         }
@@ -362,17 +377,35 @@ public enum TargetEntityTypes {
         this.body = null;
         this.customClass = customClass;
         this.resistances = resistances;
-        this.nmsEntityType = null;
+        this.nmsEntityTypeFieldName = null;
+    }
+
+    @Nullable
+    public static String getFieldName(Class<?> clasz) {
+        if (entityTypeNames == null) {
+            entityTypeNames = new Object2ObjectOpenHashMap<>();
+            final Field[] fields = EntityTypes.class.getFields();
+            Arrays.stream(fields).forEach(f -> {
+                final Class<?> type = f.getType();
+                if (type == EntityTypes.class) {
+                    entityTypeNames.put(
+                            (Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0],
+                            f.getName()
+                    );
+                }
+            });
+        }
+        return entityTypeNames.getOrDefault(clasz, null);
     }
 
     public static void check() {
         final World world = ((CraftWorld) Bukkit.getWorlds().get(0)).getHandle();
-        Arrays.stream(values()).filter(a -> a.customClass == null && a.nmsEntityType != null).forEach(a -> {
+        Arrays.stream(values()).filter(a -> a.customClass == null && a.nmsEntityTypeFieldName != null).forEach(a -> {
             try {
-                final EntityTypes<?> type = (EntityTypes<?>) EntityTypes.class.getField(a.nmsEntityType).get(null);
+                final EntityTypes<?> type = (EntityTypes<?>) EntityTypes.class.getField(a.nmsEntityTypeFieldName).get(null);
                 a.clasz.getConstructor(EntityTypes.class, World.class).newInstance(type, world);
             } catch (IllegalAccessException | NoSuchFieldException | NoSuchMethodException | InstantiationException | InvocationTargetException e) {
-                CommonUtils.logWarning("not checked " + a.nmsEntityType + ".", e);
+                CommonUtils.logWarning("not checked " + a.nmsEntityTypeFieldName + ".", e);
             }
         });
         CommonUtils.log("TargetEntityTypes check finished.");

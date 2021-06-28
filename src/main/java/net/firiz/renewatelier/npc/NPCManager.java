@@ -1,8 +1,14 @@
 package net.firiz.renewatelier.npc;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.ateliercommonapi.loop.TickRunnable;
+import net.firiz.ateliercommonapi.nms.entity.NMSLivingEntity;
+import net.firiz.ateliercommonapi.nms.entity.player.NMSPlayer;
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.ateliercommonapi.utils.pair.longs.ObjectLongNonNullMutablePair;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.server.script.conversation.NPCConversation;
@@ -11,11 +17,6 @@ import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
-import net.firiz.renewatelier.version.nms.VEntity;
-import net.firiz.renewatelier.version.nms.VEntityPlayer;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakePlayerPacket;
-import net.firiz.renewatelier.version.packet.PacketUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -75,10 +76,10 @@ public enum NPCManager {
                     if (!npc.hasViewer(player)) {
                         npc.addViewer(player);
                         if (npc.isPlayer()) {
-                            FakePlayerPacket.sendPlayer(player, Collections.singletonList(npc.getEntityPlayer()), false);
-                            FakePlayerPacket.sendSkin(player, npc.getEntityPlayer(), (byte) 127); // 127 = sublayerBitmasks
+                            PacketUtils.sendPacket(player, EntityPacket.playerPacket(Collections.singletonList(npc.getEntityPlayer()), false));
+                            PacketUtils.sendPackets(player, EntityPacket.skinPackets(npc.getEntityPlayer(), (byte) 127)); // 127 = sublayerBitmasks
                         } else {
-                            EntityPacket.sendSpawnPacketLiving(player, npc.getEntity());
+                            PacketUtils.sendPackets(player, EntityPacket.spawnLivingPackets(npc.getEntity()));
                         }
                     }
                     if (CommonUtils.distanceSq(loc, player.getLocation(), 15, 5)) {
@@ -88,13 +89,13 @@ public enum NPCManager {
                         }
                         final org.bukkit.util.Vector target = eyeLoc.toVector();
                         loc.setDirection(target.subtract(loc.toVector()));
-                        PacketUtils.sendPacket(player, EntityPacket.getLookPacket(
+                        PacketUtils.sendPacket(player, EntityPacket.lookPacket(
                                 npc.getEntityId(),
                                 loc.getPitch(),
                                 loc.getYaw(),
                                 true
                         ));
-                        PacketUtils.sendPacket(player, EntityPacket.getHeadRotationPacket(
+                        PacketUtils.sendPacket(player, EntityPacket.headRotationPacket(
                                 npc.getEntityId(),
                                 loc.getYaw()
                         ));
@@ -102,9 +103,9 @@ public enum NPCManager {
                 } else if (npc.hasViewer(player)) {
                     npc.removeViewer(player);
                     if (npc.isPlayer()) {
-                        FakePlayerPacket.sendLogout(player, Collections.singletonList(npc.getEntityPlayer()));
+                        PacketUtils.sendPackets(player, EntityPacket.logoutPlayerPacket(Collections.singletonList(npc.getEntityPlayer())));
                     } else {
-                        PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(npc.getEntityId()));
+                        PacketUtils.sendPacket(player, EntityPacket.despawnPacket(npc.getEntityId()));
                     }
                 }
             }
@@ -112,39 +113,39 @@ public enum NPCManager {
     }
 
     public void stop() {
-        final Map<World, List<VEntityPlayer>> worldFakePlayers = new Object2ObjectOpenHashMap<>();
-        final Map<World, List<Integer>> worldFakeEntities = new Object2ObjectOpenHashMap<>();
+        final Map<World, List<NMSPlayer>> worldFakePlayers = new Object2ObjectOpenHashMap<>();
+        final Map<World, IntList> worldFakeEntities = new Object2ObjectOpenHashMap<>();
         npcList.forEach(npc -> {
             if (npc.isPlayer()) {
-                final VEntityPlayer entityPlayer = npc.getEntityPlayer();
-                final World world = entityPlayer.getWorld();
+                final NMSPlayer entityPlayer = npc.getEntityPlayer();
+                final World world = entityPlayer.world();
                 if (worldFakePlayers.containsKey(world)) {
                     worldFakePlayers.get(world).add(entityPlayer);
                 } else {
-                    final List<VEntityPlayer> list = new ObjectArrayList<>();
+                    final List<NMSPlayer> list = new ObjectArrayList<>();
                     list.add(entityPlayer);
                     worldFakePlayers.put(world, list);
                 }
             } else {
-                final VEntity<?> entity = npc.getEntity();
-                final World world = entity.getWorld();
+                final NMSLivingEntity entity = npc.getEntity();
+                final World world = entity.world();
                 if (worldFakeEntities.containsKey(world)) {
-                    worldFakeEntities.get(world).add(entity.getEntityId());
+                    worldFakeEntities.get(world).add(entity.id());
                 } else {
-                    final List<Integer> list = new ObjectArrayList<>();
-                    list.add(entity.getEntityId());
+                    final IntList list = new IntArrayList();
+                    list.add(entity.id());
                     worldFakeEntities.put(world, list);
                 }
             }
         });
         Bukkit.getOnlinePlayers().forEach(player -> {
-            final List<VEntityPlayer> fakePlayers = worldFakePlayers.get(player.getWorld());
+            final List<NMSPlayer> fakePlayers = worldFakePlayers.get(player.getWorld());
             if (fakePlayers != null) {
-                FakePlayerPacket.sendLogout(player, fakePlayers);
+                PacketUtils.sendPackets(player, EntityPacket.logoutPlayerPacket(fakePlayers));
             }
-            final List<Integer> fakeEntities = worldFakeEntities.get(player.getWorld());
+            final IntList fakeEntities = worldFakeEntities.get(player.getWorld());
             if (fakeEntities != null) {
-                PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(CollectionUtils.parseInts(fakeEntities)));
+                PacketUtils.sendPackets(player, EntityPacket.despawnPackets(CollectionUtils.parseInts(fakeEntities)));
             }
         });
     }
@@ -158,7 +159,7 @@ public enum NPCManager {
     }
 
     private boolean canAction(long now, ObjectLongNonNullMutablePair<NPCConversation> scriptPlayerValue) {
-        return now - scriptPlayerValue.right() >= 100;
+        return now - scriptPlayerValue.rightLong() >= 100;
     }
 
     public boolean action(@NotNull Player player, int entityId) {

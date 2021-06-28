@@ -1,29 +1,23 @@
 package net.firiz.renewatelier.version.tab;
 
-import com.mojang.authlib.GameProfile;
-import io.papermc.paper.adventure.AdventureComponent;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.firiz.ateliercommonapi.SkinProperty;
 import net.firiz.ateliercommonapi.adventure.text.C;
 import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.loop.LoopManager;
-import net.firiz.renewatelier.utils.CommonUtils;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.packet.PacketUtils;
+import net.firiz.ateliercommonapi.nms.entity.player.PlayerInfoAction;
+import net.firiz.ateliercommonapi.nms.entity.player.PlayerInfoData;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.version.tab.contents.FriendListTabContents;
 import net.firiz.renewatelier.version.tab.contents.PartyListTabContents;
 import net.firiz.renewatelier.version.tab.contents.PlayerListTabContents;
 import net.firiz.renewatelier.version.tab.contents.StatusListTabContents;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_16_R3.EnumGamemode;
-import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class TabList {
@@ -79,45 +73,30 @@ public class TabList {
                 i++;
             }
         }
-        Bukkit.getOnlinePlayers().forEach(player -> infoPacket(player, InfoAction.ADD_PLAYER));
+        Bukkit.getOnlinePlayers().forEach(this::infoPacket);
     }
 
     public void update(Player player) {
-        infoPacket(player, InfoAction.ADD_PLAYER);
+        infoPacket(player);
     }
 
-    private void infoPacket(Player player, InfoAction action) {
-        final PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo(action.enumAction);
-        try {
-            final List b = CommonUtils.cast(VersionUtils.getFieldValue(PacketPlayOutPlayerInfo.class, packet, "b"));
-            final var infoDataConstructor = Class.forName("net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo$PlayerInfoData").getDeclaredConstructor(
-                    PacketPlayOutPlayerInfo.class, GameProfile.class, int.class, EnumGamemode.class, IChatBaseComponent.class
-            );
-            infoDataConstructor.setAccessible(true);
-            int i = 0;
-            TabContents lastTabContents = null;
-            for (TabListItem item : tabItems) {
-                final TabContents contents = item.getContents();
-                if (contents != null && contents.isUpdater()) {
-                    if (!contents.equals(lastTabContents)) {
-                        lastTabContents = contents;
-                        i = 0;
-                    }
-                    item = item.updateCopy(i, player);
-                    i++;
+    private void infoPacket(Player player) {
+        int i = 0;
+        final List<PlayerInfoData> players = new ObjectArrayList<>();
+        TabContents lastTabContents = null;
+        for (TabListItem item : tabItems) {
+            final TabContents contents = item.getContents();
+            if (contents != null && contents.isUpdater()) {
+                if (!contents.equals(lastTabContents)) {
+                    lastTabContents = contents;
+                    i = 0;
                 }
-                b.add(infoDataConstructor.newInstance(
-                        packet,
-                        item.getProfile(),
-                        item.getPing(),
-                        item.getGameMode(),
-                        new AdventureComponent(item.getListName())
-                ));
+                item = item.updateCopy(i, player);
+                i++;
             }
-            PacketUtils.sendPacket(player, packet);
-        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
-            CommonUtils.logWarning(e);
+            players.add(new PlayerInfoData(item.getProfile(), item.getPing(), item.getGameMode(), item.getListName()));
         }
+        PacketUtils.sendPacket(player, PlayerInfoAction.ADD_PLAYER.compile(players.toArray(new PlayerInfoData[0])));
     }
 
     private String countName(int sl) {
@@ -128,20 +107,6 @@ public class TabList {
         }
         sb.insert(0, "!");
         return sb.toString();
-    }
-
-    public enum InfoAction {
-        ADD_PLAYER(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER),
-        UPDATE_GAME_MODE(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_GAME_MODE),
-        UPDATE_PING(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY),
-        UPDATE_DISPLAY_NAME(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME),
-        REMOVE_PLAYER(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
-
-        private final PacketPlayOutPlayerInfo.EnumPlayerInfoAction enumAction;
-
-        InfoAction(PacketPlayOutPlayerInfo.EnumPlayerInfoAction enumAction) {
-            this.enumAction = enumAction;
-        }
     }
 
 }

@@ -11,7 +11,8 @@ import net.firiz.renewatelier.version.entity.atelier.holo.AbstractHoloHealth;
 import net.firiz.renewatelier.version.entity.atelier.holo.HoloBossHealth;
 import net.firiz.renewatelier.version.entity.atelier.holo.HoloHealth;
 import net.firiz.renewatelier.version.entity.drop.PlayerDropItem;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityLiving;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
@@ -86,6 +87,7 @@ public class LivingData {
         } else {
             holoHealth = new HoloHealth(bukkit, this, displayName.toString());
         }
+        wrapEntity.aU = 0; // maxNoDamageTicks default=20
     }
 
     @NotNull
@@ -165,7 +167,7 @@ public class LivingData {
                 params
         ));
         if (wrapEntity.getHealth() > 0 && (!hasStats() || stats.getHp() > 0)) {
-            wrapEntity.noDamageTicks = 0;
+//            wrapEntity.noDamageTicks = 0;
             holoHealth.holo();
         }
         return result;

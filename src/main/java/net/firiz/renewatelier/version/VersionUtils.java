@@ -3,15 +3,11 @@ package net.firiz.renewatelier.version;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.ArrayUtils;
-import net.firiz.renewatelier.version.nms.VItemStack;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_16_R3.ChatMessage;
-import net.minecraft.server.v1_16_R3.EntityItem;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
+import net.minecraft.world.entity.item.EntityItem;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author firiz
@@ -52,44 +49,30 @@ public class VersionUtils {
         }
     }
 
-    public static Object createNBTTagCompound() {
-        return new NBTTagCompound();
-    }
-
-    public static Object createChatMessage(final String msg) {
-        return new ChatMessage(msg);
-    }
-
-    public static TextComponent createTextComponent(final String msg) {
-        return new TextComponent(msg);
-    }
-
-    public static VItemStack asVItemCopy(final ItemStack item) {
-        return new VItemStack(CraftItemStack.asNMSCopy(item));
-    }
-
-    public static net.minecraft.server.v1_16_R3.ItemStack asNMSCopy(final ItemStack item) {
-        return CraftItemStack.asNMSCopy(item);
-    }
-
-    public static ItemStack asItem(final VItemStack item) {
-        final net.minecraft.server.v1_16_R3.ItemStack nms = (net.minecraft.server.v1_16_R3.ItemStack) item.getNmsItem();
-        return CraftItemStack.asBukkitCopy(nms);
-    }
-
-    public static ItemStack asItem(final net.minecraft.server.v1_16_R3.ItemStack item) {
-        return CraftItemStack.asBukkitCopy(item);
-    }
-
     public static Item drop(@NotNull final Location location, @NotNull final ItemStack item, @NotNull final CreatureSpawnEvent.SpawnReason reason) {
         Objects.requireNonNull(location);
         Objects.requireNonNull(item);
         Objects.requireNonNull(reason);
         final CraftWorld world = (CraftWorld) Objects.requireNonNull(location.getWorld());
         EntityItem entity = new EntityItem(world.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(item));
-        entity.pickupDelay = 10;
+        /*
+        if (this.pickupDelay != 32767) {
+            this.pickupDelay -= elapsedTicks;
+        }
+         */
+        entity.ap = 10; // pickupDelay
         world.getHandle().addEntity(entity, reason);
-        return new CraftItem(world.getHandle().getServer(), entity);
+        return (Item) entity.getBukkitEntity();
+    }
+
+    public static Optional<Field> getFieldNoSuchField(Object object, String name) {
+        try {
+            final Field field = object.getClass().getDeclaredField(name);
+            field.setAccessible(true);
+            return Optional.of(field);
+        } catch (NoSuchFieldException e) {
+            return Optional.empty();
+        }
     }
 
     @NotNull
@@ -226,8 +209,7 @@ public class VersionUtils {
     }
 
     /**
-     *
-     * @param clasz targetClass
+     * @param clasz      targetClass
      * @param parameters require LinkedHashMap or ?2?LinkedOpenHashMap
      * @return created instance
      */

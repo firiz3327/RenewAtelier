@@ -4,14 +4,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-public interface IAtelierProjectile {
+public interface INMSAtelierProjectile {
 
     void shoot(Vector velocity);
 
     LivingEntity getSource();
 
     ItemStack getItem();
-
-    void setVelocity(Vector velocity);
 
 }

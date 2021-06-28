@@ -16,6 +16,7 @@ import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.tab.TabList;
 import net.firiz.renewatelier.world.MyRoomManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -111,7 +112,7 @@ public final class AtelierPlugin extends JavaPlugin {
         final AtelierEntityUtils aEntityUtils = AtelierEntityUtils.INSTANCE;
         getServer().getWorlds().forEach(world -> world.getEntities().forEach(entity -> {
             if (entity instanceof Player) {
-                ((Player) entity).kickPlayer("server reloading.");
+                ((Player) entity).kick(Component.text("server reloading."));
             } else if (entity instanceof LivingEntity && aEntityUtils.hasLivingData(entity)) {
                 entity.remove();
             }

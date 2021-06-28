@@ -1,20 +1,20 @@
 package net.firiz.renewatelier.version.entity.atelier.vanilla;
 
-import net.firiz.renewatelier.version.MinecraftVersion;
+import net.firiz.ateliercommonapi.MinecraftVersion;
 import net.firiz.renewatelier.version.entity.atelier.EntitySupplier;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import net.minecraft.server.v1_16_R3.DamageSource;
-import net.minecraft.server.v1_16_R3.EntityCreeper;
-import net.minecraft.server.v1_16_R3.EntityTypes;
-import net.minecraft.server.v1_16_R3.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.monster.EntityCreeper;
+import net.minecraft.world.level.World;
 
-@MinecraftVersion("1.16")
+@MinecraftVersion("1.17")
 public class LivingCreeper extends EntityCreeper implements EntitySupplier {
 
     private LivingData livingData;
 
     public LivingCreeper(World world) {
-        super(EntityTypes.CREEPER, world);
+        super(EntityTypes.o, world);
     }
 
     @Override

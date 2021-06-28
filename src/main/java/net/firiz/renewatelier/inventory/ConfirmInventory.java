@@ -7,10 +7,10 @@ import java.util.function.ObjIntConsumer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.firiz.ateliercommonapi.adventure.text.Text;
+import net.firiz.ateliercommonapi.nms.packet.InventoryPacket;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.firiz.renewatelier.version.packet.InventoryPacket;
-import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -45,7 +45,7 @@ public final class ConfirmInventory implements ParamInventory<ConfirmInventory.C
             consumers.put(uuid, new ObjectObjectImmutablePair<>(info.title, info.consumer));
         }
         player.openInventory(inv);
-        InventoryPacket.update(player, info.title, InventoryPacketType.HOPPER);
+        InventoryPacket.update(player, Component.text(info.title), InventoryPacket.InventoryPacketType.HOPPER);
     }
 
     @Override

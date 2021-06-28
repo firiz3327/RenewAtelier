@@ -1,10 +1,10 @@
 package net.firiz.renewatelier.version.entity.horse;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.decoration.EntityArmorStand;
+import net.minecraft.world.level.World;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class NMSHorseTwoSeater extends EntityArmorStand {
@@ -12,7 +12,7 @@ public class NMSHorseTwoSeater extends EntityArmorStand {
     private final NMSAtelierHorse horse;
 
     protected NMSHorseTwoSeater(World world, NMSAtelierHorse horse) {
-        super(EntityTypes.ARMOR_STAND, world);
+        super(EntityTypes.c, world);
         this.horse = horse;
         init();
     }
@@ -24,22 +24,18 @@ public class NMSHorseTwoSeater extends EntityArmorStand {
     }
 
     public boolean hasRider() {
-        return !passengers.isEmpty();
+        return !getPassengers().isEmpty();
     }
 
     @Override
     public void tick() {
-        // entity.class tick
-        if (!this.world.isClientSide) {
-            this.setFlag(6, this.bE());
-        }
         this.entityBaseTick();
     }
 
     protected void spawn(Player player) {
         final Location location = player.getLocation();
         setPosition(location.getX(), location.getY(), location.getZ());
-        world.addEntity(this);
+        getWorld().addEntity(this);
         ((CraftPlayer) player).getHandle().startRiding(this);
     }
 }

@@ -1,22 +1,20 @@
 package net.firiz.renewatelier.notification;
 
+import net.firiz.ateliercommonapi.nms.item.NMSItemStack;
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.version.nms.NMSEntityUtils;
-import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.packet.NotificationPacket;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 /**
  * @author firiz
@@ -60,25 +58,10 @@ public final class Notification {
     }
 
     public static void recipeNotification(final Player player, final ItemStack item) {
-        final String itemId = VersionUtils.asVItemCopy(item).getMinecraftId();
-        NotificationPacket.sendRecipe(player, itemId, false); // add
+        final String itemId = NMSItemStack.getMinecraftId(item);
+        PacketUtils.sendPacket(player, EntityPacket.recipePacket(itemId, false)); // add
         if (!NMSEntityUtils.hasRecipe(player, itemId)) {
-            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> NotificationPacket.sendRecipe(player, itemId, true), 2); // 0.1 sec
-        }
-    }
-
-    @Deprecated
-    public static void advancementNotification(final Player player, final String id) {
-        NotificationPacket.sendAdvancement(player, id, false); // add
-
-        // java.lang.IllegalArgumentException: advancement
-        if (!player.getAdvancementProgress(
-                Objects.requireNonNull(Bukkit.getAdvancement(new NamespacedKey(
-                        AtelierPlugin.getPlugin(),
-                        id.replace("minecraft:", "")
-                )))
-        ).isDone()) {
-            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> NotificationPacket.sendAdvancement(player, id, true), 2); // 0.1 sec
+            Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), () -> PacketUtils.sendPacket(player, EntityPacket.recipePacket(itemId, true)), 2); // 0.1 sec
         }
     }
 

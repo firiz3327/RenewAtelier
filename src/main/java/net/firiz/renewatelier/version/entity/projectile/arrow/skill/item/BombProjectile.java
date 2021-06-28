@@ -1,11 +1,12 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow.skill.item;
 
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.version.entity.projectile.arrow.skill.SkillProjectile;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.PacketUtils;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.network.protocol.Packet;
 import org.bukkit.Location;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
@@ -23,7 +24,7 @@ public class BombProjectile extends SkillProjectile implements IBombProjectile {
         this.effect = effect;
         this.hitEntity = hitEntity;
         this.hitBlock = hitBlock;
-        this.fromPlayer = PickupStatus.DISALLOWED;
+        getBukkitEntity().setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
         setSilent(true);
         setInvisible(true);
     }
@@ -31,7 +32,7 @@ public class BombProjectile extends SkillProjectile implements IBombProjectile {
     @Override
     public BombProjectile spawn(Location location) {
         super.spawn(location);
-        final Packet<?> despawnPacket = EntityPacket.getDespawnPacket(getId());
+        final Packet<?> despawnPacket = EntityPacket.despawnPacket(getId());
         location.getNearbyPlayers(50).forEach(player -> PacketUtils.sendPacket(player, despawnPacket));
         return this;
     }

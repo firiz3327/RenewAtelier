@@ -1,12 +1,10 @@
 package net.firiz.renewatelier.version.tab.contents;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.nms.MinecraftConverter;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.version.tab.TabListItem;
-import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -18,11 +16,11 @@ public class PlayerListTabContents implements TabContents {
         final List<Player> onlinePlayers = new ObjectArrayList<>(Bukkit.getOnlinePlayers());
         if (slot < onlinePlayers.size()) {
             final Player slotPlayer = onlinePlayers.get(slot);
-            final EntityPlayer slotEntityPlayer = ((CraftPlayer) slotPlayer).getHandle();
-            item.modifyListName(slotEntityPlayer.adventure$displayName);
-            item.modifyPing(slotEntityPlayer.ping);
+            final var slotEntityPlayer = MinecraftConverter.convert(slotPlayer);
+            item.modifyListName(slotEntityPlayer.displayName());
+            item.modifyPing(slotEntityPlayer.ping());
             item.modifyGameMode(slotPlayer.getGameMode());
-            item.modifyTextures(slotEntityPlayer.getProfile());
+            item.modifyTextures(slotEntityPlayer.profile());
         } else {
             item.resetTabItem();
         }

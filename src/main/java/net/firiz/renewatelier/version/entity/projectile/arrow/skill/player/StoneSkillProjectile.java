@@ -1,6 +1,5 @@
 package net.firiz.renewatelier.version.entity.projectile.arrow.skill.player;
 
-import com.google.common.base.Preconditions;
 import net.firiz.renewatelier.damage.AttackAttribute;
 import net.firiz.renewatelier.damage.DamageUtilV2;
 import net.firiz.renewatelier.entity.player.Char;
@@ -8,17 +7,18 @@ import net.firiz.renewatelier.skills.character.skill.bow.StoneShootSkill;
 import net.firiz.renewatelier.utils.Randomizer;
 import net.firiz.renewatelier.utils.minecraft.EntityUtils;
 import net.firiz.renewatelier.version.entity.projectile.arrow.skill.SkillProjectile;
-import net.minecraft.server.v1_16_R3.EntityFallingBlock;
+import net.minecraft.world.entity.item.EntityFallingBlock;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_16_R3.util.CraftVector;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftFallingBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -29,6 +29,8 @@ public class StoneSkillProjectile extends SkillProjectile {
 
     private boolean shoot;
     private int diedBlocks = 2;
+
+    // this.R(1.17) = this.ticksLived(1.16)
 
     // 構えながらESC押して切断したら、矢が残り続けるバグ
 
@@ -51,13 +53,13 @@ public class StoneSkillProjectile extends SkillProjectile {
     public void tick() {
         super.tick();
         if (getPlayer() == null || !getPlayer().getPlayer().isOnline()) {
-            die();
+            dieAll();
             return;
         }
-        if (!shoot && ticksLived % 40 == 0 && diedBlocks != 0) {
+        if (!shoot && this.R % 40 == 0 && diedBlocks != 0) {
             final SkillFallingBlock block = skillFallingBlocks[diedBlocks];
             block.die();
-            final World world = this.world.getWorld();
+            final World world = getWorld().getWorld();
             final Location location = new Location(world, block.locX(), block.locY(), block.locZ());
             for (int i = 0; i < 3; i++) {
                 world.playSound(location, Sound.BLOCK_STONE_BREAK, 1.5f, 0.8f);
@@ -95,7 +97,7 @@ public class StoneSkillProjectile extends SkillProjectile {
                     mob,
                     1,
                     Arrays.stream(skillFallingBlocks)
-                            .filter(net.minecraft.server.v1_16_R3.Entity::isAlive)
+                            .filter(net.minecraft.world.entity.Entity::isAlive)
                             .count() * 40D
             );
             mob.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 0)); // 2秒
@@ -114,8 +116,7 @@ public class StoneSkillProjectile extends SkillProjectile {
         }
     }
 
-    @Override
-    public void die() {
+    public void dieAll() {
         super.die();
         for (final SkillFallingBlock block : skillFallingBlocks) {
             if (block.isAlive()) {
@@ -142,6 +143,7 @@ public class StoneSkillProjectile extends SkillProjectile {
     public static class SkillFallingBlock extends EntityFallingBlock {
 
         private final BlockData blockData;
+        private CraftFallingBlock bukkitEntity;
 
         public SkillFallingBlock(Location location, BlockData blockData) {
             super(
@@ -153,25 +155,30 @@ public class StoneSkillProjectile extends SkillProjectile {
             );
             this.blockData = blockData;
             setNoGravity(true);
-            ticksLived = 580;
-            dropItem = false;
+            this.R = 580;
+            this.c = false; // dropItem
         }
 
         @Override
         public void tick() {
-            ticksLived = 580;
+            this.R = 580;
         }
 
         public void spawn() {
-            world.addEntity(this);
+            getWorld().addEntity(this);
         }
 
         public void setVelocity(Vector velocity) {
             setNoGravity(false);
-            Preconditions.checkArgument(velocity != null, "velocity");
-            velocity.checkFinite();
-            setMot(CraftVector.toNMS(velocity));
-            velocityChanged = true;
+            getBukkitEntity().setVelocity(velocity);
+        }
+
+        @Override
+        public @NotNull CraftFallingBlock getBukkitEntity() {
+            if (bukkitEntity == null) {
+                bukkitEntity = new CraftFallingBlock(getWorld().getCraftServer(), this);
+            }
+            return bukkitEntity;
         }
     }
 

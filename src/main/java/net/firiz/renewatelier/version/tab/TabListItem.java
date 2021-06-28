@@ -8,7 +8,6 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.utils.java.CObjects;
 import net.firiz.renewatelier.version.tab.contents.TabContents;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,19 +28,19 @@ public class TabListItem {
     @NotNull
     private Component listName;
     @NotNull
-    private EnumGamemode gameMode;
+    private GameMode gameMode;
 
     public TabListItem(int slot, String name) {
         this.profile = new GameProfile(new UUID(slot, slot), name);
         this.ping = 32;
         this.listName = Component.empty();
-        this.gameMode = EnumGamemode.CREATIVE;
+        this.gameMode = GameMode.CREATIVE;
     }
 
     /**
      * 個別プレイヤー用にTabListItem作成用コンストラクタ
      */
-    private TabListItem(@NotNull GameProfile profile, int ping, @NotNull Component listName, @NotNull EnumGamemode gameMode) {
+    private TabListItem(@NotNull GameProfile profile, int ping, @NotNull Component listName, @NotNull GameMode gameMode) {
         this.profile = profile;
         this.ping = ping;
         this.listName = listName;
@@ -88,7 +87,7 @@ public class TabListItem {
     }
 
     @NotNull
-    public EnumGamemode getGameMode() {
+    public GameMode getGameMode() {
         return gameMode;
     }
 
@@ -109,7 +108,7 @@ public class TabListItem {
     }
 
     public void modifyGameMode(@NotNull GameMode gameMode) {
-        this.gameMode = EnumGamemode.valueOf(Objects.requireNonNull(gameMode).name());
+        this.gameMode = gameMode;
     }
 
 }

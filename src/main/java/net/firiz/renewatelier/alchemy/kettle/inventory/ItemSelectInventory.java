@@ -3,6 +3,7 @@ package net.firiz.renewatelier.alchemy.kettle.inventory;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.ateliercommonapi.adventure.text.C;
 import net.firiz.ateliercommonapi.adventure.text.Lore;
+import net.firiz.ateliercommonapi.nms.packet.InventoryPacket;
 import net.firiz.renewatelier.alchemy.RequireAmountMaterial;
 import net.firiz.renewatelier.alchemy.kettle.KettleManager;
 import net.firiz.renewatelier.alchemy.kettle.KettleUserData;
@@ -14,8 +15,6 @@ import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.inventory.item.CustomModelMaterial;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
-import net.firiz.renewatelier.version.packet.InventoryPacket;
-import net.firiz.renewatelier.version.packet.InventoryPacket.InventoryPacketType;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -67,7 +66,7 @@ public final class ItemSelectInventory implements BiParamInventory<AlchemyRecipe
         KETTLE_MANAGER.getUserData(player.getUniqueId()).createPageItemSize(recipe.getReqMaterial().size());
         setItemSelectNumber(player, inv, recipe, 0);
         player.openInventory(inv);
-        InventoryPacket.update(player, "", InventoryPacketType.CHEST);
+        InventoryPacket.update(player, Component.text(""), InventoryPacket.InventoryPacketType.CHEST);
     }
 
     private void setItemSelectNumber(final Player player, final Inventory inv, final AlchemyRecipe recipe, final int add_page) {

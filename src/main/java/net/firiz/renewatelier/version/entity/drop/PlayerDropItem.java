@@ -1,12 +1,15 @@
 package net.firiz.renewatelier.version.entity.drop;
 
-import net.firiz.renewatelier.version.VersionUtils;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.minecraft.server.v1_16_R3.*;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
+import net.firiz.ateliercommonapi.nms.MinecraftConverter;
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.WorldServer;
+import net.minecraft.world.entity.item.EntityItem;
+import net.minecraft.world.entity.player.EntityHuman;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 public class PlayerDropItem extends EntityItem {
@@ -18,11 +21,10 @@ public class PlayerDropItem extends EntityItem {
             org.bukkit.Location location,
             org.bukkit.inventory.ItemStack itemStack
     ) {
-        super(((CraftWorld) location.getWorld()).getHandle(), location.getX(), location.getY(), location.getZ());
+        super(((CraftWorld) location.getWorld()).getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         this.setOwner(targetPlayer.getUniqueId());
-        this.despawnPacket = EntityPacket.getDespawnPacket(this.getId());
-        this.age = 4800; // 生存時間 1分 (6000で消滅するため)
-        setItemStack(VersionUtils.asNMSCopy(itemStack));
+        this.despawnPacket = EntityPacket.despawnPacket(this.getId());
+        this.ao = 4800; // ao = age 生存時間 1分 (6000で消滅するため)
     }
 
     public static boolean isPlayerDrop(org.bukkit.entity.Item item) {
@@ -30,15 +32,11 @@ public class PlayerDropItem extends EntityItem {
     }
 
     public void drop() {
-        final WorldServer world = (WorldServer) this.world;
+        final WorldServer world = (WorldServer) getWorld();
         world.addEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
-        final PlayerChunkMap.EntityTracker entityTracker = world.getChunkProvider().playerChunkMap.trackedEntities.get(this.getId());
-        if (entityTracker != null) {
-            entityTracker.trackedPlayers
-                    .stream()
-                    .filter(player -> player.getUniqueID() != this.getOwner())
-                    .forEach(player -> player.playerConnection.sendPacket(despawnPacket));
-        }
+        PacketUtils.trackPlayer(this).stream()
+                .filter(player -> player.getUniqueId() != this.getOwner())
+                .forEach(player -> MinecraftConverter.connection(player).sendPacket(despawnPacket));
     }
 
     @Override

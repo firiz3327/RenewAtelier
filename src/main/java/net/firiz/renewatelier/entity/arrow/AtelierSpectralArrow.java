@@ -1,12 +1,11 @@
 package net.firiz.renewatelier.entity.arrow;
 
 import net.firiz.renewatelier.version.entity.projectile.arrow.NMSAtelierSpectralArrow;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftSpectralArrow;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftSpectralArrow;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.SpectralArrow;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -62,41 +61,6 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     }
 
     @Override
-    public boolean isInWater() {
-        return getHandle().isInWater();
-    }
-
-    @Override
-    public boolean isInRain() {
-        return getHandle().isInRain();
-    }
-
-    @Override
-    public boolean isInBubbleColumn() {
-        return getHandle().isInBubbleColumn();
-    }
-
-    @Override
-    public boolean isInWaterOrRain() {
-        return getHandle().isInWaterOrRain();
-    }
-
-    @Override
-    public boolean isInWaterOrBubbleColumn() {
-        return getHandle().isInWaterOrBubbleColumn();
-    }
-
-    @Override
-    public boolean isInWaterOrRainOrBubbleColumn() {
-        return getHandle().isInWaterOrRainOrBubble();
-    }
-
-    @Override
-    public boolean isInLava() {
-        return getHandle().isInLava();
-    }
-
-    @Override
     public LivingEntity getSource() {
         return source;
     }
@@ -126,14 +90,5 @@ public class AtelierSpectralArrow extends CraftSpectralArrow implements AtelierA
     @Override
     public CraftItemStack getItemStack() {
         return CraftItemStack.asCraftCopy(getArrow());
-    }
-
-    @Override
-    public @Nullable Component customName() {
-        return null;
-    }
-
-    @Override
-    public void customName(@Nullable Component component) {
     }
 }

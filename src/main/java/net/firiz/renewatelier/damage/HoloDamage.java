@@ -1,6 +1,9 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.ateliercommonapi.FakeId;
+import net.firiz.ateliercommonapi.nms.entity.EntityData;
+import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
+import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.entity.player.CharSettings;
@@ -8,13 +11,12 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import net.firiz.renewatelier.version.packet.EntityPacket;
-import net.firiz.renewatelier.version.packet.FakeEntity;
-import net.firiz.renewatelier.version.packet.PacketUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -52,7 +54,7 @@ final class HoloDamage {
                 }
                 allDamage += damage;
             }
-            final FakeEntity fakeEntity = new FakeEntity(FakeId.createId(), FakeEntity.FakeEntityType.ARMOR_STAND, 0);
+            final EntityData data = new EntityData(FakeId.createId(), EntityType.ARMOR_STAND);
             Bukkit.getScheduler().scheduleSyncDelayedTask(
                     AtelierPlugin.getPlugin(),
                     () -> {
@@ -61,11 +63,11 @@ final class HoloDamage {
                             final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player).getSettings();
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
                             if (showDamage) {
-                                PacketUtils.sendPacket(player, EntityPacket.getSpawnPacket(fakeEntity, location));
-                                PacketUtils.sendPacket(player, EntityPacket.getMessageStandMeta(player.getWorld(), viewDamage, true).compile(fakeEntity.getEntityId()));
+                                EntityData.armorStand(data, location.getWorld(), Component.text(viewDamage), true);
+                                PacketUtils.sendPackets(player, data.packet(location));
                                 Bukkit.getScheduler().runTaskLater(
                                         AtelierPlugin.getPlugin(),
-                                        () -> PacketUtils.sendPacket(player, EntityPacket.getDespawnPacket(fakeEntity.getEntityId())),
+                                        () -> PacketUtils.sendPacket(player, EntityPacket.despawnPacket(data.id())),
                                         10
                                 );
                             }
