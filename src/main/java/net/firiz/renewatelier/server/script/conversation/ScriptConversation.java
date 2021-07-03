@@ -6,6 +6,7 @@ import javax.script.Invocable;
 import javax.script.ScriptException;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.AtelierPlugin;
 import net.firiz.renewatelier.alchemy.material.*;
 import net.firiz.renewatelier.characteristic.Characteristic;
@@ -23,7 +24,7 @@ import net.firiz.renewatelier.quest.QuestStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.firiz.renewatelier.world.MyRoomManager;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -142,7 +143,7 @@ public class ScriptConversation {
     }
 
     @Export
-    public String getQuestName(final String questId) {
+    public Component getQuestName(final String questId) {
         return Quest.getQuest(questId).getName();
     }
 
@@ -151,19 +152,24 @@ public class ScriptConversation {
         return UUID.fromString(uuid);
     }
 
-//    @Export
-//    public String createStridColor(final String str) {
-//        return Chore.createStridColor(str);
-//    }
-//
-//    @Export
-//    public String getStridColor(final String str) {
-//        return Chore.getStridColor(str);
-//    }
+    @Export
+    public Text text() {
+        return Text.empty();
+    }
 
     @Export
-    public String chatColor(final String str) {
-        return ChatColor.translateAlternateColorCodes('&', str);
+    public Text text(final String text) {
+        return Text.of(text);
+    }
+
+    @Export
+    public Text chatColor(final String str) {
+        return Text.translateColor(str);
+    }
+
+    @Export
+    public String plain(Component component) {
+        return Text.plain(component);
     }
 
     @Export
@@ -196,7 +202,7 @@ public class ScriptConversation {
         inventoryManager.getInventory(ConfirmInventory.class).open(
                 player,
                 new ConfirmInventory.ConfirmInfo(
-                        ChatColor.translateAlternateColorCodes('&', title),
+                        Text.translateColor(title),
                         yes,
                         no,
                         (final Player player1, final int select) -> {

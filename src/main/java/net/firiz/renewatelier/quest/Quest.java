@@ -3,9 +3,11 @@ package net.firiz.renewatelier.quest;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.config.QuestLoader;
 import net.firiz.renewatelier.quest.result.QuestResult;
+import net.kyori.adventure.text.Component;
 
 /**
  *
@@ -16,15 +18,17 @@ public class Quest {
     private static final ConfigManager CONFIG_MANAGER = ConfigManager.INSTANCE;
     private static List<Quest> importantQuests;
     private final String id;
-    private final String name;
+    private final Component name;
+    private final String plain$name;
     private final String[] description;
     private final String nextQuestId;
     private final boolean important;
     private final List<QuestResult> results;
 
-    public Quest(String id, String name, String[] description, String nextQuestId, boolean important, List<QuestResult> results) {
+    public Quest(String id, Component name, String[] description, String nextQuestId, boolean important, List<QuestResult> results) {
         this.id = id;
         this.name = name;
+        this.plain$name = Text.plain(name);
         this.description = description;
         this.nextQuestId = nextQuestId;
         this.important = important;
@@ -52,7 +56,7 @@ public class Quest {
         return id;
     }
 
-    public String getName() {
+    public Component getName() {
         return name;
     }
 

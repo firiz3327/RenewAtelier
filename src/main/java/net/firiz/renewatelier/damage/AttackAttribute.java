@@ -1,7 +1,6 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.ateliercommonapi.adventure.text.C;
-import org.bukkit.ChatColor;
 
 public enum AttackAttribute {
     NONE("無", ""),
@@ -9,29 +8,26 @@ public enum AttackAttribute {
     BLOW("打撃", "⒥"),
     THRUST("突撃", "⒦"),
     MAGIC("魔法", "⒧"),
-    FIRE("炎", "⒨", ChatColor.RED, C.RED),
-    ICE("氷", "⒩", ChatColor.BLUE, C.BLUE),
-    LIGHTNING("雷", "⒪", ChatColor.YELLOW, C.YELLOW),
-    ABNORMAL("状態異常", "⒫", ChatColor.LIGHT_PURPLE, C.LIGHT_PURPLE),
-    HEAL("回復", "", ChatColor.GREEN, C.GREEN);
+    FIRE("炎", "⒨", C.RED),
+    ICE("氷", "⒩", C.BLUE),
+    LIGHTNING("雷", "⒪", C.YELLOW),
+    ABNORMAL("状態異常", "⒫", C.LIGHT_PURPLE),
+    HEAL("回復", "", C.GREEN);
 
     private final String name;
     private final String icon;
-    private final ChatColor color;
-    private final C color2;
+    private final C color;
 
     AttackAttribute(String name, String icon) {
         this.name = name;
         this.icon = icon;
-        this.color = ChatColor.WHITE;
-        this.color2 = C.WHITE;
+        this.color = C.WHITE;
     }
 
-    AttackAttribute(String name, String icon, ChatColor color, C color2) {
+    AttackAttribute(String name, String icon, C color) {
         this.name = name;
         this.icon = icon;
         this.color = color;
-        this.color2 = color2;
     }
 
     public String getName() {
@@ -46,12 +42,8 @@ public enum AttackAttribute {
         return !icon.isEmpty();
     }
 
-    public ChatColor getColor() {
+    public C getColor() {
         return color;
-    }
-
-    public C getColor2() {
-        return color2;
     }
 
     public static boolean isPhysicalAttack(AttackAttribute attackAttribute) {

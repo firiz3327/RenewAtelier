@@ -1,8 +1,11 @@
 package net.firiz.renewatelier.server.script.conversation;
 
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.npc.MessageObject;
 import net.firiz.renewatelier.npc.NPC;
 import net.firiz.renewatelier.npc.NPCManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -40,7 +43,7 @@ public final class NPCConversation extends ScriptConversation {
 
     @NotNull
     @Export
-    public String getNPCName() {
+    public Component getNPCName() {
         return npc.getName();
     }
 
@@ -107,19 +110,34 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void sendNext(@NotNull final String prefix, @NotNull final String suffix, @NotNull final String text) {
-        player.sendMessage(prefix + text + suffix);
-        messageObject.messagePacket(chatColor(text));
+        sendNext(chatColor(prefix), chatColor(suffix), chatColor(text));
+    }
+
+    @Export
+    public void sendNext(@NotNull final Component prefix, @NotNull final Component text) {
+        sendNext(prefix, Text.empty(), text);
+    }
+
+    @Export
+    public void sendNext(@NotNull final Component prefix, @NotNull final Component suffix, @NotNull final Component text) {
+        player.sendMessage(prefix.append(text).append(suffix));
+        messageObject.messagePacket(text);
     }
 
     @Export
     public void sendNpcChat(@NotNull final String msg, final int maxStatus, final int status) {
-        final StringBuilder val = new StringBuilder();
+        final Text prefix = Text.of("[").color(C.GRAY);
         for (int i = 0; i < maxStatus; i++) {
-            val.append(i <= status ? "&a●" : "&7●");
+            prefix.append("●").color(i <= status ? C.GREEN : C.GRAY);
+        }
+        prefix.append("] ").append(getNPCName()).color(C.DARK_GREEN).append(" ");
+        final Component msgComponent = chatColor(msg);
+        if(msgComponent.color() == null) {
+            msgComponent.color(C.GREEN);
         }
         sendNext(
-                chatColor(val.insert(0, "&7[").append("&7] &2").append(getNPCName()).append(" ").toString()),
-                chatColor("&a" + msg)
+                prefix,
+                msgComponent
         );
     }
 

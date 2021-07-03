@@ -127,10 +127,9 @@ public final class QuestBook {
         }
         final TextComponent.Builder builder = Component.text().append(
                 Component.text("【")
-                        .append(
-                                Component.text(quest.getName())
-                                        .color(color)
-                                        .hoverEvent(Component.text(flagText))
+                        .append(quest.getName()
+                                .color(color)
+                                .hoverEvent(Component.text(flagText))
                         )
                         .append(Component.text("】\n\n"))
         );

@@ -4,7 +4,6 @@ import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.inventory.manager.InventoryManager;
 import net.firiz.renewatelier.version.minecraft.ReplaceVanillaItems;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

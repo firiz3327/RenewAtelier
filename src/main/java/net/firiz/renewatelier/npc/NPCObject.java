@@ -1,12 +1,12 @@
 package net.firiz.renewatelier.npc;
 
 import net.firiz.ateliercommonapi.SkinProperty;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.nms.entity.NMSLivingEntity;
 import net.firiz.ateliercommonapi.nms.entity.NMSVillager;
 import net.firiz.ateliercommonapi.nms.entity.player.NMSPlayer;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.java.CObjects;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -80,7 +80,7 @@ public class NPCObject {
     }
 
     protected NPC createNPC() {
-        final String colorName = ChatColor.translateAlternateColorCodes('&', name);
+        final Text colorName = Text.translateColor(name);
         final Location location = new Location(world, x, y, z);
         final NPC npc;
         switch (entityType) {
@@ -103,8 +103,9 @@ public class NPCObject {
                                 location.getWorld(),
                                 location,
                                 skinProperty,
-                                colorName
+                                colorName.plain()
                         ));
+                        npc.getEntityPlayer().displayName(colorName);
                         break;
                     }
                 }
@@ -112,8 +113,9 @@ public class NPCObject {
                         location.getWorld(),
                         location,
                         uuid,
-                        colorName
+                        colorName.plain()
                 ));
+                npc.getEntityPlayer().displayName(colorName);
             }
             default -> npc = new NPC(this, NMSLivingEntity.createLiving(location, colorName, entityType));
         }

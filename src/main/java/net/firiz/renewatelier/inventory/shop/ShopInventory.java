@@ -1,6 +1,7 @@
 package net.firiz.renewatelier.inventory.shop;
 
 import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.nms.packet.InventoryPacket;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
@@ -8,7 +9,6 @@ import net.firiz.renewatelier.inventory.manager.BiParamInventory;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.*;
@@ -48,7 +48,7 @@ public final class ShopInventory implements BiParamInventory<String, List<ShopIt
         player.openInventory(inv);
         InventoryPacket.update(
                 player,
-                Component.text(ChatColor.translateAlternateColorCodes('&', title)),
+                Text.translateColor(title),
                 InventoryPacket.InventoryPacketType.CHEST
         );
     }

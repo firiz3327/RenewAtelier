@@ -3,13 +3,14 @@ package net.firiz.renewatelier.version.minecraft;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import net.firiz.ateliercommonapi.MinecraftVersion;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Lore;
 import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.*;
@@ -142,19 +143,19 @@ public class ReplaceVanillaItems {
     }
 
     private static void changeArmorLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
-        final List<String> lore = new ObjectArrayList<>();
-        lore.add(ChatColor.GRAY + "防御力: " + GameConstants.getItemDefense(item.getType()));
-        meta.setLore(lore);
+        final Lore lore = new Lore();
+        lore.add("防御力: " + GameConstants.getItemDefense(item.getType())).color(C.GRAY);
+        meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         meta.addAttributeModifier(Attribute.GENERIC_ARMOR, new AttributeModifier("generic.armor", 0, AttributeModifier.Operation.ADD_NUMBER));
         item.setItemMeta(meta);
     }
 
     private static void changeShieldLore(@NotNull final ItemStack item, @NotNull final ItemMeta meta) {
-        final List<String> lore = new ObjectArrayList<>();
-        lore.add(ChatColor.GRAY + "盾で攻撃を防ぐと自身の防御力が");
-        lore.add(ChatColor.GRAY + "20%上昇した状態でダメージを受ける");
-        meta.setLore(lore);
+        final Lore lore = new Lore();
+        lore.add("盾で攻撃を防ぐと自身の防御力が").color(C.GRAY);
+        lore.add("20%上昇した状態でダメージを受ける").color(C.GRAY);
+        meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         item.setItemMeta(meta);
     }

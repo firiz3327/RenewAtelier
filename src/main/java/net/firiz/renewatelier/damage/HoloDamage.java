@@ -1,6 +1,8 @@
 package net.firiz.renewatelier.damage;
 
 import net.firiz.ateliercommonapi.FakeId;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.nms.entity.EntityData;
 import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
 import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
@@ -11,9 +13,7 @@ import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.version.entity.atelier.AtelierEntityUtils;
 import net.firiz.renewatelier.version.entity.atelier.LivingData;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -40,17 +40,22 @@ final class HoloDamage {
             final double damage = damages.get(i).getDamage();
             final AttackAttribute attribute = damages.get(i).getAttackAttribute();
             final int intDamage = (int) damage;
-            final String viewDamage;
+//            final String viewDamage;
+            final Text viewDamage;
             if (attribute == AttackAttribute.HEAL && intDamage < 0) {
-                viewDamage = String.valueOf(attribute.getColor()) + Math.abs(intDamage);
+                viewDamage = new Text(Math.abs(intDamage)).color(attribute.getColor());
+//                viewDamage = String.valueOf(attribute.getColor()) + Math.abs(intDamage);
                 allDamage += damage;
             } else if (intDamage <= 0) {
-                viewDamage = ChatColor.WHITE + "Miss";
+                viewDamage = Text.of("Miss").color(C.WHITE);
+//                viewDamage = ChatColor.WHITE + "Miss";
             } else {
                 if (attribute.hasIcon()) {
-                    viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
+                    viewDamage = Text.of(intDamage + ' ' + attribute.getIcon()).color(attribute.getColor());
+//                    viewDamage = String.valueOf(attribute.getColor()) + intDamage + ' ' + attribute.getIcon();
                 } else {
-                    viewDamage = String.valueOf(attribute.getColor()) + intDamage;
+                    viewDamage = new Text(intDamage).color(attribute.getColor());
+//                    viewDamage = String.valueOf(attribute.getColor()) + intDamage;
                 }
                 allDamage += damage;
             }
@@ -63,11 +68,11 @@ final class HoloDamage {
                             final CharSettings settings = PlayerSaveManager.INSTANCE.getChar(player).getSettings();
                             final boolean showDamage = player == damager ? settings.isShowDamage() : settings.isShowOthersDamage();
                             if (showDamage) {
-                                EntityData.armorStand(data, location.getWorld(), Component.text(viewDamage), true);
+                                EntityData.armorStand(data, location.getWorld(), viewDamage, true);
                                 PacketUtils.sendPackets(player, data.packet(location));
                                 Bukkit.getScheduler().runTaskLater(
                                         AtelierPlugin.getPlugin(),
-                                        () -> PacketUtils.sendPacket(player, EntityPacket.despawnPacket(data.id())),
+                                        () -> PacketUtils.sendPacket(player, data.despawnPacket()),
                                         10
                                 );
                             }

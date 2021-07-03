@@ -6,7 +6,6 @@ import java.util.function.ObjIntConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
-import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.nms.packet.InventoryPacket;
 import net.firiz.renewatelier.inventory.manager.ParamInventory;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
@@ -27,25 +26,25 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class ConfirmInventory implements ParamInventory<ConfirmInventory.ConfirmInfo> {
 
-    private static final String CONFIRM_STR = "-Confirm";
-    private final Map<UUID, ObjectObjectImmutablePair<String, ObjIntConsumer<Player>>> consumers = new Object2ObjectOpenHashMap<>();
+    private static final Component TITLE = Component.text("Confirm");
+    private final Map<UUID, ObjectObjectImmutablePair<Component, ObjIntConsumer<Player>>> consumers = new Object2ObjectOpenHashMap<>();
 
     @Override
     public boolean check(@NotNull final InventoryView view) {
-        return Text.plainEndsWith(view.title(), CONFIRM_STR);
+        return view.title().equals(TITLE);
     }
 
     @Override
     public void open(@NotNull final Player player, @NotNull final ConfirmInfo info) {
         final UUID uuid = player.getUniqueId();
-        final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, uuid.toString().concat(CONFIRM_STR));
+        final Inventory inv = Bukkit.createInventory(null, InventoryType.HOPPER, TITLE);
         inv.setItem(1, ItemUtils.ci(Material.LIME_WOOL, 0, info.yes, null));
         inv.setItem(3, ItemUtils.ci(Material.RED_WOOL, 0, info.no, null));
-        if (!consumers.containsKey(uuid) || !consumers.get(uuid).left().equals(info.title)) {
+        if (!(consumers.containsKey(uuid) && consumers.get(uuid).left().equals(info.title))) {
             consumers.put(uuid, new ObjectObjectImmutablePair<>(info.title, info.consumer));
         }
         player.openInventory(inv);
-        InventoryPacket.update(player, Component.text(info.title), InventoryPacket.InventoryPacketType.HOPPER);
+        InventoryPacket.update(player, info.title, InventoryPacket.InventoryPacketType.HOPPER);
     }
 
     @Override
@@ -83,7 +82,7 @@ public final class ConfirmInventory implements ParamInventory<ConfirmInventory.C
         }
     }
 
-    public record ConfirmInfo(String title, String yes, String no, ObjIntConsumer<Player> consumer) {
+    public record ConfirmInfo(Component title, String yes, String no, ObjIntConsumer<Player> consumer) {
     }
 
 }

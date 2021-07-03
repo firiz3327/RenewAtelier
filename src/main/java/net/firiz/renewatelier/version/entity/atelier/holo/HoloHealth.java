@@ -4,6 +4,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.firiz.ateliercommonapi.FakeId;
+import net.firiz.ateliercommonapi.adventure.text.C;
+import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.ateliercommonapi.nms.entity.EntityData;
 import net.firiz.ateliercommonapi.nms.packet.EntityPacket;
 import net.firiz.ateliercommonapi.nms.packet.PacketUtils;
@@ -16,7 +18,6 @@ import net.firiz.renewatelier.version.entity.atelier.LivingData;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.Packet;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection;
 import org.bukkit.entity.EntityType;
@@ -31,6 +32,7 @@ import java.util.*;
 public final class HoloHealth extends AbstractHoloHealth {
 
     private static final BukkitScheduler SCHEDULER = Bukkit.getScheduler();
+    private static final String HEALTH_ICON = "❤";
     private final EntityData holoHp;
     private final EntityData holoCustomName;
     private final EntityData holoResistances;
@@ -116,19 +118,21 @@ public final class HoloHealth extends AbstractHoloHealth {
         if (hasResistances) {
             packets.add(EntityData.armorStand(holoResistances, entity.getWorld(), Component.text(createDisplayResistances()), true).metaPacket());
         }
-        final StringBuilder displayHp = new StringBuilder(ChatColor.RED.toString());
-        displayHp.append("❤❤❤❤❤❤❤❤❤");
-        final double p = getPercentHealth() * 10;
-        final int insertPos = (int) Math.floor(p);
-        final double z = p - insertPos;
-        if (z >= 0.5) {
-            displayHp.insert(Math.min(2 + insertPos, displayHp.length()), ChatColor.YELLOW);
-            displayHp.insert(Math.min(5 + insertPos, displayHp.length()), ChatColor.GRAY);
-        } else {
-            displayHp.insert(Math.min(2 + insertPos, displayHp.length()), ChatColor.GRAY);
+        final int healthSize = 10;
+        final double percent = getPercentHealth() * healthSize;
+        final int insertPos = (int) Math.floor(percent);
+        final boolean half = percent - insertPos >= 0.5;
+        final int grayArea = healthSize - insertPos;
+        final Text displayHp = Text.of(HEALTH_ICON.repeat(healthSize - grayArea)).color(C.RED);
+        if (grayArea > 0) {
+            if (half) {
+                displayHp.append(HEALTH_ICON).color(C.YELLOW).append(HEALTH_ICON.repeat(grayArea - 1)).color(C.GRAY);
+            } else {
+                displayHp.append(HEALTH_ICON.repeat(grayArea)).color(C.GRAY);
+            }
         }
-        packets.add(EntityData.armorStand(holoHp, entity.getWorld(), Component.text(displayHp.toString()), true).metaPacket());
-        packets.add(EntityData.armorStand(holoCustomName, entity.getWorld(), Component.text(createDisplayCustomName()), true).metaPacket());
+        packets.add(EntityData.armorStand(holoHp, entity.getWorld(), displayHp, true).metaPacket());
+        packets.add(EntityData.armorStand(holoCustomName, entity.getWorld(), createDisplayCustomName(), true).metaPacket());
         return packets;
     }
 
@@ -153,22 +157,23 @@ public final class HoloHealth extends AbstractHoloHealth {
         return sb.toString();
     }
 
-    private String createDisplayCustomName() {
-        final StringBuilder sb = new StringBuilder(customName);
+    private Text createDisplayCustomName() {
+        final Text text;
         if (livingData != null && livingData.hasStats()) {
-            sb.setLength(0);
             final EntityStatus status = livingData.getStats();
             assert status != null;
 
             final Set<String> iconSet = new TreeSet<>();
             status.getBuffs().forEach(buff -> iconSet.add(buff.getType().getWord(buff.getX() > 0)));
-            sb.append("Lv.").append(status.getLevel());
+            text = Text.of("Lv.").append(status.getLevel());
             if (!iconSet.isEmpty()) {
-                sb.append(" ");
-                iconSet.forEach(sb::append);
+                text.append(" ");
+                iconSet.forEach(text::append);
             }
+        } else {
+            text = Text.of(customName);
         }
-        return sb.toString();
+        return text;
     }
 
     private Location getLoc(int y) {

@@ -33,10 +33,14 @@ public class MessageObject {
     }
 
     public void messagePacket(@NotNull final String text) {
+        messagePacket(Component.text(text));
+    }
+
+    public void messagePacket(@NotNull final Component text) {
         showStand(text);
     }
 
-    private void showStand(String message) {
+    private void showStand(Component message) {
         final Player bukkitPlayer = this.player.getPlayer();
         if (this.entityData == null) {
             this.entityData = new EntityData(FAKE_UNIQUE_ID, EntityType.ARMOR_STAND);
@@ -45,7 +49,7 @@ public class MessageObject {
         } else {
             this.player.getMessageObjectRun().resetTime();
         }
-        PacketUtils.sendPacket(bukkitPlayer, EntityData.armorStand(this.entityData, bukkitPlayer.getWorld(), Component.text(message), false).metaPacket());
+        PacketUtils.sendPacket(bukkitPlayer, EntityData.armorStand(this.entityData, bukkitPlayer.getWorld(), message, false).metaPacket());
     }
 
     protected void hideStand() {

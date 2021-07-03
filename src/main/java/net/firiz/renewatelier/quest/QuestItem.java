@@ -6,24 +6,24 @@ import net.firiz.renewatelier.alchemy.material.AlchemyIngredients;
 import net.firiz.renewatelier.alchemy.material.AlchemyMaterial;
 import net.firiz.renewatelier.characteristic.Characteristic;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- *
  * @author firiz
  */
-public class QuestItem {
+public record QuestItem(
+        @NotNull AlchemyMaterial material,
+        @Nullable Component name,
+        int amount, int quality, int usecount,
+        List<AlchemyIngredients> ingredients,
+        List<Characteristic> characteristics
+) {
 
-    private final String material;
-    private final String name;
-    private final int amount;
-    private final int quality;
-    private final int usecount;
-    private final List<AlchemyIngredients> ingredients;
-    private final List<Characteristic> characteristics;
-
-    public QuestItem(String material, String name, int amount, int quality, int usecount, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics) {
+    public QuestItem(@NotNull AlchemyMaterial material, @Nullable Component name, int amount, int quality, int usecount, List<AlchemyIngredients> ingredients, List<Characteristic> characteristics) {
         this.material = material;
         this.name = name;
         this.amount = amount;
@@ -35,7 +35,7 @@ public class QuestItem {
 
     public ItemStack getItem() {
         final ItemStack result = AlchemyItemStatus.getItem(
-                AlchemyMaterial.getMaterial(material),
+                material,
                 ingredients,
                 null,
                 quality,
@@ -47,7 +47,7 @@ public class QuestItem {
         result.setAmount(amount);
         if (name != null) {
             final ItemMeta meta = result.getItemMeta();
-            meta.setDisplayName(name);
+            meta.displayName(name);
             result.setItemMeta(meta);
         }
         return result;
@@ -55,7 +55,7 @@ public class QuestItem {
 
     public ItemStack getItem(AlchemyItemStatus.VisibleFlags flags) {
         final ItemStack result = AlchemyItemStatus.getItem(
-                AlchemyMaterial.getMaterial(material),
+                material,
                 ingredients,
                 null,
                 quality,
@@ -68,17 +68,19 @@ public class QuestItem {
         result.setAmount(amount);
         if (name != null) {
             final ItemMeta meta = result.getItemMeta();
-            meta.setDisplayName(name);
+            meta.displayName(name);
             result.setItemMeta(meta);
         }
         return result;
     }
 
-    public String getMaterial() {
+    @NotNull
+    public AlchemyMaterial getMaterial() {
         return material;
     }
 
-    public String getName() {
+    @Nullable
+    public Component getName() {
         return name;
     }
 

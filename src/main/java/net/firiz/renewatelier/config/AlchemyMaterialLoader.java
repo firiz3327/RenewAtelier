@@ -26,7 +26,6 @@ import net.firiz.renewatelier.utils.CustomConfig;
 import net.firiz.renewatelier.utils.java.CollectionUtils;
 import net.firiz.renewatelier.version.LanguageItemUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -201,7 +200,7 @@ public class AlchemyMaterialLoader extends ConfigLoader<AlchemyMaterial> {
             name = Text.itemName(LanguageItemUtil.getLocalizeName(new ItemStack(mat.getMaterial())));
         } else {
             if (item.contains("name")) {
-                name = new Text(LegacyComponentSerializer.legacyAmpersand().deserialize(Objects.requireNonNull(item.getString("name"))));
+                name = Text.translateColor(Objects.requireNonNull(item.getString("name")));
             } else {
                 notFounds.add("name");
             }

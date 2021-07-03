@@ -3,6 +3,7 @@ package net.firiz.renewatelier.npc;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.firiz.ateliercommonapi.nms.entity.NMSLivingEntity;
 import net.firiz.ateliercommonapi.nms.entity.player.NMSPlayer;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -40,11 +41,11 @@ public class NPC {
         return entity.id();
     }
 
-    public String getName() {
+    public Component getName() {
         if (isPlayer) {
-            return PlainTextComponentSerializer.plainText().serialize(((NMSPlayer) entity).displayName());
+            return ((NMSPlayer) entity).displayName();
         } else {
-            return PlainTextComponentSerializer.plainText().serialize(entity.customName());
+            return entity.customName();
         }
     }
 
