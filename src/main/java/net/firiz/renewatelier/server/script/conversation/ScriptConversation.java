@@ -163,6 +163,11 @@ public class ScriptConversation {
     }
 
     @Export
+    public Component translate(final String key) {
+        return Component.translatable(key);
+    }
+
+    @Export
     public Text chatColor(final String str) {
         return Text.translateColor(str);
     }

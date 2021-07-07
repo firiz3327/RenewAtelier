@@ -60,7 +60,6 @@ public class InventoryListener implements Listener {
                 assert lore != null;
                 if (lore.size() == 1 && Text.plainStartsWith(lore.get(0), "防御力: ")) {
                     e.setResult(ReplaceVanillaItems.changeVanillaLore(result));
-                    System.out.println(result);
                 }
             }
         }

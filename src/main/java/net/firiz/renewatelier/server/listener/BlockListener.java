@@ -29,14 +29,7 @@ public class BlockListener implements Listener {
     private void cancelPiston(BlockPistonEvent e, List<Block> blocks) {
         for (final Block block : blocks) {
             switch (block.getType()) {
-                case CAULDRON:
-                case OAK_DOOR:
-                case IRON_DOOR:
-                case SPRUCE_DOOR:
-                case BIRCH_DOOR:
-                case JUNGLE_DOOR:
-                case ACACIA_DOOR:
-                case DARK_OAK_DOOR:
+                case CAULDRON, OAK_DOOR, IRON_DOOR, SPRUCE_DOOR, BIRCH_DOOR, JUNGLE_DOOR, ACACIA_DOOR, DARK_OAK_DOOR:
                     e.setCancelled(true);
                     break;
                 default:
@@ -56,22 +49,14 @@ public class BlockListener implements Listener {
     @EventHandler
     private void placeBlock(final BlockPlaceEvent e) {
         final Block block = e.getBlock();
-        switch (block.getType()) {
-            case FIRE:
-            case CAMPFIRE:
-            case SOUL_FIRE:
-            case SOUL_CAMPFIRE:
-                final Block upBlock = block.getRelative(BlockFace.UP);
-                if (upBlock.getBlockData() instanceof Levelled) {
-                    final Levelled cauldron = (Levelled) upBlock.getBlockData();
-                    if (cauldron.getLevel() == cauldron.getMaximumLevel()) {
-                        PlayerSaveManager.INSTANCE.getChar(e.getPlayer()).completionAlchemyKettleAdvancement(upBlock.getLocation());
-                    }
+        final Material type = block.getType();
+        if (type == Material.FIRE || type == Material.CAMPFIRE || type == Material.SOUL_FIRE || type == Material.SOUL_CAMPFIRE) {
+            final Block upBlock = block.getRelative(BlockFace.UP);
+            if (upBlock.getBlockData() instanceof final Levelled cauldron) {
+                if (cauldron.getLevel() == cauldron.getMaximumLevel()) {
+                    PlayerSaveManager.INSTANCE.getChar(e.getPlayer()).completionAlchemyKettleAdvancement(upBlock.getLocation());
                 }
-                break;
-            default:
-                // ignited
-                break;
+            }
         }
     }
 

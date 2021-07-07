@@ -4,6 +4,8 @@ import net.firiz.ateliercommonapi.loop.LoopManager;
 import net.firiz.renewatelier.server.chat.command.CheckCommand;
 import net.firiz.renewatelier.config.ConfigManager;
 import net.firiz.renewatelier.entity.EntityCleanUp;
+import net.firiz.renewatelier.server.chat.command.DiscordCommand;
+import net.firiz.renewatelier.server.discord.DiscordManager;
 import net.firiz.renewatelier.server.listener.*;
 import net.firiz.renewatelier.server.listener.player.PlayerListener;
 import net.firiz.renewatelier.loop.AnimatedDropManager;
@@ -56,6 +58,7 @@ public final class AtelierPlugin extends JavaPlugin {
         CommonUtils.log("2 register events [Done]");
 
         Objects.requireNonNull(getCommand("check")).setExecutor(new CheckCommand());
+        Objects.requireNonNull(getCommand("discord")).setExecutor(new DiscordCommand());
         CommonUtils.log("3 command set executor [Done]");
 
         // setup worlds
@@ -89,6 +92,8 @@ public final class AtelierPlugin extends JavaPlugin {
         TargetEntityTypes.check();
         CommonUtils.log("15 target entity type check [Done]");
         CommonUtils.log("Atelier Plugin complete initialization.");
+
+        DiscordManager.INSTANCE.setup();
     }
 
     public static void worldSettings(World world) {
@@ -106,6 +111,7 @@ public final class AtelierPlugin extends JavaPlugin {
         NPCManager.INSTANCE.stop();
         resetEntities();
         removePlayerNPCStands();
+        DiscordManager.INSTANCE.stop();
     }
 
     private void resetEntities() {

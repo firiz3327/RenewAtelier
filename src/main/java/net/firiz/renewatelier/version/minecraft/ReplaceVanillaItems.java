@@ -11,6 +11,7 @@ import net.firiz.renewatelier.constants.GameConstants;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemStatus;
 import net.firiz.renewatelier.utils.CommonUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.*;
@@ -48,28 +49,13 @@ public class ReplaceVanillaItems {
             final Recipe recipe = recipes.next();
             final org.bukkit.Material material = recipe.getResult().getType();
             switch (material) {
-                case TURTLE_HELMET:
-                case LEATHER_HELMET:
-                case LEATHER_CHESTPLATE:
-                case LEATHER_LEGGINGS:
-                case LEATHER_BOOTS:
-                case CHAINMAIL_HELMET:
-                case CHAINMAIL_CHESTPLATE:
-                case CHAINMAIL_LEGGINGS:
-                case CHAINMAIL_BOOTS:
-                case IRON_HELMET:
-                case IRON_CHESTPLATE:
-                case IRON_LEGGINGS:
-                case IRON_BOOTS:
-                case GOLDEN_HELMET:
-                case GOLDEN_CHESTPLATE:
-                case GOLDEN_LEGGINGS:
-                case GOLDEN_BOOTS:
-                case DIAMOND_HELMET:
-                case DIAMOND_CHESTPLATE:
-                case DIAMOND_LEGGINGS:
-                case DIAMOND_BOOTS:
-                case SHIELD:
+                case TURTLE_HELMET,
+                        LEATHER_HELMET, LEATHER_CHESTPLATE, LEATHER_LEGGINGS, LEATHER_BOOTS,
+                        CHAINMAIL_HELMET, CHAINMAIL_CHESTPLATE, CHAINMAIL_LEGGINGS, CHAINMAIL_BOOTS,
+                        IRON_HELMET, IRON_CHESTPLATE, IRON_LEGGINGS, IRON_BOOTS,
+                        GOLDEN_HELMET, GOLDEN_CHESTPLATE, GOLDEN_LEGGINGS, GOLDEN_BOOTS,
+                        DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS, DIAMOND_BOOTS,
+                        SHIELD:
                     recipes.remove();
                     final ShapedRecipe shapedRecipe = new ShapedRecipe(((ShapedRecipe) recipe).getKey(), ReplaceVanillaItems.changeVanillaLore(recipe.getResult()));
                     shapedRecipe.shape(((ShapedRecipe) recipe).getShape());
@@ -79,10 +65,7 @@ public class ReplaceVanillaItems {
                     }
                     addRecipes.add(shapedRecipe);
                     break;
-                case NETHERITE_HELMET:
-                case NETHERITE_CHESTPLATE:
-                case NETHERITE_LEGGINGS:
-                case NETHERITE_BOOTS:
+                case NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS:
                     recipes.remove();
                     final SmithingRecipe baseRecipe = (SmithingRecipe) recipe;
                     final SmithingRecipe smithingRecipe = new SmithingRecipe(
@@ -105,38 +88,21 @@ public class ReplaceVanillaItems {
 
     public static ItemStack changeVanillaLore(final ItemStack item) {
         final ItemMeta meta = item.getItemMeta();
-        switch (item.getType()) {
-            case TURTLE_HELMET:
-            case LEATHER_HELMET:
-            case LEATHER_CHESTPLATE:
-            case LEATHER_LEGGINGS:
-            case LEATHER_BOOTS:
-            case CHAINMAIL_HELMET:
-            case CHAINMAIL_CHESTPLATE:
-            case CHAINMAIL_LEGGINGS:
-            case CHAINMAIL_BOOTS:
-            case IRON_HELMET:
-            case IRON_CHESTPLATE:
-            case IRON_LEGGINGS:
-            case IRON_BOOTS:
-            case GOLDEN_HELMET:
-            case GOLDEN_CHESTPLATE:
-            case GOLDEN_LEGGINGS:
-            case GOLDEN_BOOTS:
-            case DIAMOND_HELMET:
-            case DIAMOND_CHESTPLATE:
-            case DIAMOND_LEGGINGS:
-            case DIAMOND_BOOTS:
-            case NETHERITE_HELMET:
-            case NETHERITE_CHESTPLATE:
-            case NETHERITE_LEGGINGS:
-            case NETHERITE_BOOTS:
+        Material type = item.getType();// 想定しない
+        switch (type) {
+            case TURTLE_HELMET,
+                    LEATHER_HELMET, LEATHER_CHESTPLATE, LEATHER_LEGGINGS, LEATHER_BOOTS,
+                    CHAINMAIL_HELMET, CHAINMAIL_CHESTPLATE, CHAINMAIL_LEGGINGS, CHAINMAIL_BOOTS,
+                    IRON_HELMET, IRON_CHESTPLATE, IRON_LEGGINGS, IRON_BOOTS,
+                    GOLDEN_HELMET, GOLDEN_CHESTPLATE, GOLDEN_LEGGINGS, GOLDEN_BOOTS,
+                    DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS, DIAMOND_BOOTS,
+                    NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS:
                 changeArmorLore(item, meta);
                 break;
             case SHIELD:
                 changeShieldLore(item, meta);
                 break;
-            default: // 想定しない
+            default:
                 return item;
         }
         return item;

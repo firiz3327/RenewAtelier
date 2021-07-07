@@ -48,4 +48,5 @@ public class CharSettings {
     public void setShowPlayerChat(boolean showPlayerChat) {
         this.showPlayerChat = showPlayerChat;
     }
+
 }

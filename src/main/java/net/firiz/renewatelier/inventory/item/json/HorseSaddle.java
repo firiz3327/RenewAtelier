@@ -214,7 +214,7 @@ public class HorseSaddle {
         if (refreshLore) {
             final Lore lore = new Lore();
             lore.add(Lang.HORSE_SADDLE_LORE_DESC_RANK.get(tier.getTier()));
-            lore.add(Lang.HORSE_SADDLE_LORE_DESC_GENDER.get(female ? Lang.HORSE_GENDER_FEMALE : Lang.HORSE_GENDER_MALE));
+            lore.add(Lang.HORSE_SADDLE_LORE_DESC_GENDER.get().append((female ? Lang.HORSE_GENDER_FEMALE : Lang.HORSE_GENDER_MALE).get().color(C.WHITE)));
             lore.add(Lang.HORSE_SADDLE_LORE_DESC_SPEED.get(scaleString(tier.getSpeed(level))));
             lore.add(Lang.HORSE_SADDLE_LORE_DESC_JUMP.get(scaleString(tier.getJump(level))));
             if (!horseSkills.isEmpty()) {

@@ -18,17 +18,10 @@ import java.util.Optional;
 public class ChannelHandler extends ChannelDuplexHandler {
 
     private final EntityPlayer player;
-    final Field a;
 
     @MinecraftVersion("1.17")
     public ChannelHandler(EntityPlayer player) {
         this.player = player;
-        try {
-            a = PacketPlayInUseEntity.class.getDeclaredField("a");
-            a.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException("initialize error channel handler.");
-        }
     }
 
     @Override
@@ -36,7 +29,6 @@ public class ChannelHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        System.out.println("[READ] " + msg.getClass().getSimpleName());
         if (msg instanceof final PacketPlayInUseEntity packet) {
-            final int mobId = a.getInt(packet);
             final var b = VersionUtils.getFieldValue(PacketPlayInUseEntity.class, packet, "b");
             final Optional<Field> aField = VersionUtils.getFieldNoSuchField(b, "a");
             if (aField.isPresent()) {
@@ -44,7 +36,7 @@ public class ChannelHandler extends ChannelDuplexHandler {
                 final EquipmentSlot hand = enumHand == EnumHand.a ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
                 final AsyncPlayerInteractEntityEvent event = new AsyncPlayerInteractEntityEvent(
                         player.getBukkitEntity(),
-                        mobId,
+                        packet.getEntityId(),
                         enumHand != null,
                         hand
                 );

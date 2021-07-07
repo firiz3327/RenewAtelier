@@ -4,6 +4,8 @@ import net.firiz.ateliercommonapi.adventure.text.C;
 import net.firiz.ateliercommonapi.adventure.text.Text;
 import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.sql.load.PlayerSaveManager;
+import net.firiz.renewatelier.server.discord.DiscordManager;
+import net.firiz.renewatelier.server.discord.DiscordStatus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -41,6 +43,7 @@ public final class Chat {
     };
     private static final Component warningMessage1 = Component.text("少し時間をおいてチャットを行ってみてください。").color(NamedTextColor.YELLOW);
     private static final Component warningMessage2 = Component.text("同じ発言の連投はできません。").color(NamedTextColor.YELLOW);
+    private static final DiscordManager discord = DiscordManager.INSTANCE;
 
     static {
         final StringBuilder sb = new StringBuilder();
@@ -60,8 +63,21 @@ public final class Chat {
                 character.incrementChatCount();
                 character.setLastChatComponent(message);
                 final Text text = new Text();
-                appendPlayerName(text, player);
-                sendPlayers(text.append(replace(player, message)));
+                final Component replacedComponent = replace(player, message);
+                final DiscordStatus status = discord.getDiscordStatus(player.getUniqueId());
+                if (status != null && status.getDiscordId() != 0) {
+                    discord.findMember(status.getDiscordId(), member -> {
+                        Component name;
+                        if (member == null) {
+                            name = player.displayName();
+                        } else {
+                            name = Text.of(member.getEffectiveName() + "(" + Text.plain(player.displayName()) + ")");
+                        }
+                        chat(player, text, name, replacedComponent);
+                    });
+                    return;
+                }
+                chat(player, text, player.displayName(), replacedComponent);
             } else {
                 player.sendMessage(warningMessage2);
             }
@@ -69,6 +85,20 @@ public final class Chat {
             character.chatBan();
             player.sendMessage(warningMessage1);
         }
+    }
+
+    private static void chat(Player player, Text text, Component name, Component replacedComponent) {
+        text.append("<").append(name).color(C.AQUA).clickEvent(ClickEvent.suggestCommand(
+                "/tell " + player.getName() + " "
+        )).hoverEvent(
+                HoverEvent.showText(Component.text().append(player.displayName(), Component.text(" さんにメッセージを送信する")))
+        ).append("> ");
+        sendPlayers(text.append(replacedComponent));
+        discord.sendMessage(player, Text.plain(replacedComponent));
+    }
+
+    public static void discordChat(final String name, final Component message) {
+        sendPlayers(Text.of("<").append(name).color(C.AQUA).append("⒬> ").append(replace(null, message)));
     }
 
     public static void tell(final Player sender, final String[] args) {
@@ -89,14 +119,14 @@ public final class Chat {
     }
 
     private static Component replace(final Player player, final Component message) {
-        final ItemStack item = player.getInventory().getItemInMainHand();
-        final Component msg;
-        if (item.getType() == Material.AIR) {
-            msg = message;
-        } else {
-            msg = message.replaceText(
-                    TextReplacementConfig.builder().match(itemPattern).replacement(item.displayName().hoverEvent(item.asHoverEvent())).build()
-            );
+        Component msg = message;
+        if (player != null) {
+            final ItemStack item = player.getInventory().getItemInMainHand();
+            if (item.getType() != Material.AIR) {
+                msg = message.replaceText(
+                        TextReplacementConfig.builder().match(itemPattern).replacement(item.displayName().hoverEvent(item.asHoverEvent())).build()
+                );
+            }
         }
         return msg.replaceText(config);
     }
@@ -112,14 +142,6 @@ public final class Chat {
                     .append(" にささやかれました ").color(C.FLAT_LIGHT_GREEN1).hoverEvent(hoverEvent).clickEvent(clickEvent);
         }
         return text;
-    }
-
-    private static void appendPlayerName(final Text text, final Player player) {
-        text.append("<").append(player.displayName()).color(C.AQUA).clickEvent(ClickEvent.suggestCommand(
-                "/tell " + player.getName() + " "
-        )).hoverEvent(
-                HoverEvent.showText(Component.text().append(player.displayName(), Component.text(" さんにメッセージを送信する")))
-        ).append("> ");
     }
 
     private static void sendPlayers(final Component component) {

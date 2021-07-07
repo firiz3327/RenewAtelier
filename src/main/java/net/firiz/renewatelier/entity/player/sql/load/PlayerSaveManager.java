@@ -8,6 +8,7 @@ import net.firiz.renewatelier.entity.player.Char;
 import net.firiz.renewatelier.entity.player.EngineManager;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
+import net.firiz.renewatelier.server.discord.DiscordManager;
 import net.firiz.renewatelier.server.script.execution.ScriptManager;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
@@ -157,9 +158,10 @@ public enum PlayerSaveManager {
                 CommonUtils.cast(loaderValues.get(0)), // recipeStatusLoader
                 CommonUtils.cast(loaderValues.get(1)), // questStatusLoader
                 CommonUtils.cast(loaderValues.get(3)), // charSettingLoader
-                CommonUtils.cast(loaderValues.get(4)) // bagLoader
+                CommonUtils.cast(loaderValues.get(4)), // bagLoader
+                DiscordManager.INSTANCE.getDiscordStatus(id, uuid)
         );
-        character.getCharStats().init(character, CommonUtils.cast(loaderValues.get(5)));
+        character.getCharStats().init(character, CommonUtils.cast(loaderValues.get(5))); // skillLoader
         new Thread(() -> {
             final EngineManager engineManager = character.getEngineManager();
             engineManager.setJsEngine(script.createJsEngine());

@@ -120,8 +120,8 @@ public final class NPCConversation extends ScriptConversation {
 
     @Export
     public void sendNext(@NotNull final Component prefix, @NotNull final Component suffix, @NotNull final Component text) {
-        player.sendMessage(prefix.append(text).append(suffix));
-        messageObject.messagePacket(text);
+        player.sendMessage(Component.empty().append(prefix.append(text).append(suffix)));
+        messageObject.packet(text);
     }
 
     @Export
@@ -132,13 +132,10 @@ public final class NPCConversation extends ScriptConversation {
         }
         prefix.append("] ").append(getNPCName()).color(C.DARK_GREEN).append(" ");
         final Component msgComponent = chatColor(msg);
-        if(msgComponent.color() == null) {
+        if (msgComponent.color() == null) {
             msgComponent.color(C.GREEN);
         }
-        sendNext(
-                prefix,
-                msgComponent
-        );
+        sendNext(prefix, msgComponent);
     }
 
 }

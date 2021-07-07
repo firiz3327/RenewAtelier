@@ -32,7 +32,7 @@ public enum Lang {
     HORSE_LEVELUP_SKILL_LVUP("atelier.horse.levelup.skill.lvup", 1, C.GREEN), // %s のレベルが上がりました！
 
     HORSE_SADDLE_LORE_DESC_RANK("atelier.horse.saddle.desc.rank", 1, C.GRAY, C.WHITE),
-    HORSE_SADDLE_LORE_DESC_GENDER("atelier.horse.saddle.desc.gender", 1, C.GRAY, C.WHITE),
+    HORSE_SADDLE_LORE_DESC_GENDER("atelier.horse.saddle.desc.gender", C.GRAY),
     HORSE_SADDLE_LORE_DESC_SPEED("atelier.horse.saddle.desc.speed", 1, C.GRAY, C.WHITE),
     HORSE_SADDLE_LORE_DESC_JUMP("atelier.horse.saddle.desc.jump", 1, C.GRAY, C.WHITE),
     HORSE_SADDLE_LORE_DESC_SKILL("atelier.horse.saddle.desc.skill", C.GRAY),

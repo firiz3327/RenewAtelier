@@ -39,7 +39,7 @@ public class DebugListener implements Listener {
 
     private boolean nonBreak = true;
     private boolean logHandle = false;
-    private List<Class<? extends Event>> ignoreAlarmEvents = new ObjectArrayList<>();
+    private final List<Class<? extends Event>> ignoreAlarmEvents = new ObjectArrayList<>();
     private final RegisteredListener alarmListener = new RegisteredListener(
             this,
             (listener, event) -> {
@@ -90,6 +90,7 @@ public class DebugListener implements Listener {
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(AtelierPlugin.getPlugin(), () -> {
                     for (int i = 0; i < val; i++) {
                         final ItemStack item = AlchemyItemStatus.getItem("kaen_stone", new ItemStack(Material.STONE));
+                        assert player != null;
                         ItemUtils.drop(player.getLocation(), item);
                     }
                 }, 20);
@@ -117,9 +118,7 @@ public class DebugListener implements Listener {
 
     @EventHandler
     public final void blockBreak(BlockBreakEvent e) {
-        e.setCancelled(
-                nonBreak || e.getPlayer().getInventory().getItemInMainHand().getType() == Material.DEBUG_STICK
-        );
+        e.setCancelled(nonBreak || e.getPlayer().getInventory().getItemInMainHand().getType() == Material.DEBUG_STICK);
     }
 
     public boolean isNonBreak() {

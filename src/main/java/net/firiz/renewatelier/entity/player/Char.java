@@ -16,6 +16,7 @@ import net.firiz.renewatelier.entity.player.sql.RecipeSQL;
 import net.firiz.renewatelier.entity.player.stats.CharStats;
 import net.firiz.renewatelier.inventory.item.json.AlchemyItemBag;
 import net.firiz.renewatelier.npc.MessageObjectRun;
+import net.firiz.renewatelier.server.discord.DiscordStatus;
 import net.firiz.renewatelier.sql.SQLManager;
 import net.firiz.renewatelier.utils.CommonUtils;
 import net.firiz.renewatelier.utils.minecraft.ItemUtils;
@@ -76,6 +77,9 @@ public final class Char {
     private int chatCount;
     private long chatBanTime;
 
+    @NotNull
+    private final DiscordStatus discordStatus;
+
     public Char(
             @NotNull Player player,
             @NotNull UUID uuid,
@@ -86,8 +90,8 @@ public final class Char {
             @NotNull final List<RecipeStatus> recipeStatuses,
             @NotNull final List<QuestStatus> questStatuses,
             @NotNull final CharSettings settings,
-            @NotNull final AlchemyItemBag bag
-    ) {
+            @NotNull final AlchemyItemBag bag,
+            @NotNull final DiscordStatus discordStatus) {
         this.player = player;
         this.uuid = uuid;
         this.id = id;
@@ -99,12 +103,9 @@ public final class Char {
         this.settings = settings;
         this.engineManager = new EngineManager();
         this.bag = bag;
+        this.discordStatus = discordStatus;
 
-        this.autoSave = () -> {
-            this.charStats.save(this.id);
-            this.settings.save(this.id);
-            this.bag.save(this.id);
-        };
+        this.autoSave = this::save;
         final TickRunnable oneLoop = new TickRunnable() {
             int time = 0;
 
@@ -122,6 +123,12 @@ public final class Char {
         this.taskIdSec = LoopManager.INSTANCE.addSeconds(oneLoop);
         this.messageObjectRun = new MessageObjectRun();
         this.taskIdTick = LoopManager.INSTANCE.addTicks(messageObjectRun);
+    }
+
+    public void save() {
+        this.charStats.save(this.id);
+        this.settings.save(this.id);
+        this.bag.save(this.id);
     }
 
     public void unload() {
@@ -352,5 +359,10 @@ public final class Char {
 
     public long getChatBanTime() {
         return chatBanTime;
+    }
+
+    @NotNull
+    public DiscordStatus getDiscordStatus() {
+        return discordStatus;
     }
 }

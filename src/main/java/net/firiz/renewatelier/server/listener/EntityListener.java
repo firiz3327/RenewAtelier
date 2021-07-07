@@ -46,17 +46,13 @@ public class EntityListener implements Listener {
             if (type != null) {
                 final boolean cancel;
                 final boolean spawnEgg = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG;
-                switch (e.getSpawnReason()) {
-                    case BUILD_IRONGOLEM:
-                    case BUILD_SNOWMAN:
-                    case BUILD_WITHER:
-                        cancel = false;
-                        Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), entity::remove, 1);
-                        break;
-                    default:
-                        cancel = !spawnEgg;
-                        e.setCancelled(true);
-                        break;
+                final CreatureSpawnEvent.SpawnReason spawnReason = e.getSpawnReason();
+                if (spawnReason == CreatureSpawnEvent.SpawnReason.BUILD_IRONGOLEM || spawnReason == CreatureSpawnEvent.SpawnReason.BUILD_SNOWMAN || spawnReason == CreatureSpawnEvent.SpawnReason.BUILD_WITHER) {
+                    cancel = false;
+                    Bukkit.getScheduler().runTaskLater(AtelierPlugin.getPlugin(), entity::remove, 1);
+                } else {
+                    cancel = !spawnEgg;
+                    e.setCancelled(true);
                 }
                 final Entity atelierEntity = aEntityUtils.spawn(
                         type,

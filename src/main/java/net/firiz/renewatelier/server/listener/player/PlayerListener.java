@@ -48,10 +48,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     private void loadCrossbow(final EntityLoadCrossbowEvent e) {
-        if (e.getEntity() instanceof Player) {
-            final Player player = (Player) e.getEntity();
+        if (e.getEntity() instanceof final Player player) {
             final ItemStack item = e.getCrossbow();
-            if (item.getType() == Material.CROSSBOW && !((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles()) {
+            if (item != null && item.getType() == Material.CROSSBOW && !((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles()) {
                 e.setCancelled(ArrowManager.INSTANCE.interactCrossbow(player));
                 player.updateInventory();
             }

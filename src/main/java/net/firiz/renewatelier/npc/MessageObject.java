@@ -32,11 +32,11 @@ public class MessageObject {
         this.baseLocation = location;
     }
 
-    public void messagePacket(@NotNull final String text) {
-        messagePacket(Component.text(text));
+    public void packet(@NotNull final String text) {
+        packet(Component.text(text));
     }
 
-    public void messagePacket(@NotNull final Component text) {
+    public void packet(@NotNull final Component text) {
         showStand(text);
     }
 

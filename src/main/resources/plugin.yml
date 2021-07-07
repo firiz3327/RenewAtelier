@@ -2,9 +2,12 @@ name: Atelier
 version: 1.0
 auther: firiz
 main: net.firiz.renewatelier.AtelierPlugin
-api-version: 1.16
+api-version: 1.17
 depend: [ AtelierCommonAPI ]
 commands:
     check:
         description: check my stats.
+        usage: /<command>
+    discord:
+        description: discord commands.
         usage: /<command>
